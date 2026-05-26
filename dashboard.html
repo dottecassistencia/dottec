@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dottec Assistência — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --cyan:       #29B8C2;
+      --cyan-dark:  #1E9099;
+      --cyan-light: #D6F4F6;
+      --coral:      #E8604A;
+      --coral-dark: #C94835;
+      --coral-bg:   #FDECEA;
+      --dark:       #2C2C2A;
+      --gray:       #5F5E5A;
+      --gray-mid:   #9C9B97;
+      --gray-light: #F1EFE8;
+      --bg:         #F0EFEA;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--dark);
+      display: flex; flex-direction: column;
+      min-height: 100vh;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 10;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1.25rem;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sb-logo {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--cyan);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sb-logo-sq {
+      width: 23px; height: 23px; background: var(--coral);
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sb-logo-sq svg { width: 14px; height: 14px; }
+
+    .sb-brand-text { flex: 1; overflow: hidden; }
+    .sb-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sb-sub { font-size: 10px; color: var(--cyan); letter-spacing: 0.06em; }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+
+    .nav-section {
+      font-size: 9.5px; font-weight: 700; color: rgba(255,255,255,0.3);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.75rem 1.25rem 0.4rem;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 1.25rem;
+      font-size: 13px; color: rgba(255,255,255,0.6);
+      cursor: pointer; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      border-radius: 0;
+      position: relative;
+    }
+    .nav-item i { font-size: 17px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+    .nav-item.active {
+      background: rgba(41,184,194,0.15);
+      color: var(--cyan);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 6px; bottom: 6px;
+      width: 3px; background: var(--cyan); border-radius: 0 3px 3px 0;
+    }
+
+    .sidebar-user {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+    }
+    .user-info { flex: 1; overflow: hidden; }
+    .user-name  { font-size: 12.5px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role  { font-size: 10.5px; color: var(--gray-mid); }
+
+    .logout-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.35); font-size: 17px; padding: 0;
+      transition: color 0.15s; flex-shrink: 0;
+    }
+    .logout-btn:hover { color: var(--coral); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 240px;
+      flex: 1; padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 700; color: var(--dark);
+    }
+    .page-date { font-size: 13px; color: var(--gray-mid); margin-top: 2px; }
+
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .notif-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #fff; border: 1px solid #E2E0DA;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--gray); font-size: 18px;
+      transition: border-color 0.15s;
+    }
+    .notif-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── MÉTRICAS ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: #fff; border-radius: 14px;
+      border: 1px solid #E8E6E0;
+      padding: 1.1rem 1.25rem;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: box-shadow 0.15s;
+    }
+    .metric-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+
+    .metric-top { display: flex; align-items: center; justify-content: space-between; }
+    .metric-label { font-size: 12px; color: var(--gray-mid); font-weight: 500; }
+    .metric-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .metric-icon.cyan  { background: var(--cyan-light); color: var(--cyan-dark); }
+    .metric-icon.coral { background: var(--coral-bg);   color: var(--coral-dark); }
+    .metric-icon.green { background: #EAF3DE;            color: #3B6D11; }
+    .metric-icon.amber { background: #FAEEDA;            color: #854F0B; }
+
+    .metric-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px; font-weight: 700; color: var(--dark);
+      line-height: 1;
+    }
+    .metric-trend {
+      font-size: 11.5px; color: var(--gray-mid);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .metric-trend.up   { color: #3B6D11; }
+    .metric-trend.down { color: var(--coral-dark); }
+
+    /* ── MÓDULOS CARDS ── */
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 600; color: var(--dark);
+      margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px; background: #E8E6E0;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 2rem;
+    }
+
+    .mod-card {
+      background: #fff; border-radius: 16px;
+      border: 1px solid #E8E6E0;
+      padding: 1.5rem 1.25rem;
+      display: flex; flex-direction: column; gap: 14px;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      text-decoration: none;
+    }
+    .mod-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+      border-color: var(--cyan);
+    }
+
+    .mod-card-icon {
+      width: 48px; height: 48px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .mod-card-icon.cyan  { background: var(--cyan-light);  color: var(--cyan-dark); }
+    .mod-card-icon.coral { background: var(--coral-bg);    color: var(--coral-dark); }
+    .mod-card-icon.green { background: #EAF3DE;             color: #3B6D11; }
+    .mod-card-icon.amber { background: #FAEEDA;             color: #854F0B; }
+    .mod-card-icon.dark  { background: rgba(44,44,42,0.08); color: var(--dark); }
+    .mod-card-icon.blue  { background: #E6F1FB;             color: #185FA5; }
+
+    .mod-card-info { flex: 1; }
+    .mod-card-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px; font-weight: 600; color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .mod-card-desc { font-size: 11.5px; color: var(--gray-mid); line-height: 1.5; }
+
+    .mod-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 10px; border-top: 1px solid #F0EFEA;
+    }
+    .mod-card-count { font-size: 11px; color: var(--gray-mid); }
+    .mod-card-arrow {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--gray-mid);
+      transition: background 0.15s, color 0.15s;
+    }
+    .mod-card:hover .mod-card-arrow { background: var(--cyan); color: #fff; }
+
+    /* ── ATIVIDADES RECENTES ── */
+    .bottom-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+
+    .panel {
+      background: #fff; border-radius: 14px;
+      border: 1px solid #E8E6E0; overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #F0EFEA;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13.5px; font-weight: 600; color: var(--dark);
+    }
+    .panel-action {
+      font-size: 11.5px; color: var(--cyan); cursor: pointer;
+      text-decoration: none;
+    }
+    .panel-action:hover { color: var(--cyan-dark); }
+
+    .activity-list { padding: 0.5rem 0; }
+    .activity-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 1.25rem;
+      transition: background 0.12s;
+    }
+    .activity-item:hover { background: #FAFAF7; }
+
+    .act-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .act-dot.cyan  { background: var(--cyan); }
+    .act-dot.coral { background: var(--coral); }
+    .act-dot.green { background: #639922; }
+    .act-dot.amber { background: #BA7517; }
+
+    .act-text { flex: 1; }
+    .act-title { font-size: 12.5px; color: var(--dark); }
+    .act-time  { font-size: 11px; color: var(--gray-mid); margin-top: 1px; }
+    .act-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px;
+    }
+    .act-badge.aberta    { background: var(--cyan-light);  color: var(--cyan-dark); }
+    .act-badge.concluida { background: #EAF3DE;             color: #3B6D11; }
+    .act-badge.pendente  { background: #FAEEDA;             color: #854F0B; }
+
+    .empty-state {
+      padding: 2rem 1.25rem; text-align: center;
+      font-size: 12.5px; color: var(--gray-mid);
+    }
+    .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; color: #D3D1C7; }
+
+    @media (max-width: 1200px) {
+      .modules-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics      { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; }
+      .sb-brand-text, .nav-item span, .sidebar-user .user-info, .nav-section { display: none; }
+      .main { margin-left: 60px; }
+      .nav-item { justify-content: center; padding: 12px; }
+      .nav-item i { margin: 0; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 1rem; }
+      .modules-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sb-logo">
+        <div class="sb-logo-sq">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="9.5" r="3.5" stroke="white" stroke-width="2.2"/>
+            <path d="M12 13V18" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M8.5 18h7" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sb-brand-text">
+        <div class="sb-name">Dottec Assistência</div>
+        <div class="sb-sub">GESTÃO</div>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a class="nav-item active" href="dashboard.html"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-users"></i><span>Clientes</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-tools"></i><span>Ordem de Serviço</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-shopping-cart"></i><span>Vendas</span></a>
+
+      <div class="nav-section">Estoque</div>
+      <a class="nav-item" href="#"><i class="ti ti-package"></i><span>Produtos</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-building-store"></i><span>Estoque</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-truck"></i><span>Fornecedores</span></a>
+
+      <div class="nav-section">Gestão</div>
+      <a class="nav-item" href="#"><i class="ti ti-currency-dollar"></i><span>Financeiro</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-chart-bar"></i><span>Relatórios</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-id-badge"></i><span>Funcionários</span></a>
+
+      <div class="nav-section">Sistema</div>
+      <a class="nav-item" href="#"><i class="ti ti-user-cog"></i><span>Usuários</span></a>
+      <a class="nav-item" href="#"><i class="ti ti-settings"></i><span>Configurações</span></a>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-role" id="user-role">—</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Sair">
+        <i class="ti ti-logout"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-date" id="page-date">—</div>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-btn"><i class="ti ti-bell"></i></div>
+        <div class="notif-btn"><i class="ti ti-search"></i></div>
+      </div>
+    </div>
+
+    <!-- MÉTRICAS -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Clientes</span>
+          <div class="metric-icon cyan"><i class="ti ti-users"></i></div>
+        </div>
+        <div class="metric-value" id="m-clientes">—</div>
+        <div class="metric-trend"><i class="ti ti-minus"></i> Total cadastrado</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">OS Abertas</span>
+          <div class="metric-icon coral"><i class="ti ti-tools"></i></div>
+        </div>
+        <div class="metric-value" id="m-os">—</div>
+        <div class="metric-trend"><i class="ti ti-minus"></i> Em andamento</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Produtos</span>
+          <div class="metric-icon green"><i class="ti ti-package"></i></div>
+        </div>
+        <div class="metric-value" id="m-produtos">—</div>
+        <div class="metric-trend"><i class="ti ti-minus"></i> No catálogo</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span class="metric-label">Usuários</span>
+          <div class="metric-icon amber"><i class="ti ti-user-cog"></i></div>
+        </div>
+        <div class="metric-value" id="m-usuarios">—</div>
+        <div class="metric-trend"><i class="ti ti-minus"></i> Ativos no sistema</div>
+      </div>
+    </div>
+
+    <!-- MÓDULOS -->
+    <div class="section-title">Módulos do sistema</div>
+    <div class="modules-grid">
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon cyan"><i class="ti ti-users"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Clientes</div>
+          <div class="mod-card-desc">Cadastro e histórico de clientes e contatos.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count" id="c-clientes">— registros</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon coral"><i class="ti ti-tools"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Ordem de Serviço</div>
+          <div class="mod-card-desc">Abertura, acompanhamento e encerramento de OS.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count" id="c-os">— registros</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon green"><i class="ti ti-package"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Produtos</div>
+          <div class="mod-card-desc">Catálogo de peças, acessórios e equipamentos.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count" id="c-produtos">— registros</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon dark"><i class="ti ti-settings"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Configurações</div>
+          <div class="mod-card-desc">Parâmetros do sistema, usuários e permissões.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count">Sistema</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon amber"><i class="ti ti-shopping-cart"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Vendas</div>
+          <div class="mod-card-desc">Registro e controle de vendas ao balcão.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count" id="c-vendas">— registros</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon blue"><i class="ti ti-currency-dollar"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Financeiro</div>
+          <div class="mod-card-desc">Contas a pagar, receber e fluxo de caixa.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count">Módulo</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon cyan"><i class="ti ti-building-store"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Estoque</div>
+          <div class="mod-card-desc">Entradas, saídas e inventário de produtos.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count">Módulo</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="mod-card" href="#">
+        <div class="mod-card-icon green"><i class="ti ti-chart-bar"></i></div>
+        <div class="mod-card-info">
+          <div class="mod-card-name">Relatórios</div>
+          <div class="mod-card-desc">Análises, gráficos e exportações de dados.</div>
+        </div>
+        <div class="mod-card-footer">
+          <span class="mod-card-count">Módulo</span>
+          <div class="mod-card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ATIVIDADES -->
+    <div class="bottom-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Atividade recente</div>
+          <a class="panel-action" href="#">Ver tudo</a>
+        </div>
+        <div class="activity-list" id="activity-list">
+          <div class="empty-state">
+            <i class="ti ti-history"></i>
+            Nenhuma atividade registrada ainda.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Usuários do sistema</div>
+          <a class="panel-action" href="#">Gerenciar</a>
+        </div>
+        <div class="activity-list" id="users-list">
+          <div class="empty-state">
+            <i class="ti ti-users"></i>
+            Carregando usuários...
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+    const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+    // ── SESSÃO ───────────────────────────────────────────────────
+    const sessao = JSON.parse(sessionStorage.getItem('dottec_sessao') || 'null');
+    if (!sessao) window.location.href = 'login.html';
+
+    function logout() {
+      sessionStorage.removeItem('dottec_sessao');
+      window.location.href = 'login.html';
+    }
+
+    // ── DATA ─────────────────────────────────────────────────────
+    const now = new Date();
+    document.getElementById('page-date').textContent = now.toLocaleDateString('pt-BR', {
+      weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+    });
+
+    // ── USUÁRIO NA SIDEBAR ───────────────────────────────────────
+    if (sessao) {
+      const iniciais = sessao.nome.split(' ').filter(Boolean).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+      document.getElementById('user-avatar').textContent = iniciais;
+      document.getElementById('user-name').textContent   = sessao.nome;
+      document.getElementById('user-role').textContent   = sessao.is_admin ? 'Administrador' : sessao.setor;
+    }
+
+    // ── CARREGAR DADOS ───────────────────────────────────────────
+    async function loadDashboard() {
+      // contagem de usuários
+      const { count: cUsuarios } = await db.from('usuarios').select('*', { count: 'exact', head: true }).eq('ativo', true);
+      document.getElementById('m-usuarios').textContent = cUsuarios ?? '0';
+
+      // logs recentes
+      const { data: logs } = await db
+        .from('log_atividades')
+        .select('acao, modulo, detalhes, criado_em')
+        .order('criado_em', { ascending: false })
+        .limit(6);
+
+      const actList = document.getElementById('activity-list');
+      if (logs && logs.length > 0) {
+        actList.innerHTML = logs.map(l => {
+          const t = new Date(l.criado_em);
+          const hora = t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          const data = t.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+          const acoes = {
+            'login':              { label: 'Login realizado',          dot: 'cyan' },
+            'setup_admin_criado': { label: 'Admin master criado',      dot: 'green' },
+          };
+          const info = acoes[l.acao] || { label: l.acao, dot: 'amber' };
+          return `<div class="activity-item">
+            <div class="act-dot ${info.dot}"></div>
+            <div class="act-text">
+              <div class="act-title">${info.label}</div>
+              <div class="act-time">${data} às ${hora} · ${l.modulo || '—'}</div>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        actList.innerHTML = '<div class="empty-state"><i class="ti ti-history"></i>Nenhuma atividade ainda.</div>';
+      }
+
+      // lista de usuários
+      const { data: users } = await db
+        .from('usuarios')
+        .select('nome, setor, is_admin, ativo')
+        .order('criado_em', { ascending: false })
+        .limit(6);
+
+      const usersList = document.getElementById('users-list');
+      if (users && users.length > 0) {
+        usersList.innerHTML = users.map(u => {
+          const ini = u.nome.split(' ').filter(Boolean).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+          const role = u.is_admin ? 'Administrador' : u.setor;
+          const dot  = u.ativo ? 'green' : 'coral';
+          return `<div class="activity-item">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--cyan-light);
+              display:flex;align-items:center;justify-content:center;
+              font-size:11px;font-weight:600;color:var(--cyan-dark);flex-shrink:0">${ini}</div>
+            <div class="act-text">
+              <div class="act-title" style="font-weight:500">${u.nome}</div>
+              <div class="act-time">${role}</div>
+            </div>
+            <div class="act-dot ${dot}" style="margin-left:4px"></div>
+          </div>`;
+        }).join('');
+      } else {
+        usersList.innerHTML = '<div class="empty-state"><i class="ti ti-users"></i>Nenhum usuário.</div>';
+      }
+
+      // métricas zeradas (tabelas ainda não existem — serão atualizadas conforme módulos forem criados)
+      ['m-clientes','m-os','m-produtos'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+      ['c-clientes','c-os','c-produtos','c-vendas'].forEach(id => {
+        document.getElementById(id).textContent = '0 registros';
+      });
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
