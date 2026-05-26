@@ -8,160 +8,92 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/bCrypt.min.js"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- bcryptjs — global correto é dcodeIO.bcrypt -->
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
   <style>
     :root {
       --dt-cyan:        #29B8C2;
       --dt-cyan-dark:   #1E9099;
-      --dt-cyan-light:  #D6F4F6;
       --dt-coral:       #E8604A;
       --dt-coral-dark:  #C94835;
       --dt-coral-light: #FDECEA;
-      --dt-white:       #FFFFFF;
       --dt-dark:        #2C2C2A;
       --dt-gray:        #5F5E5A;
       --dt-gray-mid:    #9C9B97;
-      --dt-gray-light:  #F1EFE8;
       --dt-border:      rgba(41,184,194,0.18);
-      --dt-success:     #1E9099;
-      --dt-error:       #C94835;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'DM Sans', sans-serif;
       background: #EAF8F9;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       padding: 2rem 1rem;
     }
-
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background-image: radial-gradient(circle, rgba(41,184,194,0.12) 1px, transparent 1px);
       background-size: 28px 28px;
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
-
     .card {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 520px;
-      background: #fff;
-      border-radius: 22px;
-      border: 1px solid var(--dt-border);
-      overflow: hidden;
+      position: relative; z-index: 1;
+      width: 100%; max-width: 520px;
+      background: #fff; border-radius: 22px;
+      border: 1px solid var(--dt-border); overflow: hidden;
       box-shadow: 0 4px 40px rgba(41,184,194,0.13), 0 1px 4px rgba(0,0,0,0.06);
       animation: fadeUp 0.45s ease both;
     }
-
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
-    /* HEADER */
     .card-header {
-      background: var(--dt-dark);
-      padding: 1.5rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background: var(--dt-dark); padding: 1.5rem 2rem;
+      display: flex; align-items: center; gap: 14px;
     }
-
     .logo-circle {
-      width: 50px; height: 50px;
-      border-radius: 50%;
+      width: 50px; height: 50px; border-radius: 50%;
       background: var(--dt-cyan);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-
     .logo-square {
-      width: 32px; height: 32px;
-      background: var(--dt-coral);
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; background: var(--dt-coral);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
     }
-
     .logo-square svg { width: 19px; height: 19px; }
-
     .brand-info { flex: 1; }
-    .brand-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px; font-weight: 700;
-      color: #fff; letter-spacing: -0.01em;
-    }
-    .brand-sub {
-      font-size: 10px; color: var(--dt-cyan);
-      letter-spacing: 0.1em; font-weight: 500; margin-top: 2px;
-    }
-
+    .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+    .brand-sub  { font-size: 10px; color: var(--dt-cyan); letter-spacing: 0.1em; font-weight: 500; margin-top: 2px; }
     .header-badge {
-      font-size: 10px; font-weight: 500;
-      padding: 4px 11px; border-radius: 20px;
-      background: rgba(41,184,194,0.15);
-      color: var(--dt-cyan);
-      border: 1px solid rgba(41,184,194,0.3);
-      white-space: nowrap;
+      font-size: 10px; font-weight: 500; padding: 4px 11px; border-radius: 20px;
+      background: rgba(41,184,194,0.15); color: var(--dt-cyan);
+      border: 1px solid rgba(41,184,194,0.3); white-space: nowrap;
       display: flex; align-items: center; gap: 5px;
     }
-
-    /* STEPS */
-    .steps-bar {
-      padding: 1.25rem 2rem 1rem;
-      border-bottom: 1px solid #F0EFEA;
-    }
-
-    .steps-row {
-      display: flex; align-items: center; gap: 5px; margin-bottom: 10px;
-    }
-
-    .step-seg {
-      height: 4px; width: 36px; border-radius: 4px;
-      background: var(--dt-cyan); transition: background 0.3s;
-    }
+    .steps-bar { padding: 1.25rem 2rem 1rem; border-bottom: 1px solid #F0EFEA; }
+    .steps-row { display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
+    .step-seg { height: 4px; width: 36px; border-radius: 4px; background: var(--dt-cyan); }
     .step-seg.off { background: #E2E0DA; }
     .step-hint { font-size: 11.5px; color: var(--dt-gray-mid); margin-left: 4px; }
-
-    .steps-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 17px; font-weight: 600; color: var(--dt-dark); margin-bottom: 4px;
-    }
-    .steps-desc { font-size: 12.5px; color: var(--dt-gray); line-height: 1.55; }
-
+    .steps-title { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; color: var(--dt-dark); margin-bottom: 4px; }
+    .steps-desc  { font-size: 12.5px; color: var(--dt-gray); line-height: 1.55; }
     .admin-pill {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 500;
-      padding: 4px 11px 4px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 500; padding: 4px 11px 4px 8px; border-radius: 20px;
       background: var(--dt-coral-light); color: var(--dt-coral-dark);
       border: 1px solid rgba(232,96,74,0.2); margin-top: 10px;
     }
-
-    /* BODY */
     .card-body { padding: 1.4rem 2rem 1.6rem; }
-
-    .row2 {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 12px; margin-bottom: 12px;
-    }
-
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .field { margin-bottom: 12px; }
-
     label {
-      display: block;
-      font-size: 10.5px; font-weight: 600; color: var(--dt-gray);
+      display: block; font-size: 10.5px; font-weight: 600; color: var(--dt-gray);
       text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px;
     }
-
     input, select {
       width: 100%; height: 41px; padding: 0 13px;
       border: 1px solid #E2E0DA; border-radius: 10px;
@@ -171,7 +103,6 @@
       transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
       -webkit-appearance: none; appearance: none;
     }
-
     input::placeholder { color: var(--dt-gray-mid); }
     input:hover, select:hover { border-color: rgba(41,184,194,0.45); }
     input:focus, select:focus {
@@ -180,143 +111,87 @@
       background: #fff;
     }
     input:disabled, select:disabled { opacity: 0.55; cursor: not-allowed; }
-
-    input.error { border-color: var(--dt-coral); box-shadow: 0 0 0 3px rgba(232,96,74,0.12); }
-    input.success { border-color: var(--dt-cyan-dark); }
-
-    .field-hint {
-      font-size: 11px; margin-top: 4px; padding-left: 2px;
-      display: none;
-    }
+    input.error { border-color: var(--dt-coral) !important; box-shadow: 0 0 0 3px rgba(232,96,74,0.12) !important; }
+    .field-hint { font-size: 11px; margin-top: 4px; padding-left: 2px; display: none; }
     .field-hint.error { color: var(--dt-coral-dark); display: block; }
-    .field-hint.info  { color: var(--dt-gray-mid); display: block; }
-
+    .field-hint.info  { color: var(--dt-cyan-dark); display: block; }
     .pass-wrap { position: relative; }
     .pass-wrap input { padding-right: 42px; }
-
     .eye-btn {
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
       color: var(--dt-gray-mid); font-size: 17px; padding: 0; line-height: 1;
-      transition: color 0.15s;
     }
     .eye-btn:hover { color: var(--dt-cyan-dark); }
-
-    /* strength bar */
-    .strength-bar {
-      display: flex; gap: 4px; margin-top: 6px;
-    }
-    .strength-seg {
-      flex: 1; height: 3px; border-radius: 3px;
-      background: #E2E0DA; transition: background 0.25s;
-    }
-    .strength-label {
-      font-size: 10.5px; color: var(--dt-gray-mid); margin-top: 3px;
-      text-align: right;
-    }
-
-    /* MODULES */
+    .strength-bar { display: flex; gap: 4px; margin-top: 6px; }
+    .strength-seg { flex: 1; height: 3px; border-radius: 3px; background: #E2E0DA; transition: background 0.25s; }
+    .strength-label { font-size: 10.5px; color: var(--dt-gray-mid); margin-top: 3px; text-align: right; }
     .modules-label {
       font-size: 10.5px; font-weight: 600; color: var(--dt-gray);
       text-transform: uppercase; letter-spacing: 0.06em;
-      display: flex; align-items: center; gap: 8px;
-      margin: 1.1rem 0 0.65rem;
+      display: flex; align-items: center; gap: 8px; margin: 1.1rem 0 0.65rem;
     }
     .modules-label i { font-size: 14px; color: var(--dt-cyan); }
-    .modules-label::after {
-      content: ''; flex: 1; height: 1px; background: #EEEDEA;
-    }
-
-    .mods-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 6px; margin-bottom: 1.3rem;
-    }
-
+    .modules-label::after { content: ''; flex: 1; height: 1px; background: #EEEDEA; }
+    .mods-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 1.3rem; }
     .mod-chip {
-      display: flex; align-items: center; gap: 5px;
-      padding: 7px 8px; border-radius: 9px;
-      border: 1px solid rgba(41,184,194,0.22);
-      background: rgba(41,184,194,0.04);
+      display: flex; align-items: center; gap: 5px; padding: 7px 8px; border-radius: 9px;
+      border: 1px solid rgba(41,184,194,0.22); background: rgba(41,184,194,0.04);
       font-size: 11px; color: var(--dt-dark); overflow: hidden;
     }
     .mod-chip i { font-size: 13px; color: var(--dt-cyan-dark); flex-shrink: 0; }
     .mod-chip span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mod-badge {
-      margin-left: auto; font-size: 9px; font-weight: 700;
-      background: var(--dt-coral); color: #fff;
+      font-size: 9px; font-weight: 700; background: var(--dt-coral); color: #fff;
       padding: 2px 6px; border-radius: 6px; flex-shrink: 0;
     }
-
-    /* TOAST */
     .toast {
       position: fixed; top: 1.5rem; right: 1.5rem; z-index: 999;
-      padding: 12px 18px; border-radius: 12px;
-      font-size: 13px; font-weight: 500;
+      padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 500;
       display: flex; align-items: center; gap: 9px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      transform: translateX(120%);
-      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+      transform: translateX(140%);
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
       max-width: 320px;
     }
     .toast.show { transform: translateX(0); }
     .toast.success { background: #E6FAF8; color: #0F6E56; border: 1px solid rgba(15,110,86,0.2); }
     .toast.error   { background: var(--dt-coral-light); color: var(--dt-coral-dark); border: 1px solid rgba(232,96,74,0.2); }
     .toast i { font-size: 17px; flex-shrink: 0; }
-
-    /* SUBMIT */
     .divider { height: 1px; background: #F0EFEA; margin: 0.2rem 0 1.1rem; }
-
     .btn-submit {
-      width: 100%; height: 46px;
-      background: var(--dt-cyan); color: #fff;
+      width: 100%; height: 46px; background: var(--dt-cyan); color: #fff;
       border: none; border-radius: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14.5px; font-weight: 600;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 9px;
-      letter-spacing: 0.01em;
-      transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+      font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: background 0.18s, transform 0.12s;
       box-shadow: 0 2px 14px rgba(41,184,194,0.28);
     }
     .btn-submit i { font-size: 18px; }
-    .btn-submit:hover:not(:disabled) { background: var(--dt-cyan-dark); box-shadow: 0 4px 20px rgba(41,184,194,0.38); }
+    .btn-submit:hover:not(:disabled) { background: var(--dt-cyan-dark); }
     .btn-submit:active:not(:disabled) { transform: scale(0.985); }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
-
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .spin { animation: spin 0.7s linear infinite; display: inline-block; }
-
-    /* FOOTER */
     .card-footer {
-      background: #F8F8F5; border-top: 1px solid #F0EFEA;
-      padding: 0.8rem 2rem;
-      display: flex; align-items: center; gap: 7px;
-      font-size: 11.5px; color: var(--dt-gray-mid);
+      background: #F8F8F5; border-top: 1px solid #F0EFEA; padding: 0.8rem 2rem;
+      display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--dt-gray-mid);
     }
     .card-footer i { font-size: 14px; color: var(--dt-cyan); flex-shrink: 0; }
-
-    /* BLOQUEADO (já existe admin) */
     .blocked-screen {
-      display: none;
-      flex-direction: column; align-items: center; justify-content: center;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
       padding: 3rem 2rem; text-align: center; gap: 1rem;
     }
     .blocked-screen i { font-size: 48px; color: var(--dt-coral); }
-    .blocked-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 18px; font-weight: 600; color: var(--dt-dark);
-    }
-    .blocked-desc { font-size: 13px; color: var(--dt-gray); line-height: 1.6; }
+    .blocked-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: var(--dt-dark); }
+    .blocked-desc  { font-size: 13px; color: var(--dt-gray); line-height: 1.6; }
     .btn-login {
-      margin-top: 0.5rem;
-      padding: 10px 28px; border-radius: 10px;
-      background: var(--dt-cyan); color: #fff;
-      border: none; font-family: 'Space Grotesk', sans-serif;
-      font-size: 13.5px; font-weight: 600; cursor: pointer;
-      transition: background 0.15s;
+      margin-top: 0.5rem; padding: 10px 28px; border-radius: 10px;
+      background: var(--dt-cyan); color: #fff; border: none;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
     }
     .btn-login:hover { background: var(--dt-cyan-dark); }
-
     @media (max-width: 480px) {
       .card { border-radius: 16px; }
       .card-header, .steps-bar, .card-body { padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -327,385 +202,323 @@
 </head>
 <body>
 
-  <!-- TOAST -->
-  <div class="toast" id="toast">
-    <i id="toast-icon" class="ti ti-check"></i>
-    <span id="toast-msg">Mensagem</span>
+<div class="toast" id="toast">
+  <i id="toast-icon" class="ti ti-check"></i>
+  <span id="toast-msg"></span>
+</div>
+
+<div class="card" id="main-card">
+
+  <div class="card-header">
+    <div class="logo-circle">
+      <div class="logo-square">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="9.5" r="3.5" stroke="white" stroke-width="2.2"/>
+          <path d="M12 13V18" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M8.5 18h7" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="brand-info">
+      <div class="brand-name">Dottec Assistência</div>
+      <div class="brand-sub">SISTEMA DE GESTÃO</div>
+    </div>
+    <div class="header-badge"><i class="ti ti-settings"></i> Setup inicial</div>
   </div>
 
-  <div class="card" id="main-card">
-
-    <!-- HEADER -->
-    <div class="card-header">
-      <div class="logo-circle">
-        <div class="logo-square">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="9.5" r="3.5" stroke="white" stroke-width="2.2"/>
-            <path d="M12 13V18" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M8.5 18h7" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-          </svg>
-        </div>
+  <div id="form-area">
+    <div class="steps-bar">
+      <div class="steps-row">
+        <div class="step-seg"></div>
+        <div class="step-seg off"></div>
+        <div class="step-seg off"></div>
+        <span class="step-hint">Passo 1 de 3 — dados do administrador</span>
       </div>
-      <div class="brand-info">
-        <div class="brand-name">Dottec Assistência</div>
-        <div class="brand-sub">SISTEMA DE GESTÃO</div>
-      </div>
-      <div class="header-badge">
-        <i class="ti ti-settings"></i> Setup inicial
-      </div>
+      <div class="steps-title">Criar administrador master</div>
+      <div class="steps-desc">Este usuário terá controle total sobre o sistema e poderá gerenciar todos os outros usuários e módulos.</div>
+      <div class="admin-pill"><i class="ti ti-shield-check"></i> Acesso total — todos os módulos</div>
     </div>
 
-    <!-- conteúdo dinâmico -->
-    <div id="form-area">
-
-      <!-- STEPS -->
-      <div class="steps-bar">
-        <div class="steps-row">
-          <div class="step-seg"></div>
-          <div class="step-seg off"></div>
-          <div class="step-seg off"></div>
-          <span class="step-hint">Passo 1 de 3 — dados do administrador</span>
+    <div class="card-body">
+      <div class="row2">
+        <div>
+          <label>Nome completo</label>
+          <input type="text" id="nome" placeholder="Ex: Gaza Silva" oninput="clearErr('nome')" />
+          <div class="field-hint" id="hint-nome"></div>
         </div>
-        <div class="steps-title">Criar administrador master</div>
-        <div class="steps-desc">Este usuário terá controle total sobre o sistema e poderá gerenciar todos os outros usuários e módulos.</div>
-        <div class="admin-pill">
-          <i class="ti ti-shield-check"></i>
-          Acesso total — todos os módulos
+        <div>
+          <label>Setor</label>
+          <select disabled><option>Administração</option></select>
         </div>
       </div>
 
-      <!-- BODY -->
-      <div class="card-body">
-
-        <div class="row2">
-          <div>
-            <label>Nome completo</label>
-            <input type="text" id="nome" placeholder="Ex: Gaza Silva" autocomplete="name" oninput="clearError('nome')" />
-            <div class="field-hint" id="hint-nome"></div>
-          </div>
-          <div>
-            <label>Setor</label>
-            <select disabled><option>Administração</option></select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>E-mail</label>
-          <input type="email" id="email" placeholder="admin@dottec.com.br" autocomplete="email" oninput="clearError('email')" />
-          <div class="field-hint" id="hint-email"></div>
-        </div>
-
-        <div class="row2">
-          <div>
-            <label>Nome de usuário</label>
-            <input type="text" id="usuario" placeholder="gaza.admin" autocomplete="username" oninput="clearError('usuario'); checkUsuario()" />
-            <div class="field-hint" id="hint-usuario"></div>
-          </div>
-          <div>
-            <label>Telefone</label>
-            <input type="tel" id="telefone" placeholder="(47) 99999-0000" oninput="maskTel(this)" />
-          </div>
-        </div>
-
-        <div class="row2">
-          <div>
-            <label>Senha</label>
-            <div class="pass-wrap">
-              <input type="password" id="p1" placeholder="••••••••" autocomplete="new-password" oninput="checkStrength(this.value); clearError('p1')" />
-              <button class="eye-btn" onclick="togglePass('p1', this)" type="button" aria-label="Mostrar senha">
-                <i class="ti ti-eye"></i>
-              </button>
-            </div>
-            <div class="strength-bar">
-              <div class="strength-seg" id="s1"></div>
-              <div class="strength-seg" id="s2"></div>
-              <div class="strength-seg" id="s3"></div>
-              <div class="strength-seg" id="s4"></div>
-            </div>
-            <div class="strength-label" id="strength-label"></div>
-            <div class="field-hint" id="hint-p1"></div>
-          </div>
-          <div>
-            <label>Confirmar senha</label>
-            <div class="pass-wrap">
-              <input type="password" id="p2" placeholder="••••••••" autocomplete="new-password" oninput="clearError('p2')" />
-              <button class="eye-btn" onclick="togglePass('p2', this)" type="button" aria-label="Mostrar confirmação">
-                <i class="ti ti-eye"></i>
-              </button>
-            </div>
-            <div class="field-hint" id="hint-p2"></div>
-          </div>
-        </div>
-
-        <div class="modules-label">
-          <i class="ti ti-lock-open"></i>
-          Módulos com acesso total
-        </div>
-
-        <div class="mods-grid">
-          <div class="mod-chip"><i class="ti ti-users"></i><span>Clientes</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-truck"></i><span>Fornecedores</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-id-badge"></i><span>Funcionários</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-package"></i><span>Produtos</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-building-store"></i><span>Estoque</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-shopping-cart"></i><span>Vendas</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-tools"></i><span>Ordem Serv.</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-currency-dollar"></i><span>Financeiro</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-chart-bar"></i><span>Relatórios</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-settings"></i><span>Config.</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-user-cog"></i><span>Usuários</span><span class="mod-badge">total</span></div>
-          <div class="mod-chip"><i class="ti ti-ship"></i><span>Transportadoras</span><span class="mod-badge">total</span></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <button class="btn-submit" id="btn-submit" onclick="handleSubmit()">
-          <i class="ti ti-arrow-right"></i>
-          Criar administrador e continuar
-        </button>
-
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="email" placeholder="admin@dottec.com.br" oninput="clearErr('email')" />
+        <div class="field-hint" id="hint-email"></div>
       </div>
-    </div>
 
-    <!-- BLOQUEADO -->
-    <div class="blocked-screen" id="blocked-screen">
-      <i class="ti ti-lock"></i>
-      <div class="blocked-title">Administrador já cadastrado</div>
-      <div class="blocked-desc">O setup inicial já foi concluído.<br>Utilize a página de login para acessar o sistema.</div>
-      <button class="btn-login" onclick="window.location.href='login.html'">
-        <i class="ti ti-login"></i> Ir para o login
+      <div class="row2">
+        <div>
+          <label>Nome de usuário</label>
+          <input type="text" id="usuario" placeholder="gaza.admin" oninput="clearErr('usuario'); debounceUsuario()" />
+          <div class="field-hint" id="hint-usuario"></div>
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input type="tel" id="telefone" placeholder="(47) 99999-0000" oninput="maskTel(this)" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Senha</label>
+          <div class="pass-wrap">
+            <input type="password" id="p1" placeholder="••••••••" oninput="checkStrength(this.value); clearErr('p1')" />
+            <button class="eye-btn" type="button" onclick="togglePass('p1',this)"><i class="ti ti-eye"></i></button>
+          </div>
+          <div class="strength-bar">
+            <div class="strength-seg" id="s1"></div>
+            <div class="strength-seg" id="s2"></div>
+            <div class="strength-seg" id="s3"></div>
+            <div class="strength-seg" id="s4"></div>
+          </div>
+          <div class="strength-label" id="slabel"></div>
+          <div class="field-hint" id="hint-p1"></div>
+        </div>
+        <div>
+          <label>Confirmar senha</label>
+          <div class="pass-wrap">
+            <input type="password" id="p2" placeholder="••••••••" oninput="clearErr('p2')" />
+            <button class="eye-btn" type="button" onclick="togglePass('p2',this)"><i class="ti ti-eye"></i></button>
+          </div>
+          <div class="field-hint" id="hint-p2"></div>
+        </div>
+      </div>
+
+      <div class="modules-label"><i class="ti ti-lock-open"></i> Módulos com acesso total</div>
+      <div class="mods-grid">
+        <div class="mod-chip"><i class="ti ti-users"></i><span>Clientes</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-truck"></i><span>Fornecedores</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-id-badge"></i><span>Funcionários</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-package"></i><span>Produtos</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-building-store"></i><span>Estoque</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-shopping-cart"></i><span>Vendas</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-tools"></i><span>Ordem Serv.</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-currency-dollar"></i><span>Financeiro</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-chart-bar"></i><span>Relatórios</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-settings"></i><span>Config.</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-user-cog"></i><span>Usuários</span><span class="mod-badge">total</span></div>
+        <div class="mod-chip"><i class="ti ti-ship"></i><span>Transportadoras</span><span class="mod-badge">total</span></div>
+      </div>
+
+      <div class="divider"></div>
+      <button class="btn-submit" id="btn-submit" onclick="handleSubmit()">
+        <i class="ti ti-arrow-right"></i> Criar administrador e continuar
       </button>
     </div>
-
-    <!-- FOOTER -->
-    <div class="card-footer">
-      <i class="ti ti-info-circle"></i>
-      Esta tela aparece apenas uma vez, na configuração inicial do sistema.
-    </div>
-
   </div>
 
-  <script>
-    // ── CONFIG SUPABASE ──────────────────────────────────────────
-    const SUPABASE_URL  = 'https://clctxzynpfjilxmyblpg.supabase.co';
-    const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+  <div class="blocked-screen" id="blocked-screen">
+    <i class="ti ti-lock"></i>
+    <div class="blocked-title">Administrador já cadastrado</div>
+    <div class="blocked-desc">O setup inicial já foi concluído.<br>Utilize a página de login para acessar o sistema.</div>
+    <button class="btn-login" onclick="window.location.href='login.html'">
+      <i class="ti ti-login"></i> Ir para o login
+    </button>
+  </div>
 
-    const MODULOS = [
-      'clientes','fornecedores','funcionarios','produtos','transportadoras',
-      'estoque','vendas','ordem_servico','financeiro','relatorios','configuracoes','usuarios'
-    ];
+  <div class="card-footer">
+    <i class="ti ti-info-circle"></i>
+    Esta tela aparece apenas uma vez, na configuração inicial do sistema.
+  </div>
+</div>
 
-    // ── VERIFICAR SE JÁ EXISTE ADMIN ────────────────────────────
-    async function checkAdminExists() {
-      const { data, error } = await db
-        .from('usuarios')
-        .select('id')
-        .eq('is_admin', true)
-        .limit(1);
+<script>
+  // ── SUPABASE ─────────────────────────────────────────────────
+  const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-      if (!error && data && data.length > 0) {
-        document.getElementById('form-area').style.display = 'none';
-        document.getElementById('blocked-screen').style.display = 'flex';
-      }
+  const MODULOS = [
+    'clientes','fornecedores','funcionarios','produtos','transportadoras',
+    'estoque','vendas','ordem_servico','financeiro','relatorios','configuracoes','usuarios'
+  ];
+
+  // ── CHECAR SE JÁ EXISTE ADMIN ────────────────────────────────
+  (async () => {
+    const { data, error } = await db
+      .from('usuarios')
+      .select('id')
+      .eq('is_admin', true)
+      .limit(1);
+    if (!error && data && data.length > 0) {
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('blocked-screen').style.display = 'flex';
     }
+  })();
 
-    checkAdminExists();
+  // ── TOAST ────────────────────────────────────────────────────
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-icon').className = 'ti ' + (type === 'success' ? 'ti-check' : 'ti-alert-circle');
+    document.getElementById('toast-msg').textContent = msg;
+    el.className = 'toast ' + type + ' show';
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
 
-    // ── UTILS ────────────────────────────────────────────────────
-    function showToast(msg, type = 'success') {
-      const t = document.getElementById('toast');
-      const ic = document.getElementById('toast-icon');
-      const tx = document.getElementById('toast-msg');
-      t.className = 'toast ' + type;
-      ic.className = 'ti ' + (type === 'success' ? 'ti-check' : 'ti-alert-circle');
-      tx.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3800);
-    }
+  // ── ERROS ────────────────────────────────────────────────────
+  function setErr(id, msg) {
+    const el = document.getElementById(id);
+    const h  = document.getElementById('hint-' + id);
+    if (el) el.classList.add('error');
+    if (h)  { h.textContent = msg; h.className = 'field-hint error'; }
+  }
+  function clearErr(id) {
+    const el = document.getElementById(id);
+    const h  = document.getElementById('hint-' + id);
+    if (el) el.classList.remove('error');
+    if (h)  { h.textContent = ''; h.className = 'field-hint'; }
+  }
 
-    function setError(id, msg) {
-      const el = document.getElementById(id);
-      const hint = document.getElementById('hint-' + id);
-      if (el) el.classList.add('error');
-      if (hint) { hint.textContent = msg; hint.className = 'field-hint error'; }
-    }
+  // ── TOGGLE SENHA ─────────────────────────────────────────────
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    const ic  = btn.querySelector('i');
+    if (inp.type === 'password') { inp.type = 'text';     ic.className = 'ti ti-eye-off'; }
+    else                         { inp.type = 'password'; ic.className = 'ti ti-eye'; }
+  }
 
-    function clearError(id) {
-      const el = document.getElementById(id);
-      const hint = document.getElementById('hint-' + id);
-      if (el) el.classList.remove('error');
-      if (hint) { hint.textContent = ''; hint.className = 'field-hint'; }
-    }
+  // ── MÁSCARA TELEFONE ─────────────────────────────────────────
+  function maskTel(inp) {
+    let v = inp.value.replace(/\D/g, '').slice(0, 11);
+    if      (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    else if (v.length > 6)  v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
+    else if (v.length > 2)  v = v.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
+    inp.value = v;
+  }
 
-    function togglePass(id, btn) {
-      const input = document.getElementById(id);
-      const icon = btn.querySelector('i');
-      if (input.type === 'password') {
-        input.type = 'text'; icon.className = 'ti ti-eye-off';
-      } else {
-        input.type = 'password'; icon.className = 'ti ti-eye';
-      }
-    }
+  // ── FORÇA DA SENHA ───────────────────────────────────────────
+  function checkStrength(v) {
+    let s = 0;
+    if (v.length >= 8)           s++;
+    if (/[A-Z]/.test(v))         s++;
+    if (/[0-9]/.test(v))         s++;
+    if (/[^A-Za-z0-9]/.test(v))  s++;
+    const cores  = ['#E8604A','#E8A44A','#29B8C2','#1E9099'];
+    const labels = ['','Fraca','Média','Forte','Muito forte'];
+    [1,2,3,4].forEach(i => {
+      document.getElementById('s'+i).style.background = i <= s ? cores[s-1] : '#E2E0DA';
+    });
+    document.getElementById('slabel').textContent = v.length ? labels[s] : '';
+  }
 
-    function maskTel(input) {
-      let v = input.value.replace(/\D/g, '').slice(0, 11);
-      if (v.length > 10) {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-      } else if (v.length > 6) {
-        v = v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
-      } else if (v.length > 2) {
-        v = v.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
-      } else {
-        v = v.replace(/^(\d{0,2})$/, '($1');
-      }
-      input.value = v;
-    }
-
-    // ── FORÇA DA SENHA ───────────────────────────────────────────
-    function checkStrength(val) {
-      const segs = [document.getElementById('s1'), document.getElementById('s2'),
-                    document.getElementById('s3'), document.getElementById('s4')];
-      const label = document.getElementById('strength-label');
-      let score = 0;
-      if (val.length >= 8)              score++;
-      if (/[A-Z]/.test(val))            score++;
-      if (/[0-9]/.test(val))            score++;
-      if (/[^A-Za-z0-9]/.test(val))     score++;
-
-      const colors = ['#E8604A','#E8A44A','#29B8C2','#1E9099'];
-      const labels = ['','Fraca','Média','Forte','Muito forte'];
-
-      segs.forEach((s, i) => {
-        s.style.background = i < score ? colors[score - 1] : '#E2E0DA';
-      });
-      label.textContent = val.length ? labels[score] : '';
-    }
-
-    // ── VERIFICAR USUÁRIO ÚNICO (debounce) ───────────────────────
-    let usuarioTimer;
-    async function checkUsuario() {
+  // ── VERIFICAR USUÁRIO ÚNICO ──────────────────────────────────
+  let uTimer;
+  function debounceUsuario() {
+    clearTimeout(uTimer);
+    uTimer = setTimeout(async () => {
       const val = document.getElementById('usuario').value.trim();
-      clearTimeout(usuarioTimer);
       if (val.length < 3) return;
-      usuarioTimer = setTimeout(async () => {
-        const { data } = await db.from('usuarios').select('id').eq('usuario', val).limit(1);
-        if (data && data.length > 0) {
-          setError('usuario', 'Este nome de usuário já está em uso.');
-        } else {
-          clearError('usuario');
-          const hint = document.getElementById('hint-usuario');
-          hint.textContent = 'Disponível ✓';
-          hint.className = 'field-hint info';
-        }
-      }, 600);
+      const { data, error } = await db.from('usuarios').select('id').eq('usuario', val).limit(1);
+      if (error) return; // ignora erro de rede silenciosamente
+      const h = document.getElementById('hint-usuario');
+      if (data && data.length > 0) {
+        setErr('usuario', 'Nome de usuário já está em uso.');
+      } else {
+        clearErr('usuario');
+        h.textContent = '✓ Disponível';
+        h.className = 'field-hint info';
+      }
+    }, 700);
+  }
+
+  // ── VALIDAÇÃO ────────────────────────────────────────────────
+  function validate() {
+    let ok = true;
+    const nome    = document.getElementById('nome').value.trim();
+    const email   = document.getElementById('email').value.trim();
+    const usuario = document.getElementById('usuario').value.trim();
+    const p1      = document.getElementById('p1').value;
+    const p2      = document.getElementById('p2').value;
+
+    if (!nome || nome.split(' ').filter(Boolean).length < 2)
+      { setErr('nome', 'Informe nome e sobrenome.'); ok = false; }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      { setErr('email', 'E-mail inválido.'); ok = false; }
+
+    if (!usuario || usuario.length < 3 || /\s/.test(usuario))
+      { setErr('usuario', 'Mínimo 3 caracteres, sem espaços.'); ok = false; }
+
+    if (!p1 || p1.length < 8)
+      { setErr('p1', 'Senha deve ter no mínimo 8 caracteres.'); ok = false; }
+
+    if (p1 !== p2)
+      { setErr('p2', 'As senhas não coincidem.'); ok = false; }
+
+    return ok;
+  }
+
+  // ── SUBMIT ───────────────────────────────────────────────────
+  async function handleSubmit() {
+    if (!validate()) return;
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Salvando...';
+
+    try {
+      const nome     = document.getElementById('nome').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const usuario  = document.getElementById('usuario').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      const senha    = document.getElementById('p1').value;
+
+      // bcryptjs expõe dcodeIO.bcrypt OU bcrypt dependendo da versão do bundle
+      const _bcrypt = window.dcodeIO?.bcrypt ?? window.bcrypt;
+      if (!_bcrypt) throw new Error('Biblioteca de hash não carregou. Recarregue a página.');
+
+      const senhaHash = await _bcrypt.hash(senha, 10);
+
+      // 1. Inserir usuário
+      const { data: novo, error: e1 } = await db
+        .from('usuarios')
+        .insert({ nome, email, usuario, senha_hash: senhaHash,
+                  telefone: telefone || null, setor: 'administracao',
+                  is_admin: true, ativo: true })
+        .select('id')
+        .single();
+
+      if (e1) throw new Error(e1.message);
+
+      // 2. Permissões total em todos os módulos
+      const { error: e2 } = await db.from('permissoes').insert(
+        MODULOS.map(m => ({ usuario_id: novo.id, modulo: m, nivel: 'total' }))
+      );
+      if (e2) throw new Error(e2.message);
+
+      // 3. Log
+      await db.from('log_atividades').insert({
+        usuario_id: novo.id, acao: 'setup_admin_criado',
+        modulo: 'usuarios', detalhes: { nome, email, usuario }
+      });
+
+      btn.innerHTML = '<i class="ti ti-check"></i> Administrador criado!';
+      btn.style.background = 'var(--dt-cyan-dark)';
+      toast('Administrador criado com sucesso! Redirecionando...', 'success');
+      setTimeout(() => window.location.href = 'login.html', 2500);
+
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-arrow-right"></i> Criar administrador e continuar';
+      btn.style.background = '';
+      const msg = err.message.includes('duplicate') || err.message.includes('unique')
+        ? 'E-mail ou usuário já cadastrado.' : 'Erro: ' + err.message;
+      toast(msg, 'error');
     }
-
-    // ── VALIDAÇÃO ────────────────────────────────────────────────
-    function validate() {
-      let ok = true;
-      const nome    = document.getElementById('nome').value.trim();
-      const email   = document.getElementById('email').value.trim();
-      const usuario = document.getElementById('usuario').value.trim();
-      const p1      = document.getElementById('p1').value;
-      const p2      = document.getElementById('p2').value;
-
-      if (!nome || nome.split(' ').length < 2) {
-        setError('nome', 'Informe nome e sobrenome.'); ok = false;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError('email', 'E-mail inválido.'); ok = false;
-      }
-      if (!usuario || usuario.length < 3 || /\s/.test(usuario)) {
-        setError('usuario', 'Mínimo 3 caracteres, sem espaços.'); ok = false;
-      }
-      if (!p1 || p1.length < 8) {
-        setError('p1', 'Senha deve ter no mínimo 8 caracteres.'); ok = false;
-      }
-      if (p1 !== p2) {
-        setError('p2', 'As senhas não coincidem.'); ok = false;
-      }
-      return ok;
-    }
-
-    // ── SUBMIT ───────────────────────────────────────────────────
-    async function handleSubmit() {
-      if (!validate()) return;
-
-      const btn = document.getElementById('btn-submit');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Criando administrador...';
-
-      try {
-        const nome     = document.getElementById('nome').value.trim();
-        const email    = document.getElementById('email').value.trim();
-        const usuario  = document.getElementById('usuario').value.trim();
-        const telefone = document.getElementById('telefone').value.trim();
-        const senha    = document.getElementById('p1').value;
-
-        // Hash da senha com bcrypt (salt 10)
-        const senhaHash = await bcrypt.hash(senha, 10);
-
-        // 1. Inserir usuário
-        const { data: novoUsuario, error: errUser } = await db
-          .from('usuarios')
-          .insert({
-            nome,
-            email,
-            usuario,
-            senha_hash: senhaHash,
-            telefone: telefone || null,
-            setor: 'administracao',
-            is_admin: true,
-            ativo: true
-          })
-          .select('id')
-          .single();
-
-        if (errUser) throw new Error(errUser.message);
-
-        // 2. Criar permissões "total" para todos os módulos
-        const permissoes = MODULOS.map(modulo => ({
-          usuario_id: novoUsuario.id,
-          modulo,
-          nivel: 'total'
-        }));
-
-        const { error: errPerm } = await db.from('permissoes').insert(permissoes);
-        if (errPerm) throw new Error(errPerm.message);
-
-        // 3. Log de atividade
-        await db.from('log_atividades').insert({
-          usuario_id: novoUsuario.id,
-          acao: 'setup_admin_criado',
-          modulo: 'usuarios',
-          detalhes: { nome, email, usuario }
-        });
-
-        // Sucesso
-        btn.innerHTML = '<i class="ti ti-check"></i> Administrador criado com sucesso!';
-        btn.style.background = 'var(--dt-cyan-dark)';
-        showToast('Administrador criado! Redirecionando para o login...', 'success');
-
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 2500);
-
-      } catch (err) {
-        console.error(err);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-arrow-right"></i> Criar administrador e continuar';
-        btn.style.background = '';
-
-        if (err.message.includes('duplicate') || err.message.includes('unique')) {
-          showToast('E-mail ou usuário já cadastrado no sistema.', 'error');
-        } else {
-          showToast('Erro ao salvar: ' + err.message, 'error');
-        }
-      }
-    }
-  </script>
-
+  }
+</script>
 </body>
 </html>
