@@ -6,20 +6,19 @@
   <title>Dottec Assistência</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     :root {
       --cyan:      #29B8C2;
       --cyan-dark: #1E9099;
-      --cyan-bg:   #EAF8F9;
       --coral:     #E8604A;
       --dark:      #1C1C1A;
       --text:      #2C2C2A;
-      --sub:       #84827C;
-      --border:    #E7E5DE;
-      --bg:        #F3F1EC;
+      --sub:       #8A887F;
+      --border:    #EAE7DF;
+      --bg:        #EDEAE3;
       --white:     #FFFFFF;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -27,15 +26,13 @@
 
     /* TOPBAR */
     .topbar{
-      height:56px;background:var(--white);border-bottom:1px solid var(--border);
-      display:flex;align-items:center;padding:0 1.5rem;gap:.5rem;
+      background:var(--white);border-bottom:1px solid var(--border);
       position:sticky;top:0;z-index:100;
     }
-    .tb-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0;margin-right:.5rem}
-    .tb-logo-img{width:32px;height:32px;border-radius:50%;flex-shrink:0;object-fit:cover}
-    .tb-brand{font-size:14px;font-weight:800;color:var(--dark);letter-spacing:-.01em}
-
-    .tb-nav{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto}
+    .topbar-row1{
+      height:50px;display:flex;align-items:center;padding:0 1.5rem;gap:.4rem;
+      border-bottom:1px solid var(--border);
+    }
     .tb-item{
       display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
       font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;text-decoration:none;
@@ -43,97 +40,132 @@
     }
     .tb-item i{font-size:15px}
     .tb-item:hover{background:var(--bg);color:var(--text)}
-    .tb-item.active{color:var(--cyan-dark);background:var(--cyan-bg)}
+    .tb-item.active{color:var(--coral);background:#FCEAE6}
 
-    .tb-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
-    .tb-time{font-size:13px;font-weight:700;color:var(--sub);min-width:42px;text-align:right}
-    .icon-btn{
-      width:32px;height:32px;border-radius:9px;background:none;border:1px solid var(--border);
-      display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);font-size:16px;
-      transition:background .12s,color .12s;
+    .topbar-row2{
+      height:64px;display:flex;align-items:center;padding:0 1.5rem;gap:12px;
     }
-    .icon-btn:hover{background:var(--bg);color:var(--text)}
-    .user-chip{
-      display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border-radius:20px;
-      background:var(--bg);border:1px solid var(--border);cursor:pointer;
+    .tb-logo-img{width:38px;height:38px;border-radius:50%;flex-shrink:0;object-fit:cover}
+    .tb-title-block{flex:1}
+    .tb-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark);letter-spacing:-.01em}
+    .tb-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+
+    .tb-right{display:flex;align-items:center;gap:10px}
+    .tb-time{font-size:13px;font-weight:700;color:var(--sub)}
+    .toggle{width:38px;height:21px;border-radius:20px;background:var(--coral);position:relative;cursor:pointer;flex-shrink:0}
+    .toggle::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+    .toggle.on::after{left:20px}
+    .user-av{
+      width:34px;height:34px;border-radius:50%;background:var(--coral);
+      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;
     }
-    .user-av{width:24px;height:24px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff}
-    .user-nm{font-size:12px;font-weight:700;color:var(--text)}
-    .logout-btn{font-size:12.5px;font-weight:600;color:var(--sub);background:none;border:none;cursor:pointer;padding:5px 9px;border-radius:8px;transition:background .12s,color .12s}
-    .logout-btn:hover{background:#FCEAE6;color:var(--coral)}
+    .logout-btn{
+      font-size:13px;font-weight:600;color:var(--text);background:var(--white);
+      border:1px solid var(--border);cursor:pointer;padding:7px 16px;border-radius:10px;
+      transition:background .12s;
+    }
+    .logout-btn:hover{background:var(--bg)}
 
     /* CONTENT */
-    .content{max-width:1180px;margin:0 auto;padding:2.5rem 2rem}
-    .page-label{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin-bottom:5px}
-    .page-title{font-size:23px;font-weight:800;color:var(--dark);letter-spacing:-.02em;margin-bottom:2rem}
+    .content{max-width:1040px;margin:0 auto;padding:2.5rem 2rem}
+    .section-label{
+      font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--sub);margin-bottom:1.25rem;
+    }
 
-    .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
 
     .mod-card{
       background:var(--white);border-radius:18px;border:1px solid var(--border);
-      padding:1.75rem 1.5rem 1.4rem;display:flex;flex-direction:column;gap:1rem;
+      padding:1.75rem;display:flex;flex-direction:column;gap:1.1rem;
       cursor:pointer;text-decoration:none;color:inherit;
       transition:box-shadow .2s,border-color .2s,transform .18s;
       animation:cardIn .4s ease both;
     }
-    .mod-card:hover{box-shadow:0 6px 28px rgba(0,0,0,.08);border-color:rgba(41,184,194,.35);transform:translateY(-2px)}
+    .mod-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D8D4C8;transform:translateY(-2px)}
     @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .mod-card:nth-child(1){animation-delay:.03s}
+    .mod-card:nth-child(2){animation-delay:.07s}
+    .mod-card:nth-child(3){animation-delay:.11s}
+    .mod-card:nth-child(4){animation-delay:.15s}
 
-    .card-top{display:flex;align-items:flex-start;justify-content:space-between}
-    .card-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:23px}
-    .card-icon.cyan{background:var(--cyan-bg);color:var(--cyan-dark)}
+    .card-icon-box{
+      width:52px;height:52px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;font-size:25px;
+    }
+    .card-icon-box.cyan{background:#E3F4F5}
+    .card-icon-box.coral{background:#FBE9E5}
+    .card-icon-box.sage{background:#EAEFE3}
+    .card-icon-box.amber{background:#FBEFDD}
+
+    .card-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+    .card-text{flex:1}
+    .card-name{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark);letter-spacing:-.01em;margin-bottom:5px}
+    .card-desc{font-size:12.5px;color:var(--sub);line-height:1.55}
+
     .card-arrow{
-      width:28px;height:28px;border-radius:50%;background:var(--bg);
-      display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub);
+      width:34px;height:34px;border-radius:50%;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);
       flex-shrink:0;transition:background .18s,color .18s,transform .18s;
     }
-    .mod-card:hover .card-arrow{background:var(--cyan);color:#fff;transform:translateX(3px)}
+    .mod-card:hover .card-arrow{background:var(--dark);color:#fff;transform:translateX(2px)}
 
-    .card-name{font-size:16px;font-weight:800;color:var(--dark);letter-spacing:-.01em;margin-bottom:4px}
-    .card-desc{font-size:12.5px;color:var(--sub);line-height:1.5}
-
-    @media (max-width:1024px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.tb-nav{display:none}.content{padding:1.5rem 1rem}.cards-grid{grid-template-columns:1fr}}
+    @media (max-width:680px){
+      .topbar-row1{overflow-x:auto}
+      .cards-grid{grid-template-columns:1fr}
+      .content{padding:1.5rem 1rem}
+      .tb-sub{display:none}
+    }
   </style>
 </head>
 <body>
 
   <header class="topbar">
-    <a class="tb-logo" href="dashboard.html">
-      <img src="logo-dottec.png" alt="Dottec Assistência" class="tb-logo-img" />
-      <span class="tb-brand">Dottec</span>
-    </a>
-
-    <nav class="tb-nav">
+    <div class="topbar-row1">
       <a class="tb-item active" href="dashboard.html"><i class="ti ti-home"></i> Início</a>
-    </nav>
-
-    <div class="tb-right">
-      <div class="tb-time" id="tb-time">—</div>
-      <button class="icon-btn"><i class="ti ti-bell"></i></button>
-      <div class="user-chip">
-        <div class="user-av" id="user-av">?</div>
-        <span class="user-nm" id="user-nm">...</span>
+    </div>
+    <div class="topbar-row2">
+      <img src="logo-dottec.png" alt="Dottec Assistência" class="tb-logo-img" />
+      <div class="tb-title-block">
+        <div class="tb-title">Dottec Assistência</div>
+        <div class="tb-sub" id="tb-sub">Carregando...</div>
       </div>
-      <button class="logout-btn" onclick="logout()">Sair</button>
+      <div class="tb-right">
+        <div class="tb-time" id="tb-time">—</div>
+        <div class="toggle" id="theme-toggle" onclick="this.classList.toggle('on')"></div>
+        <div class="user-av" id="user-av"><i class="ti ti-user"></i></div>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
     </div>
   </header>
 
   <main class="content">
-    <div class="page-label">Painel principal</div>
-    <div class="page-title" id="page-greeting">Olá, carregando...</div>
+    <div class="section-label">Módulos do sistema</div>
 
     <div class="cards-grid">
+
       <a class="mod-card" href="cadastro.html">
-        <div class="card-top">
-          <div class="card-icon cyan"><i class="ti ti-forms"></i></div>
+        <div class="card-icon-box cyan"><i class="ti ti-forms" style="color:var(--cyan-dark)"></i></div>
+        <div class="card-bottom">
+          <div class="card-text">
+            <div class="card-name">Cadastro</div>
+            <div class="card-desc">Clientes, fornecedores, transportadoras e serviços.</div>
+          </div>
           <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
         </div>
-        <div>
-          <div class="card-name">Cadastro</div>
-          <div class="card-desc">Clientes, fornecedores, transportadoras e serviços.</div>
+      </a>
+
+      <a class="mod-card" href="produtos.html">
+        <div class="card-icon-box coral"><i class="ti ti-package" style="color:var(--coral)"></i></div>
+        <div class="card-bottom">
+          <div class="card-text">
+            <div class="card-name">Produtos</div>
+            <div class="card-desc">Catálogo, custo, venda, estoque e etiquetas.</div>
+          </div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
         </div>
       </a>
+
     </div>
   </main>
 
@@ -143,7 +175,6 @@
     const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
     const sessao = JSON.parse(sessionStorage.getItem('dottec_sessao') || 'null');
-    // Sem redirecionar por enquanto — banco/login serão recriados.
 
     function logout() {
       sessionStorage.removeItem('dottec_sessao');
@@ -156,18 +187,9 @@
     }
     tick(); setInterval(tick,30000);
 
-    if (sessao) {
-      const ini = sessao.nome.split(' ').filter(Boolean).slice(0,2).map(n=>n[0]).join('').toUpperCase();
-      document.getElementById('user-av').textContent = ini;
-      document.getElementById('user-nm').textContent = sessao.nome.split(' ')[0];
-      const h = new Date().getHours();
-      const saud = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-      document.getElementById('page-greeting').textContent = saud+', '+sessao.nome.split(' ')[0]+'.';
-    } else {
-      document.getElementById('user-av').textContent = 'G';
-      document.getElementById('user-nm').textContent = 'Gaza';
-      document.getElementById('page-greeting').textContent = 'Olá, Gaza.';
-    }
+    const nome = sessao ? sessao.nome.split(' ')[0] : 'Gaza';
+    document.getElementById('user-av').textContent = nome[0].toUpperCase();
+    document.getElementById('tb-sub').textContent = 'Olá, ' + nome + '.';
   </script>
 </body>
 </html>
