@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Produtos — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --cyan:#29B8C2; --cyan-dark:#1E9099; --coral:#E8604A; --coral-dark:#C94835;
+    --dark:#1C1C1A; --text:#2C2C2A; --sub:#8A887F; --border:#EAE7DF; --bg:#EDEAE3; --white:#FFFFFF;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;
+    background:radial-gradient(circle at 12% -8%, rgba(41,184,194,.10), transparent 42%),
+               radial-gradient(circle at 92% 6%, rgba(232,96,74,.08), transparent 38%), var(--bg);}
+
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{
+    width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;
+    cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s;
+  }
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+
+  .content{max-width:1180px;margin:0 auto;padding:2rem}
+
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+
+  .btn{
+    height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;
+    font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;
+    display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--coral);color:#fff}
+  .btn-primary:hover{background:var(--coral-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg)}
+
+  .dropdown-wrap{position:relative}
+  .dropdown-menu{
+    display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:230px;
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 10px 36px rgba(0,0,0,.12);padding:6px;z-index:50;
+  }
+  .dropdown-wrap.open .dropdown-menu{display:block}
+  .ddm-item{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;
+    font-size:13px;font-weight:500;color:var(--text);cursor:pointer;text-decoration:none;transition:background .12s;
+  }
+  .ddm-item i{font-size:16px;color:var(--sub);width:18px}
+  .ddm-item:hover{background:var(--bg)}
+
+  .search-wrap{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .search-box{position:relative}
+  .search-box input{
+    width:280px;height:40px;padding:0 14px 0 38px;border-radius:10px;
+    border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .search-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
+  .search-box i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
+
+  /* TABELA */
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{
+    text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--sub);padding:13px 18px;border-bottom:1px solid var(--border);background:#FAFAF7;
+  }
+  thead th.right{text-align:right}
+  thead th.center{text-align:center}
+
+  tbody td{padding:13px 18px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAF7}
+
+  .td-codigo{color:var(--sub);font-variant-numeric:tabular-nums;font-weight:600}
+  .td-nome{font-weight:600;color:var(--dark)}
+  .td-grupo{
+    display:inline-flex;font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;
+    background:var(--cyan-bg,#E3F4F5);color:var(--cyan-dark);margin-top:3px;
+  }
+  .td-valor{text-align:right;font-weight:700;color:var(--dark);font-variant-numeric:tabular-nums}
+  .td-estoque{text-align:center;font-weight:600}
+  .estoque-ok{color:#3B6D11}
+  .estoque-baixo{color:var(--coral-dark)}
+  .estoque-zero{color:var(--coral-dark);font-weight:700}
+
+  .actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .act-btn{
+    width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:14px;
+    transition:background .15s,transform .1s;
+  }
+  .act-btn:active{transform:scale(.92)}
+  .act-edit{background:#E3F4F5;color:var(--cyan-dark)}
+  .act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:#FBE9E5;color:var(--coral)}
+  .act-del:hover{background:var(--coral);color:#fff}
+
+  .empty-row td{padding:3.5rem 1rem;text-align:center;color:var(--sub)}
+  .empty-row i{font-size:34px;display:block;margin-bottom:10px;opacity:.4}
+  .empty-row .empty-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .empty-row .empty-desc{font-size:12.5px}
+
+  .table-footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub);
+  }
+
+  /* modal rápido (placeholder usado por outras páginas) */
+  @media (max-width:760px){
+    .content{padding:1.25rem}
+    .search-box input{width:100%}
+    .search-wrap{margin-left:0;width:100%}
+    table{font-size:12.5px}
+    thead th, tbody td{padding:10px 12px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="dashboard.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">Produtos</div>
+      <div class="crumb-sub">Catálogo de produtos cadastrados</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+
+  <div class="toolbar">
+    <div class="dropdown-wrap" id="add-dropdown">
+      <button class="btn btn-primary" onclick="toggleDropdown('add-dropdown')">
+        <i class="ti ti-plus"></i> Adicionar
+        <i class="ti ti-chevron-down" style="font-size:13px"></i>
+      </button>
+      <div class="dropdown-menu">
+        <a class="ddm-item" href="produto-novo.html"><i class="ti ti-package"></i> Novo produto</a>
+        <a class="ddm-item" href="#" onclick="alert('Em breve: gerador de etiqueta'); return false;"><i class="ti ti-barcode"></i> Gerar etiqueta</a>
+        <a class="ddm-item" href="#" onclick="alert('Em breve: gestão de grupos'); return false;"><i class="ti ti-category"></i> Grupo de produtos</a>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary"><i class="ti ti-settings-2"></i> Mais ações</button>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" id="search-input" placeholder="Buscar por código, nome ou cód. barras" oninput="filterTable()" />
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:90px">Código</th>
+          <th>Nome</th>
+          <th style="width:120px" class="right">Valor</th>
+          <th style="width:100px" class="center">Estoque</th>
+          <th style="width:110px" class="right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="produtos-tbody">
+        <tr class="empty-row">
+          <td colspan="5">
+            <i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>
+            Carregando produtos...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="table-footer">
+      <span id="table-count">—</span>
+      <span>Dottec Assistência</span>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  let TODOS_PRODUTOS = [];
+
+  function toggleDropdown(id) {
+    document.querySelectorAll('.dropdown-wrap.open').forEach(d => { if (d.id !== id) d.classList.remove('open'); });
+    document.getElementById(id).classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dropdown-wrap')) {
+      document.querySelectorAll('.dropdown-wrap.open').forEach(d => d.classList.remove('open'));
+    }
+  });
+
+  function fmtMoney(v) {
+    return (v ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function estoqueClass(atual, minimo) {
+    if (atual <= 0) return 'estoque-zero';
+    if (minimo && atual <= minimo) return 'estoque-baixo';
+    return 'estoque-ok';
+  }
+
+  function renderTable(lista) {
+    const tbody = document.getElementById('produtos-tbody');
+
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="5">
+        <i class="ti ti-package-off"></i>
+        <div class="empty-title">Nenhum produto encontrado</div>
+        <div class="empty-desc">Cadastre o primeiro produto clicando em "Adicionar".</div>
+      </td></tr>`;
+      document.getElementById('table-count').textContent = '0 produtos';
+      return;
+    }
+
+    tbody.innerHTML = lista.map(p => `
+      <tr>
+        <td class="td-codigo">${String(p.codigo).padStart(3,'0')}</td>
+        <td>
+          <div class="td-nome">${p.nome}</div>
+          ${p.grupo_nome ? `<span class="td-grupo">${p.grupo_nome}</span>` : ''}
+        </td>
+        <td class="td-valor">R$ ${fmtMoney(p.valor_venda)}</td>
+        <td class="td-estoque ${estoqueClass(p.estoque_atual, p.estoque_minimo)}">${fmtMoney(p.estoque_atual).replace('.00','')}</td>
+        <td>
+          <div class="actions">
+            <button class="act-btn act-edit" onclick="editarProduto('${p.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+            <button class="act-btn act-del" onclick="excluirProduto('${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    document.getElementById('table-count').textContent = lista.length + (lista.length === 1 ? ' produto' : ' produtos');
+  }
+
+  function filterTable() {
+    const q = document.getElementById('search-input').value.trim().toUpperCase();
+    if (!q) { renderTable(TODOS_PRODUTOS); return; }
+    const filtrado = TODOS_PRODUTOS.filter(p =>
+      String(p.codigo).includes(q) ||
+      (p.nome || '').toUpperCase().includes(q) ||
+      (p.codigo_barras || '').toUpperCase().includes(q)
+    );
+    renderTable(filtrado);
+  }
+
+  function editarProduto(id) {
+    window.location.href = 'produto-novo.html?id=' + id;
+  }
+
+  async function excluirProduto(id, nome) {
+    if (!confirm('Excluir o produto "' + nome + '"? Essa ação não pode ser desfeita.')) return;
+    const { error } = await db.from('produtos').delete().eq('id', id);
+    if (error) {
+      alert('Erro ao excluir: ' + error.message);
+      return;
+    }
+    await loadProdutos();
+  }
+
+  async function loadProdutos() {
+    const { data, error } = await db
+      .from('produtos')
+      .select('id, codigo, codigo_barras, nome, valor_venda, estoque_atual, estoque_minimo, grupo_id, grupos_produtos(nome)')
+      .eq('ativo', true)
+      .order('codigo', { ascending: true });
+
+    if (error) {
+      document.getElementById('produtos-tbody').innerHTML =
+        `<tr class="empty-row"><td colspan="5"><i class="ti ti-alert-circle"></i><div class="empty-title">Erro ao carregar produtos</div><div class="empty-desc">${error.message}</div></td></tr>`;
+      return;
+    }
+
+    TODOS_PRODUTOS = (data || []).map(p => ({ ...p, grupo_nome: p.grupos_produtos?.nome || null }));
+    renderTable(TODOS_PRODUTOS);
+  }
+
+  loadProdutos();
+</script>
+
+<style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
+</body>
+</html>
