@@ -14,6 +14,7 @@
       --cyan:      #29B8C2;
       --cyan-dark: #1E9099;
       --coral:     #E8604A;
+      --coral-dark:#C94835;
       --dark:      #1C1C1A;
       --text:      #2C2C2A;
       --sub:       #8A887F;
@@ -22,130 +23,139 @@
       --white:     #FFFFFF;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Figtree',sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+    body{
+      font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;
+      background:
+        radial-gradient(circle at 12% -8%, rgba(41,184,194,.16), transparent 42%),
+        radial-gradient(circle at 92% 6%, rgba(232,96,74,.14), transparent 38%),
+        var(--bg);
+    }
 
-    /* TOPBAR */
-    .topbar{
-      background:var(--white);border-bottom:1px solid var(--border);
-      position:sticky;top:0;z-index:100;
-    }
-    .topbar-row1{
-      height:50px;display:flex;align-items:center;padding:0 1.5rem;gap:.4rem;
-      border-bottom:1px solid var(--border);
-    }
-    .tb-item{
-      display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
-      font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;text-decoration:none;
-      white-space:nowrap;transition:background .14s,color .14s;
-    }
-    .tb-item i{font-size:15px}
-    .tb-item:hover{background:var(--bg);color:var(--text)}
-    .tb-item.active{color:var(--coral);background:#FCEAE6}
+    .content{max-width:1040px;margin:0 auto;padding:3.5rem 2rem 3rem}
 
-    .topbar-row2{
-      height:64px;display:flex;align-items:center;padding:0 1.5rem;gap:12px;
-    }
-    .tb-logo-img{width:38px;height:38px;border-radius:50%;flex-shrink:0;object-fit:cover}
-    .tb-title-block{flex:1}
-    .tb-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark);letter-spacing:-.01em}
-    .tb-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+    .page-head{display:flex;align-items:center;gap:14px;margin-bottom:2.25rem}
+    .ph-logo{width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;
+      box-shadow:0 4px 18px rgba(0,0,0,.12)}
+    .ph-title{font-family:'Lora',serif;font-size:21px;font-weight:600;color:var(--dark);letter-spacing:-.01em}
+    .ph-sub{font-size:12.5px;color:var(--sub);margin-top:1px}
 
-    .tb-right{display:flex;align-items:center;gap:10px}
-    .tb-time{font-size:13px;font-weight:700;color:var(--sub)}
-    .toggle{width:38px;height:21px;border-radius:20px;background:var(--coral);position:relative;cursor:pointer;flex-shrink:0}
-    .toggle::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
-    .toggle.on::after{left:20px}
-    .user-av{
-      width:34px;height:34px;border-radius:50%;background:var(--coral);
-      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;
-    }
-    .logout-btn{
-      font-size:13px;font-weight:600;color:var(--text);background:var(--white);
-      border:1px solid var(--border);cursor:pointer;padding:7px 16px;border-radius:10px;
-      transition:background .12s;
-    }
-    .logout-btn:hover{background:var(--bg)}
-
-    /* CONTENT */
-    .content{max-width:1040px;margin:0 auto;padding:2.5rem 2rem}
     .section-label{
-      font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-      color:var(--sub);margin-bottom:1.25rem;
+      font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--sub);margin-bottom:1.1rem;display:flex;align-items:center;gap:8px;
     }
+    .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
 
-    .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
 
+    /* CARD */
     .mod-card{
-      background:var(--white);border-radius:18px;border:1px solid var(--border);
-      padding:1.75rem;display:flex;flex-direction:column;gap:1.1rem;
+      position:relative;
+      background:var(--white);
+      border-radius:20px;
+      border:1px solid var(--border);
+      padding:1.85rem;
+      display:flex;flex-direction:column;gap:1.3rem;
       cursor:pointer;text-decoration:none;color:inherit;
-      transition:box-shadow .2s,border-color .2s,transform .18s;
-      animation:cardIn .4s ease both;
+      overflow:hidden;
+      transition:box-shadow .28s ease, transform .28s ease, border-color .28s ease;
+      animation:cardIn .45s cubic-bezier(.2,.8,.2,1) both;
     }
-    .mod-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D8D4C8;transform:translateY(-2px)}
-    @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .mod-card:nth-child(1){animation-delay:.03s}
-    .mod-card:nth-child(2){animation-delay:.07s}
-    .mod-card:nth-child(3){animation-delay:.11s}
-    .mod-card:nth-child(4){animation-delay:.15s}
+    .mod-card:nth-child(1){animation-delay:.02s}
+    .mod-card:nth-child(2){animation-delay:.08s}
+    .mod-card:nth-child(3){animation-delay:.14s}
+    .mod-card:nth-child(4){animation-delay:.20s}
+    @keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    /* glow de fundo que aparece no hover, nas cores do card */
+    .mod-card::before{
+      content:'';
+      position:absolute; inset:0;
+      background: radial-gradient(circle at 85% -10%, var(--glow-color, rgba(41,184,194,.18)), transparent 60%);
+      opacity:0; transition:opacity .35s ease;
+      pointer-events:none;
+    }
+    .mod-card:hover::before{opacity:1}
+
+    .mod-card.cyan  { --glow-color: rgba(41,184,194,.22); }
+    .mod-card.coral { --glow-color: rgba(232,96,74,.20); }
+    .mod-card.sage  { --glow-color: rgba(120,150,70,.18); }
+    .mod-card.amber { --glow-color: rgba(190,130,20,.18); }
+
+    .mod-card:hover{
+      transform:translateY(-4px);
+      box-shadow:0 16px 40px rgba(0,0,0,.10);
+    }
+    .mod-card.cyan:hover  { border-color: rgba(41,184,194,.45); }
+    .mod-card.coral:hover { border-color: rgba(232,96,74,.45); }
+    .mod-card.sage:hover  { border-color: rgba(120,150,70,.4); }
+    .mod-card.amber:hover { border-color: rgba(190,130,20,.4); }
 
     .card-icon-box{
-      width:52px;height:52px;border-radius:14px;
+      position:relative; z-index:1;
+      width:54px;height:54px;border-radius:15px;
       display:flex;align-items:center;justify-content:center;font-size:25px;
+      transition:transform .3s cubic-bezier(.34,1.5,.64,1), background .3s, color .3s;
     }
-    .card-icon-box.cyan{background:#E3F4F5}
-    .card-icon-box.coral{background:#FBE9E5}
-    .card-icon-box.sage{background:#EAEFE3}
-    .card-icon-box.amber{background:#FBEFDD}
+    .mod-card.cyan  .card-icon-box{background:#E3F4F5; color:var(--cyan-dark)}
+    .mod-card.coral .card-icon-box{background:#FBE9E5; color:var(--coral)}
+    .mod-card.sage  .card-icon-box{background:#EAEFE1; color:#4A6B1F}
+    .mod-card.amber .card-icon-box{background:#FBEEDB; color:#9A6000}
 
-    .card-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+    .mod-card:hover .card-icon-box{ transform:scale(1.08) rotate(-4deg); }
+    .mod-card.cyan:hover  .card-icon-box{ background:var(--cyan);  color:#fff; }
+    .mod-card.coral:hover .card-icon-box{ background:var(--coral); color:#fff; }
+    .mod-card.sage:hover  .card-icon-box{ background:#5C7F2A;     color:#fff; }
+    .mod-card.amber:hover .card-icon-box{ background:#B5790C;    color:#fff; }
+
+    .card-bottom{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
     .card-text{flex:1}
     .card-name{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark);letter-spacing:-.01em;margin-bottom:5px}
     .card-desc{font-size:12.5px;color:var(--sub);line-height:1.55}
 
     .card-arrow{
-      width:34px;height:34px;border-radius:50%;background:var(--bg);
+      width:36px;height:36px;border-radius:50%;background:var(--bg);
       display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);
-      flex-shrink:0;transition:background .18s,color .18s,transform .18s;
+      flex-shrink:0;transition:background .25s, color .25s, transform .25s;
     }
-    .mod-card:hover .card-arrow{background:var(--dark);color:#fff;transform:translateX(2px)}
+    .mod-card.cyan:hover  .card-arrow{background:var(--cyan-dark);  color:#fff; transform:translateX(3px) rotate(-45deg);}
+    .mod-card.coral:hover .card-arrow{background:var(--coral-dark); color:#fff; transform:translateX(3px) rotate(-45deg);}
+    .mod-card.sage:hover  .card-arrow{background:#4A6B1F;          color:#fff; transform:translateX(3px) rotate(-45deg);}
+    .mod-card.amber:hover .card-arrow{background:#9A6000;         color:#fff; transform:translateX(3px) rotate(-45deg);}
+
+    /* badge "em breve" pros próximos cards fantasma */
+    .mod-card.ghost{
+      align-items:center; justify-content:center;
+      border-style:dashed; gap:.6rem; min-height:172px;
+      color:var(--sub); cursor:default;
+    }
+    .mod-card.ghost:hover{ transform:none; box-shadow:none; border-color:var(--border); }
+    .mod-card.ghost i{font-size:22px; opacity:.5}
+    .mod-card.ghost span{font-size:12.5px; font-weight:600}
 
     @media (max-width:680px){
-      .topbar-row1{overflow-x:auto}
       .cards-grid{grid-template-columns:1fr}
-      .content{padding:1.5rem 1rem}
-      .tb-sub{display:none}
+      .content{padding:2.25rem 1.1rem}
     }
   </style>
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="topbar-row1">
-      <a class="tb-item active" href="dashboard.html"><i class="ti ti-home"></i> Início</a>
-    </div>
-    <div class="topbar-row2">
-      <img src="logo-dottec.png" alt="Dottec Assistência" class="tb-logo-img" />
-      <div class="tb-title-block">
-        <div class="tb-title">Dottec Assistência</div>
-        <div class="tb-sub" id="tb-sub">Carregando...</div>
-      </div>
-      <div class="tb-right">
-        <div class="tb-time" id="tb-time">—</div>
-        <div class="toggle" id="theme-toggle" onclick="this.classList.toggle('on')"></div>
-        <div class="user-av" id="user-av"><i class="ti ti-user"></i></div>
-        <button class="logout-btn" onclick="logout()">Sair</button>
-      </div>
-    </div>
-  </header>
-
   <main class="content">
+
+    <div class="page-head">
+      <img src="logo-dottec.png" alt="Dottec Assistência" class="ph-logo" />
+      <div>
+        <div class="ph-title">Dottec Assistência</div>
+        <div class="ph-sub" id="ph-sub">Carregando...</div>
+      </div>
+    </div>
+
     <div class="section-label">Módulos do sistema</div>
 
     <div class="cards-grid">
 
-      <a class="mod-card" href="cadastro.html">
-        <div class="card-icon-box cyan"><i class="ti ti-forms" style="color:var(--cyan-dark)"></i></div>
+      <a class="mod-card cyan" href="cadastro.html">
+        <div class="card-icon-box"><i class="ti ti-forms"></i></div>
         <div class="card-bottom">
           <div class="card-text">
             <div class="card-name">Cadastro</div>
@@ -155,8 +165,8 @@
         </div>
       </a>
 
-      <a class="mod-card" href="produtos.html">
-        <div class="card-icon-box coral"><i class="ti ti-package" style="color:var(--coral)"></i></div>
+      <a class="mod-card coral" href="produtos.html">
+        <div class="card-icon-box"><i class="ti ti-package"></i></div>
         <div class="card-bottom">
           <div class="card-text">
             <div class="card-name">Produtos</div>
@@ -170,26 +180,11 @@
   </main>
 
   <script>
-    const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-    const db = supabase.createClient(SUPA_URL, SUPA_KEY);
-
     const sessao = JSON.parse(sessionStorage.getItem('dottec_sessao') || 'null');
-
-    function logout() {
-      sessionStorage.removeItem('dottec_sessao');
-      window.location.href = 'login.html';
-    }
-
-    function tick(){
-      document.getElementById('tb-time').textContent =
-        new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    }
-    tick(); setInterval(tick,30000);
-
     const nome = sessao ? sessao.nome.split(' ')[0] : 'Gaza';
-    document.getElementById('user-av').textContent = nome[0].toUpperCase();
-    document.getElementById('tb-sub').textContent = 'Olá, ' + nome + '.';
+    const h = new Date().getHours();
+    const saud = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+    document.getElementById('ph-sub').textContent = saud + ', ' + nome + '.';
   </script>
 </body>
 </html>
