@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dottec Assistência</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root {
+      --cyan:      #29B8C2;
+      --cyan-dark: #1E9099;
+      --cyan-bg:   #EAF8F9;
+      --coral:     #E8604A;
+      --dark:      #1C1C1A;
+      --text:      #2C2C2A;
+      --sub:       #84827C;
+      --border:    #E7E5DE;
+      --bg:        #F3F1EC;
+      --white:     #FFFFFF;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Figtree',sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+
+    /* TOPBAR */
+    .topbar{
+      height:56px;background:var(--white);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;padding:0 1.5rem;gap:.5rem;
+      position:sticky;top:0;z-index:100;
+    }
+    .tb-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0;margin-right:.5rem}
+    .tb-logo-img{width:32px;height:32px;border-radius:50%;flex-shrink:0;object-fit:cover}
+    .tb-brand{font-size:14px;font-weight:800;color:var(--dark);letter-spacing:-.01em}
+
+    .tb-nav{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto}
+    .tb-item{
+      display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;
+      font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;text-decoration:none;
+      white-space:nowrap;transition:background .14s,color .14s;
+    }
+    .tb-item i{font-size:15px}
+    .tb-item:hover{background:var(--bg);color:var(--text)}
+    .tb-item.active{color:var(--cyan-dark);background:var(--cyan-bg)}
+
+    .tb-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+    .tb-time{font-size:13px;font-weight:700;color:var(--sub);min-width:42px;text-align:right}
+    .icon-btn{
+      width:32px;height:32px;border-radius:9px;background:none;border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);font-size:16px;
+      transition:background .12s,color .12s;
+    }
+    .icon-btn:hover{background:var(--bg);color:var(--text)}
+    .user-chip{
+      display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border-radius:20px;
+      background:var(--bg);border:1px solid var(--border);cursor:pointer;
+    }
+    .user-av{width:24px;height:24px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:#fff}
+    .user-nm{font-size:12px;font-weight:700;color:var(--text)}
+    .logout-btn{font-size:12.5px;font-weight:600;color:var(--sub);background:none;border:none;cursor:pointer;padding:5px 9px;border-radius:8px;transition:background .12s,color .12s}
+    .logout-btn:hover{background:#FCEAE6;color:var(--coral)}
+
+    /* CONTENT */
+    .content{max-width:1180px;margin:0 auto;padding:2.5rem 2rem}
+    .page-label{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin-bottom:5px}
+    .page-title{font-size:23px;font-weight:800;color:var(--dark);letter-spacing:-.02em;margin-bottom:2rem}
+
+    .cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+    .mod-card{
+      background:var(--white);border-radius:18px;border:1px solid var(--border);
+      padding:1.75rem 1.5rem 1.4rem;display:flex;flex-direction:column;gap:1rem;
+      cursor:pointer;text-decoration:none;color:inherit;
+      transition:box-shadow .2s,border-color .2s,transform .18s;
+      animation:cardIn .4s ease both;
+    }
+    .mod-card:hover{box-shadow:0 6px 28px rgba(0,0,0,.08);border-color:rgba(41,184,194,.35);transform:translateY(-2px)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .card-top{display:flex;align-items:flex-start;justify-content:space-between}
+    .card-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:23px}
+    .card-icon.cyan{background:var(--cyan-bg);color:var(--cyan-dark)}
+    .card-arrow{
+      width:28px;height:28px;border-radius:50%;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub);
+      flex-shrink:0;transition:background .18s,color .18s,transform .18s;
+    }
+    .mod-card:hover .card-arrow{background:var(--cyan);color:#fff;transform:translateX(3px)}
+
+    .card-name{font-size:16px;font-weight:800;color:var(--dark);letter-spacing:-.01em;margin-bottom:4px}
+    .card-desc{font-size:12.5px;color:var(--sub);line-height:1.5}
+
+    @media (max-width:1024px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.tb-nav{display:none}.content{padding:1.5rem 1rem}.cards-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a class="tb-logo" href="dashboard.html">
+      <img src="logo-dottec.png" alt="Dottec Assistência" class="tb-logo-img" />
+      <span class="tb-brand">Dottec</span>
+    </a>
+
+    <nav class="tb-nav">
+      <a class="tb-item active" href="dashboard.html"><i class="ti ti-home"></i> Início</a>
+    </nav>
+
+    <div class="tb-right">
+      <div class="tb-time" id="tb-time">—</div>
+      <button class="icon-btn"><i class="ti ti-bell"></i></button>
+      <div class="user-chip">
+        <div class="user-av" id="user-av">?</div>
+        <span class="user-nm" id="user-nm">...</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="page-label">Painel principal</div>
+    <div class="page-title" id="page-greeting">Olá, carregando...</div>
+
+    <div class="cards-grid">
+      <a class="mod-card" href="cadastro.html">
+        <div class="card-top">
+          <div class="card-icon cyan"><i class="ti ti-forms"></i></div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+        <div>
+          <div class="card-name">Cadastro</div>
+          <div class="card-desc">Clientes, fornecedores, transportadoras e serviços.</div>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+    const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+    const sessao = JSON.parse(sessionStorage.getItem('dottec_sessao') || 'null');
+    // Sem redirecionar por enquanto — banco/login serão recriados.
+
+    function logout() {
+      sessionStorage.removeItem('dottec_sessao');
+      window.location.href = 'login.html';
+    }
+
+    function tick(){
+      document.getElementById('tb-time').textContent =
+        new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }
+    tick(); setInterval(tick,30000);
+
+    if (sessao) {
+      const ini = sessao.nome.split(' ').filter(Boolean).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+      document.getElementById('user-av').textContent = ini;
+      document.getElementById('user-nm').textContent = sessao.nome.split(' ')[0];
+      const h = new Date().getHours();
+      const saud = h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+      document.getElementById('page-greeting').textContent = saud+', '+sessao.nome.split(' ')[0]+'.';
+    } else {
+      document.getElementById('user-av').textContent = 'G';
+      document.getElementById('user-nm').textContent = 'Gaza';
+      document.getElementById('page-greeting').textContent = 'Olá, Gaza.';
+    }
+  </script>
+</body>
+</html>
