@@ -295,8 +295,21 @@
         <button class="forma-btn" id="f-pix" onclick="setForma('PIX')"><i class="ti ti-qrcode"></i>PIX</button>
         <button class="forma-btn" id="f-debito" onclick="setForma('DEBITO')"><i class="ti ti-credit-card"></i>Débito</button>
         <button class="forma-btn" id="f-credito" onclick="setForma('CREDITO')"><i class="ti ti-credit-card"></i>Crédito</button>
-        <button class="forma-btn" id="f-boleto" onclick="setForma('BOLETO')" style="grid-column:span 2"><i class="ti ti-file-text"></i>Boleto / A prazo</button>
+        <button class="forma-btn" id="f-boleto" onclick="setForma('BOLETO')" style="grid-column:span 2"><i class="ti ti-calendar-due"></i>A prazo</button>
       </div>
+
+      <!-- vencimento: só aparece quando A prazo -->
+      <div id="prazo-wrap" style="display:none;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">
+          <i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>
+          Data de vencimento
+        </div>
+        <input type="date" id="prazo-data" style="height:42px;border-radius:10px;border:1.5px solid var(--amber);background:var(--amber-bg);font-size:14px;font-family:inherit;outline:none;padding:0 12px;width:100%;transition:border-color .15s"/>
+        <div style="font-size:11px;color:var(--amber);margin-top:5px;display:flex;align-items:center;gap:5px">
+          <i class="ti ti-info-circle"></i> Será lançado em Contas a Receber automaticamente
+        </div>
+      </div>
+
       <div class="recebido-row" id="recebido-wrap" style="display:none">
         <div class="recebido-label">Valor recebido</div>
         <input type="number" step="0.01" class="recebido-input" id="recebido-val" placeholder="0,00" oninput="calcTroco()"/>
@@ -529,6 +542,12 @@
     FORMA=f;
     ['dinheiro','pix','debito','credito','boleto'].forEach(x=>document.getElementById('f-'+x).classList.toggle('selected',f===x.toUpperCase()));
     document.getElementById('recebido-wrap').style.display=f==='DINHEIRO'?'block':'none';
+    document.getElementById('prazo-wrap').style.display=f==='BOLETO'?'block':'none';
+    if(f==='BOLETO'){
+      // pré-preenche vencimento com 30 dias
+      const d=new Date();d.setDate(d.getDate()+30);
+      document.getElementById('prazo-data').value=d.toISOString().slice(0,10);
+    }
     if(f!=='DINHEIRO')document.getElementById('troco-box').className='troco-box';
     calcTroco();atualizarBotao();
   }
@@ -576,11 +595,29 @@
       );
       if(ei) throw new Error(ei.message);
 
-      if(sessaoId){
+      // só movimenta caixa físico se for DINHEIRO
+      if(FORMA==='DINHEIRO'&&sessaoId){
         await db.from('caixa_movimentos').insert({
           sessao_id:sessaoId,tipo:'ENTRADA',
           descricao:'VENDA #'+String(venda.numero).padStart(4,'0')+(CLIENTE?' - '+CLIENTE.nome:''),
           valor:total,forma_pagamento:FORMA,categoria:'VENDA',referencia:String(venda.numero),
+        });
+      }
+
+      // se for A prazo, lança em contas a receber
+      if(FORMA==='BOLETO'){
+        const vencimento=document.getElementById('prazo-data').value;
+        if(!vencimento){toast('Informe a data de vencimento para pagamento a prazo.');return;}
+        await db.from('contas').insert({
+          tipo:'RECEBER',
+          descricao:'VENDA #'+String(venda.numero).padStart(4,'0')+(CLIENTE?' - '+CLIENTE.nome:''),
+          valor:total,
+          vencimento,
+          status:'ABERTA',
+          categoria:'VENDA A PRAZO',
+          forma_pagamento:'A PRAZO',
+          pessoa_id:CLIENTE?CLIENTE.id:null,
+          observacoes:obs||null,
         });
       }
 
@@ -612,6 +649,8 @@
     document.getElementById('recebido-val').value='';
     document.getElementById('obs').value='';
     document.getElementById('recebido-wrap').style.display='none';
+    document.getElementById('prazo-wrap').style.display='none';
+    document.getElementById('prazo-data').value='';
     document.getElementById('troco-box').className='troco-box';
     ['dinheiro','pix','debito','credito','boleto'].forEach(x=>document.getElementById('f-'+x).classList.remove('selected'));
     document.getElementById('modal-sucesso').classList.remove('open');

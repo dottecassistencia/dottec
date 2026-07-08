@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Formas de Pagamento — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--green:#3B6D11;--green-bg:#EAF3DE;--amber:#9A6000;--amber-bg:#FBEEDB}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .content{max-width:900px;margin:0 auto;padding:2rem}
+
+  .info-box{background:var(--cyan-bg);border:1px solid rgba(41,184,194,.3);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;margin-bottom:1.75rem;font-size:13px;color:var(--cyan-dark);line-height:1.6}
+  .info-box i{font-size:18px;flex-shrink:0;margin-top:1px}
+
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cyan-dark)}
+
+  .formas-list{display:flex;flex-direction:column;gap:10px}
+  .forma-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:16px;transition:box-shadow .15s}
+  .forma-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07)}
+  .forma-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .forma-icon.caixa{background:var(--green-bg);color:var(--green)}
+  .forma-icon.banco{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .forma-icon.prazo{background:var(--amber-bg);color:var(--amber)}
+  .forma-info{flex:1}
+  .forma-nome{font-size:14px;font-weight:700;color:var(--dark)}
+  .forma-desc{font-size:12px;color:var(--sub);margin-top:2px}
+  .forma-badges{display:flex;gap:6px;margin-top:6px}
+  .badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px}
+  .badge.caixa{background:var(--green-bg);color:var(--green)}
+  .badge.banco{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .badge.prazo{background:var(--amber-bg);color:var(--amber)}
+  .badge.inativo{background:#F0EFEA;color:var(--sub)}
+
+  /* toggle switch */
+  .toggle-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+  .toggle-label{font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em}
+  .toggle{width:42px;height:23px;border-radius:20px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .toggle.on{background:var(--green)}
+  .toggle.off{background:#D4D2CB}
+  .toggle::after{content:'';position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .toggle.on::after{left:22px}
+  .toggle.off::after{left:3px}
+
+  .forma-actions{display:flex;gap:7px;flex-shrink:0}
+  .act-btn{width:32px;height:32px;border-radius:9px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .15s}
+  .act-edit{background:var(--cyan-bg);color:var(--cyan-dark)}.act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}.act-del:hover{background:var(--coral);color:#fff}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  input,select{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s;text-transform:uppercase}
+  input::placeholder{text-transform:none;color:#B5B2A8}
+  input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3.5px rgba(41,184,194,.13);background:#fff}
+
+  .movimenta-toggle{display:flex;align-items:center;gap:14px;background:var(--bg);border-radius:12px;padding:14px}
+  .mt-info{flex:1}
+  .mt-title{font-size:13.5px;font-weight:700;color:var(--dark)}
+  .mt-desc{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.5}
+
+  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--cyan);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-save:hover{background:var(--cyan-dark)}
+  .btn-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+  .btn-cancel:hover{background:var(--bg)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Nova forma de pagamento</div>
+      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="m-nome" placeholder="EX: PIX, DINHEIRO, CARTÃO..."/>
+      </div>
+      <div class="field">
+        <label>Descrição <small style="text-transform:none;font-weight:400">(opcional)</small></label>
+        <input type="text" id="m-desc" placeholder="EX: PAGAMENTO INSTANTÂNEO VIA PIX"/>
+      </div>
+      <div class="field no-mb">
+        <label>Movimenta o caixa físico?</label>
+        <div class="movimenta-toggle">
+          <div class="mt-info">
+            <div class="mt-title">Caixa físico</div>
+            <div class="mt-desc">Ative se este pagamento entra ou sai do caixa em espécie. <br><strong>Dinheiro = ativo. PIX, Débito, Crédito = inativo.</strong></div>
+          </div>
+          <div class="toggle off" id="m-toggle" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="configuracoes.html"><i class="ti ti-arrow-left"></i></a>
+    <div><div class="crumb-title">Formas de Pagamento</div><div class="crumb-sub">Configuração e movimentação de caixa</div></div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="info-box">
+    <i class="ti ti-info-circle"></i>
+    <div>Defina aqui quais formas de pagamento movimentam o <strong>caixa físico</strong>. Apenas <strong>Dinheiro</strong> movimenta o caixa físico por padrão. PIX, Débito e Crédito vão para o caixa do banco — controle separado que será integrado futuramente.</div>
+  </div>
+
+  <div class="toolbar">
+    <span style="font-size:13px;color:var(--sub)" id="total-label">Carregando...</span>
+    <button class="btn btn-cyan" onclick="abrirModal()"><i class="ti ti-plus"></i> Nova forma</button>
+  </div>
+
+  <div class="formas-list" id="formas-list">
+    <div style="text-align:center;padding:2rem;color:var(--sub);font-size:13px">
+      <i class="ti ti-loader-2" style="font-size:26px;animation:spin .8s linear infinite;display:block;margin-bottom:8px"></i>
+      Carregando...
+    </div>
+  </div>
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+  let EDIT_ID=null, DADOS=[];
+
+  function toast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+    document.getElementById('tm').textContent=msg;
+    t.className='toast '+type+' show';
+    setTimeout(()=>t.classList.remove('show'),4000);
+  }
+
+  const iconMap={
+    DINHEIRO:{icon:'ti-cash',cls:'caixa'},
+    PIX:{icon:'ti-qrcode',cls:'banco'},
+    DEBITO:{icon:'ti-credit-card',cls:'banco'},
+    CREDITO:{icon:'ti-credit-card',cls:'banco'},
+    BOLETO:{icon:'ti-file-text',cls:'prazo'},
+    'A PRAZO':{icon:'ti-calendar-due',cls:'prazo'},
+  };
+
+  function getIconInfo(nome){
+    const key=Object.keys(iconMap).find(k=>nome.toUpperCase().includes(k));
+    return iconMap[key]||{icon:'ti-credit-card',cls:'banco'};
+  }
+
+  async function load(){
+    const{data}=await db.from('formas_pagamento').select('*').order('nome');
+    DADOS=data||[];
+    document.getElementById('total-label').textContent=DADOS.length+' forma(s) cadastrada(s)';
+
+    if(!DADOS.length){
+      document.getElementById('formas-list').innerHTML=`<div style="text-align:center;padding:2.5rem;color:var(--sub);background:var(--white);border-radius:14px;border:1px solid var(--border)">
+        <i class="ti ti-credit-card-off" style="font-size:32px;display:block;margin-bottom:10px;opacity:.3"></i>
+        Nenhuma forma de pagamento cadastrada.<br>Clique em "Nova forma" para começar.
+      </div>`;
+      return;
+    }
+
+    document.getElementById('formas-list').innerHTML=DADOS.map(f=>{
+      const ic=getIconInfo(f.nome);
+      return`<div class="forma-card">
+        <div class="forma-icon ${ic.cls}"><i class="ti ${ic.icon}"></i></div>
+        <div class="forma-info">
+          <div class="forma-nome">${f.nome}</div>
+          ${f.descricao?`<div class="forma-desc">${f.descricao}</div>`:''}
+          <div class="forma-badges">
+            ${f.movimenta_caixa
+              ?'<span class="badge caixa"><i class="ti ti-wallet" style="font-size:10px"></i> Movimenta caixa físico</span>'
+              :'<span class="badge banco"><i class="ti ti-building-bank" style="font-size:10px"></i> Caixa do banco</span>'}
+            ${!f.ativo?'<span class="badge inativo">Inativo</span>':''}
+          </div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-label">Ativo</div>
+          <div class="toggle ${f.ativo?'on':'off'}" onclick="toggleAtivo('${f.id}',${f.ativo})"></div>
+        </div>
+        <div class="forma-actions">
+          <button class="act-btn act-edit" onclick="editarForma('${f.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+          <button class="act-btn act-del" onclick="excluirForma('${f.id}','${f.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function toggleAtivo(id,atual){
+    await db.from('formas_pagamento').update({ativo:!atual}).eq('id',id);
+    load();
+  }
+
+  function abrirModal(forma=null){
+    EDIT_ID=forma?forma.id:null;
+    document.getElementById('modal-title').textContent=forma?'Editar forma':'Nova forma de pagamento';
+    document.getElementById('m-nome').value=forma?forma.nome:'';
+    document.getElementById('m-desc').value=forma?forma.descricao||'':'';
+    const tog=document.getElementById('m-toggle');
+    const movimenta=forma?forma.movimenta_caixa:false;
+    tog.className='toggle '+(movimenta?'on':'off');
+    document.getElementById('modal').classList.add('open');
+    setTimeout(()=>document.getElementById('m-nome').focus(),100);
+  }
+
+  function fecharModal(){document.getElementById('modal').classList.remove('open');EDIT_ID=null;}
+
+  function editarForma(id){
+    const f=DADOS.find(x=>x.id===id);
+    if(f) abrirModal(f);
+  }
+
+  async function excluirForma(id,nome){
+    if(!confirm('Excluir "'+nome+'"?')) return;
+    const{error}=await db.from('formas_pagamento').delete().eq('id',id);
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Excluído.','success');load();
+  }
+
+  async function salvar(){
+    const nome=document.getElementById('m-nome').value.trim().toUpperCase();
+    if(!nome){toast('Informe o nome.','error');return;}
+    const movimenta=document.getElementById('m-toggle').classList.contains('on');
+    const payload={
+      nome,
+      descricao:document.getElementById('m-desc').value.trim().toUpperCase()||null,
+      movimenta_caixa:movimenta,
+      ativo:true,
+    };
+    let error;
+    if(EDIT_ID){({error}=await db.from('formas_pagamento').update(payload).eq('id',EDIT_ID));}
+    else{({error}=await db.from('formas_pagamento').insert(payload));}
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Salvo!','success');
+    fecharModal();load();
+  }
+
+  load();
+</script>
+</body>
+</html>
