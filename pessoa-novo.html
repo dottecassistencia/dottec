@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova Pessoa — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;
+    --coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;
+    --dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;
+    --green:#3B6D11;--green-bg:#EAF3DE;
+    --amber:#9A6000;--amber-bg:#FBEEDB;
+    --slate:#3A4A6B;--slate-bg:#EEF0F5;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+
+  /* maiúsculas nos campos de texto (exceto email, doc, cep, tel) */
+  input.upper{text-transform:uppercase}
+  input.upper::placeholder{text-transform:none}
+  textarea{text-transform:uppercase}
+  textarea::placeholder{text-transform:none!important}
+
+  /* TOPBAR */
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem;position:sticky;top:0;z-index:100}
+  .crumb{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;
+    cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .crumb-right{margin-left:auto;display:flex;gap:10px}
+
+  .btn{height:40px;padding:0 18px;border-radius:10px;border:none;cursor:pointer;
+    font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:700;
+    display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--coral);color:#fff}
+  .btn-primary:hover{background:var(--coral-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+
+  /* BUSCA RÁPIDA NO TOPO */
+  .search-bar{background:var(--white);border-bottom:1px solid var(--border);padding:.75rem 2rem}
+  .search-bar-inner{max-width:980px;margin:0 auto;position:relative}
+  .search-bar-inner i.icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:17px;pointer-events:none}
+  .search-bar-inner input{
+    width:100%;height:44px;padding:0 14px 0 44px;border-radius:12px;
+    border:1px solid var(--border);background:#FAFAF7;font-size:14px;font-family:inherit;outline:none;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .search-bar-inner input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13);background:#fff}
+
+  .search-results{
+    display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+    background:#fff;border:1px solid var(--border);border-radius:14px;
+    box-shadow:0 12px 36px rgba(0,0,0,.12);max-height:320px;overflow-y:auto;z-index:200;
+  }
+  .search-results.open{display:block}
+  .sr-item{
+    display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;
+    transition:background .12s;border-bottom:1px solid #F2F0EA;
+  }
+  .sr-item:last-child{border-bottom:none}
+  .sr-item:hover{background:var(--bg)}
+  .sr-avatar{width:36px;height:36px;border-radius:50%;background:var(--cyan-bg);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+    color:var(--cyan-dark);flex-shrink:0}
+  .sr-info{flex:1}
+  .sr-nome{font-size:13.5px;font-weight:700;color:var(--dark)}
+  .sr-doc{font-size:11.5px;color:var(--sub)}
+  .sr-papeis{display:flex;gap:4px;margin-top:3px}
+  .sr-badge{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .sr-badge.c{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .sr-badge.f{background:var(--amber-bg);color:var(--amber)}
+  .sr-badge.t{background:var(--slate-bg);color:var(--slate)}
+  .sr-arrow{font-size:14px;color:var(--sub)}
+  .sr-empty{padding:1.25rem;text-align:center;font-size:13px;color:var(--sub)}
+
+  /* CONTENT */
+  .content{max-width:980px;margin:0 auto;padding:2rem 2rem 4rem}
+
+  /* PAPÉIS */
+  .papeis-section{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:1.5rem;margin-bottom:18px}
+  .papeis-title{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--dark);
+    display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+  .papeis-title i{font-size:16px;color:var(--sub)}
+  .papeis-title small{font-family:'Figtree',sans-serif;font-size:11px;font-weight:400;color:var(--sub)}
+  .papeis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+  .papel-toggle{border:2px solid var(--border);border-radius:14px;padding:1rem 1.1rem;
+    display:flex;align-items:center;gap:12px;cursor:pointer;
+    transition:border-color .2s,background .2s,box-shadow .2s;user-select:none}
+  .papel-toggle:hover{border-color:rgba(41,184,194,.4);background:#FAFAF7}
+  .papel-toggle.selected.cliente{border-color:var(--cyan);background:var(--cyan-bg);box-shadow:0 0 0 3px rgba(41,184,194,.12)}
+  .papel-toggle.selected.fornecedor{border-color:var(--amber);background:var(--amber-bg);box-shadow:0 0 0 3px rgba(154,96,0,.12)}
+  .papel-toggle.selected.transportadora{border-color:var(--slate);background:var(--slate-bg);box-shadow:0 0 0 3px rgba(58,74,107,.12)}
+
+  .papel-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .2s,color .2s;background:#E8E6DF;color:var(--sub)}
+  .papel-toggle.selected.cliente      .papel-icon{background:var(--cyan);color:#fff}
+  .papel-toggle.selected.fornecedor   .papel-icon{background:var(--amber);color:#fff}
+  .papel-toggle.selected.transportadora .papel-icon{background:var(--slate);color:#fff}
+
+  .papel-info{flex:1}
+  .papel-nome{font-size:13.5px;font-weight:700;color:var(--dark)}
+  .papel-desc{font-size:11px;color:var(--sub);margin-top:2px}
+
+  .papel-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .papel-toggle.selected.cliente      .papel-check{border-color:var(--cyan);background:var(--cyan)}
+  .papel-toggle.selected.fornecedor   .papel-check{border-color:var(--amber);background:var(--amber)}
+  .papel-toggle.selected.transportadora .papel-check{border-color:var(--slate);background:var(--slate)}
+  .papel-toggle.selected .papel-check::after{content:'✓';font-size:10px;color:#fff;font-weight:700}
+
+  .papeis-erro{font-size:12px;color:var(--coral-dark);padding:7px 11px;background:var(--coral-bg);border-radius:8px;display:none;margin-top:10px}
+  .papeis-erro.show{display:block}
+
+  /* PANELS */
+  .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:hidden}
+  .panel-head{display:flex;align-items:center;gap:10px;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+  .panel-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .panel-icon.cyan{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .panel-icon.green{background:var(--green-bg);color:var(--green)}
+  .panel-icon.amber{background:var(--amber-bg);color:var(--amber)}
+  .panel-icon.slate{background:var(--slate-bg);color:var(--slate)}
+  .panel-title{font-family:'Lora',serif;font-size:15.5px;font-weight:600;color:var(--dark)}
+  .panel-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .panel-body{padding:1.5rem}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .field{margin-bottom:14px}
+  .field.no-mb{margin-bottom:0}
+
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10.5px;color:var(--sub);margin-left:4px}
+
+  input,select,textarea{
+    width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;
+    background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;
+    transition:border-color .15s,box-shadow .15s,background .15s;
+  }
+  input::placeholder{color:#B5B2A8}
+  input:hover,select:hover{border-color:rgba(41,184,194,.4)}
+  input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3.5px rgba(41,184,194,.13);background:#fff}
+  textarea{height:80px;resize:vertical;padding:10px 13px}
+
+  /* doc detectado */
+  .doc-detected{font-size:11px;margin-top:5px;display:none;align-items:center;gap:5px;font-weight:600}
+  .doc-detected.show{display:flex}
+  .doc-detected.cpf{color:var(--cyan-dark)}
+  .doc-detected.cnpj{color:var(--amber)}
+  .doc-detected i{font-size:13px}
+
+  /* CNPJ extras */
+  .cnpj-only{display:none}
+  .cnpj-only.show{display:block}
+
+  /* CEP */
+  .cep-wrap{display:flex;gap:8px}
+  .cep-wrap input{flex:1}
+  .cep-btn{height:42px;padding:0 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--white);color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:6px;font-family:'Figtree',sans-serif;white-space:nowrap;
+    transition:background .15s,border-color .15s,color .15s}
+  .cep-btn:hover{background:var(--cyan-bg);border-color:var(--cyan);color:var(--cyan-dark)}
+
+  /* TOAST */
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;
+    font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;
+    box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+
+  @media(max-width:760px){
+    .content{padding:1.25rem}
+    .grid2,.grid3,.grid4{grid-template-columns:1fr}
+    .papeis-grid{grid-template-columns:1fr}
+    .crumb-sub{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><i id="toast-icon" class="ti ti-check"></i><span id="toast-msg"></span></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="pessoas.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title" id="page-title">Nova pessoa</div>
+      <div class="crumb-sub">Preencha os dados e selecione os papéis</div>
+    </div>
+    <div class="crumb-right">
+      <a class="btn btn-secondary" href="pessoas.html">Cancelar</a>
+      <button class="btn btn-primary" id="btn-save" onclick="salvar()">
+        <i class="ti ti-device-floppy"></i> Salvar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- BUSCA RÁPIDA -->
+<div class="search-bar">
+  <div class="search-bar-inner">
+    <i class="ti ti-search icon"></i>
+    <input type="text" id="busca-rapida" placeholder="Buscar pessoa cadastrada por nome, CPF ou CNPJ..." oninput="buscaRapida()" />
+    <div class="search-results" id="search-results"></div>
+  </div>
+</div>
+
+<main class="content">
+
+  <!-- PAPÉIS -->
+  <div class="papeis-section">
+    <div class="papeis-title">
+      <i class="ti ti-tag"></i> Papéis desta pessoa
+      <small>— selecione pelo menos um (pode marcar todos)</small>
+    </div>
+    <div class="papeis-grid">
+      <div class="papel-toggle cliente" id="toggle-cliente" onclick="togglePapel('cliente')">
+        <div class="papel-icon"><i class="ti ti-user"></i></div>
+        <div class="papel-info">
+          <div class="papel-nome">Cliente</div>
+          <div class="papel-desc">Realiza compras e solicita serviços</div>
+        </div>
+        <div class="papel-check"></div>
+      </div>
+      <div class="papel-toggle fornecedor" id="toggle-fornecedor" onclick="togglePapel('fornecedor')">
+        <div class="papel-icon"><i class="ti ti-truck"></i></div>
+        <div class="papel-info">
+          <div class="papel-nome">Fornecedor</div>
+          <div class="papel-desc">Fornece produtos e peças para a loja</div>
+        </div>
+        <div class="papel-check"></div>
+      </div>
+      <div class="papel-toggle transportadora" id="toggle-transportadora" onclick="togglePapel('transportadora')">
+        <div class="papel-icon"><i class="ti ti-ship"></i></div>
+        <div class="papel-info">
+          <div class="papel-nome">Transportadora</div>
+          <div class="papel-desc">Responsável pelo transporte de mercadorias</div>
+        </div>
+        <div class="papel-check"></div>
+      </div>
+    </div>
+    <div class="papeis-erro" id="papeis-erro">Selecione pelo menos um papel antes de salvar.</div>
+  </div>
+
+  <!-- IDENTIFICAÇÃO -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon cyan"><i class="ti ti-id-badge"></i></div>
+      <div>
+        <div class="panel-title">Identificação</div>
+        <div class="panel-sub">CPF detectado automaticamente ao digitar — CNPJ abre campos adicionais</div>
+      </div>
+    </div>
+    <div class="panel-body">
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="field no-mb">
+          <label id="doc-label">CPF / CNPJ</label>
+          <input type="text" id="documento" placeholder="Digite o CPF ou CNPJ" oninput="onDocInput(this)" maxlength="18"/>
+          <div class="doc-detected" id="doc-detected">
+            <i class="ti ti-check-circle"></i><span id="doc-tipo-label">—</span>
+          </div>
+        </div>
+        <div class="field no-mb cnpj-only" id="nome-fantasia-wrap">
+          <label>Nome fantasia <span class="label-opt">opcional</span></label>
+          <input type="text" id="nome_fantasia" class="upper" placeholder="NOME FANTASIA"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="nome-label">Nome completo</label>
+        <input type="text" id="nome" class="upper" placeholder="NOME COMPLETO"/>
+      </div>
+
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="field no-mb">
+          <label>Telefone <span class="label-opt">fixo</span></label>
+          <input type="text" id="telefone" placeholder="(47) 3333-0000" oninput="maskTelFixo(this)"/>
+        </div>
+        <div class="field no-mb">
+          <label>Celular / WhatsApp</label>
+          <input type="text" id="celular" placeholder="(47) 99999-0000" oninput="maskTelCel(this)"/>
+        </div>
+      </div>
+
+      <div class="field no-mb">
+        <label>E-mail <span class="label-opt">para envio de recibos e OS</span></label>
+        <input type="email" id="email" placeholder="exemplo@email.com" style="text-transform:none"/>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DADOS CNPJ -->
+  <div class="panel cnpj-only" id="cnpj-panel">
+    <div class="panel-head">
+      <div class="panel-icon amber"><i class="ti ti-building"></i></div>
+      <div>
+        <div class="panel-title">Dados da empresa</div>
+        <div class="panel-sub">Informações fiscais — habilitado por ser CNPJ</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="grid3" style="margin-bottom:14px">
+        <div class="field no-mb">
+          <label>Inscrição estadual</label>
+          <input type="text" id="inscricao_estadual" class="upper" placeholder="0000000000"/>
+        </div>
+        <div class="field no-mb">
+          <label>Inscrição municipal</label>
+          <input type="text" id="inscricao_municipal" class="upper" placeholder="0000000000"/>
+        </div>
+        <div class="field no-mb">
+          <label>SUFRAMA <span class="label-opt">opcional</span></label>
+          <input type="text" id="suframa" class="upper" placeholder="000000000"/>
+        </div>
+      </div>
+      <div class="field no-mb">
+        <label>Regime tributário</label>
+        <select id="regime_tributario">
+          <option value="">Selecione</option>
+          <option value="MEI">MEI — Microempreendedor Individual</option>
+          <option value="SIMPLES_NACIONAL">Simples Nacional</option>
+          <option value="SIMPLES_NACIONAL_EXCESSO">Simples Nacional — Excesso de sublimite</option>
+          <option value="REGIME_NORMAL">Regime Normal (Lucro Real / Presumido)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDEREÇO -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon green"><i class="ti ti-map-pin"></i></div>
+      <div>
+        <div class="panel-title">Endereço</div>
+        <div class="panel-sub">Digite o CEP para preenchimento automático</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="field">
+        <label>CEP</label>
+        <div class="cep-wrap">
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)"/>
+          <button type="button" class="cep-btn" onclick="buscarCep()"><i class="ti ti-search"></i> Buscar CEP</button>
+        </div>
+      </div>
+      <div class="grid3" style="margin-bottom:14px">
+        <div class="field no-mb" style="grid-column:span 2">
+          <label>Logradouro</label>
+          <input type="text" id="logradouro" class="upper" placeholder="RUA, AVENIDA, ETC"/>
+        </div>
+        <div class="field no-mb">
+          <label>Número</label>
+          <input type="text" id="numero" class="upper" placeholder="123"/>
+        </div>
+      </div>
+      <div class="grid3" style="margin-bottom:14px">
+        <div class="field no-mb">
+          <label>Complemento <span class="label-opt">opcional</span></label>
+          <input type="text" id="complemento" class="upper" placeholder="APTO, SALA..."/>
+        </div>
+        <div class="field no-mb">
+          <label>Bairro</label>
+          <input type="text" id="bairro" class="upper" placeholder="BAIRRO"/>
+        </div>
+        <div class="field no-mb">
+          <label>Cidade</label>
+          <input type="text" id="cidade" class="upper" placeholder="CIDADE"/>
+        </div>
+      </div>
+      <div style="max-width:120px">
+        <div class="field no-mb">
+          <label>UF</label>
+          <select id="estado">
+            <option value="">UF</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon slate"><i class="ti ti-notes"></i></div>
+      <div>
+        <div class="panel-title">Observações <span class="label-opt">opcional</span></div>
+        <div class="panel-sub">Informações internas sobre esta pessoa</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <textarea id="observacoes" placeholder="ANOTAÇÕES INTERNAS, PREFERÊNCIAS, HISTÓRICO..."></textarea>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+  const params=new URLSearchParams(window.location.search);
+  const EDIT_ID=params.get('id');
+  let TIPO_DOC='CPF';
+  let PAPEIS={cliente:false,fornecedor:false,transportadora:false};
+
+  // ── TOAST ─────────────────────────────────────────────────
+  function toast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('toast-icon').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+    document.getElementById('toast-msg').textContent=msg;
+    t.className='toast '+type+' show';
+    setTimeout(()=>t.classList.remove('show'),4000);
+  }
+
+  // ── PAPÉIS ────────────────────────────────────────────────
+  function togglePapel(papel){
+    PAPEIS[papel]=!PAPEIS[papel];
+    document.getElementById('toggle-'+papel).classList.toggle('selected',PAPEIS[papel]);
+    document.getElementById('papeis-erro').classList.remove('show');
+  }
+
+  // ── DETECÇÃO CPF / CNPJ ───────────────────────────────────
+  function onDocInput(inp){
+    let digits=inp.value.replace(/\D/g,'');
+    // máscara dinâmica
+    if(digits.length<=11){
+      // CPF
+      digits=digits.slice(0,11);
+      if(digits.length>9)      digits=digits.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})$/,'$1.$2.$3-$4');
+      else if(digits.length>6) digits=digits.replace(/^(\d{3})(\d{3})(\d{0,3})$/,'$1.$2.$3');
+      else if(digits.length>3) digits=digits.replace(/^(\d{3})(\d{0,3})$/,'$1.$2');
+      setTipoDoc(inp.value.replace(/\D/g,'').length===11?'CPF':'DETECT');
+    } else {
+      // CNPJ
+      digits=digits.slice(0,14);
+      if(digits.length>12)     digits=digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/,'$1.$2.$3/$4-$5');
+      else if(digits.length>8) digits=digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})$/,'$1.$2.$3/$4');
+      else if(digits.length>5) digits=digits.replace(/^(\d{2})(\d{3})(\d{0,3})$/,'$1.$2.$3');
+      else if(digits.length>2) digits=digits.replace(/^(\d{2})(\d{0,3})$/,'$1.$2');
+      setTipoDoc(inp.value.replace(/\D/g,'').length>=13?'CNPJ':'DETECT');
+    }
+    inp.value=digits;
+
+    // detecta tipo final
+    const raw=inp.value.replace(/\D/g,'');
+    if(raw.length===11) setTipoDoc('CPF');
+    else if(raw.length===14) setTipoDoc('CNPJ');
+    else setTipoDoc('DETECT');
+  }
+
+  function setTipoDoc(tipo){
+    const dd=document.getElementById('doc-detected');
+    const lbl=document.getElementById('doc-tipo-label');
+    const cnpjEls=document.querySelectorAll('.cnpj-only');
+
+    if(tipo==='CPF'){
+      TIPO_DOC='CPF';
+      dd.className='doc-detected cpf show';
+      lbl.textContent='CPF detectado';
+      document.getElementById('nome-label').textContent='Nome completo';
+      cnpjEls.forEach(el=>el.classList.remove('show'));
+    } else if(tipo==='CNPJ'){
+      TIPO_DOC='CNPJ';
+      dd.className='doc-detected cnpj show';
+      lbl.textContent='CNPJ detectado — campos de empresa habilitados';
+      document.getElementById('nome-label').textContent='Razão social';
+      cnpjEls.forEach(el=>el.classList.add('show'));
+    } else {
+      TIPO_DOC='CPF';
+      dd.className='doc-detected';
+      cnpjEls.forEach(el=>el.classList.remove('show'));
+    }
+  }
+
+  // ── MÁSCARAS ──────────────────────────────────────────────
+  function maskTelFixo(inp){
+    let v=inp.value.replace(/\D/g,'').slice(0,10);
+    if(v.length>6) v=v.replace(/^(\d{2})(\d{4})(\d{0,4})$/,'($1) $2-$3');
+    else if(v.length>2) v=v.replace(/^(\d{2})(\d{0,4})$/,'($1) $2');
+    inp.value=v;
+  }
+  function maskTelCel(inp){
+    let v=inp.value.replace(/\D/g,'').slice(0,11);
+    if(v.length>7) v=v.replace(/^(\d{2})(\d{5})(\d{0,4})$/,'($1) $2-$3');
+    else if(v.length>2) v=v.replace(/^(\d{2})(\d{0,5})$/,'($1) $2');
+    inp.value=v;
+  }
+  function maskCep(inp){
+    let v=inp.value.replace(/\D/g,'').slice(0,8);
+    if(v.length>5) v=v.replace(/^(\d{5})(\d{0,3})$/,'$1-$2');
+    inp.value=v;
+  }
+
+  // ── BUSCAR CEP ────────────────────────────────────────────
+  async function buscarCep(){
+    const cep=document.getElementById('cep').value.replace(/\D/g,'');
+    if(cep.length!==8){toast('CEP inválido.','error');return;}
+    try{
+      const r=await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+      const d=await r.json();
+      if(d.erro){toast('CEP não encontrado.','error');return;}
+      document.getElementById('logradouro').value=(d.logradouro||'').toUpperCase();
+      document.getElementById('bairro').value=(d.bairro||'').toUpperCase();
+      document.getElementById('cidade').value=(d.localidade||'').toUpperCase();
+      document.getElementById('estado').value=d.uf||'';
+      document.getElementById('numero').focus();
+    }catch(e){toast('Erro ao buscar CEP.','error');}
+  }
+
+  // ── BUSCA RÁPIDA ──────────────────────────────────────────
+  let buscaTimer;
+  async function buscaRapida(){
+    const q=document.getElementById('busca-rapida').value.trim();
+    const res=document.getElementById('search-results');
+    if(q.length<2){res.classList.remove('open');return;}
+
+    clearTimeout(buscaTimer);
+    buscaTimer=setTimeout(async()=>{
+      const term=q.toUpperCase();
+      const{data}=await db.from('pessoas')
+        .select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor,is_transportadora')
+        .or(`nome.ilike.%${term}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
+        .eq('ativo',true).limit(8);
+
+      if(!data||data.length===0){
+        res.innerHTML='<div class="sr-empty">Nenhuma pessoa encontrada para "'+q+'"</div>';
+        res.classList.add('open');
+        return;
+      }
+
+      function fmtDoc(doc,tipo){
+        if(!doc) return '';
+        if(tipo==='CPF') return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+        return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+      }
+
+      res.innerHTML=data.map(p=>`
+        <div class="sr-item" onclick="window.location.href='pessoa-novo.html?id=${p.id}'">
+          <div class="sr-avatar">${p.nome[0]}</div>
+          <div class="sr-info">
+            <div class="sr-nome">${p.nome}</div>
+            <div class="sr-doc">${p.tipo_doc}: ${fmtDoc(p.documento,p.tipo_doc)}${p.celular?' · '+p.celular:''}</div>
+            <div class="sr-papeis">
+              ${p.is_cliente?'<span class="sr-badge c">Cliente</span>':''}
+              ${p.is_fornecedor?'<span class="sr-badge f">Fornecedor</span>':''}
+              ${p.is_transportadora?'<span class="sr-badge t">Transportadora</span>':''}
+            </div>
+          </div>
+          <i class="ti ti-chevron-right sr-arrow"></i>
+        </div>`).join('');
+      res.classList.add('open');
+    },350);
+  }
+
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.search-bar-inner'))
+      document.getElementById('search-results').classList.remove('open');
+  });
+
+  // ── CARREGAR EDIÇÃO ───────────────────────────────────────
+  async function loadEdicao(){
+    if(!EDIT_ID) return;
+    document.getElementById('page-title').textContent='Editar pessoa';
+    const{data:p,error}=await db.from('pessoas').select('*').eq('id',EDIT_ID).single();
+    if(error||!p){toast('Pessoa não encontrada.','error');return;}
+
+    // doc e tipo
+    document.getElementById('documento').value=
+      p.tipo_doc==='CPF'
+        ? p.documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4')
+        : p.documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+    setTipoDoc(p.tipo_doc);
+
+    document.getElementById('nome').value=p.nome||'';
+    document.getElementById('nome_fantasia').value=p.nome_fantasia||'';
+    document.getElementById('telefone').value=p.telefone||'';
+    document.getElementById('celular').value=p.celular||'';
+    document.getElementById('email').value=p.email||'';
+    document.getElementById('cep').value=p.cep?p.cep.replace(/(\d{5})(\d{3})/,'$1-$2'):'';
+    document.getElementById('logradouro').value=p.logradouro||'';
+    document.getElementById('numero').value=p.numero||'';
+    document.getElementById('complemento').value=p.complemento||'';
+    document.getElementById('bairro').value=p.bairro||'';
+    document.getElementById('cidade').value=p.cidade||'';
+    document.getElementById('estado').value=p.estado||'';
+    document.getElementById('inscricao_estadual').value=p.inscricao_estadual||'';
+    document.getElementById('inscricao_municipal').value=p.inscricao_municipal||'';
+    document.getElementById('suframa').value=p.suframa||'';
+    document.getElementById('regime_tributario').value=p.regime_tributario||'';
+    document.getElementById('observacoes').value=p.observacoes||'';
+
+    if(p.is_cliente)        togglePapel('cliente');
+    if(p.is_fornecedor)     togglePapel('fornecedor');
+    if(p.is_transportadora) togglePapel('transportadora');
+  }
+
+  // ── SALVAR ────────────────────────────────────────────────
+  async function salvar(){
+    if(!PAPEIS.cliente&&!PAPEIS.fornecedor&&!PAPEIS.transportadora){
+      document.getElementById('papeis-erro').classList.add('show');
+      document.getElementById('toggle-cliente').scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+    const nome=document.getElementById('nome').value.trim();
+    if(!nome){toast('Informe o nome.','error');document.getElementById('nome').focus();return;}
+    const doc=document.getElementById('documento').value.replace(/\D/g,'');
+    if(!doc){toast('Informe o CPF/CNPJ.','error');document.getElementById('documento').focus();return;}
+    if(TIPO_DOC==='CPF'&&doc.length!==11){toast('CPF inválido (11 dígitos).','error');return;}
+    if(TIPO_DOC==='CNPJ'&&doc.length!==14){toast('CNPJ inválido (14 dígitos).','error');return;}
+
+    const btn=document.getElementById('btn-save');
+    btn.disabled=true;
+    btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';
+
+    try{
+      const payload={
+        tipo_doc:TIPO_DOC,
+        documento:doc,
+        nome,
+        nome_fantasia:document.getElementById('nome_fantasia').value.trim()||null,
+        telefone:document.getElementById('telefone').value.replace(/\D/g,'')||null,
+        celular:document.getElementById('celular').value.replace(/\D/g,'')||null,
+        email:document.getElementById('email').value.trim().toLowerCase()||null,
+        cep:document.getElementById('cep').value.replace(/\D/g,'')||null,
+        logradouro:document.getElementById('logradouro').value.trim()||null,
+        numero:document.getElementById('numero').value.trim()||null,
+        complemento:document.getElementById('complemento').value.trim()||null,
+        bairro:document.getElementById('bairro').value.trim()||null,
+        cidade:document.getElementById('cidade').value.trim()||null,
+        estado:document.getElementById('estado').value||null,
+        is_cliente:PAPEIS.cliente,
+        is_fornecedor:PAPEIS.fornecedor,
+        is_transportadora:PAPEIS.transportadora,
+        inscricao_estadual:document.getElementById('inscricao_estadual').value.trim()||null,
+        inscricao_municipal:document.getElementById('inscricao_municipal').value.trim()||null,
+        suframa:document.getElementById('suframa').value.trim()||null,
+        regime_tributario:document.getElementById('regime_tributario').value||null,
+        observacoes:document.getElementById('observacoes').value.trim()||null,
+      };
+
+      let error;
+      if(EDIT_ID){({error}=await db.from('pessoas').update(payload).eq('id',EDIT_ID));}
+      else{({error}=await db.from('pessoas').insert(payload));}
+
+      if(error) throw new Error(error.message);
+      toast('Salvo com sucesso!','success');
+      setTimeout(()=>window.location.href='pessoas.html',1200);
+    }catch(err){
+      const msg=err.message.includes('duplicate')||err.message.includes('unique')
+        ?'CPF/CNPJ já cadastrado no sistema.'
+        :'Erro ao salvar: '+err.message;
+      toast(msg,'error');
+      btn.disabled=false;
+      btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar';
+    }
+  }
+
+  // ── INIT ──────────────────────────────────────────────────
+  loadEdicao();
+</script>
+</body>
+</html>

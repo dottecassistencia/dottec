@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pessoas — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;
+    --coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;
+    --dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;
+    --green:#3B6D11;--green-bg:#EAF3DE;
+    --amber:#9A6000;--amber-bg:#FBEEDB;
+    --slate:#3A4A6B;--slate-bg:#EEF0F5;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;
+    background:radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),
+               radial-gradient(circle at 92% 6%,rgba(232,96,74,.08),transparent 38%),var(--bg)}
+
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;
+    cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+
+  .content{max-width:1180px;margin:0 auto;padding:2rem}
+
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;
+    font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;
+    display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--coral);color:#fff}
+  .btn-primary:hover{background:var(--coral-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg)}
+  .btn-active{background:var(--cyan-bg);color:var(--cyan-dark);border:1px solid rgba(41,184,194,.3)}
+
+  /* filtros de papel */
+  .filters{display:flex;align-items:center;gap:6px}
+  .filter-btn{
+    height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--white);color:var(--sub);font-size:12.5px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;font-family:'Figtree',sans-serif;
+  }
+  .filter-btn i{font-size:14px}
+  .filter-btn:hover{border-color:var(--cyan);color:var(--cyan-dark)}
+  .filter-btn.active{background:var(--cyan-bg);color:var(--cyan-dark);border-color:rgba(41,184,194,.4)}
+
+  .search-wrap{margin-left:auto;position:relative}
+  .search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
+  .search-wrap input{
+    width:280px;height:40px;padding:0 14px 0 38px;border-radius:10px;
+    border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
+
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--sub);padding:13px 18px;border-bottom:1px solid var(--border);background:#FAFAF7}
+  thead th.center{text-align:center}
+  tbody td{padding:13px 18px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAF7}
+
+  .td-nome{font-weight:700;color:var(--dark)}
+  .td-doc{font-size:12px;color:var(--sub);margin-top:2px}
+  .td-telefone{font-variant-numeric:tabular-nums}
+
+  .papeis{display:flex;gap:4px;flex-wrap:wrap}
+  .papel-badge{
+    font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
+    display:flex;align-items:center;gap:4px;
+  }
+  .papel-badge i{font-size:11px}
+  .papel-badge.cliente{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .papel-badge.fornecedor{background:var(--amber-bg);color:var(--amber)}
+  .papel-badge.transportadora{background:var(--slate-bg);color:var(--slate)}
+
+  .actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s,transform .1s}
+  .act-btn:active{transform:scale(.92)}
+  .act-edit{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}
+  .act-del:hover{background:var(--coral);color:#fff}
+
+  .empty-row td{padding:3.5rem 1rem;text-align:center;color:var(--sub)}
+  .empty-row i{font-size:34px;display:block;margin-bottom:10px;opacity:.4}
+  .empty-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+
+  .table-footer{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub)}
+
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @media(max-width:760px){.content{padding:1.25rem}.search-wrap input{width:100%}.search-wrap{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="cadastro.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">Pessoas</div>
+      <div class="crumb-sub">Clientes, fornecedores e transportadoras</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="toolbar">
+    <a class="btn btn-primary" href="pessoa-novo.html"><i class="ti ti-plus"></i> Adicionar</a>
+
+    <div class="filters">
+      <button class="filter-btn active" id="f-todos" onclick="setFiltro('todos')"><i class="ti ti-list"></i> Todos</button>
+      <button class="filter-btn" id="f-cliente" onclick="setFiltro('cliente')"><i class="ti ti-user"></i> Clientes</button>
+      <button class="filter-btn" id="f-fornecedor" onclick="setFiltro('fornecedor')"><i class="ti ti-truck"></i> Fornecedores</button>
+      <button class="filter-btn" id="f-transportadora" onclick="setFiltro('transportadora')"><i class="ti ti-ship"></i> Transportadoras</button>
+    </div>
+
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="search-input" placeholder="Buscar por nome, CPF ou CNPJ" oninput="filterTable()"/>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome / Documento</th>
+          <th>Telefone</th>
+          <th>Cidade / UF</th>
+          <th class="center">Papéis</th>
+          <th style="width:90px;text-align:right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="pessoas-tbody">
+        <tr class="empty-row">
+          <td colspan="5"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Carregando...</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="table-footer">
+      <span id="table-count">—</span>
+      <span>Dottec Assistência</span>
+    </div>
+  </div>
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+  let TODOS=[];
+  let FILTRO='todos';
+
+  function setFiltro(f){
+    FILTRO=f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('f-'+f).classList.add('active');
+    filterTable();
+  }
+
+  function fmtDoc(doc,tipo){
+    if(!doc) return '—';
+    if(tipo==='CPF') return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+    return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+  }
+
+  function papeisBadge(p){
+    let h='<div class="papeis">';
+    if(p.is_cliente)        h+=`<span class="papel-badge cliente"><i class="ti ti-user"></i>Cliente</span>`;
+    if(p.is_fornecedor)     h+=`<span class="papel-badge fornecedor"><i class="ti ti-truck"></i>Fornecedor</span>`;
+    if(p.is_transportadora) h+=`<span class="papel-badge transportadora"><i class="ti ti-ship"></i>Transportadora</span>`;
+    return h+'</div>';
+  }
+
+  function renderTable(lista){
+    const tb=document.getElementById('pessoas-tbody');
+    if(!lista||lista.length===0){
+      tb.innerHTML=`<tr class="empty-row"><td colspan="5"><i class="ti ti-users-off"></i><div class="empty-title">Nenhuma pessoa encontrada</div>Clique em "Adicionar" para começar.</td></tr>`;
+      document.getElementById('table-count').textContent='0 registros';
+      return;
+    }
+    tb.innerHTML=lista.map(p=>`
+      <tr>
+        <td>
+          <div class="td-nome">${p.nome}${p.nome_fantasia?` <span style="font-weight:400;color:var(--sub);font-size:12px">(${p.nome_fantasia})</span>`:''}</div>
+          <div class="td-doc">${p.tipo_doc}: ${fmtDoc(p.documento,p.tipo_doc)}</div>
+        </td>
+        <td class="td-telefone">${p.celular||p.telefone||'—'}</td>
+        <td>${p.cidade?p.cidade+(p.estado?' / '+p.estado:''):'—'}</td>
+        <td>${papeisBadge(p)}</td>
+        <td>
+          <div class="actions">
+            <button class="act-btn act-edit" onclick="window.location.href='pessoa-novo.html?id=${p.id}'" title="Editar"><i class="ti ti-pencil"></i></button>
+            <button class="act-btn act-del" onclick="excluir('${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+    document.getElementById('table-count').textContent=lista.length+(lista.length===1?' registro':' registros');
+  }
+
+  function filterTable(){
+    const q=document.getElementById('search-input').value.trim().toUpperCase();
+    let lista=TODOS;
+    if(FILTRO==='cliente')        lista=lista.filter(p=>p.is_cliente);
+    if(FILTRO==='fornecedor')     lista=lista.filter(p=>p.is_fornecedor);
+    if(FILTRO==='transportadora') lista=lista.filter(p=>p.is_transportadora);
+    if(q) lista=lista.filter(p=>(p.nome||'').toUpperCase().includes(q)||(p.documento||'').includes(q));
+    renderTable(lista);
+  }
+
+  async function excluir(id,nome){
+    if(!confirm('Excluir "'+nome+'"? Essa ação não pode ser desfeita.')) return;
+    const{error}=await db.from('pessoas').delete().eq('id',id);
+    if(error){alert('Erro: '+error.message);return;}
+    await load();
+  }
+
+  async function load(){
+    const{data,error}=await db.from('pessoas').select('*').eq('ativo',true).order('nome');
+    if(error){
+      document.getElementById('pessoas-tbody').innerHTML=`<tr class="empty-row"><td colspan="5"><i class="ti ti-alert-circle"></i><div class="empty-title">Erro ao carregar</div>${error.message}</td></tr>`;
+      return;
+    }
+    TODOS=data||[];
+    filterTable();
+  }
+
+  load();
+</script>
+</body>
+</html>
