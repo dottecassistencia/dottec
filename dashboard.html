@@ -171,12 +171,15 @@
   .mod-card.coral{--glow:rgba(232,96,74,.20)}
   .mod-card.sage {--glow:rgba(120,150,70,.18)}
   .mod-card.amber{--glow:rgba(154,96,0,.16)}
+  :root{--amber:#9A6000;--amber-bg:#FBEEDB}
 
   .mod-card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.09)}
   .mod-card.cyan:hover {border-color:rgba(41,184,194,.4)}
   .mod-card.coral:hover{border-color:rgba(232,96,74,.4)}
   .mod-card.sage:hover {border-color:rgba(120,150,70,.35)}
   .mod-card.amber:hover{border-color:rgba(154,96,0,.35)}
+  .mod-card.amber:hover .card-icon-box{background:#9A6000;color:#fff}
+  .mod-card.amber:hover .card-arrow{background:#9A6000;color:#fff;transform:translateX(3px) rotate(-45deg)}
 
   .card-icon-box{
     width:52px;height:52px;border-radius:14px;
@@ -187,7 +190,7 @@
   .mod-card.cyan  .card-icon-box{background:var(--cyan-bg);color:var(--cyan-dark)}
   .mod-card.coral .card-icon-box{background:var(--coral-bg);color:var(--coral)}
   .mod-card.sage  .card-icon-box{background:#EAEFE1;color:#4A6B1F}
-  .mod-card.amber .card-icon-box{background:var(--amber-bg);color:var(--amber)}
+  .mod-card.amber .card-icon-box{background:#FBEEDB;color:#9A6000}
 
   .mod-card:hover .card-icon-box{transform:scale(1.09) rotate(-4deg)}
   .mod-card.cyan:hover  .card-icon-box{background:var(--cyan);color:#fff}
@@ -279,6 +282,17 @@
         <div>
           <div class="card-name">Produtos</div>
           <div class="card-desc">Catálogo, custo, venda, estoque e etiquetas.</div>
+        </div>
+        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </a>
+
+    <a class="mod-card amber" href="configuracoes.html">
+      <div class="card-icon-box"><i class="ti ti-settings"></i></div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-name">Configurações</div>
+          <div class="card-desc">Cadastros auxiliares, sistema, fiscal e impressão.</div>
         </div>
         <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
       </div>

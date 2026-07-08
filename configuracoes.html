@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Configurações — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;
+    --coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;
+    --dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;
+    --amber:#9A6000;--amber-bg:#FBEEDB;
+    --green:#3B6D11;--green-bg:#EAF3DE;
+    --slate:#3A4A6B;--slate-bg:#EEF0F5;
+    --rose:#9B2242;--rose-bg:#FEE8EE;
+    --purple:#5B3FA6;--purple-bg:#EFE8FF;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;
+    background:
+      radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),
+      radial-gradient(circle at 92% 6%,rgba(232,96,74,.08),transparent 38%),
+      var(--bg);
+  }
+
+  /* TOPBAR */
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem;position:sticky;top:0;z-index:100}
+  .crumb{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;
+    cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+
+  /* CONTENT */
+  .content{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 4rem}
+
+  /* SEÇÕES */
+  .section{margin-bottom:2.75rem}
+  .section-label{
+    font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--sub);margin-bottom:1.1rem;display:flex;align-items:center;gap:8px;
+  }
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* GRID DE CARDS */
+  .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .cards-grid.cols2{grid-template-columns:repeat(2,1fr)}
+
+  /* CARD */
+  .cfg-card{
+    background:var(--white);border-radius:18px;border:1px solid var(--border);
+    padding:1.5rem;display:flex;flex-direction:column;gap:.9rem;
+    cursor:pointer;text-decoration:none;color:inherit;overflow:hidden;position:relative;
+    transition:box-shadow .22s,border-color .22s,transform .2s;
+    animation:cardIn .4s ease both;
+  }
+  .cfg-card:nth-child(1){animation-delay:.02s}.cfg-card:nth-child(2){animation-delay:.06s}
+  .cfg-card:nth-child(3){animation-delay:.10s}.cfg-card:nth-child(4){animation-delay:.14s}
+  .cfg-card:nth-child(5){animation-delay:.18s}.cfg-card:nth-child(6){animation-delay:.22s}
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .cfg-card::before{content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 90% -5%,var(--glow,transparent),transparent 55%);
+    opacity:0;transition:opacity .3s;pointer-events:none}
+  .cfg-card:hover::before{opacity:1}
+
+  /* variantes de cor */
+  .cfg-card.cyan  {--glow:rgba(41,184,194,.18)}
+  .cfg-card.coral {--glow:rgba(232,96,74,.16)}
+  .cfg-card.amber {--glow:rgba(154,96,0,.15)}
+  .cfg-card.green {--glow:rgba(59,109,17,.14)}
+  .cfg-card.slate {--glow:rgba(58,74,107,.14)}
+  .cfg-card.rose  {--glow:rgba(155,34,66,.14)}
+  .cfg-card.purple{--glow:rgba(91,63,166,.14)}
+  .cfg-card.dark  {--glow:rgba(28,28,26,.10)}
+
+  .cfg-card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.09)}
+  .cfg-card.cyan:hover  {border-color:rgba(41,184,194,.4)}
+  .cfg-card.coral:hover {border-color:rgba(232,96,74,.4)}
+  .cfg-card.amber:hover {border-color:rgba(154,96,0,.35)}
+  .cfg-card.green:hover {border-color:rgba(59,109,17,.35)}
+  .cfg-card.slate:hover {border-color:rgba(58,74,107,.35)}
+  .cfg-card.rose:hover  {border-color:rgba(155,34,66,.35)}
+  .cfg-card.purple:hover{border-color:rgba(91,63,166,.35)}
+  .cfg-card.dark:hover  {border-color:rgba(28,28,26,.25)}
+
+  /* card em breve — sem hover forte */
+  .cfg-card.soon{cursor:default;opacity:.6}
+  .cfg-card.soon:hover{transform:none;box-shadow:none;border-color:var(--border)}
+  .cfg-card.soon::before{display:none}
+
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between}
+  .card-icon{width:44px;height:44px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;font-size:21px;
+    transition:transform .28s cubic-bezier(.34,1.5,.64,1),background .25s,color .25s;
+    position:relative;z-index:1;}
+
+  .cfg-card.cyan   .card-icon{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .cfg-card.coral  .card-icon{background:var(--coral-bg);color:var(--coral)}
+  .cfg-card.amber  .card-icon{background:var(--amber-bg);color:var(--amber)}
+  .cfg-card.green  .card-icon{background:var(--green-bg);color:var(--green)}
+  .cfg-card.slate  .card-icon{background:var(--slate-bg);color:var(--slate)}
+  .cfg-card.rose   .card-icon{background:var(--rose-bg);color:var(--rose)}
+  .cfg-card.purple .card-icon{background:var(--purple-bg);color:var(--purple)}
+  .cfg-card.dark   .card-icon{background:rgba(28,28,26,.08);color:var(--dark)}
+
+  .cfg-card:not(.soon):hover .card-icon{transform:scale(1.08) rotate(-4deg)}
+  .cfg-card.cyan:hover   .card-icon{background:var(--cyan);color:#fff}
+  .cfg-card.coral:hover  .card-icon{background:var(--coral);color:#fff}
+  .cfg-card.amber:hover  .card-icon{background:var(--amber);color:#fff}
+  .cfg-card.green:hover  .card-icon{background:var(--green);color:#fff}
+  .cfg-card.slate:hover  .card-icon{background:var(--slate);color:#fff}
+  .cfg-card.rose:hover   .card-icon{background:var(--rose);color:#fff}
+  .cfg-card.purple:hover .card-icon{background:var(--purple);color:#fff}
+  .cfg-card.dark:hover   .card-icon{background:var(--dark);color:#fff}
+
+  .soon-badge{
+    font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    background:var(--bg);color:var(--sub);border:1px solid var(--border);
+    padding:3px 8px;border-radius:7px;
+  }
+
+  .card-body{position:relative;z-index:1}
+  .card-name{font-family:'Lora',serif;font-size:15.5px;font-weight:600;color:var(--dark);margin-bottom:4px}
+  .card-desc{font-size:12px;color:var(--sub);line-height:1.55}
+
+  .card-footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:10px;border-top:1px solid #F0EFEA;position:relative;z-index:1;
+  }
+  .card-count{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:5px}
+  .card-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+  .card-dot.ok{background:#639922}
+  .card-dot.warn{background:var(--amber)}
+
+  .card-arrow{
+    width:28px;height:28px;border-radius:50%;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text);
+    transition:background .2s,color .2s,transform .2s;
+  }
+  .cfg-card.cyan:hover   .card-arrow{background:var(--cyan-dark);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.coral:hover  .card-arrow{background:var(--coral-dark);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.amber:hover  .card-arrow{background:var(--amber);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.green:hover  .card-arrow{background:var(--green);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.slate:hover  .card-arrow{background:var(--slate);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.rose:hover   .card-arrow{background:var(--rose);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.purple:hover .card-arrow{background:var(--purple);color:#fff;transform:translateX(2px) rotate(-45deg)}
+  .cfg-card.dark:hover   .card-arrow{background:var(--dark);color:#fff;transform:translateX(2px) rotate(-45deg)}
+
+  @media(max-width:900px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:580px){.cards-grid,.cards-grid.cols2{grid-template-columns:1fr}.content{padding:1.5rem 1rem}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="dashboard.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">Configurações</div>
+      <div class="crumb-sub">Cadastros auxiliares e opções do sistema</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- CADASTROS AUXILIARES -->
+  <div class="section">
+    <div class="section-label">Cadastros auxiliares</div>
+    <div class="cards-grid">
+
+      <a class="cfg-card cyan" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-map-pin"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Localidades</div>
+          <div class="card-desc">Cidades, estados e tabela de CEPs para autocomplete no cadastro de pessoas.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card amber" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-category"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Grupos de produtos</div>
+          <div class="card-desc">Categorias para organizar o catálogo de produtos (pelicula, cabo, carcaça...).</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count" id="cnt-grupos"><div class="card-dot"></div> Carregando...</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card green" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-tools"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Tipos de serviço</div>
+          <div class="card-desc">Categorias de serviços usadas nas ordens de serviço (troca de tela, bateria...).</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card slate" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-flag"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Status de OS</div>
+          <div class="card-desc">Etapas personalizadas para o fluxo das ordens de serviço.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card coral" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-forms"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Campos personalizados</div>
+          <div class="card-desc">Adicione campos extras ao cadastro de clientes, produtos ou OS.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card purple" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-tags"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Condições de pagamento</div>
+          <div class="card-desc">Prazos e formas de pagamento padrão para vendas e compras.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- SISTEMA -->
+  <div class="section">
+    <div class="section-label">Sistema</div>
+    <div class="cards-grid">
+
+      <a class="cfg-card dark" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-building"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Dados da empresa</div>
+          <div class="card-desc">CNPJ, razão social, endereço e logotipo usados em documentos e notas.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot warn"></div> Pendente configurar</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card rose" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-user-cog"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Usuários e permissões</div>
+          <div class="card-desc">Gerencie quem acessa o sistema e o que cada usuário pode fazer.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count" id="cnt-usuarios"><div class="card-dot"></div> Carregando...</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card slate" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-file-invoice"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Configuração fiscal</div>
+          <div class="card-desc">Certificado digital, ambiente (homologação/produção) e série da NF-e.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot warn"></div> Pendente configurar</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- IMPRESSÃO E DOCUMENTOS -->
+  <div class="section">
+    <div class="section-label">Impressão e documentos</div>
+    <div class="cards-grid cols2">
+
+      <a class="cfg-card amber" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-barcode"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Etiquetas</div>
+          <div class="card-desc">Modelo, tamanho e campos exibidos nas etiquetas de produtos.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card green" href="#">
+        <div class="card-top">
+          <div class="card-icon"><i class="ti ti-printer"></i></div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Modelo de OS</div>
+          <div class="card-desc">Layout e campos impressos na ordem de serviço entregue ao cliente.</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+  async function loadCounts(){
+    // grupos de produtos
+    const{count:cg}=await db.from('grupos_produtos').select('*',{count:'exact',head:true});
+    const elG=document.getElementById('cnt-grupos');
+    elG.innerHTML=`<div class="card-dot ok"></div> ${cg??0} grupo${cg===1?'':'s'}`;
+
+    // usuários
+    const{count:cu}=await db.from('usuarios').select('*',{count:'exact',head:true}).eq('ativo',true);
+    const elU=document.getElementById('cnt-usuarios');
+    elU.innerHTML=`<div class="card-dot ok"></div> ${cu??0} usuário${cu===1?'':'s'} ativo${cu===1?'':'s'}`;
+  }
+
+  loadCounts();
+</script>
+</body>
+</html>
