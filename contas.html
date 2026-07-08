@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contas — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),var(--bg)}
+
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+
+  .content{max-width:1200px;margin:0 auto;padding:2rem}
+
+  /* TOTALIZADORES */
+  .totais{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+  .total-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem}
+  .total-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+  .total-value{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--dark)}
+  .total-value.green{color:var(--green)}.total-value.coral{color:var(--coral)}.total-value.amber{color:var(--amber)}
+
+  /* TOOLBAR */
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  .btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#2E5A0D}
+  .btn-coral{background:var(--coral);color:#fff}.btn-coral:hover{background:var(--coral-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg)}
+
+  /* FILTRO TIPO */
+  .tipo-toggle{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;gap:3px}
+  .tipo-btn{height:34px;padding:0 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--sub);transition:all .15s;display:flex;align-items:center;gap:6px}
+  .tipo-btn.active-receber{background:var(--white);color:var(--green);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .tipo-btn.active-pagar{background:var(--white);color:var(--coral);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .tipo-btn.active-todos{background:var(--white);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+  /* STATUS FILTER */
+  .filters{display:flex;align-items:center;gap:6px}
+  .filter-btn{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Figtree',sans-serif;display:flex;align-items:center;gap:5px}
+  .filter-btn:hover{border-color:var(--cyan);color:var(--cyan-dark)}
+  .filter-btn.active{background:var(--cyan-bg);color:var(--cyan-dark);border-color:rgba(41,184,194,.4)}
+
+  /* BUSCA */
+  .search-wrap{position:relative;margin-left:auto}
+  .search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
+  .search-wrap input{width:260px;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;text-transform:uppercase}
+  .search-wrap input::placeholder{text-transform:none}
+  .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
+
+  /* TABELA */
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:13px 16px;border-bottom:1px solid var(--border);background:#FAFAF7}
+  thead th.right{text-align:right}
+  tbody td{padding:13px 16px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAF7}
+
+  .tipo-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px}
+  .tipo-pill.R{background:var(--green-bg);color:var(--green)}
+  .tipo-pill.P{background:var(--coral-bg);color:var(--coral)}
+
+  .status-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px}
+  .status-pill.ABERTA{background:#EEF0F5;color:#3A4A6B}
+  .status-pill.PAGA{background:var(--green-bg);color:var(--green)}
+  .status-pill.VENCIDA{background:var(--coral-bg);color:var(--coral)}
+  .status-pill.PARCIAL{background:var(--amber-bg);color:var(--amber)}
+  .status-pill.CANCELADA{background:#F0EFEA;color:var(--sub)}
+
+  .td-valor{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .td-valor.R{color:var(--green)}.td-valor.P{color:var(--coral)}
+  .td-date{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--sub)}
+  .td-date.vencida{color:var(--coral);font-weight:700}
+  .td-pessoa{font-size:12px;color:var(--sub);margin-top:2px}
+
+  .actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+  .act-pay{background:var(--green-bg);color:var(--green)}.act-pay:hover{background:var(--green);color:#fff}
+  .act-edit{background:var(--cyan-bg);color:var(--cyan-dark)}.act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}.act-del:hover{background:var(--coral);color:#fff}
+
+  .empty-row td{padding:3rem 1rem;text-align:center;color:var(--sub)}
+  .empty-row i{font-size:32px;display:block;margin-bottom:10px;opacity:.35}
+  .table-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub)}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  input,select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;text-transform:uppercase}
+  input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
+  input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3.5px rgba(41,184,194,.13);background:#fff}
+  input[type=date],input[type=number]{text-transform:none}
+  textarea{height:70px;resize:vertical;padding:10px 13px}
+  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-modal-save{height:40px;padding:0 20px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-modal-save.green{background:var(--green);color:#fff}.btn-modal-save.green:hover{background:#2E5A0D}
+  .btn-modal-save.coral{background:var(--coral);color:#fff}.btn-modal-save.coral:hover{background:var(--coral-dark)}
+  .btn-modal-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+  .btn-modal-cancel:hover{background:var(--bg)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @media(max-width:900px){.totais{grid-template-columns:1fr 1fr}.content{padding:1.25rem}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="toast-icon" class="ti ti-check"></i><span id="toast-msg"></span></div>
+
+<!-- MODAL NOVA CONTA -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Nova conta</div>
+      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Tipo</label>
+        <select id="m-tipo">
+          <option value="RECEBER">A RECEBER</option>
+          <option value="PAGAR">A PAGAR</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input type="text" id="m-descricao" placeholder="EX: PAGAMENTO CLIENTE / CONTA DE LUZ"/>
+      </div>
+      <div class="grid2">
+        <div class="field no-mb">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="m-valor" placeholder="0,00"/>
+        </div>
+        <div class="field no-mb">
+          <label>Vencimento</label>
+          <input type="date" id="m-vencimento"/>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="field no-mb">
+          <label>Categoria</label>
+          <input type="text" id="m-categoria" placeholder="EX: ALUGUEL, VENDA..."/>
+        </div>
+        <div class="field no-mb">
+          <label>Forma de pagamento</label>
+          <select id="m-forma">
+            <option value="">Selecione</option>
+            <option>DINHEIRO</option><option>PIX</option><option>CARTÃO DÉBITO</option>
+            <option>CARTÃO CRÉDITO</option><option>BOLETO</option><option>TRANSFERÊNCIA</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label>Observações <small style="text-transform:none;font-weight:400">(opcional)</small></label>
+        <textarea id="m-obs" placeholder="INFORMAÇÕES ADICIONAIS..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-modal-save green" id="btn-modal-save" onclick="salvarConta()">
+        <i class="ti ti-device-floppy"></i> Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="financeiro.html"><i class="ti ti-arrow-left"></i></a>
+    <div><div class="crumb-title">Contas a Pagar e Receber</div><div class="crumb-sub">Controle de compromissos financeiros</div></div>
+  </div>
+</header>
+
+<main class="content">
+
+  <div class="totais">
+    <div class="total-card">
+      <div class="total-label">Total a receber</div>
+      <div class="total-value green" id="t-receber">R$ —</div>
+    </div>
+    <div class="total-card">
+      <div class="total-label">Total a pagar</div>
+      <div class="total-value coral" id="t-pagar">R$ —</div>
+    </div>
+    <div class="total-card">
+      <div class="total-label">Vencidas / atrasadas</div>
+      <div class="total-value amber" id="t-vencidas">—</div>
+    </div>
+    <div class="total-card">
+      <div class="total-label">Saldo previsto</div>
+      <div class="total-value" id="t-saldo">R$ —</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-green" onclick="abrirModal('RECEBER')"><i class="ti ti-plus"></i> Nova a Receber</button>
+    <button class="btn btn-coral" onclick="abrirModal('PAGAR')"><i class="ti ti-plus"></i> Nova a Pagar</button>
+
+    <div class="tipo-toggle">
+      <button class="tipo-btn" id="f-todos" onclick="setTipo('TODOS')"><i class="ti ti-list"></i> Todos</button>
+      <button class="tipo-btn" id="f-receber" onclick="setTipo('RECEBER')"><i class="ti ti-arrow-up-circle"></i> Receber</button>
+      <button class="tipo-btn" id="f-pagar" onclick="setTipo('PAGAR')"><i class="ti ti-arrow-down-circle"></i> Pagar</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" id="fs-todos" onclick="setStatus('TODOS')">Todas</button>
+      <button class="filter-btn" id="fs-aberta" onclick="setStatus('ABERTA')">Abertas</button>
+      <button class="filter-btn" id="fs-vencida" onclick="setStatus('VENCIDA')">Vencidas</button>
+      <button class="filter-btn" id="fs-paga" onclick="setStatus('PAGA')">Pagas</button>
+    </div>
+
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="busca" placeholder="Buscar por descrição..." oninput="filtrar()"/>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:80px">Tipo</th>
+          <th>Descrição</th>
+          <th style="width:120px">Vencimento</th>
+          <th style="width:100px">Status</th>
+          <th style="width:130px" class="right">Valor</th>
+          <th style="width:110px;text-align:right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr class="empty-row"><td colspan="6"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Carregando...</td></tr>
+      </tbody>
+    </table>
+    <div class="table-footer"><span id="count">—</span><span>Dottec Assistência</span></div>
+  </div>
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+  const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const hoje=new Date().toISOString().slice(0,10);
+  const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+
+  let TODOS=[], TIPO_F='TODOS', STATUS_F='TODOS', EDIT_ID=null;
+
+  // define filtro inicial pela URL
+  const urlTipo=new URLSearchParams(window.location.search).get('tipo');
+  if(urlTipo==='RECEBER') { TIPO_F='RECEBER'; }
+  else if(urlTipo==='PAGAR') { TIPO_F='PAGAR'; }
+
+  function toast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('toast-icon').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+    document.getElementById('toast-msg').textContent=msg;
+    t.className='toast '+type+' show';
+    setTimeout(()=>t.classList.remove('show'),4000);
+  }
+
+  function setTipo(t){
+    TIPO_F=t;
+    ['todos','receber','pagar'].forEach(x=>{
+      const el=document.getElementById('f-'+x);
+      el.className='tipo-btn'+(t===x.toUpperCase()||t==='TODOS'&&x==='todos'?' active-'+x:'');
+    });
+    filtrar();
+  }
+
+  function setStatus(s){
+    STATUS_F=s;
+    ['todos','aberta','vencida','paga'].forEach(x=>{
+      document.getElementById('fs-'+x).classList.toggle('active',s===x.toUpperCase()||s==='TODOS'&&x==='todos');
+    });
+    filtrar();
+  }
+
+  function filtrar(){
+    const q=document.getElementById('busca').value.trim().toUpperCase();
+    let lista=TODOS;
+    if(TIPO_F!=='TODOS') lista=lista.filter(c=>c.tipo===TIPO_F);
+    if(STATUS_F!=='TODOS') lista=lista.filter(c=>c.status===STATUS_F);
+    if(q) lista=lista.filter(c=>(c.descricao||'').toUpperCase().includes(q)||(c.categoria||'').toUpperCase().includes(q));
+    renderTable(lista);
+  }
+
+  function renderTable(lista){
+    const tb=document.getElementById('tbody');
+    if(!lista||lista.length===0){
+      tb.innerHTML=`<tr class="empty-row"><td colspan="6"><i class="ti ti-receipt-off"></i>Nenhuma conta encontrada.</td></tr>`;
+      document.getElementById('count').textContent='0 contas';
+      return;
+    }
+    tb.innerHTML=lista.map(c=>{
+      const venc=c.vencimento;
+      const isVencida=c.status==='ABERTA'&&venc<hoje;
+      const statusReal=isVencida?'VENCIDA':c.status;
+      const labels={ABERTA:'ABERTA',PAGA:'PAGA',VENCIDA:'VENCIDA',PARCIAL:'PARCIAL',CANCELADA:'CANCELADA'};
+      return `<tr>
+        <td><span class="tipo-pill ${c.tipo[0]}">${c.tipo==='RECEBER'?'RECEBER':'PAGAR'}</span></td>
+        <td>
+          <div style="font-weight:600;color:var(--dark)">${c.descricao}</div>
+          ${c.categoria?`<div style="font-size:11.5px;color:var(--sub);margin-top:1px">${c.categoria}</div>`:''}
+        </td>
+        <td class="td-date${isVencida?' vencida':''}">${fmtDate(venc)}</td>
+        <td><span class="status-pill ${statusReal}">${labels[statusReal]}</span></td>
+        <td class="td-valor ${c.tipo[0]}">${fmt(c.valor)}</td>
+        <td>
+          <div class="actions">
+            ${c.status==='ABERTA'||c.status==='PARCIAL'||c.status==='VENCIDA'
+              ?`<button class="act-btn act-pay" onclick="marcarPaga('${c.id}')" title="Marcar como paga"><i class="ti ti-check"></i></button>`:''}
+            <button class="act-btn act-edit" onclick="editarConta('${c.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+            <button class="act-btn act-del" onclick="excluirConta('${c.id}','${c.descricao.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    document.getElementById('count').textContent=lista.length+' conta(s)';
+  }
+
+  async function load(){
+    const{data,error}=await db.from('contas').select('*').order('vencimento',{ascending:true});
+    if(error){toast('Erro ao carregar: '+error.message,'error');return;}
+    TODOS=data||[];
+
+    // totalizadores
+    const receber=TODOS.filter(c=>c.tipo==='RECEBER'&&['ABERTA','PARCIAL','VENCIDA'].includes(c.status));
+    const pagar=TODOS.filter(c=>c.tipo==='PAGAR'&&['ABERTA','PARCIAL','VENCIDA'].includes(c.status));
+    const totalR=receber.reduce((s,c)=>s+Number(c.valor),0);
+    const totalP=pagar.reduce((s,c)=>s+Number(c.valor),0);
+    const vencidas=TODOS.filter(c=>['ABERTA','PARCIAL'].includes(c.status)&&c.vencimento<hoje).length;
+    document.getElementById('t-receber').textContent=fmt(totalR);
+    document.getElementById('t-pagar').textContent=fmt(totalP);
+    document.getElementById('t-vencidas').textContent=vencidas;
+    const saldo=totalR-totalP;
+    const elS=document.getElementById('t-saldo');
+    elS.textContent=fmt(saldo);
+    elS.className='total-value '+(saldo>=0?'green':'coral');
+
+    // aplica filtro inicial
+    if(TIPO_F!=='TODOS') setTipo(TIPO_F);
+    else filtrar();
+  }
+
+  // MODAL
+  function abrirModal(tipo='RECEBER',conta=null){
+    EDIT_ID=conta?conta.id:null;
+    document.getElementById('modal-title').textContent=conta?'Editar conta':'Nova conta';
+    document.getElementById('m-tipo').value=conta?conta.tipo:tipo;
+    document.getElementById('m-descricao').value=conta?conta.descricao:'';
+    document.getElementById('m-valor').value=conta?conta.valor:'';
+    document.getElementById('m-vencimento').value=conta?conta.vencimento:hoje;
+    document.getElementById('m-categoria').value=conta?conta.categoria||'':'';
+    document.getElementById('m-forma').value=conta?conta.forma_pagamento||'':'';
+    document.getElementById('m-obs').value=conta?conta.observacoes||'':'';
+    const saveBtn=document.getElementById('btn-modal-save');
+    const t=conta?conta.tipo:tipo;
+    saveBtn.className='btn-modal-save '+(t==='RECEBER'?'green':'coral');
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('m-descricao').focus(),100);
+  }
+
+  function fecharModal(){
+    document.getElementById('modal-overlay').classList.remove('open');
+    EDIT_ID=null;
+  }
+
+  async function salvarConta(){
+    const desc=document.getElementById('m-descricao').value.trim();
+    const valor=parseFloat(document.getElementById('m-valor').value);
+    const venc=document.getElementById('m-vencimento').value;
+    if(!desc){toast('Informe a descrição.','error');return;}
+    if(!valor||valor<=0){toast('Informe o valor.','error');return;}
+    if(!venc){toast('Informe o vencimento.','error');return;}
+
+    const payload={
+      tipo:document.getElementById('m-tipo').value,
+      descricao:desc.toUpperCase(),
+      valor,
+      vencimento:venc,
+      categoria:document.getElementById('m-categoria').value.trim().toUpperCase()||null,
+      forma_pagamento:document.getElementById('m-forma').value||null,
+      observacoes:document.getElementById('m-obs').value.trim().toUpperCase()||null,
+      status:'ABERTA',
+    };
+
+    const btn=document.getElementById('btn-modal-save');
+    btn.disabled=true;
+    btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin .7s linear infinite;display:inline-block"></i> Salvando...';
+
+    let error;
+    if(EDIT_ID){({error}=await db.from('contas').update(payload).eq('id',EDIT_ID));}
+    else{({error}=await db.from('contas').insert(payload));}
+
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar';
+
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Conta salva!','success');
+    fecharModal();
+    load();
+  }
+
+  function editarConta(id){
+    const c=TODOS.find(x=>x.id===id);
+    if(c) abrirModal(c.tipo,c);
+  }
+
+  async function marcarPaga(id){
+    const{error}=await db.from('contas').update({status:'PAGA',data_pagamento:hoje}).eq('id',id);
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Conta marcada como paga!','success');
+    load();
+  }
+
+  async function excluirConta(id,desc){
+    if(!confirm('Excluir "'+desc+'"?')) return;
+    const{error}=await db.from('contas').delete().eq('id',id);
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Conta excluída.','success');
+    load();
+  }
+
+  // inicializa estados dos botões de filtro
+  ['todos','receber','pagar'].forEach(x=>{
+    const el=document.getElementById('f-'+x);
+    const t=x.toUpperCase();
+    el.className='tipo-btn'+(TIPO_F===t||TIPO_F==='TODOS'&&x==='todos'?' active-'+x:'');
+  });
+
+  load();
+</script>
+</body>
+</html>
