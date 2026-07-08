@@ -179,7 +179,11 @@
   .mod-card.sage:hover {border-color:rgba(120,150,70,.35)}
   .mod-card.amber:hover{border-color:rgba(154,96,0,.35)}
   .mod-card.amber:hover .card-icon-box{background:#9A6000;color:#fff}
-  .mod-card.amber:hover .card-arrow{background:#9A6000;color:#fff;transform:translateX(3px) rotate(-45deg)}
+  .mod-card.green{--glow:rgba(59,109,17,.16)}
+  .mod-card.green:hover{border-color:rgba(59,109,17,.38)}
+  .mod-card.green .card-icon-box{background:#EAF3DE;color:#3B6D11}
+  .mod-card.green:hover .card-icon-box{background:#3B6D11;color:#fff}
+  .mod-card.green:hover .card-arrow{background:#3B6D11;color:#fff;transform:translateX(3px) rotate(-45deg)}
 
   .card-icon-box{
     width:52px;height:52px;border-radius:14px;
@@ -304,6 +308,17 @@
         <div>
           <div class="card-name">Financeiro</div>
           <div class="card-desc">Contas a pagar, a receber e caixa diário.</div>
+        </div>
+        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </a>
+
+    <a class="mod-card green" href="venda.html">
+      <div class="card-icon-box"><i class="ti ti-shopping-cart"></i></div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-name">Venda</div>
+          <div class="card-desc">Venda rápida de balcão e histórico completo de vendas.</div>
         </div>
         <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
       </div>
