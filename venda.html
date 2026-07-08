@@ -27,7 +27,7 @@
   .metric-sub{font-size:11px;color:var(--sub);margin-top:3px}
   .section-label{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);margin-bottom:1.1rem;display:flex;align-items:center;gap:8px}
   .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-  .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   .mod-card{background:var(--white);border-radius:20px;border:1px solid var(--border);padding:2rem;display:flex;flex-direction:column;gap:1.1rem;cursor:pointer;text-decoration:none;color:inherit;overflow:hidden;position:relative;transition:box-shadow .22s,border-color .22s,transform .2s;animation:cardIn .4s ease both}
   .mod-card:nth-child(1){animation-delay:.03s}.mod-card:nth-child(2){animation-delay:.09s}
   .mod-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 85% -10%,var(--glow,transparent),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
@@ -96,9 +96,21 @@
       <div class="card-icon"><i class="ti ti-receipt"></i></div>
       <div class="card-bottom">
         <div>
-          <div class="card-name">Vendas</div>
-          <div class="card-desc">Histórico completo de todas as vendas realizadas, com detalhes e status.</div>
+          <div class="card-name">Histórico de Vendas</div>
+          <div class="card-desc">Todas as vendas realizadas com detalhes e status.</div>
           <div class="card-tag coral"><i class="ti ti-list"></i> HISTÓRICO COMPLETO</div>
+        </div>
+        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </a>
+
+    <a class="mod-card sage" href="venda-normal.html">
+      <div class="card-icon" style="background:#EAEFE1;color:#4A6B1F"><i class="ti ti-user-check"></i></div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-name">Venda com Cliente</div>
+          <div class="card-desc">Venda vinculada ao cadastro do cliente, com desconto por item e observações.</div>
+          <div class="card-tag" style="background:#EAEFE1;color:#4A6B1F"><i class="ti ti-receipt"></i> COM DADOS DO CLIENTE</div>
         </div>
         <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
       </div>

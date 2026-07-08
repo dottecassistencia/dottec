@@ -276,7 +276,7 @@
 <script>
   const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
   const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY); window._db_vr=db;
   const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
 
   let ITENS=[];
@@ -563,3 +563,60 @@
 </script>
 </body>
 </html>
+
+<!-- HISTÓRICO DO DIA (injetado abaixo do PDV) -->
+<style>
+  .historico-dia{background:var(--white);border-top:1px solid var(--border);padding:1.25rem 1.5rem}
+  .hist-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin-bottom:.9rem;display:flex;align-items:center;justify-content:space-between}
+  .hist-title a{font-size:11px;font-weight:700;color:var(--cyan-dark);text-decoration:none}
+  .hist-title a:hover{text-decoration:underline}
+  .hist-list{display:flex;flex-direction:column;gap:6px}
+  .hist-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg);border-radius:10px;transition:background .12s;cursor:pointer;text-decoration:none}
+  .hist-item:hover{background:#E2DFD6}
+  .hist-num{font-size:11px;font-weight:800;color:var(--sub);background:var(--white);padding:2px 8px;border-radius:6px;flex-shrink:0}
+  .hist-hora{font-size:11.5px;color:var(--sub);flex-shrink:0;font-variant-numeric:tabular-nums}
+  .hist-itens{font-size:12.5px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hist-forma{font-size:11px;color:var(--sub);flex-shrink:0}
+  .hist-total{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark);flex-shrink:0;min-width:80px;text-align:right}
+  .hist-empty{font-size:13px;color:var(--sub);text-align:center;padding:1.25rem;background:var(--bg);border-radius:10px}
+</style>
+
+<div class="historico-dia" id="hist-section" style="display:none">
+  <div class="hist-title">
+    <span>Vendas de hoje</span>
+    <a href="vendas.html">Ver tudo →</a>
+  </div>
+  <div class="hist-list" id="hist-list"></div>
+</div>
+
+<script>
+(async function loadHistorico(){
+  const hoje=new Date().toISOString().slice(0,10);
+  const{data}=await window._db_vr.from('vendas')
+    .select('id,numero,total,forma_pagamento,criado_em,venda_itens(nome)')
+    .eq('status','CONCLUIDA')
+    .eq('tipo','RAPIDA')
+    .gte('criado_em',hoje+'T00:00:00')
+    .lte('criado_em',hoje+'T23:59:59')
+    .order('criado_em',{ascending:false})
+    .limit(15);
+
+  if(!data||data.length===0) return;
+  document.getElementById('hist-section').style.display='block';
+
+  const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtHr=d=>new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const formaLabel={'DINHEIRO':'Dinheiro','PIX':'PIX','DEBITO':'Débito','CREDITO':'Crédito'};
+
+  document.getElementById('hist-list').innerHTML=data.map(v=>{
+    const nomes=(v.venda_itens||[]).map(i=>i.nome).join(', ')||'—';
+    return `<div class="hist-item" onclick="window.location.href='vendas.html'">
+      <span class="hist-num">#${String(v.numero).padStart(4,'0')}</span>
+      <span class="hist-hora">${fmtHr(v.criado_em)}</span>
+      <span class="hist-itens">${nomes}</span>
+      <span class="hist-forma">${formaLabel[v.forma_pagamento]||v.forma_pagamento||'—'}</span>
+      <span class="hist-total">${fmt(v.total)}</span>
+    </div>`;
+  }).join('');
+})();
+</script>
