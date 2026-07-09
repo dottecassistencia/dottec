@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Compras — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--slate:#3A4A6B;--slate-bg:#EEF0F5}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .content{max-width:1200px;margin:0 auto;padding:2rem}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+  .metric{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem}
+  .metric-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+  .metric-value{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--dark)}
+  .metric-value.coral{color:var(--coral)}.metric-value.amber{color:var(--amber)}.metric-value.green{color:var(--green)}
+
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  .btn-slate{background:var(--slate);color:#fff}.btn-slate:hover{background:#2A3A5B}
+  .btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cyan-dark)}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg)}
+
+  .filters{display:flex;gap:6px}
+  .filter-btn{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Figtree',sans-serif;display:flex;align-items:center;gap:5px}
+  .filter-btn.active{background:var(--cyan-bg);color:var(--cyan-dark);border-color:rgba(41,184,194,.4)}
+  .filter-btn:hover{border-color:var(--cyan);color:var(--cyan-dark)}
+
+  .search-wrap{position:relative;margin-left:auto}
+  .search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
+  .search-wrap input{width:240px;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:uppercase}
+  .search-wrap input::placeholder{text-transform:none}
+  .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
+
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAF7}
+  thead th.right{text-align:right}
+  tbody td{padding:12px 16px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s;cursor:pointer}
+  tbody tr:hover{background:#FAFAF7}
+
+  .nota-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px}
+  .nota-pill.sim{background:var(--green-bg);color:var(--green)}
+  .nota-pill.nao{background:var(--bg);color:var(--sub)}
+
+  .status-pill{display:inline-flex;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .status-pill.PENDENTE{background:var(--amber-bg);color:var(--amber)}
+  .status-pill.PAGO{background:var(--green-bg);color:var(--green)}
+  .status-pill.PARCIAL{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .status-pill.CANCELADO{background:#F0EFEA;color:var(--sub)}
+
+  .td-total{text-align:right;font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+  .td-fn{font-size:11.5px;color:var(--sub);margin-top:2px}
+  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+  .act-view{background:var(--cyan-bg);color:var(--cyan-dark)}.act-view:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}.act-del:hover{background:var(--coral);color:#fff}
+
+  .empty-row td{padding:3rem 1rem;text-align:center;color:var(--sub)}
+  .empty-row i{font-size:32px;display:block;margin-bottom:10px;opacity:.35}
+  .table-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub)}
+
+  /* MODAL DETALHE */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:700px;box-shadow:0 24px 64px rgba(0,0,0,.18);margin:auto}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+  .det-item{background:var(--bg);border-radius:10px;padding:10px 12px}
+  .det-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+  .det-value{font-size:13.5px;font-weight:600;color:var(--dark)}
+  .section-mini{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin:1rem 0 .6rem;display:flex;align-items:center;gap:7px}
+  .section-mini::after{content:'';flex:1;height:1px;background:var(--border)}
+  .itens-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .itens-table th{text-align:left;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;border-bottom:1px solid var(--border);background:#FAFAF7}
+  .itens-table td{padding:8px 10px;border-bottom:1px solid #F2F0EA}
+  .itens-table tr:last-child td{border-bottom:none}
+  .nfe-tag{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--green-bg);color:var(--green)}
+  .nfe-tag.nao{background:var(--bg);color:var(--sub)}
+  .parcelas-list{display:flex;flex-direction:column;gap:6px}
+  .parcela-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:9px;padding:9px 12px;font-size:13px}
+  .parcela-num{font-weight:800;color:var(--sub);min-width:28px}
+  .parcela-venc{color:var(--text)}
+  .parcela-val{font-family:'Lora',serif;font-weight:700;color:var(--dark)}
+  .parcela-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .parcela-status.ABERTA{background:var(--amber-bg);color:var(--amber)}
+  .parcela-status.PAGA{background:var(--green-bg);color:var(--green)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @media(max-width:900px){.metrics{grid-template-columns:1fr 1fr}.content{padding:1.25rem}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL DETALHE -->
+<div class="modal-overlay" id="modal-det" onclick="if(event.target===this)fecharDet()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="det-title">Detalhes da compra</div>
+      <button class="modal-close" onclick="fecharDet()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="det-body">Carregando...</div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="dashboard.html"><i class="ti ti-arrow-left"></i></a>
+    <div><div class="crumb-title">Compras</div><div class="crumb-sub">Entrada de produtos e NF-e</div></div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Compras este mês</div><div class="metric-value" id="m-qtd">—</div></div>
+    <div class="metric"><div class="metric-label">Total este mês</div><div class="metric-value coral" id="m-total">R$ —</div></div>
+    <div class="metric"><div class="metric-label">A pagar (parcelas)</div><div class="metric-value amber" id="m-pagar">R$ —</div></div>
+    <div class="metric"><div class="metric-label">Com NF-e</div><div class="metric-value green" id="m-nfe">—</div></div>
+  </div>
+
+  <div class="toolbar">
+    <a class="btn btn-slate" href="compra-nova.html"><i class="ti ti-file-invoice"></i> Nova compra / Importar XML</a>
+
+    <div class="filters">
+      <button class="filter-btn active" id="fs-todos" onclick="setFiltro('TODOS')">Todas</button>
+      <button class="filter-btn" id="fs-pendente" onclick="setFiltro('PENDENTE')">Pendentes</button>
+      <button class="filter-btn" id="fs-pago" onclick="setFiltro('PAGO')">Pagas</button>
+      <button class="filter-btn" id="fs-cancelado" onclick="setFiltro('CANCELADO')">Canceladas</button>
+    </div>
+
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="busca" placeholder="Buscar por fornecedor ou NF..." oninput="filtrar()"/>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Fornecedor</th>
+          <th style="width:100px">NF-e</th>
+          <th style="width:90px">Data</th>
+          <th style="width:90px">Condição</th>
+          <th style="width:90px">Status</th>
+          <th style="width:120px" class="right">Total</th>
+          <th style="width:80px;text-align:right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr class="empty-row"><td colspan="7"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Carregando...</td></tr>
+      </tbody>
+    </table>
+    <div class="table-footer"><span id="count">—</span><span>Dottec Assistência</span></div>
+  </div>
+</main>
+
+<script>
+  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+  const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+  const mesInicio=new Date().toISOString().slice(0,8)+'01';
+
+  let TODOS=[], FILTRO='TODOS';
+
+  function toast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+    document.getElementById('tm').textContent=msg;
+    t.className='toast '+type+' show';
+    setTimeout(()=>t.classList.remove('show'),4000);
+  }
+
+  function setFiltro(f){
+    FILTRO=f;
+    ['todos','pendente','pago','cancelado'].forEach(x=>{
+      document.getElementById('fs-'+x).classList.toggle('active',f===x.toUpperCase()||f==='TODOS'&&x==='todos');
+    });
+    filtrar();
+  }
+
+  function filtrar(){
+    const q=document.getElementById('busca').value.trim().toUpperCase();
+    let lista=TODOS;
+    if(FILTRO!=='TODOS') lista=lista.filter(c=>c.status===FILTRO);
+    if(q) lista=lista.filter(c=>
+      (c.fornecedor_nome||'').toUpperCase().includes(q)||
+      (c.numero_nf||'').includes(q)||
+      (c.pessoas?.nome||'').toUpperCase().includes(q)
+    );
+    renderTable(lista);
+  }
+
+  function renderTable(lista){
+    const tb=document.getElementById('tbody');
+    if(!lista.length){
+      tb.innerHTML=`<tr class="empty-row"><td colspan="7"><i class="ti ti-shopping-bag-x"></i>Nenhuma compra encontrada.</td></tr>`;
+      document.getElementById('count').textContent='0 compras';return;
+    }
+    tb.innerHTML=lista.map(c=>{
+      const fn=c.pessoas?.nome||c.fornecedor_nome||'—';
+      return`<tr onclick="verDetalhe('${c.id}')">
+        <td>
+          <div style="font-weight:600;color:var(--dark)">${fn}</div>
+          ${c.fornecedor_cnpj?`<div class="td-fn">CNPJ: ${c.fornecedor_cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5')}</div>`:''}
+        </td>
+        <td>
+          ${c.tem_nota
+            ?`<span class="nota-pill sim"><i class="ti ti-file-check"></i> NF ${c.numero_nf||'—'}</span>`
+            :`<span class="nota-pill nao"><i class="ti ti-file-off"></i> Sem nota</span>`}
+        </td>
+        <td style="font-size:12.5px;color:var(--sub)">${fmtDate(c.data_entrada)}</td>
+        <td style="font-size:12.5px">${c.condicao==='AVISTA'?'À vista':'A prazo'}</td>
+        <td><span class="status-pill ${c.status}">${c.status}</span></td>
+        <td class="td-total">${fmt(c.valor_total)}</td>
+        <td>
+          <div style="display:flex;gap:5px;justify-content:flex-end">
+            <button class="act-btn act-view" onclick="event.stopPropagation();verDetalhe('${c.id}')" title="Detalhes"><i class="ti ti-eye"></i></button>
+            ${c.status!=='CANCELADO'?`<button class="act-btn act-del" onclick="event.stopPropagation();cancelar('${c.id}')" title="Cancelar"><i class="ti ti-x"></i></button>`:''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    document.getElementById('count').textContent=lista.length+' compra(s)';
+  }
+
+  async function load(){
+    const[rC,rP]=await Promise.all([
+      db.from('compras').select('*,pessoas(nome)').order('criado_em',{ascending:false}),
+      db.from('compra_parcelas').select('valor').eq('status','ABERTA'),
+    ]);
+    TODOS=rC.data||[];
+    const mes=TODOS.filter(c=>c.data_entrada>=mesInicio&&c.status!=='CANCELADO');
+    const totalMes=mes.reduce((s,c)=>s+Number(c.valor_total),0);
+    const totalPagar=(rP.data||[]).reduce((s,p)=>s+Number(p.valor),0);
+    const comNfe=TODOS.filter(c=>c.tem_nota).length;
+    document.getElementById('m-qtd').textContent=mes.length;
+    document.getElementById('m-total').textContent=fmt(totalMes);
+    document.getElementById('m-pagar').textContent=fmt(totalPagar);
+    document.getElementById('m-nfe').textContent=comNfe;
+    filtrar();
+  }
+
+  async function verDetalhe(id){
+    const c=TODOS.find(x=>x.id===id);if(!c) return;
+    const fn=c.pessoas?.nome||c.fornecedor_nome||'—';
+    document.getElementById('det-title').textContent='Compra — '+(c.numero_nf?'NF '+c.numero_nf:fn);
+    document.getElementById('det-body').innerHTML='<div style="text-align:center;padding:2rem;color:var(--sub)"><i class="ti ti-loader-2" style="font-size:28px;animation:spin .8s linear infinite"></i></div>';
+    document.getElementById('modal-det').classList.add('open');
+
+    const[rI,rP]=await Promise.all([
+      db.from('compra_itens').select('*').eq('compra_id',id),
+      db.from('compra_parcelas').select('*').eq('compra_id',id).order('numero'),
+    ]);
+    const itens=rI.data||[], parcelas=rP.data||[];
+
+    const detGrid=[
+      ['Fornecedor',fn],
+      ['CNPJ',c.fornecedor_cnpj?c.fornecedor_cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—'],
+      ['Data entrada',fmtDate(c.data_entrada)],
+      ['Data emissão',fmtDate(c.data_emissao)],
+      ['NF-e',c.tem_nota?(c.numero_nf+' / Série '+c.serie_nf):'Sem nota fiscal'],
+      ['Status',c.status],
+      ['Condição',c.condicao==='AVISTA'?'À vista':'A prazo'],
+      ['Total',fmt(c.valor_total)],
+    ].map(([l,v])=>`<div class="det-item"><div class="det-label">${l}</div><div class="det-value">${v}</div></div>`).join('');
+
+    const itensHtml=itens.map(it=>`<tr>
+      <td>${it.descricao}</td>
+      <td style="text-align:center">${it.quantidade}</td>
+      <td style="text-align:right">${fmt(it.valor_unitario)}</td>
+      <td style="text-align:right">${fmt(it.valor_total)}</td>
+      <td style="text-align:center"><span class="nfe-tag ${it.habilita_nfe_saida?'':'nao'}">${it.habilita_nfe_saida?'SIM':'NÃO'}</span></td>
+    </tr>`).join('');
+
+    const parcelasHtml=parcelas.length?parcelas.map(p=>`
+      <div class="parcela-row">
+        <span class="parcela-num">${p.numero}ª</span>
+        <span class="parcela-venc">${fmtDate(p.vencimento)}</span>
+        <span class="parcela-val">${fmt(p.valor)}</span>
+        <span class="parcela-status ${p.status}">${p.status}</span>
+      </div>`).join(''):'';
+
+    document.getElementById('det-body').innerHTML=`
+      <div class="det-grid">${detGrid}</div>
+      ${c.chave_nfe?`<div style="font-size:11px;color:var(--sub);background:var(--bg);border-radius:8px;padding:8px 12px;margin-bottom:1rem;word-break:break-all"><b>Chave NF-e:</b> ${c.chave_nfe}</div>`:''}
+      <div class="section-mini">Itens (${itens.length})</div>
+      <table class="itens-table">
+        <thead><tr><th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Unit.</th><th style="text-align:right">Total</th><th style="text-align:center">NF-e saída</th></tr></thead>
+        <tbody>${itensHtml||'<tr><td colspan="5" style="text-align:center;color:var(--sub);padding:1rem">Sem itens</td></tr>'}</tbody>
+      </table>
+      ${parcelas.length?`<div class="section-mini">Parcelas (${parcelas.length})</div><div class="parcelas-list">${parcelasHtml}</div>`:''}
+    `;
+  }
+
+  function fecharDet(){document.getElementById('modal-det').classList.remove('open')}
+
+  async function cancelar(id){
+    if(!confirm('Cancelar esta compra?')) return;
+    const{error}=await db.from('compras').update({status:'CANCELADO'}).eq('id',id);
+    if(error){toast('Erro: '+error.message,'error');return;}
+    toast('Compra cancelada.','success');load();
+  }
+
+  load();
+</script>
+</body>
+</html>

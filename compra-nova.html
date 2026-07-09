@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova Compra — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--slate:#3A4A6B;--slate-bg:#EEF0F5}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;position:sticky;top:0;z-index:100}
+  .crumb{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark);flex:1}
+  .crumb-right{display:flex;gap:10px}
+  .btn{height:40px;padding:0 18px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  .btn-slate{background:var(--slate);color:#fff}.btn-slate:hover{background:#2A3A5B}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .content{max-width:1060px;margin:0 auto;padding:2rem 2rem 5rem}
+
+  /* XML DROP */
+  .xml-drop{border:2px dashed var(--cyan);border-radius:18px;background:var(--cyan-bg);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px;position:relative}
+  .xml-drop:hover,.xml-drop.drag{background:#CBF0F3;border-color:var(--cyan-dark)}
+  .xml-drop.loaded{border-style:solid;background:var(--green-bg);border-color:rgba(59,109,17,.4)}
+  .xml-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .xml-icon{font-size:36px;color:var(--cyan-dark);margin-bottom:10px}
+  .xml-drop.loaded .xml-icon{color:var(--green)}
+  .xml-title{font-size:15px;font-weight:700;color:var(--cyan-dark);margin-bottom:4px}
+  .xml-drop.loaded .xml-title{color:var(--green)}
+  .xml-sub{font-size:12.5px;color:var(--sub)}
+
+  /* PANELS */
+  .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:visible}
+  .panel-head{display:flex;align-items:center;gap:10px;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+  .panel-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .pi-cyan{background:var(--cyan-bg);color:var(--cyan-dark)}.pi-slate{background:var(--slate-bg);color:var(--slate)}
+  .pi-amber{background:var(--amber-bg);color:var(--amber)}.pi-green{background:var(--green-bg);color:var(--green)}
+  .panel-title{font-family:'Lora',serif;font-size:15.5px;font-weight:600;color:var(--dark)}
+  .panel-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .panel-body{padding:1.5rem}
+
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10px;margin-left:3px}
+  input:not([type=checkbox]):not([type=file]),select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13);background:#fff}
+  input::placeholder{color:#B5B2A8}
+  textarea{height:70px;resize:vertical;padding:10px 13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .mb14{margin-bottom:14px}
+
+  /* NOTA TOGGLE */
+  .toggle-row{display:flex;gap:8px;margin-bottom:14px}
+  .tgl-btn{flex:1;height:42px;border-radius:10px;border:1.5px solid var(--border);background:#FAFAF7;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:700;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s}
+  .tgl-btn.sel-green{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+  .tgl-btn.sel-sub{border-color:#B5B2A8;background:#F0EFEA;color:var(--sub)}
+  .tgl-btn.sel-cyan{border-color:var(--cyan);background:var(--cyan-bg);color:var(--cyan-dark)}
+
+  /* ── ITEM CARD DE MATCHING ───────────────────────────────── */
+  .item-card{background:var(--bg);border-radius:16px;padding:1.25rem;margin-bottom:14px;border:1.5px solid var(--border);position:relative}
+  .item-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+  .xml-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:7px;background:var(--slate-bg);color:var(--slate);white-space:nowrap;flex-shrink:0}
+  .xml-desc{font-size:13.5px;font-weight:700;color:var(--dark);flex:1}
+  .xml-meta{font-size:11.5px;color:var(--sub);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+  .xml-meta span{display:flex;align-items:center;gap:3px}
+
+  /* STATUS DO MATCH */
+  .match-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin-bottom:12px;border:1.5px solid}
+  .match-status.mapped{background:var(--green-bg);border-color:rgba(59,109,17,.3)}
+  .match-status.suggested{background:var(--amber-bg);border-color:rgba(154,96,0,.3)}
+  .match-status.none{background:var(--coral-bg);border-color:rgba(232,96,74,.3)}
+  .match-status.confirmed{background:var(--green-bg);border-color:rgba(59,109,17,.5)}
+  .ms-icon{font-size:18px;flex-shrink:0}
+  .match-status.mapped .ms-icon,.match-status.confirmed .ms-icon{color:var(--green)}
+  .match-status.suggested .ms-icon{color:var(--amber)}
+  .match-status.none .ms-icon{color:var(--coral)}
+  .ms-info{flex:1;min-width:0}
+  .ms-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+  .match-status.mapped .ms-label,.match-status.confirmed .ms-label{color:var(--green)}
+  .match-status.suggested .ms-label{color:var(--amber)}
+  .match-status.none .ms-label{color:var(--coral)}
+  .ms-nome{font-size:13.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ms-score{font-size:11px;color:var(--sub)}
+  .ms-btns{display:flex;gap:6px;flex-shrink:0}
+  .ms-btn{height:32px;padding:0 12px;border-radius:8px;border:1.5px solid;cursor:pointer;font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+  .ms-btn.confirm{border-color:var(--green);color:var(--green);background:transparent}.ms-btn.confirm:hover{background:var(--green);color:#fff}
+  .ms-btn.change{border-color:var(--border);color:var(--sub);background:transparent}.ms-btn.change:hover{border-color:var(--cyan);color:var(--cyan-dark)}
+  .ms-btn.reject{border-color:var(--coral);color:var(--coral);background:transparent}.ms-btn.reject:hover{background:var(--coral);color:#fff}
+
+  /* BUSCA PRODUTO INLINE */
+  .prod-search-wrap{position:relative;margin-bottom:10px}
+  .prod-search-wrap input{height:40px;font-size:13.5px}
+  .prod-sug-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);max-height:260px;overflow-y:auto;z-index:200;display:none}
+  .prod-sug-drop.open{display:block}
+  .psd-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #F2F0EA;transition:background .12s}
+  .psd-item:last-child{border-bottom:none}
+  .psd-item:hover,.psd-item.focused{background:var(--bg)}
+  .psd-icon{width:34px;height:34px;border-radius:9px;background:var(--coral-bg);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .psd-info{flex:1}.psd-nome{font-size:13px;font-weight:700;color:var(--dark)}.psd-cod{font-size:11.5px;color:var(--sub)}
+  .psd-skip{padding:10px 14px;font-size:12.5px;color:var(--coral);font-weight:600;cursor:pointer;border-top:1px solid var(--border);display:flex;align-items:center;gap:7px;transition:background .12s}
+  .psd-skip:hover{background:var(--coral-bg)}
+
+  /* NF-E saida toggle dentro do item */
+  .nfe-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:10px;padding:10px 14px;border:1px solid var(--border);margin-top:10px}
+  .nfe-row-info{flex:1}.nfe-row-title{font-size:13px;font-weight:700;color:var(--dark)}.nfe-row-desc{font-size:11.5px;color:var(--sub);margin-top:2px}
+  .sw{width:38px;height:21px;border-radius:20px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .sw.on{background:var(--green)}.sw.off{background:#D4D2CB}
+  .sw::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .sw.on::after{left:20px}.sw.off::after{left:3px}
+
+  /* CAMPOS EXTRAS POR ITEM (qty, unit) */
+  .item-valores{display:grid;grid-template-columns:80px 1fr 1fr;gap:10px;margin-top:10px}
+
+  /* PARCELAS */
+  .parcelas-area{display:none}
+  .parcelas-area.show{display:block}
+  .parc-row{display:grid;grid-template-columns:52px 1fr 1fr 36px;gap:10px;align-items:end;margin-bottom:10px}
+  .parc-num{font-size:11px;font-weight:800;color:var(--sub);background:#F2F0EA;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+  .parc-del{width:36px;height:42px;border-radius:10px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .12s;flex-shrink:0}
+  .parc-del:hover{background:var(--coral);color:#fff}
+  .add-parc-btn{height:36px;padding:0 12px;border-radius:9px;border:1.5px dashed var(--border);background:transparent;cursor:pointer;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;color:var(--sub);display:flex;align-items:center;gap:6px;transition:all .15s;margin-top:8px}
+  .add-parc-btn:hover{border-color:var(--cyan);color:var(--cyan-dark);background:var(--cyan-bg)}
+  .parc-aviso{font-size:11.5px;color:var(--amber);display:flex;align-items:center;gap:5px;margin-top:8px}
+  .add-item-btn{height:36px;padding:0 14px;border-radius:9px;border:1.5px dashed var(--border);background:transparent;cursor:pointer;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;color:var(--sub);display:flex;align-items:center;gap:6px;transition:all .15s;margin-top:4px}
+  .add-item-btn:hover{border-color:var(--cyan);color:var(--cyan-dark);background:var(--cyan-bg)}
+  .item-del-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:8px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .12s}
+  .item-del-btn:hover{background:var(--coral);color:#fff}
+
+  /* TOTAIS */
+  .tot-box{background:var(--bg);border-radius:14px;padding:1.1rem 1.25rem}
+  .tot-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+  .tot-sep{height:1px;background:var(--border);margin:8px 0}
+  .tot-row.big{font-family:'Lora',serif;font-size:18px;font-weight:700}
+  .tot-row.big span:last-child{color:var(--coral)}
+
+  /* matching summary header */
+  .match-summary{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .ms-pill{font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:8px;display:flex;align-items:center;gap:5px}
+  .ms-pill.green{background:var(--green-bg);color:var(--green)}
+  .ms-pill.amber{background:var(--amber-bg);color:var(--amber)}
+  .ms-pill.coral{background:var(--coral-bg);color:var(--coral)}
+  .ms-pill.sub{background:var(--bg);color:var(--sub)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}.parc-row{grid-template-columns:44px 1fr 1fr 36px}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="compras.html"><i class="ti ti-arrow-left"></i></a>
+    <div class="crumb-title">Nova Compra</div>
+    <div class="crumb-right">
+      <a class="btn btn-secondary" href="compras.html">Cancelar</a>
+      <button class="btn btn-slate" id="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> Salvar compra</button>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- XML DROP -->
+  <div class="xml-drop" id="xml-drop" ondragover="ondrag(event)" ondragleave="offdrag()" ondrop="ondrop(event)">
+    <input type="file" id="xml-input" accept=".xml" onchange="lerXml(this.files[0])"/>
+    <div class="xml-icon" id="xml-icon"><i class="ti ti-file-import"></i></div>
+    <div class="xml-title" id="xml-title">Importar XML da NF-e</div>
+    <div class="xml-sub" id="xml-sub">Arraste ou clique para selecionar o arquivo XML do fornecedor</div>
+  </div>
+
+  <!-- NOTA FISCAL -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-cyan"><i class="ti ti-file-invoice"></i></div>
+      <div><div class="panel-title">Nota fiscal</div></div>
+    </div>
+    <div class="panel-body">
+      <div class="toggle-row">
+        <button class="tgl-btn" id="tn-sim" onclick="setNota(true)"><i class="ti ti-file-check"></i> Com nota fiscal</button>
+        <button class="tgl-btn" id="tn-nao" onclick="setNota(false)"><i class="ti ti-file-off"></i> Sem nota fiscal</button>
+      </div>
+      <div id="campos-nf" style="display:none">
+        <div class="grid3 mb14">
+          <div><label>Número NF</label><input type="text" id="numero_nf" placeholder="126712"/></div>
+          <div><label>Série</label><input type="text" id="serie_nf" placeholder="1"/></div>
+          <div><label>Data emissão</label><input type="date" id="data_emissao"/></div>
+        </div>
+        <div class="mb14"><label>Chave NF-e <span class="label-opt">44 dígitos</span></label><input type="text" id="chave_nfe" placeholder="00000000000000000000000000000000000000000000" maxlength="44" style="text-transform:none"/></div>
+        <div><label>Natureza da operação</label><input type="text" id="natop" placeholder="VENDA DE MERCADORIA"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORNECEDOR -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-slate"><i class="ti ti-truck"></i></div>
+      <div><div class="panel-title">Fornecedor</div></div>
+    </div>
+    <div class="panel-body">
+      <div id="forn-busca-wrap" class="mb14">
+        <label>Buscar fornecedor cadastrado</label>
+        <div style="position:relative">
+          <input type="text" id="forn-busca" placeholder="Nome ou CNPJ" autocomplete="off" oninput="buscaForn()"/>
+          <div id="forn-sug" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;z-index:50"></div>
+        </div>
+      </div>
+      <div id="forn-selected" style="display:none;background:var(--cyan-bg);border:1.5px solid var(--cyan);border-radius:12px;padding:10px 14px;align-items:center;gap:12px;margin-bottom:14px">
+        <i class="ti ti-building" style="color:var(--cyan-dark);font-size:20px"></i>
+        <div style="flex:1"><div style="font-weight:700;color:var(--dark)" id="forn-nome-sel">—</div><div style="font-size:11.5px;color:var(--sub)" id="forn-cnpj-sel"></div></div>
+        <button onclick="limparForn()" style="border:none;background:none;cursor:pointer;color:var(--sub);font-size:16px"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="grid2">
+        <div><label>Razão social / Nome</label><input type="text" id="fornecedor_nome" placeholder="NOME DO FORNECEDOR" style="text-transform:uppercase"/></div>
+        <div><label>CNPJ <span class="label-opt">opcional</span></label><input type="text" id="fornecedor_cnpj" placeholder="00.000.000/0000-00" oninput="maskCnpj(this)" style="text-transform:none"/></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA DE ENTRADA -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-cyan"><i class="ti ti-calendar"></i></div><div><div class="panel-title">Data de entrada</div></div></div>
+    <div class="panel-body"><div style="max-width:200px"><label>Data de entrada dos produtos</label><input type="date" id="data_entrada"/></div></div>
+  </div>
+
+  <!-- ITENS -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-amber"><i class="ti ti-package"></i></div>
+      <div><div class="panel-title">Itens da compra</div><div class="panel-sub" id="itens-sub">Nenhum item</div></div>
+    </div>
+    <div class="panel-body">
+      <div id="match-summary" style="display:none" class="match-summary"></div>
+      <div id="itens-container"></div>
+      <button class="add-item-btn" onclick="addItemManual()"><i class="ti ti-plus"></i> Adicionar item manualmente</button>
+    </div>
+  </div>
+
+  <!-- TOTAIS -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-cyan"><i class="ti ti-receipt"></i></div><div><div class="panel-title">Totais</div></div></div>
+    <div class="panel-body">
+      <div class="grid3 mb14">
+        <div><label>Frete</label><input type="number" step="0.01" id="valor_frete" value="0" oninput="calcTotais()"/></div>
+        <div><label>Desconto</label><input type="number" step="0.01" id="valor_desconto" value="0" oninput="calcTotais()"/></div>
+        <div><label>Outras despesas</label><input type="number" step="0.01" id="valor_outros" value="0" oninput="calcTotais()"/></div>
+      </div>
+      <div class="tot-box">
+        <div class="tot-row"><span style="color:var(--sub)">Produtos</span><span id="tot-prod">R$ 0,00</span></div>
+        <div class="tot-row"><span style="color:var(--sub)">+ Frete</span><span id="tot-frete">R$ 0,00</span></div>
+        <div class="tot-row"><span style="color:var(--sub)">- Desconto</span><span id="tot-desc">R$ 0,00</span></div>
+        <div class="tot-row"><span style="color:var(--sub)">+ Outros</span><span id="tot-outros">R$ 0,00</span></div>
+        <div class="tot-sep"></div>
+        <div class="tot-row big"><span>Total da compra</span><span id="tot-total">R$ 0,00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGAMENTO -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-green"><i class="ti ti-currency-dollar"></i></div><div><div class="panel-title">Pagamento</div></div></div>
+    <div class="panel-body">
+      <div class="mb14">
+        <label>Forma de pagamento</label>
+        <select id="forma_pagamento">
+          <option value="">Selecione</option>
+          <option>DINHEIRO</option><option>PIX</option><option>BOLETO</option>
+          <option>TRANSFERÊNCIA</option><option>CARTÃO CRÉDITO</option><option>CARTÃO DÉBITO</option><option>A PRAZO</option>
+        </select>
+      </div>
+      <label>Condição</label>
+      <div class="toggle-row">
+        <button class="tgl-btn" id="cond-avista" onclick="setCond('AVISTA')"><i class="ti ti-check-circle"></i> À vista</button>
+        <button class="tgl-btn" id="cond-prazo" onclick="setCond('PRAZO')"><i class="ti ti-calendar-due"></i> A prazo (parcelado)</button>
+      </div>
+      <div class="parcelas-area" id="parcelas-area">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <label style="margin-bottom:0">Parcelas</label>
+          <button class="add-parc-btn" onclick="addParcela()"><i class="ti ti-plus"></i> Adicionar parcela</button>
+        </div>
+        <div id="parc-container"></div>
+        <div class="parc-aviso" id="parc-aviso" style="display:none"><i class="ti ti-info-circle"></i> Cada parcela será lançada em <strong>Contas a Pagar</strong> automaticamente.</div>
+      </div>
+      <div style="margin-top:14px"><label>Observações <span class="label-opt">opcional</span></label><textarea id="observacoes" placeholder="EX: PEDIDO 1234, PRAZO NEGOCIADO..."></textarea></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+let TEM_NOTA=null, COND=null, FORNECEDOR=null;
+let ITENS=[]; // cada item: {xml, match: {produto_id,nome,status:'mapped'|'confirmed'|'suggested'|'none'|'skip'}, habilita_nfe_saida, ...}
+let PARCELAS=[];
+let PRODUTOS_CACHE=null; // carregado uma vez
+let CNPJ_EMITENTE='';
+
+document.getElementById('data_entrada').value=new Date().toISOString().slice(0,10);
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ─── FUZZY MATCH ────────────────────────────────────────────
+// tokeniza e conta palavras em comum (case-insensitive, ignora tokens curtos)
+function fuzzyScore(xmlDesc, prodNome){
+  const clean=s=>s.toUpperCase().replace(/[^A-Z0-9\s]/g,' ').split(/\s+/).filter(t=>t.length>2);
+  const tokA=clean(xmlDesc), tokB=clean(prodNome);
+  if(!tokA.length||!tokB.length) return 0;
+  let matches=0;
+  tokA.forEach(t=>{if(tokB.some(b=>b.includes(t)||t.includes(b)))matches++;});
+  return Math.round((matches/Math.max(tokA.length,tokB.length))*100);
+}
+
+async function carregarProdutos(){
+  if(PRODUTOS_CACHE) return PRODUTOS_CACHE;
+  const{data}=await db.from('produtos').select('id,codigo,nome,codigo_barras,valor_venda').eq('ativo',true);
+  PRODUTOS_CACHE=data||[];
+  return PRODUTOS_CACHE;
+}
+
+// busca no mapa de associações permanentes
+async function buscarMapa(cnpj, codForn){
+  if(!cnpj||!codForn) return null;
+  const{data}=await db.from('fornecedor_produto_map')
+    .select('produto_id,produtos(id,nome,codigo)')
+    .eq('fornecedor_cnpj',cnpj).eq('codigo_fornecedor',codForn).maybeSingle();
+  return data?.produtos||null;
+}
+
+// match automático por EAN depois fuzzy
+async function matchItem(xmlItem){
+  const prods=await carregarProdutos();
+
+  // 1. mapa permanente
+  if(CNPJ_EMITENTE&&xmlItem.cProd){
+    const mapped=await buscarMapa(CNPJ_EMITENTE,xmlItem.cProd);
+    if(mapped) return {produto_id:mapped.id,nome:mapped.nome,codigo:mapped.codigo,status:'mapped',score:100};
+  }
+
+  // 2. EAN exato
+  if(xmlItem.cEAN&&xmlItem.cEAN!=='SEM GTIN'){
+    const p=prods.find(x=>x.codigo_barras===xmlItem.cEAN);
+    if(p) return {produto_id:p.id,nome:p.nome,codigo:p.codigo,status:'suggested',score:99,motivo:'EAN'};
+  }
+
+  // 3. fuzzy nome — retorna top3 com score
+  const scored=prods.map(p=>({...p,score:fuzzyScore(xmlItem.xProd,p.nome)}))
+    .filter(p=>p.score>=30)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,3);
+
+  if(scored.length>0) return {produto_id:scored[0].id,nome:scored[0].nome,codigo:scored[0].codigo,status:'suggested',score:scored[0].score,alternatives:scored,motivo:'nome'};
+
+  return {produto_id:null,nome:null,status:'none',score:0,alternatives:[]};
+}
+
+// ─── XML ────────────────────────────────────────────────────
+function ondrag(e){e.preventDefault();document.getElementById('xml-drop').classList.add('drag')}
+function offdrag(){document.getElementById('xml-drop').classList.remove('drag')}
+function ondrop(e){e.preventDefault();offdrag();const f=e.dataTransfer.files[0];if(f)lerXml(f);}
+
+async function lerXml(file){
+  if(!file||!file.name.endsWith('.xml')){toast('Selecione um arquivo .xml','error');return;}
+  const text=await file.text();
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(text,'text/xml');
+  const ns='http://www.portalfiscal.inf.br/nfe';
+  const g=(t,el=doc)=>el.getElementsByTagNameNS(ns,t)[0]?.textContent||'';
+
+  // cabeçalho
+  CNPJ_EMITENTE=g('CNPJ');
+  document.getElementById('numero_nf').value=g('nNF');
+  document.getElementById('serie_nf').value=g('serie');
+  document.getElementById('data_emissao').value=(g('dhEmi')||'').slice(0,10);
+  document.getElementById('chave_nfe').value=doc.querySelector('[Id]')?.getAttribute('Id')?.replace('NFe','')||'';
+  document.getElementById('natop').value=g('natOp');
+  setNota(true);
+
+  // fornecedor
+  const nomeEmit=g('xNome');
+  document.getElementById('fornecedor_nome').value=nomeEmit.toUpperCase();
+  document.getElementById('fornecedor_cnpj').value=CNPJ_EMITENTE.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+  if(CNPJ_EMITENTE){
+    const{data}=await db.from('pessoas').select('id,nome,documento').eq('documento',CNPJ_EMITENTE).eq('is_fornecedor',true).limit(1);
+    if(data&&data.length>0) selecionarForn(data[0]);
+  }
+
+  // frete/desconto
+  const frete=parseFloat(doc.getElementsByTagNameNS(ns,'vFrete')[0]?.textContent)||0;
+  const desconto=parseFloat(doc.getElementsByTagNameNS(ns,'vDesc')[0]?.textContent)||0;
+  document.getElementById('valor_frete').value=frete||'';
+  document.getElementById('valor_desconto').value=desconto||'';
+
+  // itens — lê XML, guarda tudo, faz matching
+  const dets=Array.from(doc.getElementsByTagNameNS(ns,'det'));
+  ITENS=dets.map(det=>{
+    const gd=t=>det.getElementsByTagNameNS(ns,t)[0]?.textContent||'';
+    return {
+      xml:{
+        nItem:det.getAttribute('nItem'),
+        cProd:gd('cProd'),
+        cEAN:gd('cEAN'),
+        xProd:gd('xProd').toUpperCase(),
+        ncm:gd('NCM'),
+        cfop:gd('CFOP'),
+        unidade:gd('uCom'),
+        quantidade:parseFloat(gd('qCom'))||1,
+        valor_unitario:parseFloat(gd('vUnCom'))||0,
+        valor_total:parseFloat(gd('vProd'))||0,
+        cst_icms:gd('CST')||gd('CSOSN'),
+        aliq_icms:parseFloat(gd('pICMS'))||0,
+        valor_icms:parseFloat(gd('vICMS'))||0,
+        cst_ipi:det.getElementsByTagNameNS(ns,'IPITrib')[0]?.getElementsByTagNameNS(ns,'CST')[0]?.textContent||'',
+        aliq_pis:parseFloat(gd('pPIS'))||0,
+        aliq_cofins:parseFloat(gd('pCOFINS'))||0,
+        origem:parseInt(gd('orig'))||0,
+      },
+      match:{status:'loading'},
+      habilita_nfe_saida:false,
+    };
+  });
+
+  renderItens(); // renderiza com loading
+  calcTotais();
+
+  // feedback visual do drop
+  const drop=document.getElementById('xml-drop');
+  drop.classList.add('loaded');
+  document.getElementById('xml-icon').innerHTML='<i class="ti ti-file-check"></i>';
+  document.getElementById('xml-title').textContent='XML importado: '+file.name;
+  document.getElementById('xml-sub').textContent=ITENS.length+' item(ns) — processando associações...';
+
+  // matching em paralelo
+  const matches=await Promise.all(ITENS.map(it=>matchItem(it.xml)));
+  ITENS.forEach((it,i)=>it.match=matches[i]);
+  renderItens();
+  calcTotais();
+  document.getElementById('xml-sub').textContent=ITENS.length+' item(ns) carregado(s)';
+  toast('XML importado!','success');
+}
+
+// ─── RENDER ITENS ───────────────────────────────────────────
+function renderItens(){
+  const c=document.getElementById('itens-container');
+  document.getElementById('itens-sub').textContent=ITENS.length+' item(ns)';
+
+  if(!ITENS.length){
+    c.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--sub);font-size:13px">Nenhum item. Importe um XML ou adicione manualmente.</div>';
+    document.getElementById('match-summary').style.display='none';
+    return;
+  }
+
+  // summary
+  const mapped=ITENS.filter(it=>it.match.status==='mapped'||it.match.status==='confirmed').length;
+  const sug=ITENS.filter(it=>it.match.status==='suggested').length;
+  const none=ITENS.filter(it=>it.match.status==='none').length;
+  const skip=ITENS.filter(it=>it.match.status==='skip').length;
+  const sumEl=document.getElementById('match-summary');
+  sumEl.style.display='flex';
+  sumEl.innerHTML=`
+    ${mapped?`<span class="ms-pill green"><i class="ti ti-link"></i> ${mapped} vinculado(s)</span>`:''}
+    ${sug?`<span class="ms-pill amber"><i class="ti ti-help-circle"></i> ${sug} aguardando confirmação</span>`:''}
+    ${none?`<span class="ms-pill coral"><i class="ti ti-unlink"></i> ${none} sem correspondência</span>`:''}
+    ${skip?`<span class="ms-pill sub"><i class="ti ti-minus"></i> ${skip} ignorado(s)</span>`:''}
+  `;
+
+  c.innerHTML=ITENS.map((it,i)=>renderItem(it,i)).join('');
+}
+
+function renderItem(it,i){
+  const xml=it.xml||{};
+  const m=it.match||{};
+  const isManual=!xml.xProd&&!xml.cProd;
+
+  // header do item
+  const header=isManual?`<div style="font-size:13px;font-weight:600;color:var(--sub)">Item manual</div>`
+    :`<div>
+      <div class="xml-desc">${xml.xProd||'—'}</div>
+      <div class="xml-meta">
+        ${xml.cProd?`<span><i class="ti ti-barcode" style="font-size:11px"></i> Cód: ${xml.cProd}</span>`:''}
+        ${xml.ncm?`<span>NCM: ${xml.ncm}</span>`:''}
+        ${xml.cfop?`<span>CFOP: ${xml.cfop}</span>`:''}
+        ${xml.cEAN&&xml.cEAN!=='SEM GTIN'?`<span>EAN: ${xml.cEAN}</span>`:''}
+      </div>
+    </div>`;
+
+  // bloco de matching
+  let matchBlock='';
+  if(m.status==='loading'){
+    matchBlock=`<div class="match-status suggested"><i class="ti ti-loader-2 spin ms-icon"></i><div class="ms-info"><div class="ms-label">Buscando associação...</div></div></div>`;
+  } else if(m.status==='mapped'){
+    matchBlock=`<div class="match-status mapped">
+      <i class="ti ti-link ms-icon"></i>
+      <div class="ms-info"><div class="ms-label">Associação salva — vinculado automaticamente</div><div class="ms-nome">${m.nome}</div></div>
+      <div class="ms-btns"><button class="ms-btn change" onclick="abrirBuscaProd(${i})"><i class="ti ti-pencil"></i> Alterar</button></div>
+    </div>`;
+  } else if(m.status==='confirmed'){
+    matchBlock=`<div class="match-status confirmed">
+      <i class="ti ti-circle-check ms-icon"></i>
+      <div class="ms-info"><div class="ms-label">Confirmado</div><div class="ms-nome">${m.nome}</div></div>
+      <div class="ms-btns"><button class="ms-btn change" onclick="abrirBuscaProd(${i})"><i class="ti ti-pencil"></i> Alterar</button></div>
+    </div>`;
+  } else if(m.status==='suggested'){
+    matchBlock=`<div class="match-status suggested">
+      <i class="ti ti-help-circle ms-icon"></i>
+      <div class="ms-info">
+        <div class="ms-label">Sugestão (${m.motivo==='EAN'?'EAN idêntico':'similaridade '+m.score+'%'})</div>
+        <div class="ms-nome">${m.nome}</div>
+        ${m.alternatives&&m.alternatives.length>1?`<div class="ms-score">${m.alternatives.length-1} outra(s) sugestão(ões)</div>`:''}
+      </div>
+      <div class="ms-btns">
+        <button class="ms-btn confirm" onclick="confirmarMatch(${i})"><i class="ti ti-check"></i> Sim, é este</button>
+        <button class="ms-btn change" onclick="abrirBuscaProd(${i})"><i class="ti ti-search"></i> Outro</button>
+        <button class="ms-btn reject" onclick="ignorarItem(${i})"><i class="ti ti-x"></i></button>
+      </div>
+    </div>`;
+    // alternativas
+    if(m.alternatives&&m.alternatives.length>1){
+      matchBlock+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        ${m.alternatives.slice(1).map((a,ai)=>`<button onclick="selecionarAlternativa(${i},${ai+1})" style="height:30px;padding:0 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--sub);display:flex;align-items:center;gap:5px;transition:all .12s" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)'"><i class="ti ti-package" style="font-size:12px"></i>${a.nome} <span style="opacity:.6">${a.score}%</span></button>`).join('')}
+      </div>`;
+    }
+  } else if(m.status==='none'){
+    matchBlock=`<div class="match-status none">
+      <i class="ti ti-unlink ms-icon"></i>
+      <div class="ms-info"><div class="ms-label">Sem correspondência no cadastro</div><div class="ms-score">Pesquise abaixo ou ignore este item</div></div>
+      <div class="ms-btns"><button class="ms-btn change" onclick="abrirBuscaProd(${i})"><i class="ti ti-search"></i> Buscar</button><button class="ms-btn reject" onclick="ignorarItem(${i})"><i class="ti ti-x"></i></button></div>
+    </div>`;
+  } else if(m.status==='skip'){
+    matchBlock=`<div style="padding:8px 12px;background:var(--bg);border-radius:10px;font-size:12.5px;color:var(--sub);display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span><i class="ti ti-minus" style="font-size:11px"></i> Item ignorado — não será vinculado</span>
+      <button onclick="ITENS[${i}].match.status='none';renderItens()" style="border:none;background:none;cursor:pointer;color:var(--cyan-dark);font-size:12px;font-weight:700">Desfazer</button>
+    </div>`;
+  }
+
+  // busca inline (visível quando status==='searching')
+  const searchBlock=m.status==='searching'?`
+    <div class="prod-search-wrap" id="psw-${i}">
+      <input type="text" placeholder="Buscar produto no cadastro..." oninput="buscaProdInline(${i},this.value)" onkeydown="navProdInline(event,${i})" autocomplete="off" id="psi-${i}" style="text-transform:none"/>
+      <div class="prod-sug-drop" id="psd-${i}">
+        <div class="psd-skip" onclick="ignorarItem(${i})"><i class="ti ti-x"></i> Ignorar este item (não vincular)</div>
+      </div>
+    </div>`:'';
+
+  // valores editáveis
+  const valBlock=m.status!=='skip'?`
+    <div class="item-valores">
+      <div><label>Qtd</label><input type="number" step="0.001" value="${xml.quantidade||1}" oninput="ITENS[${i}].xml.quantidade=parseFloat(this.value)||1;recalcItemXml(${i})" style="text-transform:none"/></div>
+      <div><label>Valor unit.</label><input type="number" step="0.01" value="${xml.valor_unitario||0}" oninput="ITENS[${i}].xml.valor_unitario=parseFloat(this.value)||0;recalcItemXml(${i})" style="text-transform:none"/></div>
+      <div><label>Total item</label><input type="number" step="0.01" value="${(xml.valor_total||0).toFixed(2)}" oninput="ITENS[${i}].xml.valor_total=parseFloat(this.value)||0;calcTotais()" style="text-transform:none"/></div>
+    </div>
+    <div class="nfe-row">
+      <div class="nfe-row-info">
+        <div class="nfe-row-title">Habilitar para NF-e de saída</div>
+        <div class="nfe-row-desc">Este produto pode ser vendido com nota fiscal?</div>
+      </div>
+      <div class="sw ${it.habilita_nfe_saida?'on':'off'}" onclick="ITENS[${i}].habilita_nfe_saida=!ITENS[${i}].habilita_nfe_saida;renderItens()"></div>
+    </div>`:'';
+
+  return`<div class="item-card" id="icard-${i}">
+    <button class="item-del-btn" onclick="remItem(${i})"><i class="ti ti-trash"></i></button>
+    <div class="item-card-head">
+      <span class="xml-badge">ITEM ${i+1}</span>
+      ${header}
+    </div>
+    ${matchBlock}
+    ${searchBlock}
+    ${valBlock}
+  </div>`;
+}
+
+// ─── AÇÕES DE MATCHING ──────────────────────────────────────
+function confirmarMatch(i){
+  ITENS[i].match.status='confirmed';
+  renderItens();
+  // salva no mapa
+  salvarMapa(i);
+}
+
+function selecionarAlternativa(i,ai){
+  const alt=ITENS[i].match.alternatives[ai];
+  ITENS[i].match={...ITENS[i].match,produto_id:alt.id,nome:alt.nome,status:'confirmed'};
+  renderItens();
+  salvarMapa(i);
+}
+
+function ignorarItem(i){
+  ITENS[i].match={status:'skip'};
+  renderItens();calcTotais();
+}
+
+function remItem(i){ITENS.splice(i,1);renderItens();calcTotais();}
+
+async function salvarMapa(i){
+  const it=ITENS[i];
+  if(!CNPJ_EMITENTE||!it.xml?.cProd||!it.match?.produto_id) return;
+  await db.from('fornecedor_produto_map').upsert({
+    fornecedor_cnpj:CNPJ_EMITENTE,
+    codigo_fornecedor:it.xml.cProd,
+    descricao_xml:it.xml.xProd,
+    produto_id:it.match.produto_id,
+  },{onConflict:'fornecedor_cnpj,codigo_fornecedor'});
+}
+
+// busca inline
+function abrirBuscaProd(i){
+  ITENS[i].match={...ITENS[i].match,status:'searching'};
+  renderItens();
+  setTimeout(()=>{
+    const inp=document.getElementById('psi-'+i);
+    if(inp){inp.focus();}
+  },50);
+}
+
+let searchTimers={};
+async function buscaProdInline(i,q){
+  clearTimeout(searchTimers[i]);
+  const drop=document.getElementById('psd-'+i);
+  if(q.length<1){drop.className='prod-sug-drop';return;}
+  searchTimers[i]=setTimeout(async()=>{
+    const prods=await carregarProdutos();
+    const scored=prods.map(p=>({...p,sc:fuzzyScore(q,p.nome)}))
+      .filter(p=>p.nome.toUpperCase().includes(q.toUpperCase())||p.sc>20)
+      .sort((a,b)=>b.sc-a.sc).slice(0,8);
+    drop.innerHTML=scored.map((p,pi)=>`
+      <div class="psd-item" data-idx="${pi}" onmousedown="selecionarProd(${i},'${p.id}','${p.nome.replace(/'/g,"\\'")}')">
+        <div class="psd-icon"><i class="ti ti-package"></i></div>
+        <div class="psd-info"><div class="psd-nome">${p.nome}</div><div class="psd-cod">COD: ${String(p.codigo).padStart(3,'0')}</div></div>
+      </div>`).join('')
+      +`<div class="psd-skip" onmousedown="ignorarItem(${i})"><i class="ti ti-x"></i> Ignorar este item</div>`;
+    drop.className='prod-sug-drop open';
+  },250);
+}
+
+function navProdInline(e,i){
+  if(e.key==='Escape'){ITENS[i].match.status=ITENS[i].match.produto_id?'confirmed':'none';renderItens();}
+}
+
+function selecionarProd(i,id,nome){
+  ITENS[i].match={produto_id:id,nome,status:'confirmed',score:100};
+  renderItens();
+  salvarMapa(i);
+}
+
+function recalcItemXml(i){
+  ITENS[i].xml.valor_total=ITENS[i].xml.quantidade*ITENS[i].xml.valor_unitario;
+  calcTotais();
+}
+
+// item manual
+function addItemManual(){
+  ITENS.push({xml:{xProd:'',cProd:'',cEAN:'',ncm:'',cfop:'',unidade:'UND',quantidade:1,valor_unitario:0,valor_total:0,cst_icms:'',aliq_icms:0,valor_icms:0,cst_ipi:'',aliq_pis:0,aliq_cofins:0,origem:0},match:{status:'none'},habilita_nfe_saida:false});
+  renderItens();
+}
+
+// ─── TOTAIS ─────────────────────────────────────────────────
+function calcTotais(){
+  const prod=ITENS.filter(it=>it.match.status!=='skip').reduce((s,it)=>s+Number(it.xml?.valor_total||0),0);
+  const frete=parseFloat(document.getElementById('valor_frete').value)||0;
+  const desc=parseFloat(document.getElementById('valor_desconto').value)||0;
+  const outros=parseFloat(document.getElementById('valor_outros').value)||0;
+  const total=prod+frete-desc+outros;
+  document.getElementById('tot-prod').textContent=fmt(prod);
+  document.getElementById('tot-frete').textContent=fmt(frete);
+  document.getElementById('tot-desc').textContent=fmt(desc);
+  document.getElementById('tot-outros').textContent=fmt(outros);
+  document.getElementById('tot-total').textContent=fmt(total);
+}
+
+// ─── NOTA ───────────────────────────────────────────────────
+function setNota(v){
+  TEM_NOTA=v;
+  document.getElementById('tn-sim').className='tgl-btn'+(v?' sel-green':'');
+  document.getElementById('tn-nao').className='tgl-btn'+(!v?' sel-sub':'');
+  document.getElementById('campos-nf').style.display=v?'block':'none';
+}
+
+// ─── FORNECEDOR ─────────────────────────────────────────────
+let fornTimer;
+async function buscaForn(){
+  const q=document.getElementById('forn-busca').value.trim();
+  const sug=document.getElementById('forn-sug');
+  clearTimeout(fornTimer);
+  if(q.length<2){sug.style.display='none';return;}
+  fornTimer=setTimeout(async()=>{
+    const{data}=await db.from('pessoas').select('id,nome,documento,tipo_doc')
+      .or(`nome.ilike.%${q.toUpperCase()}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
+      .eq('is_fornecedor',true).eq('ativo',true).limit(6);
+    if(!data||!data.length){sug.innerHTML='<div style="padding:10px 14px;font-size:13px;color:var(--sub)">Nenhum fornecedor encontrado.</div>';sug.style.display='block';return;}
+    sug.innerHTML=data.map(f=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #F2F0EA;transition:background .12s" onmousedown="selecionarForn({id:'${f.id}',nome:'${f.nome.replace(/'/g,"\\'")}',documento:'${f.documento||''}'})" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div style="font-weight:700;color:var(--dark)">${f.nome}</div>
+      <div style="font-size:11.5px;color:var(--sub)">${f.tipo_doc}: ${f.documento||''}</div>
+    </div>`).join('');
+    sug.style.display='block';
+  },280);
+}
+
+function selecionarForn(f){
+  FORNECEDOR=f;
+  document.getElementById('forn-sug').style.display='none';
+  document.getElementById('forn-busca').value='';
+  document.getElementById('forn-busca-wrap').style.display='none';
+  const sel=document.getElementById('forn-selected');
+  sel.style.display='flex';
+  document.getElementById('forn-nome-sel').textContent=f.nome;
+  document.getElementById('forn-cnpj-sel').textContent=f.documento?f.documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'';
+}
+
+function limparForn(){
+  FORNECEDOR=null;
+  document.getElementById('forn-selected').style.display='none';
+  document.getElementById('forn-busca-wrap').style.display='block';
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#forn-busca-wrap'))document.getElementById('forn-sug').style.display='none';
+  // fecha drops de busca de produto
+  document.querySelectorAll('.prod-sug-drop').forEach(d=>{
+    if(!e.target.closest('.prod-search-wrap'))d.className='prod-sug-drop';
+  });
+});
+
+// ─── CONDIÇÃO PAGAMENTO ─────────────────────────────────────
+function setCond(c){
+  COND=c;
+  document.getElementById('cond-avista').className='tgl-btn'+(c==='AVISTA'?' sel-cyan':'');
+  document.getElementById('cond-prazo').className='tgl-btn'+(c==='PRAZO'?' sel-cyan':'');
+  const pa=document.getElementById('parcelas-area');
+  pa.className='parcelas-area'+(c==='PRAZO'?' show':'');
+  document.getElementById('parc-aviso').style.display=c==='PRAZO'?'flex':'none';
+}
+
+function addParcela(){
+  const n=PARCELAS.length+1;
+  const d=new Date();d.setDate(d.getDate()+n*30);
+  PARCELAS.push({numero:n,vencimento:d.toISOString().slice(0,10),valor:0});
+  renderParcelas();
+}
+
+function renderParcelas(){
+  const c=document.getElementById('parc-container');
+  if(!PARCELAS.length){c.innerHTML='';return;}
+  c.innerHTML=PARCELAS.map((p,i)=>`
+    <div class="parc-row">
+      <div class="parc-num">${p.numero}ª</div>
+      <div>
+        ${i===0?'<label>Vencimento</label>':''}
+        <input type="date" value="${p.vencimento}" oninput="PARCELAS[${i}].vencimento=this.value" style="text-transform:none"/>
+      </div>
+      <div>
+        ${i===0?'<label>Valor (R$)</label>':''}
+        <input type="number" step="0.01" value="${p.valor||''}" placeholder="0,00" oninput="PARCELAS[${i}].valor=parseFloat(this.value)||0" style="text-transform:none"/>
+      </div>
+      <button class="parc-del" onclick="remParcela(${i})"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+
+function remParcela(i){PARCELAS.splice(i,1);PARCELAS.forEach((p,j)=>p.numero=j+1);renderParcelas();}
+
+function maskCnpj(inp){
+  let v=inp.value.replace(/\D/g,'').slice(0,14);
+  if(v.length>12)v=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5');
+  else if(v.length>8)v=v.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})$/,'$1.$2.$3/$4');
+  else if(v.length>5)v=v.replace(/^(\d{2})(\d{3})(\d{0,3})$/,'$1.$2.$3');
+  else if(v.length>2)v=v.replace(/^(\d{2})(\d{0,3})$/,'$1.$2');
+  inp.value=v;
+}
+
+// ─── SALVAR ─────────────────────────────────────────────────
+async function salvar(){
+  if(TEM_NOTA===null){toast('Informe se a compra tem nota fiscal.','error');return;}
+  if(COND===null){toast('Selecione a condição de pagamento.','error');return;}
+  const itensAtivos=ITENS.filter(it=>it.match.status!=='skip');
+  if(!itensAtivos.length){toast('Adicione pelo menos um item (não ignorado).','error');return;}
+
+  const nomeF=FORNECEDOR?FORNECEDOR.nome:document.getElementById('fornecedor_nome').value.trim();
+  if(!nomeF){toast('Informe o fornecedor.','error');return;}
+
+  const prod=itensAtivos.reduce((s,it)=>s+Number(it.xml?.valor_total||0),0);
+  const frete=parseFloat(document.getElementById('valor_frete').value)||0;
+  const desc=parseFloat(document.getElementById('valor_desconto').value)||0;
+  const outros=parseFloat(document.getElementById('valor_outros').value)||0;
+  const total=prod+frete-desc+outros;
+
+  if(COND==='PRAZO'){
+    if(!PARCELAS.length){toast('Adicione as parcelas do pagamento a prazo.','error');return;}
+    const soma=PARCELAS.reduce((s,p)=>s+Number(p.valor),0);
+    if(Math.abs(soma-total)>0.05){toast(`Soma das parcelas (${fmt(soma)}) ≠ total (${fmt(total)})`,'error');return;}
+  }
+
+  const btn=document.getElementById('btn-save');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';
+
+  try{
+    const{data:compra,error:ec}=await db.from('compras').insert({
+      tem_nota:TEM_NOTA,
+      numero_nf:TEM_NOTA?document.getElementById('numero_nf').value.trim()||null:null,
+      serie_nf:TEM_NOTA?document.getElementById('serie_nf').value.trim()||null:null,
+      chave_nfe:TEM_NOTA?document.getElementById('chave_nfe').value.replace(/\s/g,'')||null:null,
+      data_emissao:TEM_NOTA?document.getElementById('data_emissao').value||null:null,
+      data_entrada:document.getElementById('data_entrada').value,
+      natureza_op:TEM_NOTA?document.getElementById('natop').value.trim()||null:null,
+      pessoa_id:FORNECEDOR?.id||null,
+      fornecedor_nome:nomeF.toUpperCase(),
+      fornecedor_cnpj:document.getElementById('fornecedor_cnpj').value.replace(/\D/g,'')||null,
+      valor_produtos:prod,valor_frete:frete,valor_desconto:desc,valor_total:total,
+      forma_pagamento:document.getElementById('forma_pagamento').value||null,
+      condicao:COND,status:'PENDENTE',
+      observacoes:document.getElementById('observacoes').value.trim()||null,
+    }).select('id').single();
+    if(ec) throw new Error(ec.message);
+
+    // itens
+    const{error:ei}=await db.from('compra_itens').insert(itensAtivos.map(it=>({
+      compra_id:compra.id,
+      produto_id:it.match?.produto_id||null,
+      codigo_fornecedor:it.xml.cProd||null,
+      codigo_barras:it.xml.cEAN&&it.xml.cEAN!=='SEM GTIN'?it.xml.cEAN:null,
+      descricao:it.xml.xProd||'—',
+      ncm:it.xml.ncm||null,cfop:it.xml.cfop||null,unidade:it.xml.unidade||null,
+      quantidade:it.xml.quantidade,valor_unitario:it.xml.valor_unitario,valor_total:it.xml.valor_total,
+      cst_icms:it.xml.cst_icms||null,aliq_icms:it.xml.aliq_icms||null,valor_icms:it.xml.valor_icms||null,
+      cst_ipi:it.xml.cst_ipi||null,aliq_pis:it.xml.aliq_pis||null,aliq_cofins:it.xml.aliq_cofins||null,
+      origem:it.xml.origem||null,
+      habilita_nfe_saida:it.habilita_nfe_saida,
+    })));
+    if(ei) throw new Error(ei.message);
+
+    // atualiza estoque + custo dos produtos vinculados
+    await Promise.all(itensAtivos.filter(it=>it.match?.produto_id).map(it=>
+      db.from('produtos').select('estoque_atual').eq('id',it.match.produto_id).single()
+        .then(({data:p})=>{if(p) return db.from('produtos').update({
+          estoque_atual:Number(p.estoque_atual)+it.xml.quantidade,
+          valor_custo:it.xml.valor_unitario,
+        }).eq('id',it.match.produto_id)})
+    ));
+
+    // parcelas → contas a pagar
+    if(COND==='PRAZO'){
+      const fn=FORNECEDOR?FORNECEDOR.nome:nomeF;
+      const nfRef=TEM_NOTA?' NF '+document.getElementById('numero_nf').value:'';
+      for(const p of PARCELAS){
+        const{data:conta}=await db.from('contas').insert({
+          tipo:'PAGAR',
+          descricao:`COMPRA${nfRef} — ${fn.toUpperCase()} — ${p.numero}/${PARCELAS.length}`,
+          valor:p.valor,vencimento:p.vencimento,status:'ABERTA',
+          categoria:'COMPRA A PRAZO',
+          pessoa_id:FORNECEDOR?.id||null,
+        }).select('id').single();
+        if(conta?.data){
+          await db.from('compra_parcelas').insert({
+            compra_id:compra.id,numero:p.numero,
+            vencimento:p.vencimento,valor:p.valor,
+            status:'ABERTA',conta_id:conta.data.id,
+          });
+        }
+      }
+    } else {
+      await db.from('compra_parcelas').insert({compra_id:compra.id,numero:1,vencimento:document.getElementById('data_entrada').value,valor:total,status:'PAGA'});
+      await db.from('compras').update({status:'PAGO'}).eq('id',compra.id);
+    }
+
+    toast('Compra salva!','success');
+    setTimeout(()=>window.location.href='compras.html',1200);
+
+  }catch(err){
+    toast('Erro: '+err.message,'error');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar compra';
+  }
+}
+
+renderItens();
+document.getElementById('xml-drop').addEventListener('click',e=>{
+  if(!e.target.closest('input[type=file]'))document.getElementById('xml-input').click();
+});
+</script>
+</body>
+</html>

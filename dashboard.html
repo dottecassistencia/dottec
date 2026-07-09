@@ -179,7 +179,11 @@
   .mod-card.sage:hover {border-color:rgba(120,150,70,.35)}
   .mod-card.amber:hover{border-color:rgba(154,96,0,.35)}
   .mod-card.amber:hover .card-icon-box{background:#9A6000;color:#fff}
-  .mod-card.green{--glow:rgba(59,109,17,.16)}
+  .mod-card.slate{--glow:rgba(58,74,107,.16)}
+  .mod-card.slate:hover{border-color:rgba(58,74,107,.35)}
+  .mod-card.slate .card-icon-box{background:#EEF0F5;color:#3A4A6B}
+  .mod-card.slate:hover .card-icon-box{background:#3A4A6B;color:#fff}
+  .mod-card.slate:hover .card-arrow{background:#3A4A6B;color:#fff;transform:translateX(3px) rotate(-45deg)}
   .mod-card.green:hover{border-color:rgba(59,109,17,.38)}
   .mod-card.green .card-icon-box{background:#EAF3DE;color:#3B6D11}
   .mod-card.green:hover .card-icon-box{background:#3B6D11;color:#fff}
@@ -319,6 +323,28 @@
         <div>
           <div class="card-name">Venda</div>
           <div class="card-desc">Venda rápida de balcão e histórico completo de vendas.</div>
+        </div>
+        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </a>
+
+    <a class="mod-card" style="--glow:rgba(58,74,107,.15)" href="compras.html">
+      <div class="card-icon-box" style="background:var(--slate-bg,#EEF0F5);color:#3A4A6B"><i class="ti ti-truck-delivery"></i></div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-name">Compras</div>
+          <div class="card-desc">Entrada de produtos, importação de NF-e e contas a pagar.</div>
+        </div>
+        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </a>
+
+    <a class="mod-card slate" href="compras.html">
+      <div class="card-icon-box"><i class="ti ti-truck"></i></div>
+      <div class="card-bottom">
+        <div>
+          <div class="card-name">Compras</div>
+          <div class="card-desc">Entrada de produtos, importação de XML e controle de NF-e.</div>
         </div>
         <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
       </div>
