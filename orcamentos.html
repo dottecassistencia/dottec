@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orçamentos — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--teal:#0E7490;--teal-bg:#CFFAFE}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+
+  /* TOPBAR */
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+  .back-btn{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:15px;cursor:pointer;text-decoration:none;flex-shrink:0}
+  .back-btn:hover{background:#E2DFD6}
+  .topbar-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark);flex:1}
+  .tb-tabs{display:flex;gap:3px;background:var(--bg);border-radius:10px;padding:3px}
+  .tb-tab{height:32px;padding:0 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--sub);transition:all .15s;display:flex;align-items:center;gap:6px}
+  .tb-tab.active{background:var(--white);color:var(--dark);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+  /* LAYOUT PRINCIPAL */
+  .main-layout{display:grid;grid-template-columns:1fr 400px;min-height:calc(100vh - 57px)}
+
+  /* ESQUERDO — LISTA DO FORNECEDOR */
+  .left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--white)}
+
+  /* ABA LISTA */
+  .tab-panel{display:none;flex:1;flex-direction:column}
+  .tab-panel.active{display:flex}
+
+  /* PASTE AREA */
+  .paste-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:#FAFAF7}
+  .paste-label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .paste-label .badge{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--teal-bg);color:var(--teal)}
+  .paste-box{width:100%;min-height:110px;max-height:160px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:#fff;font-size:12.5px;font-family:'Figtree',sans-serif;outline:none;resize:vertical;line-height:1.6;transition:border-color .15s}
+  .paste-box:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.12)}
+  .paste-box::placeholder{color:#B5B2A8;font-style:italic}
+  .parse-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .btn-parse{height:36px;padding:0 16px;border-radius:9px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+  .btn-parse:hover{background:#0A5A72}
+  .btn-limpar{height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--sub);font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+  .btn-limpar:hover{background:var(--bg)}
+  .parse-info{font-size:12px;color:var(--sub);margin-left:auto}
+
+  /* FILTROS E BUSCA */
+  .filter-bar{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:#FAFAF7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .search-mini{position:relative;flex:1;min-width:160px}
+  .search-mini i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px}
+  .search-mini input{width:100%;height:34px;padding:0 12px 0 34px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-family:inherit;outline:none;text-transform:uppercase}
+  .search-mini input::placeholder{text-transform:none}
+  .search-mini input:focus{border-color:var(--teal)}
+  .chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px}
+  .chip.active{background:var(--teal-bg);color:var(--teal);border-color:rgba(14,116,144,.4)}
+  .chip:hover{border-color:var(--teal);color:var(--teal)}
+  .margem-wrap{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--sub);background:#fff;border:1px solid var(--border);border-radius:8px;padding:0 10px;height:32px}
+  .margem-wrap input{width:44px;height:22px;border:none;background:transparent;font-size:13px;font-family:inherit;font-weight:700;color:var(--dark);outline:none;text-align:right}
+
+  /* LISTA ITENS */
+  .items-area{flex:1;overflow-y:auto}
+  .item-row{
+    display:flex;align-items:center;gap:10px;padding:10px 1.25rem;
+    border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s;
+    position:relative;
+  }
+  .item-row:hover{background:#F8FAF5}
+  .item-row.selected{background:#EFF7EE}
+  .item-row.selected::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:0 3px 3px 0}
+  .item-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:#fff}
+  .item-row.selected .item-check{background:var(--green);border-color:var(--green);color:#fff}
+  .item-info{flex:1;min-width:0}
+  .item-modelo{font-size:13.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item-detalhe{font-size:11px;color:var(--sub);margin-top:2px;display:flex;gap:8px}
+  .item-detalhe span{display:flex;align-items:center;gap:3px}
+  .cond-badge{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px}
+  .cond-badge.novo{background:#EAF3DE;color:var(--green)}
+  .cond-badge.usado{background:var(--amber-bg);color:var(--amber)}
+  .cond-badge.seminovo{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .preco-forn{font-size:13px;font-weight:700;color:var(--sub);flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
+  .preco-venda{font-size:11px;color:var(--teal);margin-top:2px;font-weight:700;text-align:right}
+
+  .items-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--sub);gap:10px}
+  .items-empty i{font-size:40px;opacity:.2}
+  .items-empty p{font-size:13.5px}
+
+  /* ABA HISTÓRICO */
+  .historico-list{flex:1;overflow-y:auto}
+
+  /* DIREITO — ORÇAMENTO */
+  .right-panel{background:var(--white);display:flex;flex-direction:column}
+  .orcamento-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0}
+  .orcamento-title{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--dark);margin-bottom:4px}
+  .orcamento-meta{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:8px}
+
+  /* CLIENTE */
+  .cliente-area{padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0}
+  .campo-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .campo-input{width:100%;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s}
+  .campo-input:focus{border-color:var(--teal)}
+
+  /* SELECIONADOS */
+  .selecionados-area{flex:1;overflow-y:auto;padding:.75rem 1.25rem}
+  .sel-empty{text-align:center;padding:2rem;color:var(--sub);font-size:13px}
+  .sel-empty i{font-size:32px;display:block;margin-bottom:8px;opacity:.25}
+
+  .sel-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:7px;transition:background .12s}
+  .sel-info{flex:1;min-width:0}
+  .sel-modelo{font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sel-badges{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+  .sel-preco-wrap{text-align:right;flex-shrink:0}
+  .sel-preco-forn{font-size:11px;color:var(--sub);text-decoration:line-through}
+  .sel-preco-venda{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--teal)}
+  .sel-remove{width:26px;height:26px;border-radius:7px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:background .12s}
+  .sel-remove:hover{background:var(--coral);color:#fff}
+
+  /* AREA AÇOES */
+  .acoes-area{padding:1rem 1.25rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .preview-box{background:var(--bg);border-radius:12px;padding:12px;font-size:12.5px;line-height:1.7;color:var(--dark);max-height:150px;overflow-y:auto;font-family:'Figtree',sans-serif;white-space:pre-wrap;border:1px solid var(--border);margin-bottom:2px}
+  .acoes-btns{display:flex;gap:8px}
+  .btn-copiar{flex:1;height:40px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
+  .btn-copiar:hover{background:#0A5A72}
+  .btn-copiar.copied{background:var(--green)}
+  .btn-salvar-orc{height:40px;padding:0 16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-salvar-orc:hover{background:var(--bg)}
+  .btn-pdf{height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--coral);color:var(--coral);background:#fff;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+  .btn-pdf:hover{background:var(--coral);color:#fff}
+
+  /* ALERTA MARGEM */
+  .margem-alerta{font-size:11.5px;color:var(--coral);font-weight:700;display:flex;align-items:center;gap:5px;display:none}
+  .margem-alerta.show{display:flex}
+
+  /* MODAL SALVAR ORC */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10px}
+  input[type=text],input[type=date],select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
+  input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.12);background:#fff}
+  input::placeholder{color:#B5B2A8}
+  textarea{height:80px;resize:vertical;padding:10px 13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-modal-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .btn-modal-save:hover{background:#0A5A72}
+  .btn-modal-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+  .btn-modal-cancel:hover{background:var(--bg)}
+
+  /* ABA HISTÓRICO */
+  .hist-item{padding:12px 1.25rem;border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s}
+  .hist-item:hover{background:#FAFAF7}
+  .hist-cliente{font-size:13.5px;font-weight:700;color:var(--dark)}
+  .hist-meta{font-size:11.5px;color:var(--sub);margin-top:2px;display:flex;gap:10px}
+  .hist-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .hist-status.ABERTO{background:var(--cyan-bg);color:var(--cyan-dark)}
+  .hist-status.APROVADO{background:var(--green-bg);color:var(--green)}
+  .hist-status.RECUSADO{background:var(--coral-bg);color:var(--coral)}
+  .hist-status.EXPIRADO{background:#F0EFEA;color:var(--sub)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+  @media(max-width:900px){.main-layout{grid-template-columns:1fr}.right-panel{border-top:2px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL SALVAR ORÇAMENTO -->
+<div class="modal-overlay" id="modal-orc" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Salvar orçamento</div>
+      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Cliente</label>
+          <input type="text" id="m-cliente" placeholder="NOME DO CLIENTE" style="text-transform:uppercase"/>
+        </div>
+        <div class="field">
+          <label>Contato (WhatsApp)</label>
+          <input type="text" id="m-contato" placeholder="47 9 0000-0000" style="text-transform:none"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Validade</label>
+          <input type="date" id="m-validade"/>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="m-status">
+            <option value="ABERTO">Aberto</option>
+            <option value="APROVADO">Aprovado</option>
+            <option value="RECUSADO">Recusado</option>
+          </select>
+        </div>
+      </div>
+      <div class="field no-mb">
+        <label>Observações <span class="label-opt">opcional</span></label>
+        <textarea id="m-obs" placeholder="APARELHO QUE INTERESSA, CONDIÇÃO ESPECIAL..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-modal-save" onclick="salvarOrcamento()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <a class="back-btn" href="dashboard.html"><i class="ti ti-arrow-left"></i></a>
+  <div class="topbar-title">Orçamentos</div>
+  <div class="tb-tabs">
+    <button class="tb-tab active" id="tab-lista" onclick="setTab('lista')"><i class="ti ti-list"></i> Lista do fornecedor</button>
+    <button class="tb-tab" id="tab-historico" onclick="setTab('historico')"><i class="ti ti-history"></i> Histórico</button>
+  </div>
+</header>
+
+<div class="main-layout">
+
+  <!-- ESQUERDO -->
+  <div class="left-panel">
+
+    <!-- ABA LISTA -->
+    <div class="tab-panel active" id="panel-lista">
+      <!-- PASTE -->
+      <div class="paste-header">
+        <div class="paste-label">Lista do fornecedor <span class="badge">COLAR AQUI</span></div>
+        <textarea class="paste-box" id="lista-raw" placeholder="Cole aqui a lista de preços do seu fornecedor (iPhones, Samsung, etc.)&#10;&#10;Exemplos de formatos aceitos:&#10;iPhone 15 Pro Max 256GB - R$ 4.500 (novo)&#10;Samsung S24 256gb usado - 2800&#10;IP15 128 black seminovo 3.200"></textarea>
+        <div class="parse-row">
+          <button class="btn-parse" onclick="parseLista()"><i class="ti ti-wand"></i> Interpretar lista</button>
+          <button class="btn-limpar" onclick="limparLista()">Limpar</button>
+          <span class="parse-info" id="parse-info"></span>
+        </div>
+      </div>
+      <!-- FILTROS -->
+      <div class="filter-bar">
+        <div class="search-mini">
+          <i class="ti ti-search"></i>
+          <input type="text" id="busca-lista" placeholder="Filtrar modelo, GB, cor..." oninput="renderLista()"/>
+        </div>
+        <button class="chip" id="chip-novo" onclick="toggleChip('novo')"><i class="ti ti-circle-check"></i> Novo</button>
+        <button class="chip" id="chip-usado" onclick="toggleChip('usado')">Usado</button>
+        <button class="chip" id="chip-seminovo" onclick="toggleChip('seminovo')">Seminovo</button>
+        <div class="margem-wrap">
+          <i class="ti ti-trending-up" style="font-size:14px"></i>
+          Margem <input type="number" id="margem-perc" value="30" min="0" max="200" step="1" oninput="renderLista()"/> %
+        </div>
+      </div>
+      <!-- ITEMS -->
+      <div class="items-area" id="items-area">
+        <div class="items-empty">
+          <i class="ti ti-clipboard-text"></i>
+          <p>Cole a lista do fornecedor acima</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA HISTÓRICO -->
+    <div class="tab-panel" id="panel-historico">
+      <div class="historico-list" id="historico-list">
+        <div class="items-empty"><i class="ti ti-history"></i><p>Nenhum orçamento salvo</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DIREITO — ORÇAMENTO ATIVO -->
+  <div class="right-panel">
+    <div class="orcamento-header">
+      <div class="orcamento-title">Orçamento</div>
+      <div class="orcamento-meta">
+        <span id="orc-count">0 item(s) selecionado(s)</span>
+        <span>·</span>
+        <span id="orc-date">—</span>
+      </div>
+    </div>
+
+    <div class="cliente-area">
+      <div class="campo-label">Para quem</div>
+      <input type="text" class="campo-input" id="cliente-nome" placeholder="Nome do cliente (opcional)" oninput="gerarPreview()"/>
+    </div>
+
+    <div class="selecionados-area" id="selecionados-area">
+      <div class="sel-empty"><i class="ti ti-shopping-cart"></i>Selecione itens da lista</div>
+    </div>
+
+    <div class="acoes-area">
+      <div class="margem-alerta" id="margem-alerta">
+        <i class="ti ti-alert-triangle"></i> Atenção: preço de venda abaixo do custo em algum item!
+      </div>
+      <div class="preview-box" id="preview-box" style="display:none"></div>
+      <div class="acoes-btns">
+        <button class="btn-copiar" id="btn-copiar" onclick="copiarTexto()">
+          <i class="ti ti-copy"></i> Copiar para WhatsApp
+        </button>
+        <button class="btn-salvar-orc" onclick="abrirModal()">
+          <i class="ti ti-device-floppy"></i> Salvar
+        </button>
+        <button class="btn-pdf" onclick="gerarPDF()">
+          <i class="ti ti-file-type-pdf"></i> PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const fmtCompact=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+const hoje=new Date().toLocaleDateString('pt-BR');
+
+let ITENS_PARSED=[];
+let SELECIONADOS=new Map(); // key=idx, value=item
+let FILTROS_CHIP=new Set();
+
+document.getElementById('orc-date').textContent=hoje;
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── ABAS ──────────────────────────────────────────────────────
+function setTab(tab){
+  ['lista','historico'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('panel-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='historico') carregarHistorico();
+}
+
+// ── PARSER ────────────────────────────────────────────────────
+/*
+  Tenta extrair de cada linha:
+  - Marca (iPhone/Samsung/Motorola/Xiaomi/etc.)
+  - Modelo (15 Pro Max, S24, etc.)
+  - Armazenamento (128GB, 256GB, 512GB, 1TB)
+  - Cor (black, white, azul, etc.)
+  - Condição (novo, usado, seminovo)
+  - Preço (R$ 1.234 / 1234 / 1.234,00)
+*/
+function parseLista(){
+  const raw=document.getElementById('lista-raw').value.trim();
+  if(!raw){toast('Cole a lista do fornecedor primeiro.','error');return;}
+
+  const linhas=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>3);
+  ITENS_PARSED=[];
+
+  const marcas=['iphone','ip ','ipad','samsung','motorola','moto ','xiaomi','redmi','realme','poco','huawei','lg ','sony','asus'];
+  const condicoes=[
+    {re:/\bnov[oa]s?\b|\bsealed\b|\blacrado\b/i,val:'NOVO'},
+    {re:/\bsemi[\s-]?nov[oa]s?\b/i,val:'SEMINOVO'},
+    {re:/\busad[oa]s?\b|\bused\b|\brecondicion/i,val:'USADO'},
+  ];
+  const storages=[
+    {re:/\b(1\s?tb|1000\s?gb)\b/i,val:'1TB',bytes:1000},
+    {re:/\b512\s?gb\b/i,val:'512GB',bytes:512},
+    {re:/\b256\s?gb\b/i,val:'256GB',bytes:256},
+    {re:/\b128\s?gb\b/i,val:'128GB',bytes:128},
+    {re:/\b64\s?gb\b/i,val:'64GB',bytes:64},
+  ];
+  const precoRe=/r\$?\s*([\d.,]+)|([\d]{3,}[\d.,]*)/i;
+
+  linhas.forEach((linha,i)=>{
+    const low=linha.toLowerCase();
+
+    // detecta marca
+    let marca='';
+    if(/iphone|ip\s?\d|ipad/i.test(low)) marca='iPhone';
+    else if(/samsung/i.test(low)) marca='Samsung';
+    else if(/motorola|moto\s/i.test(low)) marca='Motorola';
+    else if(/xiaomi|redmi/i.test(low)) marca='Xiaomi';
+    else if(/poco/i.test(low)) marca='Poco';
+    else if(/huawei/i.test(low)) marca='Huawei';
+    else if(/realme/i.test(low)) marca='Realme';
+
+    // extrai preço
+    let preco=0;
+    const pm=linha.match(/r\$\s*([\d.,]+)/i)||linha.match(/([\d]{3,})(?:\s*(?:reais|,00|\.00))?/);
+    if(pm){
+      const raw2=(pm[1]||pm[0]).replace(/\./g,'').replace(',','.');
+      preco=parseFloat(raw2)||0;
+    }
+    if(preco<100||preco>100000) return; // filtra lixo
+
+    // condição
+    let cond='NOVO';
+    for(const c of condicoes){if(c.re.test(low)){cond=c.val;break;}}
+
+    // armazenamento
+    let storage='';let sortBytes=0;
+    for(const s of storages){if(s.re.test(low)){storage=s.val;sortBytes=s.bytes;break;}}
+
+    // cor (palavras comuns de cor)
+    let cor='';
+    const cores={preto:'PRETO',black:'PRETO',branco:'BRANCO',white:'BRANCO',azul:'AZUL',blue:'AZUL',dourado:'DOURADO',gold:'DOURADO',verde:'VERDE',green:'VERDE',roxo:'ROXO',purple:'ROXO',rosa:'ROSA',rose:'ROSA',cinza:'CINZA',gray:'CINZA',titanium:'TITÂNIO',desert:'DESERT'};
+    for(const [k,v] of Object.entries(cores)){if(low.includes(k)){cor=v;break;}}
+
+    // modelo: texto entre marca e preço, sem as palavras de storage/condicao/cor
+    let modelo=linha
+      .replace(/r\$\s*[\d.,]+/gi,'')
+      .replace(/[\d.,]+\s*(reais)?/g,'')
+      .replace(/\b(novo|novos|nova|novas|usado|usados|seminovo|lacrado|sealed)\b/gi,'')
+      .replace(/\b(preto|branco|black|white|azul|blue|dourado|gold|verde|green|roxo|purple|rosa|rose|cinza|gray|titanium|desert)\b/gi,'')
+      .replace(/\b(\d+\s?gb|1\s?tb)\b/gi,'')
+      .replace(/[-–—·|,]+/g,' ')
+      .replace(/\s+/g,' ').trim();
+
+    if(modelo.length<3) return;
+
+    ITENS_PARSED.push({
+      idx:i,linha,modelo,marca,storage,sortBytes,cor,cond,preco,
+    });
+  });
+
+  document.getElementById('parse-info').textContent=ITENS_PARSED.length+' item(ns) identificados';
+  if(ITENS_PARSED.length===0) toast('Nenhum item reconhecido. Verifique o formato da lista.','error');
+  else toast(ITENS_PARSED.length+' itens interpretados!','success');
+  renderLista();
+}
+
+function limparLista(){
+  document.getElementById('lista-raw').value='';
+  ITENS_PARSED=[];SELECIONADOS.clear();
+  document.getElementById('parse-info').textContent='';
+  renderLista();renderSelecionados();
+}
+
+// ── FILTRO CHIPS ──────────────────────────────────────────────
+function toggleChip(t){
+  if(FILTROS_CHIP.has(t)) FILTROS_CHIP.delete(t);
+  else FILTROS_CHIP.add(t);
+  document.getElementById('chip-'+t).classList.toggle('active',FILTROS_CHIP.has(t));
+  renderLista();
+}
+
+// ── RENDER LISTA ──────────────────────────────────────────────
+function renderLista(){
+  const area=document.getElementById('items-area');
+  if(!ITENS_PARSED.length){
+    area.innerHTML='<div class="items-empty"><i class="ti ti-clipboard-text"></i><p>Cole a lista do fornecedor acima</p></div>';return;
+  }
+  const q=document.getElementById('busca-lista').value.trim().toUpperCase();
+  const margem=parseFloat(document.getElementById('margem-perc').value)||30;
+
+  let lista=[...ITENS_PARSED];
+  if(q) lista=lista.filter(it=>it.modelo.toUpperCase().includes(q)||it.storage.includes(q)||it.cor.includes(q));
+  if(FILTROS_CHIP.size>0) lista=lista.filter(it=>FILTROS_CHIP.has(it.cond.toLowerCase()));
+
+  // ordena por marca → modelo → storage
+  lista.sort((a,b)=>{
+    if(a.marca!==b.marca) return a.marca.localeCompare(b.marca);
+    if(a.modelo!==b.modelo) return a.modelo.localeCompare(b.modelo);
+    return b.sortBytes-a.sortBytes;
+  });
+
+  if(!lista.length){
+    area.innerHTML='<div class="items-empty"><i class="ti ti-search-off"></i><p>Nenhum item encontrado</p></div>';return;
+  }
+
+  const condBadge=c=>({
+    NOVO:'<span class="cond-badge novo">NOVO</span>',
+    USADO:'<span class="cond-badge usado">USADO</span>',
+    SEMINOVO:'<span class="cond-badge seminovo">SEMINOVO</span>',
+  }[c]||'');
+
+  area.innerHTML=lista.map(it=>{
+    const precoVenda=it.preco*(1+margem/100);
+    const sel=SELECIONADOS.has(it.idx);
+    return`<div class="item-row${sel?' selected':''}" onclick="toggleItem(${it.idx})">
+      <div class="item-check">${sel?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
+      <div class="item-info">
+        <div class="item-modelo">${it.modelo}${it.storage?' · '+it.storage:''}${it.cor?' · '+it.cor:''}</div>
+        <div class="item-detalhe">
+          ${condBadge(it.cond)}
+          ${it.marca?`<span><i class="ti ti-device-mobile" style="font-size:10px"></i>${it.marca}</span>`:''}
+        </div>
+      </div>
+      <div>
+        <div class="preco-forn">${fmt(it.preco)}</div>
+        <div class="preco-venda">→ ${fmt(precoVenda)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TOGGLE ITEM ───────────────────────────────────────────────
+function toggleItem(idx){
+  const it=ITENS_PARSED.find(x=>x.idx===idx);
+  if(!it) return;
+  const margem=parseFloat(document.getElementById('margem-perc').value)||30;
+  if(SELECIONADOS.has(idx)){
+    SELECIONADOS.delete(idx);
+  } else {
+    SELECIONADOS.set(idx,{...it,precoVenda:it.preco*(1+margem/100)});
+  }
+  renderLista();renderSelecionados();
+}
+
+// ── RENDER SELECIONADOS ───────────────────────────────────────
+function renderSelecionados(){
+  const area=document.getElementById('selecionados-area');
+  document.getElementById('orc-count').textContent=SELECIONADOS.size+' item(s) selecionado(s)';
+
+  if(!SELECIONADOS.size){
+    area.innerHTML='<div class="sel-empty"><i class="ti ti-shopping-cart"></i>Selecione itens da lista</div>';
+    document.getElementById('preview-box').style.display='none';
+    document.getElementById('margem-alerta').className='margem-alerta';
+    return;
+  }
+
+  const condBadge=c=>({
+    NOVO:'<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;background:#EAF3DE;color:#3B6D11">NOVO</span>',
+    USADO:'<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;background:#FBEEDB;color:#9A6000">USADO</span>',
+    SEMINOVO:'<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;background:#E3F4F5;color:#1E9099">SEMINOVO</span>',
+  }[c]||'');
+
+  let alerta=false;
+  area.innerHTML=Array.from(SELECIONADOS.values()).map(it=>{
+    if(it.precoVenda<=it.preco) alerta=true;
+    return`<div class="sel-item">
+      <div class="sel-info">
+        <div class="sel-modelo">${it.modelo}${it.storage?' · '+it.storage:''}${it.cor?' · '+it.cor:''}</div>
+        <div class="sel-badges">${condBadge(it.cond)}</div>
+      </div>
+      <div class="sel-preco-wrap">
+        <div class="sel-preco-forn">${fmt(it.preco)}</div>
+        <div class="sel-preco-venda">${fmt(it.precoVenda)}</div>
+      </div>
+      <button class="sel-remove" onclick="event.stopPropagation();SELECIONADOS.delete(${it.idx});renderLista();renderSelecionados()"><i class="ti ti-x"></i></button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('margem-alerta').className='margem-alerta'+(alerta?' show':'');
+  gerarPreview();
+}
+
+// ── PREVIEW WHATSAPP ─────────────────────────────────────────
+function gerarPreview(){
+  const pb=document.getElementById('preview-box');
+  if(!SELECIONADOS.size){pb.style.display='none';return;}
+  const cliente=document.getElementById('cliente-nome').value.trim();
+  const itens=Array.from(SELECIONADOS.values());
+
+  const condLabel={NOVO:'🟢 Novo',USADO:'🟡 Usado',SEMINOVO:'🔵 Seminovo'};
+  let txt='';
+  if(cliente) txt+=`Olá, ${cliente}!\n\n`;
+  txt+='*📱 Dottec Assistência — Lista de Preços*\n';
+  txt+='━━━━━━━━━━━━━━━━━━\n';
+
+  // agrupa por condição
+  const grupos={NOVO:[],SEMINOVO:[],USADO:[]};
+  itens.forEach(it=>{(grupos[it.cond]=grupos[it.cond]||[]).push(it);});
+  Object.entries(grupos).forEach(([cond,lista])=>{
+    if(!lista.length) return;
+    txt+=`\n*${condLabel[cond]||cond}*\n`;
+    lista.forEach(it=>{
+      txt+=`• ${it.modelo}${it.storage?' '+it.storage:''}${it.cor?' '+it.cor:''} — *${fmt(it.precoVenda)}*\n`;
+    });
+  });
+
+  txt+='\n━━━━━━━━━━━━━━━━━━\n';
+  txt+='📍 Av. Tiradentes, 334 - Sala 04 · Rio dos Cedros/SC\n';
+  txt+='📞 (47) 9 8816-8931\n';
+  txt+=`_${hoje}_`;
+
+  pb.textContent=txt;
+  pb.style.display='block';
+}
+
+// ── COPIAR ────────────────────────────────────────────────────
+async function copiarTexto(){
+  const txt=document.getElementById('preview-box').textContent;
+  if(!txt){toast('Selecione ao menos um item.','error');return;}
+  try{
+    await navigator.clipboard.writeText(txt);
+    const btn=document.getElementById('btn-copiar');
+    btn.innerHTML='<i class="ti ti-check"></i> Copiado!';
+    btn.className='btn-copiar copied';
+    setTimeout(()=>{btn.innerHTML='<i class="ti ti-copy"></i> Copiar para WhatsApp';btn.className='btn-copiar';},2500);
+    toast('Copiado! Cole no WhatsApp.','success');
+  }catch{toast('Erro ao copiar.','error');}
+}
+
+// ── MODAL SALVAR ──────────────────────────────────────────────
+function abrirModal(){
+  if(!SELECIONADOS.size){toast('Selecione ao menos um item.','error');return;}
+  document.getElementById('m-cliente').value=document.getElementById('cliente-nome').value.trim();
+  const v=new Date();v.setDate(v.getDate()+7);
+  document.getElementById('m-validade').value=v.toISOString().slice(0,10);
+  document.getElementById('modal-orc').classList.add('open');
+  setTimeout(()=>document.getElementById('m-cliente').focus(),100);
+}
+function fecharModal(){document.getElementById('modal-orc').classList.remove('open');}
+
+async function salvarOrcamento(){
+  const cliente=document.getElementById('m-cliente').value.trim();
+  if(!cliente){toast('Informe o nome do cliente.','error');return;}
+
+  const itens=Array.from(SELECIONADOS.values()).map(it=>({
+    modelo:it.modelo,storage:it.storage,cor:it.cor,cond:it.cond,
+    preco_custo:it.preco,preco_venda:it.precoVenda,
+  }));
+
+  const{error}=await db.from('orcamentos').insert({
+    cliente_nome:cliente.toUpperCase(),
+    contato:document.getElementById('m-contato').value.trim()||null,
+    validade:document.getElementById('m-validade').value||null,
+    status:document.getElementById('m-status').value,
+    itens:JSON.stringify(itens),
+    texto_gerado:document.getElementById('preview-box').textContent||null,
+    observacoes:document.getElementById('m-obs').value.trim().toUpperCase()||null,
+    margem:parseFloat(document.getElementById('margem-perc').value)||30,
+  });
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast('Orçamento salvo!','success');
+  fecharModal();
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────
+async function carregarHistorico(){
+  const{data}=await db.from('orcamentos').select('*').order('criado_em',{ascending:false}).limit(50);
+  const list=document.getElementById('historico-list');
+  if(!data||!data.length){list.innerHTML='<div class="items-empty"><i class="ti ti-history"></i><p>Nenhum orçamento salvo</p></div>';return;}
+  list.innerHTML=data.map(o=>{
+    const itens=JSON.parse(o.itens||'[]');
+    return`<div class="hist-item" onclick="carregarOrcamento(${JSON.stringify(o).replace(/"/g,'&quot;')})">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="hist-cliente">${o.cliente_nome}</div>
+        <span class="hist-status ${o.status}">${o.status}</span>
+      </div>
+      <div class="hist-meta">
+        <span>${itens.length} item(ns)</span>
+        <span>·</span>
+        <span>${o.contato||'Sem contato'}</span>
+        <span>·</span>
+        <span>Validade: ${o.validade?new Date(o.validade+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function carregarOrcamento(o){
+  // carrega o texto salvo no preview para poder copiar novamente
+  document.getElementById('cliente-nome').value=o.cliente_nome;
+  if(o.texto_gerado){
+    document.getElementById('preview-box').textContent=o.texto_gerado;
+    document.getElementById('preview-box').style.display='block';
+  }
+  SELECIONADOS.clear();
+  const itens=JSON.parse(o.itens||'[]');
+  itens.forEach((it,i)=>SELECIONADOS.set(-1-i,{...it,idx:-1-i,preco:it.preco_custo,precoVenda:it.preco_venda}));
+  renderSelecionados();
+  setTab('lista');
+  toast('Orçamento de '+o.cliente_nome+' carregado!','success');
+}
+
+// ── PDF ───────────────────────────────────────────────────────
+function gerarPDF(){
+  if(!SELECIONADOS.size){toast('Selecione ao menos um item.','error');return;}
+  const cliente=document.getElementById('cliente-nome').value.trim()||'CLIENTE';
+  const itens=Array.from(SELECIONADOS.values());
+  const margem=parseFloat(document.getElementById('margem-perc').value)||30;
+  const total=itens.reduce((s,it)=>s+it.precoVenda,0);
+  const condLabel={NOVO:'Novo',SEMINOVO:'Seminovo',USADO:'Usado'};
+
+  const itensHtml=itens.map((it,i)=>`
+    <tr style="border-bottom:1px solid #eee">
+      <td style="padding:10px 8px;font-size:13px">${i+1}</td>
+      <td style="padding:10px 8px;font-size:13px;font-weight:600">${it.modelo}${it.storage?' '+it.storage:''}${it.cor?' · '+it.cor:''}</td>
+      <td style="padding:10px 8px;font-size:12px;color:#666;text-align:center">${condLabel[it.cond]||it.cond}</td>
+      <td style="padding:10px 8px;font-size:13px;font-weight:700;text-align:right;color:#0E7490">${fmt(it.precoVenda)}</td>
+    </tr>`).join('');
+
+  const validade=new Date();validade.setDate(validade.getDate()+7);
+
+  const pdfHtml=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <style>
+    body{font-family:'Arial',sans-serif;color:#1C1C1A;margin:0;padding:0}
+    .page{max-width:740px;margin:0 auto;padding:40px 36px}
+    .header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #0E7490;padding-bottom:20px;margin-bottom:24px}
+    .logo-area h1{font-size:22px;font-weight:800;color:#0E7490;margin:0}
+    .logo-area p{font-size:11px;color:#666;margin:3px 0 0}
+    .orc-info{text-align:right;font-size:12px;color:#666}
+    .orc-info strong{font-size:15px;color:#1C1C1A;display:block}
+    .dest-box{background:#F5F5F5;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;justify-content:space-between}
+    .dest-box div{font-size:13px}
+    .dest-box strong{font-size:14px;display:block;margin-bottom:3px}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:#0E7490;color:#fff}
+    thead th{padding:11px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;text-align:left}
+    thead th:last-child{text-align:right}
+    .total-row{display:flex;justify-content:flex-end;margin-top:16px;padding:14px 18px;background:#F0FAFA;border-radius:10px;align-items:center;gap:20px}
+    .total-row span{font-size:12px;color:#666}
+    .total-row strong{font-size:20px;font-weight:800;color:#0E7490}
+    .footer{margin-top:36px;padding-top:14px;border-top:1px solid #eee;font-size:11px;color:#888;display:flex;justify-content:space-between}
+    .obs-box{background:#FFF8E6;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:0 8px 8px 0;margin-top:20px;font-size:12.5px;color:#7A4B00}
+    @media print{body{margin:0}@page{margin:10mm}}
+  </style>
+  </head><body><div class="page">
+    <div class="header">
+      <div class="logo-area">
+        <h1>DOTTEC ASSISTÊNCIA</h1>
+        <p>Thiago Richard Gazaniga · CNPJ 12.227.221/0001-86</p>
+        <p>Av. Tiradentes, 334 - Sala 04 · Rio dos Cedros / SC</p>
+        <p>📞 (47) 9 8816-8931</p>
+      </div>
+      <div class="orc-info">
+        <strong>ORÇAMENTO</strong>
+        <span>Data: ${hoje}</span><br/>
+        <span>Validade: ${validade.toLocaleDateString('pt-BR')}</span>
+      </div>
+    </div>
+    <div class="dest-box">
+      <div><strong>Para:</strong>${cliente}</div>
+      <div style="text-align:right"><span>Margem aplicada: ${margem}%</span></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:32px">#</th>
+        <th>Modelo</th>
+        <th style="text-align:center;width:80px">Condição</th>
+        <th style="text-align:right;width:110px">Preço</th>
+      </tr></thead>
+      <tbody>${itensHtml}</tbody>
+    </table>
+    <div class="total-row"><span>Total estimado (${itens.length} item(ns)):</span><strong>${fmt(total)}</strong></div>
+    <div class="obs-box">Os preços podem sofrer alterações sem aviso prévio. Valores sujeitos a confirmação de estoque. Orçamento válido até ${validade.toLocaleDateString('pt-BR')}.</div>
+    <div class="footer">
+      <span>Dottec Assistência Inteligente · Rio dos Cedros / SC</span>
+      <span>Gerado em ${new Date().toLocaleString('pt-BR')}</span>
+    </div>
+  </div></body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(pdfHtml);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+// INIT
+document.getElementById('margem-perc').addEventListener('input',()=>{renderLista();renderSelecionados();});
+</script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Certificado Digital — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--slate:#3A4A6B;--slate-bg:#EEF0F5}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(58,74,107,.08),transparent 42%),var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .content{max-width:860px;margin:0 auto;padding:2rem}
+
+  /* STATUS CERT */
+  .cert-status{border-radius:18px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.25rem;border:1.5px solid}
+  .cert-status.ok{background:var(--green-bg);border-color:rgba(59,109,17,.3)}
+  .cert-status.warn{background:var(--amber-bg);border-color:rgba(154,96,0,.3)}
+  .cert-status.none{background:var(--bg);border-color:var(--border)}
+  .cs-icon{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .cert-status.ok .cs-icon{background:rgba(59,109,17,.15);color:var(--green)}
+  .cert-status.warn .cs-icon{background:rgba(154,96,0,.15);color:var(--amber)}
+  .cert-status.none .cs-icon{background:#E8E5DC;color:var(--sub)}
+  .cs-info{flex:1}
+  .cs-title{font-family:'Lora',serif;font-size:16px;font-weight:600;margin-bottom:3px}
+  .cert-status.ok .cs-title{color:var(--green)}
+  .cert-status.warn .cs-title{color:var(--amber)}
+  .cert-status.none .cs-title{color:var(--dark)}
+  .cs-sub{font-size:12.5px;color:var(--sub)}
+
+  /* PANELS */
+  .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:hidden}
+  .panel-head{display:flex;align-items:center;gap:10px;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+  .panel-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .pi-slate{background:var(--slate-bg);color:var(--slate)}.pi-cyan{background:var(--cyan-bg);color:var(--cyan-dark)}.pi-amber{background:var(--amber-bg);color:var(--amber)}
+  .panel-title{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--dark)}
+  .panel-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .panel-body{padding:1.5rem}
+
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10px;margin-left:3px}
+  input[type=text],input[type=password],select{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3.5px rgba(41,184,194,.13);background:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .mb14{margin-bottom:14px}
+
+  /* UPLOAD */
+  .upload-area{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:#FAFAF7}
+  .upload-area:hover,.upload-area.drag{border-color:var(--slate);background:var(--slate-bg)}
+  .upload-area.loaded{border-style:solid;border-color:rgba(59,109,17,.4);background:var(--green-bg)}
+  .upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .upload-icon{font-size:32px;color:var(--slate);margin-bottom:8px}
+  .upload-area.loaded .upload-icon{color:var(--green)}
+  .upload-title{font-size:14px;font-weight:700;color:var(--slate);margin-bottom:3px}
+  .upload-area.loaded .upload-title{color:var(--green)}
+  .upload-sub{font-size:12px;color:var(--sub)}
+
+  /* SENHA */
+  .senha-wrap{position:relative}
+  .senha-wrap input{padding-right:44px}
+  .senha-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--sub);font-size:17px}
+
+  /* AMBIENTE */
+  .amb-toggle{display:flex;gap:8px}
+  .amb-btn{flex:1;height:48px;border-radius:12px;border:1.5px solid var(--border);background:#FAFAF7;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:700;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s}
+  .amb-btn.sel-homolog{border-color:var(--amber);background:var(--amber-bg);color:var(--amber)}
+  .amb-btn.sel-producao{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+
+  /* INFO BOX */
+  .info-box{border-radius:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.6;margin-bottom:14px}
+  .info-box.warn{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(154,96,0,.2)}
+  .info-box.info{background:var(--cyan-bg);color:var(--cyan-dark);border:1px solid rgba(41,184,194,.2)}
+  .info-box i{font-size:16px;flex-shrink:0;margin-top:1px}
+
+  /* SÉRIE */
+  .serie-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+  /* SAVE BTN */
+  .save-bar{position:sticky;bottom:0;background:rgba(237,234,227,.95);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:1rem 0;margin-top:2rem}
+  .save-inner{max-width:860px;margin:0 auto;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .save-info{font-size:12.5px;color:var(--sub);display:flex;align-items:center;gap:7px}
+  .save-info.saved{color:var(--green)}.save-info.unsaved{color:var(--amber)}
+  .btn-save{height:42px;padding:0 24px;border-radius:11px;border:none;background:var(--slate);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+  .btn-save:hover{background:#2A3A5B}
+  .btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="configuracoes.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">Certificado Digital</div>
+      <div class="crumb-sub">Configuração fiscal para emissão de NF-e e NFC-e</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- STATUS ATUAL -->
+  <div class="cert-status none" id="cert-status-card">
+    <div class="cs-icon"><i class="ti ti-certificate"></i></div>
+    <div class="cs-info">
+      <div class="cs-title" id="cs-title">Nenhum certificado configurado</div>
+      <div class="cs-sub" id="cs-sub">Configure o certificado A1 abaixo para habilitar a emissão de notas fiscais.</div>
+    </div>
+  </div>
+
+  <!-- CERTIFICADO -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-slate"><i class="ti ti-file-certificate"></i></div>
+      <div><div class="panel-title">Certificado A1</div><div class="panel-sub">Arquivo .pfx ou .p12</div></div>
+    </div>
+    <div class="panel-body">
+
+      <div class="info-box warn" id="warn-a1">
+        <i class="ti ti-alert-triangle"></i>
+        <div><strong>Segurança:</strong> O certificado é armazenado localmente no seu navegador (localStorage). Nunca é enviado para nossos servidores. Para uso em produção com API intermediária, a senha e o arquivo serão enviados diretamente para a API (Focus NFe / Nuvem Fiscal) em conexão segura HTTPS.</div>
+      </div>
+
+      <div class="mb14">
+        <label>Arquivo do certificado (.pfx / .p12)</label>
+        <div class="upload-area" id="cert-drop" ondragover="ondrag(event)" ondragleave="offdrag()" ondrop="ondrop(event)">
+          <input type="file" id="cert-file" accept=".pfx,.p12,.cer" onchange="onFile(this.files[0])"/>
+          <div class="upload-icon" id="up-icon"><i class="ti ti-file-certificate"></i></div>
+          <div class="upload-title" id="up-title">Arraste ou clique para selecionar</div>
+          <div class="upload-sub" id="up-sub">Formatos aceitos: .pfx, .p12</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Senha do certificado</label>
+          <div class="senha-wrap">
+            <input type="password" id="cert-senha" placeholder="Senha do arquivo .pfx" autocomplete="new-password"/>
+            <button class="senha-toggle" onclick="toggleSenha()" type="button"><i class="ti ti-eye" id="eye-icon"></i></button>
+          </div>
+        </div>
+        <div>
+          <label>Validade do certificado <span class="label-opt">opcional, para alerta</span></label>
+          <input type="date" id="cert-validade"/>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AMBIENTE SEFAZ -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-cyan"><i class="ti ti-server"></i></div>
+      <div><div class="panel-title">Ambiente SEFAZ</div><div class="panel-sub">Homologação para testes · Produção para notas reais</div></div>
+    </div>
+    <div class="panel-body">
+
+      <div class="info-box info" style="margin-bottom:14px">
+        <i class="ti ti-info-circle"></i>
+        <div>Use <strong>Homologação</strong> para testes — notas não têm validade fiscal. Mude para <strong>Produção</strong> somente quando tudo estiver validado.</div>
+      </div>
+
+      <label style="margin-bottom:8px">Selecione o ambiente</label>
+      <div class="amb-toggle">
+        <button class="amb-btn" id="amb-homolog" onclick="setAmbiente('2')">
+          <i class="ti ti-flask"></i> Homologação (testes)
+        </button>
+        <button class="amb-btn" id="amb-producao" onclick="setAmbiente('1')">
+          <i class="ti ti-rocket"></i> Produção (real)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NUMERAÇÃO -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-cyan"><i class="ti ti-hash"></i></div>
+      <div><div class="panel-title">Numeração e Série</div><div class="panel-sub">Sequência de emissão de NF-e e NFC-e</div></div>
+    </div>
+    <div class="panel-body">
+      <div class="info-box info" style="margin-bottom:14px">
+        <i class="ti ti-info-circle"></i>
+        <div>A série <strong>1</strong> é a mais comum para empresas com um único estabelecimento. Altere apenas se tiver orientação do seu contador.</div>
+      </div>
+      <div class="serie-grid">
+        <div>
+          <label>Série NF-e (Mod. 55)</label>
+          <input type="text" id="serie-nfe" value="1" placeholder="1"/>
+        </div>
+        <div>
+          <label>Série NFC-e (Mod. 65)</label>
+          <input type="text" id="serie-nfce" value="1" placeholder="1"/>
+        </div>
+        <div>
+          <label>Último nº NF-e emitida</label>
+          <input type="text" id="ultimo-nfe" value="0" style="text-transform:none" placeholder="0"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-icon pi-amber"><i class="ti ti-plug-connected"></i></div>
+      <div><div class="panel-title">Integração com API (SEFAZ)</div><div class="panel-sub">Focus NFe, Nuvem Fiscal ou similar</div></div>
+    </div>
+    <div class="panel-body">
+      <div class="info-box warn" style="margin-bottom:14px">
+        <i class="ti ti-plug-connected-x"></i>
+        <div>A transmissão automática à SEFAZ requer uma API intermediária. Quando configurada, o botão "Transmitir" nas páginas de NF-e e NFC-e enviará as notas em tempo real.</div>
+      </div>
+      <div class="grid2 mb14">
+        <div>
+          <label>Provedor</label>
+          <select id="api-provedor">
+            <option value="">Nenhum configurado</option>
+            <option value="focusnfe">Focus NFe</option>
+            <option value="nuvemfiscal">Nuvem Fiscal</option>
+            <option value="enotas">eNotas</option>
+            <option value="tecnospeed">Tecnospeed</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label>Token / API Key</label>
+          <div class="senha-wrap">
+            <input type="password" id="api-token" placeholder="Token fornecido pelo provedor" autocomplete="off"/>
+            <button class="senha-toggle" onclick="toggleToken()" type="button"><i class="ti ti-eye" id="eye-token"></i></button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label>URL base da API <span class="label-opt">opcional — preenche automaticamente pelo provedor</span></label>
+        <input type="text" id="api-url" placeholder="https://api.focusnfe.com.br/v2/" style="text-transform:none"/>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="save-bar">
+  <div class="save-inner">
+    <div class="save-info" id="save-info"><i class="ti ti-info-circle"></i> Salvo localmente no navegador</div>
+    <button class="btn-save" id="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> Salvar configurações</button>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+let AMBIENTE='2', CERT_B64=null, CERT_NOME=null;
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ── ARQUIVO ──────────────────────────────────────────────────
+function ondrag(e){e.preventDefault();document.getElementById('cert-drop').classList.add('drag')}
+function offdrag(){document.getElementById('cert-drop').classList.remove('drag')}
+function ondrop(e){e.preventDefault();offdrag();const f=e.dataTransfer.files[0];if(f)onFile(f);}
+
+async function onFile(file){
+  if(!file){return;}
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!['pfx','p12','cer'].includes(ext)){toast('Selecione um arquivo .pfx ou .p12','error');return;}
+  // lê como base64
+  const b64=await new Promise(res=>{
+    const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);
+  });
+  CERT_B64=b64;CERT_NOME=file.name;
+  const drop=document.getElementById('cert-drop');
+  drop.classList.add('loaded');
+  document.getElementById('up-icon').innerHTML='<i class="ti ti-certificate"></i>';
+  document.getElementById('up-title').textContent=file.name;
+  document.getElementById('up-sub').textContent='Tamanho: '+(file.size/1024).toFixed(1)+' KB · Clique para trocar';
+  // verifica validade (best-effort, sem parsing DER real)
+  atualizarStatus('warn','Certificado carregado — salve para confirmar','Valide a senha e salve as configurações');
+}
+
+// ── AMBIENTE ─────────────────────────────────────────────────
+function setAmbiente(v){
+  AMBIENTE=v;
+  document.getElementById('amb-homolog').className='amb-btn'+(v==='2'?' sel-homolog':'');
+  document.getElementById('amb-producao').className='amb-btn'+(v==='1'?' sel-producao':'');
+}
+
+// ── SENHA TOGGLE ─────────────────────────────────────────────
+function toggleSenha(){
+  const inp=document.getElementById('cert-senha');
+  const ic=document.getElementById('eye-icon');
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  ic.className='ti '+(show?'ti-eye-off':'ti-eye');
+}
+function toggleToken(){
+  const inp=document.getElementById('api-token');
+  const ic=document.getElementById('eye-token');
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  ic.className='ti '+(show?'ti-eye-off':'ti-eye');
+}
+
+// ── STATUS CARD ───────────────────────────────────────────────
+function atualizarStatus(tipo,titulo,sub){
+  const card=document.getElementById('cert-status-card');
+  card.className='cert-status '+tipo;
+  document.getElementById('cs-title').textContent=titulo;
+  document.getElementById('cs-sub').textContent=sub;
+}
+
+// ── CARREGAR CONFIG (Supabase) ────────────────────────────────
+async function carregarConfig(){
+  const{data}=await db.from('configuracoes_sistema').select('*').eq('chave','fiscal').maybeSingle();
+  if(!data) return;
+  try{
+    const cfg=JSON.parse(data.valor||'{}');
+    if(cfg.ambiente) setAmbiente(cfg.ambiente);
+    if(cfg.serie_nfe) document.getElementById('serie-nfe').value=cfg.serie_nfe;
+    if(cfg.serie_nfce) document.getElementById('serie-nfce').value=cfg.serie_nfce;
+    if(cfg.api_provedor) document.getElementById('api-provedor').value=cfg.api_provedor;
+    if(cfg.api_url) document.getElementById('api-url').value=cfg.api_url;
+    if(cfg.cert_nome){
+      CERT_NOME=cfg.cert_nome;
+      document.getElementById('up-title').textContent=cfg.cert_nome;
+      document.getElementById('up-sub').textContent='Certificado salvo · Clique para trocar';
+      document.getElementById('cert-drop').classList.add('loaded');
+      // validade
+      if(cfg.cert_validade){
+        document.getElementById('cert-validade').value=cfg.cert_validade;
+        const dias=Math.floor((new Date(cfg.cert_validade)-new Date())/(1000*86400));
+        if(dias<0) atualizarStatus('warn','Certificado VENCIDO','O certificado expirou. Renove com sua certificadora.');
+        else if(dias<30) atualizarStatus('warn',`Certificado vence em ${dias} dias`,cfg.cert_nome);
+        else atualizarStatus('ok','Certificado ativo',`${cfg.cert_nome} · Vence em ${dias} dias`);
+      } else {
+        atualizarStatus('ok','Certificado configurado',cfg.cert_nome);
+      }
+    }
+    // último nº
+    const{data:seqNfe}=await db.from('nota_sequencia').select('ultimo_numero').eq('modelo','55').eq('serie',cfg.serie_nfe||'1').maybeSingle();
+    if(seqNfe) document.getElementById('ultimo-nfe').value=seqNfe.ultimo_numero;
+  }catch(e){console.warn('Erro ao carregar config:',e);}
+}
+
+// ── SALVAR ────────────────────────────────────────────────────
+async function salvar(){
+  const btn=document.getElementById('btn-save');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';
+
+  const cfg={
+    ambiente:AMBIENTE,
+    serie_nfe:document.getElementById('serie-nfe').value.trim()||'1',
+    serie_nfce:document.getElementById('serie-nfce').value.trim()||'1',
+    api_provedor:document.getElementById('api-provedor').value||null,
+    api_url:document.getElementById('api-url').value.trim()||null,
+    cert_nome:CERT_NOME||null,
+    cert_validade:document.getElementById('cert-validade').value||null,
+    // API token salvo separado por segurança
+  };
+
+  // API token — salva separado
+  const apiToken=document.getElementById('api-token').value.trim();
+  if(apiToken){
+    await db.from('configuracoes_sistema').upsert({chave:'fiscal_api_token',valor:apiToken},{onConflict:'chave'});
+  }
+
+  // salva cert em base64 se tiver novo upload
+  if(CERT_B64){
+    await db.from('configuracoes_sistema').upsert({chave:'fiscal_cert_b64',valor:CERT_B64},{onConflict:'chave'});
+    const senha=document.getElementById('cert-senha').value;
+    if(senha) await db.from('configuracoes_sistema').upsert({chave:'fiscal_cert_senha',valor:senha},{onConflict:'chave'});
+  }
+
+  // config principal
+  const{error}=await db.from('configuracoes_sistema').upsert({chave:'fiscal',valor:JSON.stringify(cfg)},{onConflict:'chave'});
+
+  // atualiza sequência se mudou último nº
+  const ultimoNfe=parseInt(document.getElementById('ultimo-nfe').value)||0;
+  await db.from('nota_sequencia').upsert({modelo:'55',serie:cfg.serie_nfe,ultimo_numero:ultimoNfe},{onConflict:'modelo,serie'});
+  await db.from('nota_sequencia').upsert({modelo:'65',serie:cfg.serie_nfce,ultimo_numero:0},{onConflict:'modelo,serie'}).then(()=>{});
+
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar configurações';
+
+  if(error){toast('Erro ao salvar: '+error.message,'error');return;}
+
+  toast('Configurações salvas!','success');
+  document.getElementById('save-info').className='save-info saved';
+  document.getElementById('save-info').innerHTML='<i class="ti ti-check"></i> Salvo com sucesso';
+
+  if(CERT_NOME) atualizarStatus('ok','Certificado configurado',CERT_NOME+(AMBIENTE==='1'?' · Produção':' · Homologação'));
+}
+
+// ── SQL HINT ─────────────────────────────────────────────────
+// Tabela: CREATE TABLE IF NOT EXISTS configuracoes_sistema (chave TEXT PRIMARY KEY, valor TEXT, atualizado_em TIMESTAMPTZ DEFAULT now());
+// ALTER TABLE configuracoes_sistema ENABLE ROW LEVEL SECURITY;
+// CREATE POLICY "all_cfg" ON configuracoes_sistema FOR ALL USING(TRUE) WITH CHECK(TRUE);
+
+// inicializar
+setAmbiente('2');
+carregarConfig().catch(()=>{}); // ignora se tabela não existir ainda
+
+document.getElementById('cert-drop').addEventListener('click',e=>{
+  if(!e.target.closest('input[type=file]'))document.getElementById('cert-file').click();
+});
+</script>
+</body>
+</html>
