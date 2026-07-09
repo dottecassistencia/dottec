@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Status Configuráveis — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--red:#DC2626;--red-bg:#FEF2F2}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .content{max-width:1000px;margin:0 auto;padding:2rem}
+
+  .modulo-tabs{display:flex;gap:3px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:1.5rem;width:fit-content}
+  .mod-tab{height:36px;padding:0 16px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--sub);transition:all .15s}
+  .mod-tab.active{background:var(--cyan);color:#fff;box-shadow:0 2px 8px rgba(41,184,194,.3)}
+
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+  .btn-novo{height:38px;padding:0 16px;border-radius:10px;border:none;background:var(--cyan);color:#fff;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-novo:hover{background:var(--cyan-dark)}
+
+  /* LISTA DE STATUS */
+  .status-list{display:flex;flex-direction:column;gap:8px}
+  .status-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;display:flex;align-items:center;gap:14px;transition:box-shadow .15s}
+  .status-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.07)}
+  .drag-handle{color:var(--border);font-size:18px;cursor:grab;flex-shrink:0}
+  .status-color{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.1)}
+  .status-nome{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+  .status-ordem{font-size:11px;color:var(--sub);min-width:40px}
+  /* alerta config */
+  .alerta-config{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .alerta-label{font-size:11.5px;color:var(--sub)}
+  .sw{width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .sw.on{background:var(--red)}.sw.off{background:#D4D2CB}
+  .sw::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw.on::after{left:19px}.sw.off::after{left:3px}
+  .prioridade-sel{height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:#FAFAF7;font-size:11.5px;font-family:inherit;outline:none;color:var(--dark);transition:border-color .15s}
+  .prioridade-sel:focus{border-color:var(--cyan)}
+  .alerta-para-sel{height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--border);background:#FAFAF7;font-size:11.5px;font-family:inherit;outline:none;color:var(--dark)}
+  /* pill de prioridade */
+  .prio-critica{background:var(--red-bg);color:var(--red);font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:5px}
+  .prio-alta{background:var(--amber-bg);color:var(--amber);font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:5px}
+  .status-actions{display:flex;gap:6px;flex-shrink:0}
+  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+  .act-edit{background:var(--cyan-bg);color:var(--cyan-dark)}.act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}.act-del:hover{background:var(--coral);color:#fff}
+
+  .alerta-banner{background:var(--red-bg);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--red);display:flex;align-items:center;gap:8px;margin-top:8px}
+  .alerta-banner i{flex-shrink:0}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:500px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  input,select{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
+  input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.12);background:#fff}
+  input::placeholder{color:#B5B2A8}
+  .color-row{display:flex;align-items:center;gap:10px}
+  .color-row input[type=color]{width:44px;height:42px;padding:2px;border-radius:10px;cursor:pointer}
+  .color-row input[type=text]{flex:1}
+  /* alerta toggle no modal */
+  .alerta-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:12px;padding:12px 14px}
+  .at-info{flex:1}.at-title{font-size:13.5px;font-weight:700;color:var(--dark)}.at-desc{font-size:12px;color:var(--sub);margin-top:2px}
+  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--cyan);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .btn-save:hover{background:var(--cyan-dark)}
+  .btn-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+  .btn-cancel:hover{background:var(--bg)}
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Novo status</div>
+      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nome do status</label>
+        <input type="text" id="m-nome" placeholder="EX: PASSAR ORÇAMENTO" style="text-transform:uppercase"/>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cor</label>
+          <div class="color-row">
+            <input type="color" id="m-cor-picker" value="#29B8C2" oninput="document.getElementById('m-cor-text').value=this.value"/>
+            <input type="text" id="m-cor-text" value="#29B8C2" oninput="document.getElementById('m-cor-picker').value=this.value" placeholder="#000000" style="text-transform:none"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Ordem de exibição</label>
+          <input type="number" id="m-ordem" value="1" min="1" style="text-transform:none"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Gera alerta para o administrativo?</label>
+        <div class="alerta-toggle-row">
+          <div class="at-info">
+            <div class="at-title">Ativar alerta prioritário</div>
+            <div class="at-desc">O dashboard ficará notificando até o admin resolver</div>
+          </div>
+          <div class="sw off" id="m-alerta-sw" onclick="toggleAlertaSw()"></div>
+        </div>
+      </div>
+
+      <div id="alerta-extra" style="display:none">
+        <div class="grid2">
+          <div class="field">
+            <label>Notificar</label>
+            <select id="m-alerta-para">
+              <option value="COMERCIAL">Comercial</option>
+              <option value="ADMIN">Admin</option>
+              <option value="TODOS">Todos</option>
+            </select>
+          </div>
+          <div class="field no-mb">
+            <label>Prioridade</label>
+            <select id="m-prioridade">
+              <option value="NORMAL">Normal</option>
+              <option value="ALTA">Alta 🟡</option>
+              <option value="CRITICA">Crítica 🔴</option>
+            </select>
+          </div>
+        </div>
+        <div class="alerta-banner"><i class="ti ti-bell-ringing"></i>O dashboard exibirá um alerta <strong>pulsando em vermelho</strong> para cada OS neste status, até o responsável tomar ação.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="configuracoes.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">Status Configuráveis</div>
+      <div class="crumb-sub">Defina os status e quais geram alerta no dashboard</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="modulo-tabs">
+    <button class="mod-tab active" id="mt-OS" onclick="setModulo('OS')">Ordem de Serviço</button>
+    <button class="mod-tab" id="mt-CONTAS_PAGAR" onclick="setModulo('CONTAS_PAGAR')">Contas a Pagar</button>
+    <button class="mod-tab" id="mt-CONTAS_RECEBER" onclick="setModulo('CONTAS_RECEBER')">Contas a Receber</button>
+  </div>
+
+  <div class="toolbar">
+    <span style="font-size:13px;color:var(--sub)" id="total-label">Carregando...</span>
+    <button class="btn-novo" onclick="abrirModal()"><i class="ti ti-plus"></i> Novo status</button>
+  </div>
+
+  <div class="status-list" id="status-list">
+    <div style="text-align:center;padding:2rem;color:var(--sub)"><i class="ti ti-loader-2 spin" style="font-size:24px;display:block;margin-bottom:8px"></i>Carregando...</div>
+  </div>
+</main>
+
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+let MODULO='OS', DADOS=[], EDIT_ID=null, ALERTA_ATIVO=false;
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+function setModulo(m){
+  MODULO=m;
+  ['OS','CONTAS_PAGAR','CONTAS_RECEBER'].forEach(x=>document.getElementById('mt-'+x).classList.toggle('active',x===m));
+  load();
+}
+
+async function load(){
+  const{data}=await db.from('status_config').select('*').eq('modulo',MODULO).eq('ativo',true).order('ordem');
+  DADOS=data||[];
+  document.getElementById('total-label').textContent=DADOS.length+' status configurado(s)';
+  renderList();
+}
+
+function renderList(){
+  const list=document.getElementById('status-list');
+  if(!DADOS.length){
+    list.innerHTML=`<div style="text-align:center;padding:2.5rem;color:var(--sub);background:var(--white);border-radius:14px;border:1px solid var(--border)">
+      <i class="ti ti-list-check" style="font-size:32px;display:block;margin-bottom:10px;opacity:.3"></i>
+      Nenhum status cadastrado. Clique em "Novo status" para começar.
+    </div>`;return;
+  }
+
+  const prioPill=p=>p==='CRITICA'?`<span class="prio-critica">🔴 CRÍTICA</span>`:p==='ALTA'?`<span class="prio-alta">🟡 ALTA</span>`:'';
+
+  list.innerHTML=DADOS.map(s=>`
+    <div class="status-card">
+      <i class="ti ti-grip-vertical drag-handle"></i>
+      <div class="status-color" style="background:${s.cor}"></div>
+      <div class="status-nome">${s.nome}</div>
+      <div class="status-ordem">#${s.ordem}</div>
+      <div class="alerta-config">
+        ${s.gera_alerta?`
+          <span style="font-size:11px;color:var(--sub)">Alerta para ${s.alerta_para||'TODOS'}</span>
+          ${prioPill(s.alerta_prioridade)}
+          <div class="sw on" onclick="toggleAlerta('${s.id}',false)" title="Clique para desativar alerta"></div>
+        `:`
+          <span class="alerta-label">Sem alerta</span>
+          <div class="sw off" onclick="toggleAlerta('${s.id}',true)" title="Clique para ativar alerta"></div>
+        `}
+      </div>
+      <div class="status-actions">
+        <button class="act-btn act-edit" onclick="editarStatus('${s.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+        <button class="act-btn act-del" onclick="excluirStatus('${s.id}','${s.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleAlerta(id,ativo){
+  await db.from('status_config').update({gera_alerta:ativo,alerta_prioridade:ativo?'ALTA':'NORMAL',alerta_para:ativo?'COMERCIAL':null}).eq('id',id);
+  toast(ativo?'Alerta ativado!':'Alerta desativado.','success');
+  load();
+}
+
+function abrirModal(sc=null){
+  EDIT_ID=sc?sc.id:null;
+  ALERTA_ATIVO=sc?sc.gera_alerta:false;
+  document.getElementById('modal-title').textContent=sc?'Editar status':'Novo status';
+  document.getElementById('m-nome').value=sc?sc.nome:'';
+  document.getElementById('m-cor-picker').value=sc?sc.cor:'#29B8C2';
+  document.getElementById('m-cor-text').value=sc?sc.cor:'#29B8C2';
+  document.getElementById('m-ordem').value=sc?sc.ordem:DADOS.length+1;
+  document.getElementById('m-alerta-para').value=sc?sc.alerta_para||'COMERCIAL':'COMERCIAL';
+  document.getElementById('m-prioridade').value=sc?sc.alerta_prioridade||'ALTA':'ALTA';
+  const sw=document.getElementById('m-alerta-sw');
+  sw.className='sw '+(ALERTA_ATIVO?'on':'off');
+  document.getElementById('alerta-extra').style.display=ALERTA_ATIVO?'block':'none';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('m-nome').focus(),100);
+}
+
+function fecharModal(){document.getElementById('modal').classList.remove('open');EDIT_ID=null;}
+
+function editarStatus(id){const s=DADOS.find(x=>x.id===id);if(s)abrirModal(s);}
+
+function toggleAlertaSw(){
+  ALERTA_ATIVO=!ALERTA_ATIVO;
+  document.getElementById('m-alerta-sw').className='sw '+(ALERTA_ATIVO?'on':'off');
+  document.getElementById('alerta-extra').style.display=ALERTA_ATIVO?'block':'none';
+}
+
+async function salvar(){
+  const nome=document.getElementById('m-nome').value.trim().toUpperCase();
+  if(!nome){toast('Informe o nome do status.','error');return;}
+  const payload={
+    modulo:MODULO,nome,
+    cor:document.getElementById('m-cor-text').value||'#8A887F',
+    ordem:parseInt(document.getElementById('m-ordem').value)||1,
+    gera_alerta:ALERTA_ATIVO,
+    alerta_para:ALERTA_ATIVO?(document.getElementById('m-alerta-para').value||null):null,
+    alerta_prioridade:ALERTA_ATIVO?(document.getElementById('m-prioridade').value||'NORMAL'):'NORMAL',
+    ativo:true,
+  };
+  let error;
+  if(EDIT_ID){({error}=await db.from('status_config').update(payload).eq('id',EDIT_ID));}
+  else{({error}=await db.from('status_config').insert(payload));}
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast('Status salvo!','success');fecharModal();load();
+}
+
+async function excluirStatus(id,nome){
+  if(!confirm('Excluir o status "'+nome+'"?\nAS e contas com este status não serão afetadas.')) return;
+  const{error}=await db.from('status_config').update({ativo:false}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast('Status removido.','success');load();
+}
+
+load();
+</script>
+</body>
+</html>

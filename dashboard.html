@@ -19,389 +19,969 @@
   --purple:#5B3FA6;--purple-bg:#EEEAF8;
   --teal:#0E7490;--teal-bg:#CFFAFE;
   --rose:#BE185D;--rose-bg:#FCE7F3;
-  --indigo:#3730A3;--indigo-bg:#E0E7FF;
+  --red:#DC2626;--red-bg:#FEF2F2;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;
-  background:
-    radial-gradient(circle at 8% -10%,rgba(41,184,194,.14),transparent 40%),
-    radial-gradient(circle at 94% 4%,rgba(232,96,74,.10),transparent 36%),
-    var(--bg);
-}
+body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg);display:flex;flex-direction:column}
 
 /* TOPBAR */
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;position:sticky;top:0;z-index:100}
-.topbar-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;gap:14px}
-.tb-logo{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;gap:14px;flex-shrink:0;position:sticky;top:0;z-index:200}
+.tb-logo{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .tb-brand{flex:1}
-.tb-title{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--dark)}
-.tb-sub{font-size:11px;color:var(--sub);margin-top:1px}
-.tb-time{font-size:12px;font-weight:700;color:var(--sub);background:var(--bg);padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
+.tb-title{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--dark)}
+.tb-sub{font-size:11px;color:var(--sub)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-time{font-size:11.5px;font-weight:700;color:var(--sub);background:var(--bg);padding:4px 11px;border-radius:20px;border:1px solid var(--border);white-space:nowrap}
+.tb-user{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--dark);background:var(--bg);padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer}
+.tb-user .avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+.av-admin{background:var(--slate)}.av-comercial{background:var(--teal)}.av-tecnico{background:var(--amber)}
+.perfil-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;background:var(--slate-bg);color:var(--slate)}
 
-/* CONTENT */
-.content{max-width:1160px;margin:0 auto;padding:2rem 2rem 4rem}
+/* LAYOUT PRINCIPAL */
+.main{display:grid;grid-template-columns:1fr 340px;flex:1;min-height:0;gap:0}
+
+/* COLUNA ESQUERDA */
+.col-left{display:flex;flex-direction:column;padding:1.5rem;gap:1.25rem;overflow-y:auto;min-height:0}
 
 /* BUSCA GLOBAL */
-.search-section{margin-bottom:2rem}
-.search-wrap{position:relative}
-.search-input-row{
+.search-section{position:relative}
+.search-box{
   display:flex;align-items:center;
   background:var(--white);border:1.5px solid var(--border);border-radius:14px;
   box-shadow:0 2px 12px rgba(0,0,0,.06);
-  transition:border-color .2s,box-shadow .2s;overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;overflow:visible;
 }
-.search-input-row:focus-within{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(41,184,194,.13),0 4px 18px rgba(0,0,0,.07)}
-.search-input-row i.si{padding:0 16px;font-size:20px;color:var(--sub);flex-shrink:0;pointer-events:none}
-.search-input-row input{
-  flex:1;height:50px;border:none;background:transparent;outline:none;
-  font-size:14.5px;font-family:'Figtree',sans-serif;color:var(--dark);
+.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(41,184,194,.12),0 4px 16px rgba(0,0,0,.07)}
+.search-box i.si{padding:0 16px;font-size:20px;color:var(--sub);flex-shrink:0}
+.search-box input{
+  flex:1;height:52px;border:none;background:transparent;outline:none;
+  font-size:15px;font-family:'Figtree',sans-serif;color:var(--dark);
   text-transform:uppercase;caret-color:var(--cyan);
 }
-.search-input-row input::placeholder{text-transform:none;color:#B5B2A8;font-size:14px}
-.search-kbd{margin-right:14px;display:flex;align-items:center;gap:5px;flex-shrink:0}
-.kbd{font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
-.search-results{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.13);max-height:420px;overflow-y:auto;z-index:300}
+.search-box input::placeholder{text-transform:none;color:#B5B2A8;font-size:14px}
+.search-esc{margin-right:14px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
+
+/* RESULTADOS BUSCA */
+.search-results{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+  max-height:520px;overflow-y:auto;z-index:500;
+}
 .search-results.open{display:block}
-.sr-section-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);padding:10px 16px 4px}
-.sr-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .12s}
+.sr-header{padding:10px 16px 4px;font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:7px}
+.sr-header::after{content:'';flex:1;height:1px;background:var(--border)}
+.sr-item{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;cursor:pointer;transition:background .12s;border-bottom:1px solid #F2F0EA}
+.sr-item:last-child{border-bottom:none}
 .sr-item:hover,.sr-item.focused{background:var(--bg)}
-.sr-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.sr-icon.pessoa{background:var(--cyan-bg);color:var(--cyan-dark)}
-.sr-icon.produto{background:var(--coral-bg);color:var(--coral)}
+.sr-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.sri-pessoa{background:var(--cyan-bg);color:var(--cyan-dark)}
+.sri-produto{background:var(--coral-bg);color:var(--coral)}
+.sri-os{background:var(--amber-bg);color:var(--amber)}
+.sri-conta{background:var(--green-bg);color:var(--green)}
+.sri-venda{background:var(--teal-bg);color:var(--teal)}
 .sr-info{flex:1;min-width:0}
-.sr-nome{font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sr-detalhe{font-size:11px;color:var(--sub);margin-top:1px}
-.sr-badges{display:flex;gap:4px;margin-top:2px}
-.sr-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px}
-.sr-badge.c{background:var(--cyan-bg);color:var(--cyan-dark)}
-.sr-badge.f{background:var(--amber-bg);color:var(--amber)}
-.sr-badge.t{background:var(--slate-bg);color:var(--slate)}
-.sr-badge.prod{background:var(--coral-bg);color:var(--coral)}
-.sr-meta{font-size:11px;color:var(--sub);white-space:nowrap;flex-shrink:0}
-.sr-sep{height:1px;background:var(--border);margin:4px 0}
-.sr-empty{padding:1.5rem;text-align:center;font-size:13px;color:var(--sub)}
-.sr-empty i{font-size:26px;display:block;margin-bottom:6px;opacity:.4}
-.sr-footer{padding:10px 16px;text-align:center;border-top:1px solid var(--border);font-size:11px;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:8px}
-.search-hint{display:flex;align-items:center;gap:16px;margin-top:7px;padding-left:4px}
-.sh-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--sub)}
+.sr-title{font-size:13.5px;font-weight:700;color:var(--dark)}
+.sr-sub{font-size:11.5px;color:var(--sub);margin-top:2px;line-height:1.4}
+.sr-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;margin-top:4px;display:inline-block}
+.sr-meta{font-size:11.5px;color:var(--sub);flex-shrink:0;white-space:nowrap}
+/* grupo de resultados de uma entidade */
+.sr-group{border-left:3px solid var(--border);margin:4px 16px 8px;border-radius:0 8px 8px 0}
+.sr-group-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;font-size:12.5px;transition:background .12s}
+.sr-group-item:hover{background:var(--bg)}
+.sr-group-item i{font-size:14px;color:var(--sub)}
+.sr-empty{padding:2rem;text-align:center;color:var(--sub)}
+.sr-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.3}
+.sr-footer{padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--sub);text-align:center}
 
-/* SECTION LABEL */
-.section-label{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+/* ALERTAS PRIORITÁRIOS */
+.alertas-section{}
+.section-title{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-title .count-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:var(--red);color:#fff;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
-/* ── CARDS GRID 3 COLUNAS ── */
-.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-
-.mod-card{
-  background:var(--white);border-radius:18px;border:1.5px solid var(--border);
-  padding:1.4rem 1.3rem 1.2rem;
-  display:flex;flex-direction:column;gap:0;
-  cursor:pointer;text-decoration:none;color:inherit;
-  overflow:hidden;position:relative;
-  transition:box-shadow .22s,border-color .22s,transform .2s;
-  animation:cardIn .4s ease both;
+.alerta-card{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border-radius:12px;border:1.5px solid;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;margin-bottom:7px;
+  animation:slideIn .3s ease;
 }
-@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.mod-card:nth-child(1){animation-delay:.02s}.mod-card:nth-child(2){animation-delay:.05s}.mod-card:nth-child(3){animation-delay:.08s}
-.mod-card:nth-child(4){animation-delay:.11s}.mod-card:nth-child(5){animation-delay:.14s}.mod-card:nth-child(6){animation-delay:.17s}
-.mod-card:nth-child(7){animation-delay:.20s}.mod-card:nth-child(8){animation-delay:.23s}.mod-card:nth-child(9){animation-delay:.26s}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.alerta-card:hover{transform:translateX(4px);box-shadow:0 4px 16px rgba(0,0,0,.09)}
+.alerta-card.critica{background:var(--red-bg);border-color:rgba(220,38,38,.35)}
+.alerta-card.alta{background:var(--amber-bg);border-color:rgba(154,96,0,.3)}
+.alerta-card.normal{background:var(--bg);border-color:var(--border)}
+.alerta-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.alerta-card.critica .alerta-icon{background:rgba(220,38,38,.15);color:var(--red)}
+.alerta-card.alta .alerta-icon{background:rgba(154,96,0,.15);color:var(--amber)}
+.alerta-prioridade{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;margin-bottom:3px;display:inline-block}
+.alerta-card.critica .alerta-prioridade{background:var(--red);color:#fff}
+.alerta-card.alta .alerta-prioridade{background:var(--amber);color:#fff}
+.alerta-card.critica .alerta-prioridade{animation:pulseText 1.5s ease infinite}
+@keyframes pulseText{0%,100%{opacity:1}50%{opacity:.7}}
+.alerta-info{flex:1;min-width:0}
+.alerta-titulo{font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alerta-sub{font-size:11.5px;color:var(--sub);margin-top:2px}
+.alerta-tempo{font-size:11px;color:var(--sub);flex-shrink:0;white-space:nowrap}
+.alerta-arrow{font-size:16px;color:var(--sub);flex-shrink:0}
+.btn-ack{height:28px;padding:0 10px;border-radius:7px;border:none;background:rgba(0,0,0,.06);color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;transition:background .12s;font-family:inherit}
+.btn-ack:hover{background:rgba(0,0,0,.12)}
+.alertas-vazio{background:var(--green-bg);border:1px solid rgba(59,109,17,.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--green)}
 
-.mod-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% -15%,var(--gc,transparent),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
-.mod-card:hover::before{opacity:1}
-.mod-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.09)}
+/* MÉTRICAS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;cursor:pointer;transition:box-shadow .15s;text-decoration:none;color:inherit}
+.metric-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.metric-label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.metric-value{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--dark);line-height:1}
+.metric-value.cyan{color:var(--cyan-dark)}.metric-value.green{color:var(--green)}.metric-value.coral{color:var(--coral)}.metric-value.amber{color:var(--amber)}
+.metric-sub{font-size:10.5px;color:var(--sub);margin-top:4px}
 
-/* ícone topo */
-.card-icon{
-  width:44px;height:44px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:21px;margin-bottom:1rem;flex-shrink:0;
-  transition:transform .3s cubic-bezier(.34,1.5,.64,1),background .22s,color .22s;
+/* ATALHOS RÁPIDOS */
+.atalhos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.atalho-btn{
+  background:var(--white);border:1.5px solid var(--border);border-radius:12px;
+  padding:1rem;cursor:pointer;font-family:'Figtree',sans-serif;
+  display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  transition:all .18s;text-decoration:none;color:inherit;
 }
-.mod-card:hover .card-icon{transform:scale(1.1) rotate(-5deg)}
+.atalho-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.atalho-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .2s}
+.atalho-btn:hover .atalho-icon{transform:scale(1.1) rotate(-5deg)}
+.atalho-name{font-size:12.5px;font-weight:700;color:var(--dark)}
+.atalho-desc{font-size:10.5px;color:var(--sub);line-height:1.4}
 
-/* nome + desc */
-.card-name{font-family:'Lora',serif;font-size:15.5px;font-weight:700;color:var(--dark);margin-bottom:3px;letter-spacing:-.01em}
-.card-desc{font-size:11.5px;color:var(--sub);line-height:1.5}
+/* COLUNA DIREITA */
+.col-right{border-left:1px solid var(--border);background:var(--white);display:flex;flex-direction:column;overflow:hidden}
 
-/* badge inferior */
-.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:1rem}
-.card-badge{font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:7px;letter-spacing:.04em;text-transform:uppercase}
-.card-arrow{width:28px;height:28px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);transition:background .18s,color .18s,transform .18s;flex-shrink:0}
+/* AGENDA */
+.agenda-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.agenda-title{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--dark)}
+.btn-nova-agenda{height:32px;padding:0 12px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-family:'Figtree',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s}
+.btn-nova-agenda:hover{background:var(--cyan-dark)}
 
-/* CORES POR MÓDULO */
-/* cyan */
-.mc-cyan{--gc:rgba(41,184,194,.22)}.mc-cyan:hover{border-color:rgba(41,184,194,.45)}
-.mc-cyan .card-icon{background:var(--cyan-bg);color:var(--cyan-dark)}.mc-cyan:hover .card-icon{background:var(--cyan);color:#fff}
-.mc-cyan .card-badge{background:var(--cyan-bg);color:var(--cyan-dark)}.mc-cyan:hover .card-arrow{background:var(--cyan-dark);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* coral */
-.mc-coral{--gc:rgba(232,96,74,.20)}.mc-coral:hover{border-color:rgba(232,96,74,.45)}
-.mc-coral .card-icon{background:var(--coral-bg);color:var(--coral)}.mc-coral:hover .card-icon{background:var(--coral);color:#fff}
-.mc-coral .card-badge{background:var(--coral-bg);color:var(--coral)}.mc-coral:hover .card-arrow{background:var(--coral-dark);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* amber */
-.mc-amber{--gc:rgba(154,96,0,.18)}.mc-amber:hover{border-color:rgba(154,96,0,.38)}
-.mc-amber .card-icon{background:var(--amber-bg);color:var(--amber)}.mc-amber:hover .card-icon{background:var(--amber);color:#fff}
-.mc-amber .card-badge{background:var(--amber-bg);color:var(--amber)}.mc-amber:hover .card-arrow{background:var(--amber);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* green */
-.mc-green{--gc:rgba(59,109,17,.18)}.mc-green:hover{border-color:rgba(59,109,17,.4)}
-.mc-green .card-icon{background:var(--green-bg);color:var(--green)}.mc-green:hover .card-icon{background:var(--green);color:#fff}
-.mc-green .card-badge{background:var(--green-bg);color:var(--green)}.mc-green:hover .card-arrow{background:var(--green);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* slate */
-.mc-slate{--gc:rgba(58,74,107,.16)}.mc-slate:hover{border-color:rgba(58,74,107,.38)}
-.mc-slate .card-icon{background:var(--slate-bg);color:var(--slate)}.mc-slate:hover .card-icon{background:var(--slate);color:#fff}
-.mc-slate .card-badge{background:var(--slate-bg);color:var(--slate)}.mc-slate:hover .card-arrow{background:var(--slate);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* purple */
-.mc-purple{--gc:rgba(91,63,166,.18)}.mc-purple:hover{border-color:rgba(91,63,166,.4)}
-.mc-purple .card-icon{background:var(--purple-bg);color:var(--purple)}.mc-purple:hover .card-icon{background:var(--purple);color:#fff}
-.mc-purple .card-badge{background:var(--purple-bg);color:var(--purple)}.mc-purple:hover .card-arrow{background:var(--purple);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* teal */
-.mc-teal{--gc:rgba(14,116,144,.18)}.mc-teal:hover{border-color:rgba(14,116,144,.4)}
-.mc-teal .card-icon{background:var(--teal-bg);color:var(--teal)}.mc-teal:hover .card-icon{background:var(--teal);color:#fff}
-.mc-teal .card-badge{background:var(--teal-bg);color:var(--teal)}.mc-teal:hover .card-arrow{background:var(--teal);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* rose */
-.mc-rose{--gc:rgba(190,24,93,.15)}.mc-rose:hover{border-color:rgba(190,24,93,.35)}
-.mc-rose .card-icon{background:var(--rose-bg);color:var(--rose)}.mc-rose:hover .card-icon{background:var(--rose);color:#fff}
-.mc-rose .card-badge{background:var(--rose-bg);color:var(--rose)}.mc-rose:hover .card-arrow{background:var(--rose);color:#fff;transform:translateX(2px) rotate(-45deg)}
-/* indigo */
-.mc-indigo{--gc:rgba(55,48,163,.16)}.mc-indigo:hover{border-color:rgba(55,48,163,.38)}
-.mc-indigo .card-icon{background:var(--indigo-bg);color:var(--indigo)}.mc-indigo:hover .card-icon{background:var(--indigo);color:#fff}
-.mc-indigo .card-badge{background:var(--indigo-bg);color:var(--indigo)}.mc-indigo:hover .card-arrow{background:var(--indigo);color:#fff;transform:translateX(2px) rotate(-45deg)}
+.agenda-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.ag-tab{flex:1;height:36px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.ag-tab.active{color:var(--cyan-dark);border-bottom-color:var(--cyan)}
+
+.agenda-list{flex:1;overflow-y:auto;padding:.75rem}
+
+.ag-empty{text-align:center;padding:2rem 1rem;color:var(--sub)}
+.ag-empty i{font-size:32px;display:block;margin-bottom:8px;opacity:.2}
+
+.ag-item{border-radius:12px;border:1px solid var(--border);margin-bottom:8px;overflow:hidden;transition:box-shadow .15s;cursor:pointer}
+.ag-item:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.ag-item.hoje{border-color:rgba(41,184,194,.4);background:var(--cyan-bg)}
+.ag-item.atrasado{border-color:rgba(220,38,38,.3);background:var(--red-bg)}
+.ag-item.concluido{opacity:.55}
+.ag-item-head{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.ag-data{font-size:11px;font-weight:800;color:var(--sub);background:var(--bg);padding:3px 8px;border-radius:7px;white-space:nowrap;flex-shrink:0}
+.ag-item.hoje .ag-data{background:var(--cyan);color:#fff}
+.ag-item.atrasado .ag-data{background:var(--red);color:#fff;animation:pulse 1.5s ease infinite}
+.ag-titulo{font-size:13px;font-weight:700;color:var(--dark);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-item.concluido .ag-titulo{text-decoration:line-through;color:var(--sub)}
+.ag-resp{font-size:11px;color:var(--sub);padding:0 12px 8px;display:flex;align-items:center;gap:5px}
+.ag-resp-av{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
+.ag-actions{display:flex;gap:5px;padding:0 12px 10px}
+.ag-btn{height:26px;padding:0 9px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all .12s;color:var(--sub)}
+.ag-btn.concluir{border-color:var(--green);color:var(--green)}.ag-btn.concluir:hover{background:var(--green);color:#fff}
+.ag-btn.del{border-color:var(--coral);color:var(--coral)}.ag-btn.del:hover{background:var(--coral);color:#fff}
+
+/* MÓDULOS — coluna direita embaixo */
+.modulos-section{border-top:1px solid var(--border);padding:.75rem;flex-shrink:0}
+.modulos-title{font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.6rem}
+.modulos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.mod-mini{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:.7rem .6rem;text-align:center;cursor:pointer;text-decoration:none;color:inherit;
+  transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.mod-mini:hover{background:var(--white);box-shadow:0 3px 10px rgba(0,0,0,.07);transform:translateY(-1px)}
+.mod-mini i{font-size:18px}
+.mod-mini span{font-size:10.5px;font-weight:700;color:var(--dark)}
+
+/* MODAIS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.2)}
+.modal.sm{max-width:480px}.modal.md{max-width:580px}.modal.lg{max-width:700px}
+.modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+.modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+.modal-body{padding:1.5rem}
+.modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+input,select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.12);background:#fff}
+input::placeholder,textarea::placeholder{color:#B5B2A8}
+textarea{height:80px;resize:vertical;padding:10px 13px}
+.btn-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--cyan);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
+.btn-save:hover{background:var(--cyan-dark)}
+.btn-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+.btn-cancel:hover{background:var(--bg)}
+
+/* RECIBO PRINT */
+#recibo-print-area{display:none}
+
+.toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+.toast.show{transform:translateX(0)}
+.toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
 
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@media(max-width:860px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.cards-grid{grid-template-columns:1fr}.content{padding:1.25rem 1rem}.search-hint{display:none}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+@media(max-width:1100px){.main{grid-template-columns:1fr}.col-right{border-left:none;border-top:2px solid var(--border)}}
+@media(max-width:680px){.metrics-grid{grid-template-columns:1fr 1fr}.atalhos-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <img src="logo-dottec.png" alt="Dottec" class="tb-logo"/>
-    <div class="tb-brand">
-      <div class="tb-title">Dottec Assistência Inteligente</div>
-      <div class="tb-sub" id="tb-sub">—</div>
+<!-- MODAL NOVA AGENDA -->
+<div class="modal-overlay" id="modal-agenda" onclick="if(event.target===this)fecharModal('agenda')">
+  <div class="modal sm">
+    <div class="modal-head">
+      <div class="modal-title">Novo compromisso</div>
+      <button class="modal-close" onclick="fecharModal('agenda')"><i class="ti ti-x"></i></button>
     </div>
+    <div class="modal-body">
+      <div class="field"><label>Título</label><input type="text" id="ag-titulo" placeholder="EX: LIGAR PARA CLIENTE, ENTREGAR OS..." style="text-transform:uppercase"/></div>
+      <div class="grid2">
+        <div class="field"><label>Data e hora</label><input type="datetime-local" id="ag-data"/></div>
+        <div class="field"><label>Responsável</label>
+          <select id="ag-resp">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+      <div class="field no-mb"><label>Descrição <small style="text-transform:none;font-weight:400">(opcional)</small></label>
+        <textarea id="ag-desc" placeholder="DETALHES DO COMPROMISSO..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal('agenda')">Cancelar</button>
+      <button class="btn-save" onclick="salvarAgenda()"><i class="ti ti-calendar-plus"></i> Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECIBO RÁPIDO -->
+<div class="modal-overlay" id="modal-recibo" onclick="if(event.target===this)fecharModal('recibo')">
+  <div class="modal md">
+    <div class="modal-head">
+      <div class="modal-title">Recibo Rápido</div>
+      <button class="modal-close" onclick="fecharModal('recibo')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Beneficiário</label>
+          <input type="text" id="r-beneficiario" placeholder="EX: MOTOBOY JOÃO" style="text-transform:uppercase"/>
+        </div>
+        <div class="field">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="r-valor" placeholder="0,00"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input type="text" id="r-descricao" placeholder="EX: ENTREGA DE MERCADORIAS - 09/07/2026" style="text-transform:uppercase"/>
+      </div>
+      <div class="grid2">
+        <div class="field no-mb">
+          <label>Forma de pagamento</label>
+          <select id="r-forma">
+            <option>DINHEIRO</option><option>PIX</option><option>TRANSFERÊNCIA</option>
+          </select>
+        </div>
+        <div class="field no-mb">
+          <label>Categoria</label>
+          <input type="text" id="r-categoria" placeholder="EX: FRETE, ENTREGA..." style="text-transform:uppercase"/>
+        </div>
+      </div>
+      <div style="background:var(--amber-bg);border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12.5px;color:var(--amber);display:flex;align-items:center;gap:8px">
+        <i class="ti ti-info-circle"></i> Será lançado automaticamente em <strong>Contas a Pagar</strong>.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal('recibo')">Cancelar</button>
+      <button class="btn-save" style="background:var(--amber)" onclick="salvarRecibo()"><i class="ti ti-receipt"></i> Emitir e imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <img src="logo-dottec.png" alt="Dottec" class="tb-logo"/>
+  <div class="tb-brand">
+    <div class="tb-title">Dottec Assistência Inteligente</div>
+    <div class="tb-sub" id="tb-sub">—</div>
+  </div>
+  <div class="tb-right">
     <div class="tb-time" id="tb-time">—</div>
+    <div class="tb-user" id="tb-user">
+      <div class="avatar av-admin" id="tb-avatar">G</div>
+      <span id="tb-nome">Gaza</span>
+      <span class="perfil-badge" id="tb-perfil">ADMIN</span>
+    </div>
   </div>
 </header>
 
-<main class="content">
+<div class="main">
 
-  <!-- BUSCA GLOBAL -->
-  <div class="search-section">
-    <div class="search-wrap">
-      <div class="search-input-row">
+  <!-- COLUNA ESQUERDA -->
+  <div class="col-left">
+
+    <!-- BUSCA GLOBAL -->
+    <div class="search-section">
+      <div class="search-box">
         <i class="ti ti-search si"></i>
-        <input type="text" id="busca-global" placeholder="Buscar pessoas, produtos, orçamentos..." autocomplete="off" oninput="onBusca()" onkeydown="onBuscaKey(event)"/>
-        <div class="search-kbd"><span class="kbd">ESC</span></div>
+        <input type="text" id="busca" placeholder="Buscar cliente, produto, OS, conta, orçamento..." autocomplete="off" oninput="onBusca()" onkeydown="onBuscaKey(event)"/>
+        <span class="search-esc">ESC</span>
       </div>
       <div class="search-results" id="search-results"></div>
     </div>
-    <div class="search-hint">
-      <div class="sh-item"><span class="kbd">↑</span><span class="kbd">↓</span> navegar</div>
-      <div class="sh-item"><span class="kbd">Enter</span> abrir</div>
-      <div class="sh-item"><span class="kbd">ESC</span> fechar</div>
+
+    <!-- ALERTAS -->
+    <div class="alertas-section">
+      <div class="section-title">
+        Alertas prioritários
+        <span class="count-badge" id="alerta-count" style="display:none">0</span>
+      </div>
+      <div id="alertas-container">
+        <div class="alertas-vazio"><i class="ti ti-circle-check" style="font-size:18px"></i>Nenhum alerta pendente. Tudo em dia!</div>
+      </div>
+    </div>
+
+    <!-- MÉTRICAS DO DIA -->
+    <div>
+      <div class="section-title">Hoje</div>
+      <div class="metrics-grid">
+        <a class="metric-card" href="caixa.html">
+          <div class="metric-label">Caixa atual</div>
+          <div class="metric-value cyan" id="m-caixa">R$ —</div>
+          <div class="metric-sub" id="m-caixa-s">verificando...</div>
+        </a>
+        <a class="metric-card" href="venda.html">
+          <div class="metric-label">Vendas hoje</div>
+          <div class="metric-value green" id="m-vendas">—</div>
+          <div class="metric-sub" id="m-vendas-s">—</div>
+        </a>
+        <a class="metric-card" href="os.html">
+          <div class="metric-label">OS abertas</div>
+          <div class="metric-value amber" id="m-os">—</div>
+          <div class="metric-sub" id="m-os-s">—</div>
+        </a>
+        <a class="metric-card" href="contas.html?tipo=PAGAR">
+          <div class="metric-label">Vencendo hoje</div>
+          <div class="metric-value coral" id="m-venc">—</div>
+          <div class="metric-sub">contas a pagar</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ATALHOS RÁPIDOS -->
+    <div>
+      <div class="section-title">Atalhos rápidos</div>
+      <div class="atalhos-grid">
+        <button class="atalho-btn" onclick="abrirModal('recibo')">
+          <div class="atalho-icon" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-receipt"></i></div>
+          <div class="atalho-name">Recibo rápido</div>
+          <div class="atalho-desc">Emite e lança no contas a pagar</div>
+        </button>
+        <a class="atalho-btn" href="venda-rapida.html">
+          <div class="atalho-icon" style="background:var(--cyan-bg);color:var(--cyan-dark)"><i class="ti ti-bolt"></i></div>
+          <div class="atalho-name">Venda rápida</div>
+          <div class="atalho-desc">PDV balcão sem cadastro</div>
+        </a>
+        <a class="atalho-btn" href="contas.html">
+          <div class="atalho-icon" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-currency-dollar"></i></div>
+          <div class="atalho-name">Contas</div>
+          <div class="atalho-desc">Pagar e receber</div>
+        </a>
+        <a class="atalho-btn" href="orcamentos.html">
+          <div class="atalho-icon" style="background:var(--teal-bg);color:var(--teal)"><i class="ti ti-calculator"></i></div>
+          <div class="atalho-name">Orçamento</div>
+          <div class="atalho-desc">Lista do fornecedor e envio</div>
+        </a>
+        <a class="atalho-btn" href="caixa.html">
+          <div class="atalho-icon" style="background:var(--slate-bg);color:var(--slate)"><i class="ti ti-wallet"></i></div>
+          <div class="atalho-name">Caixa</div>
+          <div class="atalho-desc">Abrir, fechar, movimentar</div>
+        </a>
+        <a class="atalho-btn" href="os.html?novo=1">
+          <div class="atalho-icon" style="background:var(--coral-bg);color:var(--coral)"><i class="ti ti-tool"></i></div>
+          <div class="atalho-name">Nova OS</div>
+          <div class="atalho-desc">Abrir ordem de serviço</div>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /col-left -->
+
+  <!-- COLUNA DIREITA — AGENDA -->
+  <div class="col-right">
+    <div class="agenda-header">
+      <div class="agenda-title"><i class="ti ti-calendar-event" style="font-size:16px;color:var(--cyan-dark);vertical-align:-2px;margin-right:5px"></i>Agenda</div>
+      <button class="btn-nova-agenda" onclick="abrirModal('agenda')"><i class="ti ti-plus"></i> Novo</button>
+    </div>
+    <div class="agenda-tabs">
+      <button class="ag-tab active" id="agtab-futuros" onclick="setAgTab('futuros')">Próximos</button>
+      <button class="ag-tab" id="agtab-hoje" onclick="setAgTab('hoje')">Hoje</button>
+      <button class="ag-tab" id="agtab-concluidos" onclick="setAgTab('concluidos')">Concluídos</button>
+    </div>
+    <div class="agenda-list" id="agenda-list">
+      <div class="ag-empty"><i class="ti ti-calendar-off"></i>Carregando...</div>
+    </div>
+
+    <!-- MÓDULOS (mini grade) -->
+    <div class="modulos-section">
+      <div class="modulos-title">Módulos do sistema</div>
+      <div class="modulos-grid">
+        <a class="mod-mini" href="cadastro.html"><i class="ti ti-users" style="color:var(--cyan-dark)"></i><span>Cadastro</span></a>
+        <a class="mod-mini" href="produtos.html"><i class="ti ti-package" style="color:var(--coral)"></i><span>Produtos</span></a>
+        <a class="mod-mini" href="financeiro.html"><i class="ti ti-currency-dollar" style="color:var(--green)"></i><span>Financeiro</span></a>
+        <a class="mod-mini" href="venda.html"><i class="ti ti-shopping-cart" style="color:var(--rose)"></i><span>Venda</span></a>
+        <a class="mod-mini" href="compras.html"><i class="ti ti-truck-delivery" style="color:var(--slate)"></i><span>Compras</span></a>
+        <a class="mod-mini" href="fiscal.html"><i class="ti ti-file-invoice" style="color:var(--purple)"></i><span>Fiscal</span></a>
+        <a class="mod-mini" href="orcamentos.html"><i class="ti ti-calculator" style="color:var(--teal)"></i><span>Orçamentos</span></a>
+        <a class="mod-mini" href="os.html"><i class="ti ti-tool" style="color:var(--amber)"></i><span>OS</span></a>
+        <a class="mod-mini" href="configuracoes.html"><i class="ti ti-settings" style="color:var(--sub)"></i><span>Config.</span></a>
+      </div>
     </div>
   </div>
 
-  <div class="section-label">Módulos do sistema</div>
-  <div class="cards-grid">
-
-    <!-- 1. CADASTRO -->
-    <a class="mod-card mc-cyan" href="cadastro.html">
-      <div class="card-icon"><i class="ti ti-users"></i></div>
-      <div class="card-name">Cadastro</div>
-      <div class="card-desc">Clientes, fornecedores e transportadoras</div>
-      <div class="card-foot">
-        <span class="card-badge">PESSOAS</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 2. PRODUTOS -->
-    <a class="mod-card mc-coral" href="produtos.html">
-      <div class="card-icon"><i class="ti ti-package"></i></div>
-      <div class="card-name">Produtos</div>
-      <div class="card-desc">Catálogo, custo, venda e estoque</div>
-      <div class="card-foot">
-        <span class="card-badge">ESTOQUE</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 3. ORÇAMENTOS -->
-    <a class="mod-card mc-teal" href="orcamentos.html">
-      <div class="card-icon"><i class="ti ti-calculator"></i></div>
-      <div class="card-name">Orçamentos</div>
-      <div class="card-desc">Lista de preços, envio WhatsApp e PDF formal</div>
-      <div class="card-foot">
-        <span class="card-badge">NOVO</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 4. FINANCEIRO -->
-    <a class="mod-card mc-green" href="financeiro.html">
-      <div class="card-icon"><i class="ti ti-currency-dollar"></i></div>
-      <div class="card-name">Financeiro</div>
-      <div class="card-desc">Contas a pagar, receber e caixa</div>
-      <div class="card-foot">
-        <span class="card-badge">CAIXA</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 5. VENDA -->
-    <a class="mod-card mc-rose" href="venda.html">
-      <div class="card-icon"><i class="ti ti-shopping-cart"></i></div>
-      <div class="card-name">Venda</div>
-      <div class="card-desc">Balcão rápido e venda com cliente</div>
-      <div class="card-foot">
-        <span class="card-badge">PDV</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 6. COMPRAS -->
-    <a class="mod-card mc-slate" href="compras.html">
-      <div class="card-icon"><i class="ti ti-truck-delivery"></i></div>
-      <div class="card-name">Compras</div>
-      <div class="card-desc">Entrada de produtos e importação XML</div>
-      <div class="card-foot">
-        <span class="card-badge">NF-E</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 7. FISCAL -->
-    <a class="mod-card mc-purple" href="fiscal.html">
-      <div class="card-icon"><i class="ti ti-file-invoice"></i></div>
-      <div class="card-name">Fiscal</div>
-      <div class="card-desc">NF-e, NFC-e e NFS-e municipal</div>
-      <div class="card-foot">
-        <span class="card-badge">MOD 55 · 65</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 8. ORDEM DE SERVIÇO (placeholder) -->
-    <a class="mod-card mc-amber" href="#" style="opacity:.75">
-      <div class="card-icon"><i class="ti ti-tool"></i></div>
-      <div class="card-name">Ordem de Serviço</div>
-      <div class="card-desc">Abertura, acompanhamento e encerramento</div>
-      <div class="card-foot">
-        <span class="card-badge">EM BREVE</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-    <!-- 9. CONFIGURAÇÕES -->
-    <a class="mod-card mc-indigo" href="configuracoes.html">
-      <div class="card-icon"><i class="ti ti-settings-2"></i></div>
-      <div class="card-name">Configurações</div>
-      <div class="card-desc">Empresa, certificado digital e fiscal</div>
-      <div class="card-foot">
-        <span class="card-badge">SISTEMA</span>
-        <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-      </div>
-    </a>
-
-  </div>
-</main>
+</div><!-- /main -->
 
 <script>
 const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const hoje=new Date().toISOString().slice(0,10);
+const fmtDt=d=>new Date(d).toLocaleDateString('pt-BR');
+const fmtHr=d=>new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const fmtDtHr=d=>{const dt=new Date(d);const dh=dt.toLocaleDateString('pt-BR');const hr=dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});return dh===new Date().toLocaleDateString('pt-BR')?'Hoje '+hr:dh+' '+hr;};
 
-// saudação + relógio
+// ── SESSÃO (sessionStorage — autenticação de aba) ─────────────
+let USUARIO=null;
+function loadSession(){
+  const s=sessionStorage.getItem('dottec_sessao');
+  if(s) try{USUARIO=JSON.parse(s);}catch{}
+  // fallback para testes sem login
+  if(!USUARIO) USUARIO={nome:'Gaza',usuario:'gaza',perfil:'ADMIN',id:null};
+  const av=document.getElementById('tb-avatar');
+  document.getElementById('tb-nome').textContent=USUARIO.nome;
+  document.getElementById('tb-perfil').textContent=USUARIO.perfil;
+  av.textContent=USUARIO.nome[0].toUpperCase();
+  av.className='avatar av-'+(USUARIO.perfil||'admin').toLowerCase();
+}
+loadSession();
+
+// ── RELÓGIO ───────────────────────────────────────────────────
 function tick(){
   const now=new Date();
   const h=now.getHours();
-  const saud=h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE';
-  document.getElementById('tb-sub').textContent=saud+', GAZA.';
+  document.getElementById('tb-sub').textContent=(h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE')+', '+USUARIO.nome.toUpperCase()+'.';
   document.getElementById('tb-time').textContent=
     now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · '+
     now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).toUpperCase();
 }
 tick();setInterval(tick,10000);
 
-// busca global
+// ── MÉTRICAS ──────────────────────────────────────────────────
+async function loadMetricas(){
+  const[rC,rV,rO,rP]=await Promise.all([
+    db.from('caixa_sessoes').select('id,saldo_inicial').eq('status','ABERTO').order('data_abertura',{ascending:false}).limit(1),
+    db.from('vendas').select('total').eq('status','CONCLUIDA').gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59'),
+    db.from('ordens_servico').select('id',{count:'exact',head:true}).not('status','in','("ENTREGUE","CANCELADA")').catch(()=>({count:0})),
+    db.from('contas').select('id',{count:'exact',head:true}).eq('tipo','PAGAR').eq('status','ABERTA').eq('vencimento',hoje),
+  ]);
+
+  // caixa
+  if(rC.data&&rC.data.length){
+    const{data:movs}=await db.from('caixa_movimentos').select('tipo,valor').eq('sessao_id',rC.data[0].id);
+    let saldo=Number(rC.data[0].saldo_inicial);
+    (movs||[]).forEach(m=>{if(m.tipo==='ENTRADA'||m.tipo==='SUPRIMENTO')saldo+=Number(m.valor);else saldo-=Number(m.valor);});
+    document.getElementById('m-caixa').textContent=fmt(saldo);
+    document.getElementById('m-caixa-s').textContent='caixa aberto';
+  } else {
+    document.getElementById('m-caixa').textContent='FECHADO';
+    document.getElementById('m-caixa-s').textContent='nenhum caixa aberto';
+  }
+
+  const vendas=rV.data||[];
+  const totalVendas=vendas.reduce((s,v)=>s+Number(v.total),0);
+  document.getElementById('m-vendas').textContent=vendas.length;
+  document.getElementById('m-vendas-s').textContent=fmt(totalVendas);
+
+  document.getElementById('m-os').textContent=rO.count||0;
+  document.getElementById('m-os-s').textContent='pendentes de entrega';
+
+  document.getElementById('m-venc').textContent=rP.count||0;
+}
+loadMetricas().catch(()=>{});
+
+// ── ALERTAS ───────────────────────────────────────────────────
+let STATUS_ALERTAS=[];
+
+async function loadAlertas(){
+  // busca status que geram alerta
+  const{data:scData}=await db.from('status_config')
+    .select('nome,alerta_prioridade,alerta_para')
+    .eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
+  STATUS_ALERTAS=scData||[];
+  if(!STATUS_ALERTAS.length){renderAlertasVazio();return;}
+
+  const statusNames=STATUS_ALERTAS.map(s=>s.nome);
+
+  const{data:osAlerta}=await db.from('ordens_servico')
+    .select('id,numero,cliente_nome,aparelho,modelo,status,atualizado_em')
+    .in('status',statusNames)
+    .order('atualizado_em',{ascending:true})
+    .limit(20);
+
+  const alertas=osAlerta||[];
+  const container=document.getElementById('alertas-container');
+  const badge=document.getElementById('alerta-count');
+
+  if(!alertas.length){renderAlertasVazio();badge.style.display='none';return;}
+
+  badge.style.display='inline';
+  badge.textContent=alertas.length;
+
+  const tempoPassado=dt=>{
+    const min=Math.floor((new Date()-new Date(dt))/60000);
+    if(min<1)return'agora';if(min<60)return min+'min';
+    const h=Math.floor(min/60);if(h<24)return h+'h';
+    return Math.floor(h/24)+'d';
+  };
+
+  container.innerHTML=alertas.map(os=>{
+    const sc=STATUS_ALERTAS.find(s=>s.nome===os.status)||{alerta_prioridade:'NORMAL'};
+    const cls=sc.alerta_prioridade.toLowerCase();
+    const icon=os.status==='PASSAR ORÇAMENTO'?'ti-currency-dollar':os.status==='PRONTA'?'ti-check-circle':'ti-alert-circle';
+    return`<div class="alerta-card ${cls}" onclick="window.location.href='os.html?id=${os.id}'">
+      <div class="alerta-icon"><i class="ti ${icon}"></i></div>
+      <div class="alerta-info">
+        <span class="alerta-prioridade">${sc.alerta_prioridade}</span>
+        <div class="alerta-titulo">OS #${String(os.numero).padStart(4,'0')} — ${os.status}</div>
+        <div class="alerta-sub">${os.cliente_nome} · ${os.aparelho||''}${os.modelo?' '+os.modelo:''}</div>
+      </div>
+      <span class="alerta-tempo">${tempoPassado(os.atualizado_em)}</span>
+      <i class="ti ti-chevron-right alerta-arrow"></i>
+    </div>`;
+  }).join('');
+}
+
+function renderAlertasVazio(){
+  document.getElementById('alertas-container').innerHTML=
+    '<div class="alertas-vazio"><i class="ti ti-circle-check" style="font-size:18px"></i>Nenhum alerta pendente. Tudo em dia!</div>';
+}
+
+loadAlertas().catch(()=>renderAlertasVazio());
+// atualiza alertas a cada 60s
+setInterval(()=>loadAlertas().catch(()=>{}), 60000);
+
+// ── AGENDA ───────────────────────────────────────────────────
+let AG_TAB='futuros', USUARIOS=[], AGENDA_DATA=[];
+
+async function loadUsuarios(){
+  const{data}=await db.from('usuarios').select('id,nome,perfil').eq('ativo',true);
+  USUARIOS=data||[];
+  const sel=document.getElementById('ag-resp');
+  sel.innerHTML='<option value="">Todos</option>'+USUARIOS.map(u=>`<option value="${u.id}">${u.nome} (${u.perfil})</option>`).join('');
+}
+
+function setAgTab(t){
+  AG_TAB=t;
+  ['futuros','hoje','concluidos'].forEach(x=>{
+    document.getElementById('agtab-'+x).classList.toggle('active',x===t);
+  });
+  renderAgenda();
+}
+
+async function loadAgenda(){
+  const{data}=await db.from('agenda').select('*,usuarios!agenda_responsavel_id_fkey(nome,perfil)')
+    .order('data_hora',{ascending:true});
+  AGENDA_DATA=data||[];
+  renderAgenda();
+}
+
+function renderAgenda(){
+  const list=document.getElementById('agenda-list');
+  const agora=new Date();
+  const hojeDt=agora.toISOString().slice(0,10);
+
+  let items=AGENDA_DATA;
+  if(AG_TAB==='futuros') items=items.filter(a=>!a.concluido&&new Date(a.data_hora)>=agora);
+  else if(AG_TAB==='hoje') items=items.filter(a=>a.data_hora.slice(0,10)===hojeDt&&!a.concluido);
+  else items=items.filter(a=>a.concluido);
+
+  if(!items.length){
+    list.innerHTML=`<div class="ag-empty"><i class="ti ti-calendar-off"></i>${AG_TAB==='concluidos'?'Nenhum compromisso concluído':'Sem compromissos'}</div>`;
+    return;
+  }
+
+  const avCls={ADMIN:'av-admin',COMERCIAL:'av-comercial',TECNICO:'av-tecnico'};
+
+  list.innerHTML=items.map(a=>{
+    const dt=new Date(a.data_hora);
+    const dh=a.data_hora.slice(0,10);
+    const isHoje=dh===hojeDt;
+    const isAtrasado=dt<agora&&!a.concluido;
+    const resp=a.usuarios;
+    const cls=a.concluido?'concluido':isAtrasado?'atrasado':isHoje?'hoje':'';
+
+    const podeExcluir=USUARIO.perfil==='ADMIN'||(a.criado_por_id&&a.criado_por_id===USUARIO.id);
+    const podeConcluir=USUARIO.perfil==='ADMIN'||(resp&&resp.id===USUARIO.id);
+
+    return`<div class="ag-item ${cls}">
+      <div class="ag-item-head">
+        <span class="ag-data">${fmtDtHr(a.data_hora)}</span>
+        <span class="ag-titulo">${a.titulo}</span>
+      </div>
+      ${resp?`<div class="ag-resp"><div class="ag-resp-av ${avCls[resp.perfil]||'av-admin'}">${resp.nome[0]}</div>${resp.nome}</div>`:''}
+      ${a.descricao?`<div style="padding:0 12px 8px;font-size:12px;color:var(--sub)">${a.descricao}</div>`:''}
+      <div class="ag-actions">
+        ${!a.concluido?`<button class="ag-btn concluir" onclick="event.stopPropagation();concluirAgenda('${a.id}')"><i class="ti ti-check"></i> Concluir</button>`:'<span style="font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px"><i class="ti ti-circle-check"></i>Concluído</span>'}
+        ${podeExcluir?`<button class="ag-btn del" onclick="event.stopPropagation();excluirAgenda('${a.id}')"><i class="ti ti-trash"></i></button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function salvarAgenda(){
+  const titulo=document.getElementById('ag-titulo').value.trim();
+  const data=document.getElementById('ag-data').value;
+  if(!titulo){toast('Informe o título.','error');return;}
+  if(!data){toast('Informe a data e hora.','error');return;}
+  const{error}=await db.from('agenda').insert({
+    titulo:titulo.toUpperCase(),
+    data_hora:new Date(data).toISOString(),
+    responsavel_id:document.getElementById('ag-resp').value||null,
+    descricao:document.getElementById('ag-desc').value.trim().toUpperCase()||null,
+    criado_por_id:USUARIO.id||null,
+    criado_por_nome:USUARIO.nome,
+  });
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast('Compromisso agendado!','success');
+  fecharModal('agenda');
+  document.getElementById('ag-titulo').value='';
+  document.getElementById('ag-desc').value='';
+  loadAgenda();
+}
+
+async function concluirAgenda(id){
+  if(USUARIO.perfil!=='ADMIN'){
+    const item=AGENDA_DATA.find(a=>a.id===id);
+    if(item&&item.responsavel_id&&item.responsavel_id!==USUARIO.id){toast('Apenas o responsável ou admin pode concluir.','error');return;}
+  }
+  await db.from('agenda').update({concluido:true,concluido_por:USUARIO.id||null}).eq('id',id);
+  toast('Compromisso concluído!','success');
+  loadAgenda();
+}
+
+async function excluirAgenda(id){
+  if(!confirm('Excluir este compromisso?')) return;
+  await db.from('agenda').delete().eq('id',id);
+  toast('Excluído.','success');
+  loadAgenda();
+}
+
+// ── RECIBO RÁPIDO ─────────────────────────────────────────────
+async function salvarRecibo(){
+  const benef=document.getElementById('r-beneficiario').value.trim();
+  const desc=document.getElementById('r-descricao').value.trim();
+  const valor=parseFloat(document.getElementById('r-valor').value)||0;
+  const forma=document.getElementById('r-forma').value;
+  const cat=document.getElementById('r-categoria').value.trim();
+
+  if(!benef){toast('Informe o beneficiário.','error');return;}
+  if(!desc){toast('Informe a descrição.','error');return;}
+  if(!valor){toast('Informe o valor.','error');return;}
+
+  const venc=new Date().toISOString().slice(0,10);
+
+  // lança em contas a pagar
+  const{data:conta,error:ec}=await db.from('contas').insert({
+    tipo:'PAGAR',
+    descricao:desc.toUpperCase(),
+    valor,vencimento:venc,
+    status:'PAGA',data_pagamento:venc,
+    categoria:cat.toUpperCase()||'DESPESA',
+    forma_pagamento:forma,
+    observacoes:'RECIBO: '+benef.toUpperCase(),
+  }).select('id').single();
+  if(ec){toast('Erro: '+ec.message,'error');return;}
+
+  // salva recibo
+  const{data:recibo}=await db.from('recibos').insert({
+    tipo:'SAIDA',
+    descricao:desc.toUpperCase(),
+    beneficiario:benef.toUpperCase(),
+    valor,forma_pagamento:forma,
+    conta_id:conta?.id||null,
+    usuario_id:USUARIO.id||null,
+    observacoes:cat||null,
+  }).select('numero').single();
+
+  fecharModal('recibo');
+  toast('Recibo emitido e lançado no financeiro!','success');
+
+  // imprimir
+  imprimirRecibo({
+    numero:recibo?.numero||'—',
+    beneficiario:benef.toUpperCase(),
+    descricao:desc.toUpperCase(),
+    valor,forma,
+    data:new Date().toLocaleDateString('pt-BR'),
+  });
+
+  // limpa campos
+  ['r-beneficiario','r-descricao','r-valor','r-categoria'].forEach(id=>document.getElementById(id).value='');
+}
+
+function imprimirRecibo(r){
+  const w=window.open('','_blank','width=600,height=500');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <style>
+    body{font-family:Arial,sans-serif;padding:30px;color:#1C1C1A;max-width:560px;margin:0 auto}
+    .header{text-align:center;border-bottom:2px solid #1C1C1A;padding-bottom:14px;margin-bottom:20px}
+    .header h1{font-size:20px;margin:0;font-weight:800}
+    .header p{font-size:11px;color:#666;margin:3px 0 0}
+    .num{font-size:12px;color:#666;text-align:right;margin-bottom:16px}
+    .campo{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:13.5px}
+    .campo strong{font-weight:600}
+    .total{display:flex;justify-content:space-between;padding:14px 0;font-size:18px;font-weight:800;border-top:2px solid #1C1C1A;margin-top:8px}
+    .ass{display:flex;justify-content:space-between;margin-top:40px;gap:20px}
+    .ass-box{flex:1;border-top:1px solid #999;padding-top:8px;text-align:center;font-size:11px;color:#666}
+    .footer{text-align:center;margin-top:20px;font-size:10px;color:#999}
+    @media print{body{padding:10mm}@page{margin:8mm}}
+  </style>
+  </head><body>
+  <div class="header">
+    <h1>DOTTEC ASSISTÊNCIA INTELIGENTE</h1>
+    <p>Thiago Richard Gazaniga · CNPJ 12.227.221/0001-86</p>
+    <p>Av. Tiradentes, 334 - Sala 04 · Rio dos Cedros / SC · (47) 9 8816-8931</p>
+  </div>
+  <div class="num">RECIBO Nº ${String(r.numero).padStart(4,'0')} · ${r.data}</div>
+  <div class="campo"><span>Recebi de:</span><strong>DOTTEC ASSISTÊNCIA</strong></div>
+  <div class="campo"><span>Pagamos a:</span><strong>${r.beneficiario}</strong></div>
+  <div class="campo"><span>Referente a:</span><strong>${r.descricao}</strong></div>
+  <div class="campo"><span>Forma de pagamento:</span><strong>${r.forma}</strong></div>
+  <div class="total"><span>VALOR TOTAL:</span><span>${fmt(r.valor)}</span></div>
+  <div class="ass">
+    <div class="ass-box">_________________________<br>DOTTEC ASSISTÊNCIA<br>CNPJ 12.227.221/0001-86</div>
+    <div class="ass-box">_________________________<br>${r.beneficiario}<br>Beneficiário</div>
+  </div>
+  <div class="footer">Documento emitido em ${r.data} pelo sistema Dottec Assistência Inteligente.</div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+// ── BUSCA GLOBAL ──────────────────────────────────────────────
 let busTimer,resultados=[],focusIdx=-1;
 
 function onBusca(){
-  const q=document.getElementById('busca-global').value.trim();
+  const q=document.getElementById('busca').value.trim();
   clearTimeout(busTimer);focusIdx=-1;
   if(q.length<2){fecharBusca();return;}
-  busTimer=setTimeout(()=>executarBusca(q),280);
+  busTimer=setTimeout(()=>executarBusca(q),300);
 }
 
 async function executarBusca(q){
   const res=document.getElementById('search-results');
-  res.innerHTML='<div class="sr-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Buscando...</div>';
+  res.innerHTML='<div class="sr-empty"><i class="ti ti-loader-2 spin" style="font-size:24px"></i></div>';
   res.classList.add('open');
-  const termo=q.toUpperCase();
-  const docTermo=q.replace(/\D/g,'');
-  const[rP,rPr]=await Promise.all([
-    db.from('pessoas').select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor,is_transportadora').or(`nome.ilike.%${termo}%${docTermo?`,documento.ilike.%${docTermo}%`:''}`).eq('ativo',true).limit(5),
-    db.from('produtos').select('id,codigo,nome,valor_venda,estoque_atual').or(`nome.ilike.%${termo}%`).eq('ativo',true).limit(5),
+  const t=q.toUpperCase();
+  const doc=q.replace(/\D/g,'');
+
+  // busca em paralelo em todas as entidades
+  const[rPes,rProd,rOS,rCon,rVen,rOrc]=await Promise.all([
+    db.from('pessoas').select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor').or(`nome.ilike.%${t}%${doc?`,documento.ilike.%${doc}%`:''}`).eq('ativo',true).limit(4),
+    db.from('produtos').select('id,codigo,nome,valor_venda,estoque_atual').or(`nome.ilike.%${t}%`).eq('ativo',true).limit(4),
+    db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,modelo,status').or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%,modelo.ilike.%${t}%`).limit(4).catch(()=>({data:[]})),
+    db.from('contas').select('id,tipo,descricao,valor,status,vencimento').or(`descricao.ilike.%${t}%`).limit(3).catch(()=>({data:[]})),
+    db.from('vendas').select('id,numero,total,forma_pagamento,criado_em,nome_cliente').or(`nome_cliente.ilike.%${t}%`).order('criado_em',{ascending:false}).limit(3).catch(()=>({data:[]})),
+    db.from('orcamentos').select('id,cliente_nome,status,criado_em').or(`cliente_nome.ilike.%${t}%`).order('criado_em',{ascending:false}).limit(3).catch(()=>({data:[]})),
   ]);
+
   resultados=[];let html='';
-  const pessoas=rP.data||[];
+
+  // PESSOAS
+  const pessoas=rPes.data||[];
   if(pessoas.length){
-    html+='<div class="sr-section-label">PESSOAS</div>';
-    pessoas.forEach(p=>{
-      const doc=(p.documento||'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4').replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
+    html+=`<div class="sr-header">Pessoas</div>`;
+    for(const p of pessoas){
       const url=`pessoa-novo.html?id=${p.id}`;
       resultados.push({url});
+      const tags=[p.is_cliente?'<span class="sr-tag" style="background:var(--cyan-bg);color:var(--cyan-dark)">CLI</span>':'',p.is_fornecedor?'<span class="sr-tag" style="background:var(--amber-bg);color:var(--amber)">FOR</span>':''].join('');
       html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
-        <div class="sr-icon pessoa"><i class="ti ti-user"></i></div>
-        <div class="sr-info"><div class="sr-nome">${p.nome}</div><div class="sr-detalhe">${p.tipo_doc}: ${doc}</div>
-        <div class="sr-badges">${p.is_cliente?'<span class="sr-badge c">CLI</span>':''}${p.is_fornecedor?'<span class="sr-badge f">FOR</span>':''}</div></div>
+        <div class="sr-icon sri-pessoa"><i class="ti ti-user"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">${p.nome}</div>
+          <div class="sr-sub">${p.tipo_doc}: ${p.documento||''} · ${p.celular||''}</div>
+          <div>${tags}</div>
+        </div>
         <div class="sr-meta"><i class="ti ti-chevron-right"></i></div>
       </div>`;
-    });
+
+      // subresultados: OS, contas vinculadas a essa pessoa
+      const[rOsP,rConP]=await Promise.all([
+        db.from('ordens_servico').select('id,numero,status,aparelho').eq('pessoa_id',p.id).limit(2).catch(()=>({data:[]})),
+        db.from('contas').select('id,tipo,descricao,valor,status').eq('pessoa_id',p.id).in('status',['ABERTA','PARCIAL','VENCIDA']).limit(2).catch(()=>({data:[]})),
+      ]);
+      const subs=[...(rOsP.data||[]).map(o=>({icon:'ti-tool',label:`OS #${String(o.numero).padStart(4,'0')} — ${o.status} · ${o.aparelho}`,url:`os.html?id=${o.id}`})),
+                  ...(rConP.data||[]).map(c=>({icon:'ti-currency-dollar',label:`${c.tipo==='PAGAR'?'A Pagar':'A Receber'}: ${c.descricao} — ${fmt(c.valor)}`,url:`contas.html`}))];
+      if(subs.length){
+        html+='<div class="sr-group">';
+        subs.forEach(s=>{
+          resultados.push({url:s.url});
+          html+=`<div class="sr-group-item" data-idx="${resultados.length-1}" onclick="irPara('${s.url}')"><i class="ti ${s.icon}"></i>${s.label}</div>`;
+        });
+        html+='</div>';
+      }
+    }
   }
-  const prods=rPr.data||[];
+
+  // PRODUTOS
+  const prods=rProd.data||[];
   if(prods.length){
-    if(pessoas.length) html+='<div class="sr-sep"></div>';
-    html+='<div class="sr-section-label">PRODUTOS</div>';
+    html+=`<div class="sr-header">Produtos</div>`;
     prods.forEach(p=>{
       const url=`produto-novo.html?id=${p.id}`;
       resultados.push({url});
       html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
-        <div class="sr-icon produto"><i class="ti ti-package"></i></div>
-        <div class="sr-info"><div class="sr-nome">${p.nome}</div><div class="sr-detalhe">COD: ${String(p.codigo).padStart(3,'0')}</div>
-        <div class="sr-badges"><span class="sr-badge prod">R$ ${Number(p.valor_venda).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div></div>
-        <div class="sr-meta">EST: ${p.estoque_atual||0}</div>
+        <div class="sr-icon sri-produto"><i class="ti ti-package"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">${p.nome}</div>
+          <div class="sr-sub">COD: ${String(p.codigo).padStart(3,'0')} · Estoque: ${p.estoque_atual||0}</div>
+        </div>
+        <div class="sr-meta">${fmt(p.valor_venda)}</div>
       </div>`;
     });
   }
-  if(!pessoas.length&&!prods.length) html=`<div class="sr-empty"><i class="ti ti-search-off"></i>Sem resultados para "${q.toUpperCase()}"</div>`;
-  else html+=`<div class="sr-footer"><span class="kbd">↑</span><span class="kbd">↓</span>&nbsp;·&nbsp;<span class="kbd">Enter</span>&nbsp;·&nbsp;<span class="kbd">ESC</span></div>`;
+
+  // OS
+  const oss=rOS.data||[];
+  if(oss.length){
+    html+=`<div class="sr-header">Ordens de Serviço</div>`;
+    oss.forEach(o=>{
+      const url=`os.html?id=${o.id}`;
+      resultados.push({url});
+      html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
+        <div class="sr-icon sri-os"><i class="ti ti-tool"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">OS #${String(o.numero).padStart(4,'0')} — ${o.cliente_nome}</div>
+          <div class="sr-sub">${o.aparelho||''}${o.modelo?' '+o.modelo:''} · ${o.status}</div>
+        </div>
+        <div class="sr-meta"><i class="ti ti-chevron-right"></i></div>
+      </div>`;
+    });
+  }
+
+  // CONTAS
+  const contas=rCon.data||[];
+  if(contas.length){
+    html+=`<div class="sr-header">Contas</div>`;
+    contas.forEach(c=>{
+      const url=`contas.html`;
+      resultados.push({url});
+      html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
+        <div class="sr-icon sri-conta"><i class="ti ti-${c.tipo==='PAGAR'?'arrow-down-circle':'arrow-up-circle'}"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">${c.descricao}</div>
+          <div class="sr-sub">${c.tipo==='PAGAR'?'A Pagar':'A Receber'} · ${c.status} · ${fmtDt(c.vencimento)}</div>
+        </div>
+        <div class="sr-meta">${fmt(c.valor)}</div>
+      </div>`;
+    });
+  }
+
+  // VENDAS
+  const vendas=rVen.data||[];
+  if(vendas.length){
+    html+=`<div class="sr-header">Vendas</div>`;
+    vendas.forEach(v=>{
+      const url=`vendas.html`;
+      resultados.push({url});
+      html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
+        <div class="sr-icon sri-venda"><i class="ti ti-shopping-cart"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">Venda #${String(v.numero).padStart(4,'0')} — ${v.nome_cliente||'Balcão'}</div>
+          <div class="sr-sub">${fmtDtHr(v.criado_em)} · ${v.forma_pagamento||''}</div>
+        </div>
+        <div class="sr-meta">${fmt(v.total)}</div>
+      </div>`;
+    });
+  }
+
+  // ORÇAMENTOS
+  const orcs=rOrc.data||[];
+  if(orcs.length){
+    html+=`<div class="sr-header">Orçamentos</div>`;
+    orcs.forEach(o=>{
+      const url=`orcamentos.html`;
+      resultados.push({url});
+      html+=`<div class="sr-item" data-idx="${resultados.length-1}" onclick="irPara('${url}')">
+        <div class="sr-icon" style="background:var(--teal-bg);color:var(--teal)"><i class="ti ti-calculator"></i></div>
+        <div class="sr-info">
+          <div class="sr-title">${o.cliente_nome}</div>
+          <div class="sr-sub">${o.status} · ${fmtDt(o.criado_em)}</div>
+        </div>
+        <div class="sr-meta"><i class="ti ti-chevron-right"></i></div>
+      </div>`;
+    });
+  }
+
+  if(!resultados.length) html='<div class="sr-empty"><i class="ti ti-search-off"></i>Nenhum resultado para "'+q.toUpperCase()+'"</div>';
+  else html+=`<div class="sr-footer"><i class="ti ti-arrow-up"></i> <i class="ti ti-arrow-down"></i> navegar · Enter abrir · ESC fechar</div>`;
+
   res.innerHTML=html;res.classList.add('open');
 }
 
 function irPara(url){window.location.href=url;}
 function fecharBusca(){document.getElementById('search-results').classList.remove('open');focusIdx=-1;}
-
 function onBuscaKey(e){
-  const items=document.querySelectorAll('.sr-item');
+  const items=document.querySelectorAll('.sr-item,.sr-group-item');
   if(!items.length) return;
   if(e.key==='ArrowDown'){e.preventDefault();focusIdx=Math.min(focusIdx+1,items.length-1);}
   else if(e.key==='ArrowUp'){e.preventDefault();focusIdx=Math.max(focusIdx-1,0);}
-  else if(e.key==='Enter'){e.preventDefault();if(focusIdx>=0&&resultados[+items[focusIdx].dataset.idx])irPara(resultados[+items[focusIdx].dataset.idx].url);}
-  else if(e.key==='Escape'){fecharBusca();document.getElementById('busca-global').blur();return;}
+  else if(e.key==='Enter'){e.preventDefault();const idx=+items[focusIdx]?.dataset.idx;if(!isNaN(idx)&&resultados[idx])irPara(resultados[idx].url);}
+  else if(e.key==='Escape'){fecharBusca();document.getElementById('busca').blur();return;}
   items.forEach((it,i)=>it.classList.toggle('focused',i===focusIdx));
   if(focusIdx>=0)items[focusIdx].scrollIntoView({block:'nearest'});
 }
-
-document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))fecharBusca();});
+document.addEventListener('click',e=>{if(!e.target.closest('.search-section'))fecharBusca();});
 document.addEventListener('keydown',e=>{
-  const inp=document.getElementById('busca-global');
+  const inp=document.getElementById('busca');
   if(document.activeElement===inp) return;
   if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey)inp.focus();
 });
+
+// ── MODAIS ────────────────────────────────────────────────────
+function abrirModal(id){document.getElementById('modal-'+id).classList.add('open');}
+function fecharModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ── INICIALIZAR ───────────────────────────────────────────────
+Promise.all([loadUsuarios(),loadAgenda()]).catch(()=>{});
+
+// preset datetime para agora+1h
+const agHora=new Date();agHora.setHours(agHora.getHours()+1,0,0,0);
+document.getElementById('ag-data').value=agHora.toISOString().slice(0,16);
 </script>
 </body>
 </html>
