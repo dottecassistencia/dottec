@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova NF-e — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--slate:#3A4A6B;--slate-bg:#EEF0F5}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;position:sticky;top:0;z-index:100}
+  .crumb{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--dark);flex:1}
+  .crumb-right{display:flex;gap:10px}
+  .btn{height:40px;padding:0 18px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;transition:background .15s;text-decoration:none}
+  .btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cyan-dark)}
+  .btn-slate{background:var(--slate);color:#fff}.btn-slate:hover{background:#2A3A5B}
+  .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--bg)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .content{max-width:1040px;margin:0 auto;padding:2rem 2rem 5rem}
+  .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:visible}
+  .panel-head{display:flex;align-items:center;gap:10px;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+  .panel-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .pi-cyan{background:var(--cyan-bg);color:var(--cyan-dark)}.pi-slate{background:var(--slate-bg);color:var(--slate)}
+  .pi-amber{background:var(--amber-bg);color:var(--amber)}.pi-green{background:var(--green-bg);color:var(--green)}
+  .panel-title{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--dark)}
+  .panel-sub{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .panel-body{padding:1.5rem}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10px;margin-left:3px}
+  input,select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13);background:#fff}
+  input::placeholder{color:#B5B2A8}
+  textarea{height:70px;resize:vertical;padding:10px 13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px}
+  .mb14{margin-bottom:14px}
+
+  /* EMITENTE FIXO */
+  .emit-box{background:var(--slate-bg);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .emit-box i{font-size:20px;color:var(--slate);flex-shrink:0}
+  .emit-nome{font-size:13.5px;font-weight:700;color:var(--dark)}
+  .emit-det{font-size:11.5px;color:var(--sub);margin-top:2px}
+
+  /* DEST AUTOCOMPLETE */
+  .dest-search{position:relative}
+  .dest-sug{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.1);max-height:220px;overflow-y:auto;z-index:50;display:none}
+  .dest-sug.open{display:block}
+  .dest-sug-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #F2F0EA;transition:background .12s}
+  .dest-sug-item:hover{background:var(--bg)}
+  .dest-sug-item:last-child{border-bottom:none}
+
+  /* PRODUTO BUSCA */
+  .prod-search{position:relative}
+  .prod-sug{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.1);max-height:240px;overflow-y:auto;z-index:50;display:none}
+  .prod-sug.open{display:block}
+  .prod-sug-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #F2F0EA;transition:background .12s}
+  .prod-sug-item:hover{background:var(--bg)}
+  .prod-sug-item:last-child{border-bottom:none}
+  .prod-sug-icon{width:34px;height:34px;border-radius:9px;background:var(--coral-bg);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+
+  /* ITEM CARD */
+  .item-card{background:var(--bg);border-radius:14px;padding:1.1rem;margin-bottom:10px;border:1.5px solid var(--border);position:relative}
+  .item-num-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--white);color:var(--sub);display:inline-block;margin-bottom:10px}
+  .item-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:8px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .item-del:hover{background:var(--coral);color:#fff}
+
+  /* CSOSN BADGE */
+  .csosn-box{background:var(--cyan-bg);border:1px solid rgba(41,184,194,.25);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:var(--cyan-dark)}
+  .csosn-box i{font-size:16px;flex-shrink:0}
+
+  /* TOTAIS */
+  .tot-box{background:var(--bg);border-radius:14px;padding:1.1rem 1.25rem}
+  .tot-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+  .tot-sep{height:1px;background:var(--border);margin:8px 0}
+  .tot-row.big{font-family:'Lora',serif;font-size:20px;font-weight:700}
+  .tot-row.big span:last-child{color:var(--cyan-dark)}
+
+  .add-item-btn{height:36px;padding:0 14px;border-radius:9px;border:1.5px dashed var(--border);background:transparent;cursor:pointer;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;color:var(--sub);display:flex;align-items:center;gap:6px;transition:all .15s;margin-top:4px}
+  .add-item-btn:hover{border-color:var(--cyan);color:var(--cyan-dark);background:var(--cyan-bg)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="nfe.html"><i class="ti ti-arrow-left"></i></a>
+    <div class="crumb-title">Nova NF-e — Modelo 55</div>
+    <div class="crumb-right">
+      <a class="btn btn-secondary" href="nfe.html">Cancelar</a>
+      <button class="btn btn-secondary" onclick="salvar('RASCUNHO')"><i class="ti ti-device-floppy"></i> Salvar rascunho</button>
+      <button class="btn btn-slate" id="btn-gerar" onclick="gerarXml()"><i class="ti ti-file-code"></i> Gerar XML</button>
+    </div>
+  </div>
+</header>
+<main class="content">
+
+  <!-- EMITENTE (FIXO) -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-slate"><i class="ti ti-building-store"></i></div><div><div class="panel-title">Emitente</div><div class="panel-sub">Seus dados fiscais — fixos</div></div></div>
+    <div class="panel-body">
+      <div class="emit-box">
+        <i class="ti ti-building-store"></i>
+        <div>
+          <div class="emit-nome">THIAGO RICHARD GAZANIGA</div>
+          <div class="emit-det">CNPJ 12.227.221/0001-86 · IE 256177503 · Simples Nacional · Rio dos Cedros / SC · CEP 89121-000</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div><label>Natureza da operação</label>
+          <select id="nat_op">
+            <option value="VENDA DE MERCADORIA">VENDA DE MERCADORIA</option>
+            <option value="TRANSFERÊNCIA">TRANSFERÊNCIA</option>
+            <option value="DEVOLUÇÃO DE COMPRA">DEVOLUÇÃO DE COMPRA</option>
+            <option value="REMESSA PARA CONSERTO">REMESSA PARA CONSERTO</option>
+            <option value="RETORNO DE CONSERTO">RETORNO DE CONSERTO</option>
+          </select>
+        </div>
+        <div><label>Finalidade</label>
+          <select id="finalidade">
+            <option value="1">1 — NF-e normal</option>
+            <option value="2">2 — NF-e complementar</option>
+            <option value="4">4 — Devolução / retorno</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESTINATÁRIO -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-cyan"><i class="ti ti-user"></i></div><div><div class="panel-title">Destinatário</div><div class="panel-sub">Pessoa física ou jurídica</div></div></div>
+    <div class="panel-body">
+      <div class="mb14">
+        <label>Buscar cliente cadastrado</label>
+        <div class="dest-search">
+          <input type="text" id="dest-busca" placeholder="Nome ou CPF/CNPJ..." autocomplete="off" oninput="buscaDest()"/>
+          <div id="dest-sug" class="dest-sug"></div>
+        </div>
+      </div>
+      <div class="grid2 mb14">
+        <div><label>Nome / Razão Social</label><input type="text" id="dest_nome" placeholder="NOME DO DESTINATÁRIO" style="text-transform:uppercase"/></div>
+        <div><label>CPF / CNPJ</label><input type="text" id="dest_doc" placeholder="000.000.000-00 ou 00.000.000/0000-00" oninput="maskDoc(this)" style="text-transform:none"/></div>
+      </div>
+      <div class="grid3 mb14">
+        <div><label>Inscrição Estadual <span class="label-opt">opcional</span></label><input type="text" id="dest_ie" placeholder="ISENTO" style="text-transform:uppercase"/></div>
+        <div><label>E-mail <span class="label-opt">opcional</span></label><input type="text" id="dest_email" placeholder="cliente@email.com" style="text-transform:none"/></div>
+        <div><label>Indicador IE dest.</label>
+          <select id="ind_ie_dest">
+            <option value="9">9 — Não contribuinte</option>
+            <option value="1">1 — Contribuinte ICMS</option>
+            <option value="2">2 — Contribuinte isento</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid4">
+        <div><label>CEP</label><input type="text" id="dest_cep" placeholder="00000-000" oninput="maskCep(this)" style="text-transform:none"/></div>
+        <div style="grid-column:span 2"><label>Logradouro</label><input type="text" id="dest_lgr" placeholder="RUA EXEMPLO" style="text-transform:uppercase"/></div>
+        <div><label>Número</label><input type="text" id="dest_num" placeholder="123"/></div>
+      </div>
+      <div class="grid3" style="margin-top:14px">
+        <div><label>Bairro</label><input type="text" id="dest_bairro" placeholder="CENTRO" style="text-transform:uppercase"/></div>
+        <div><label>Município</label><input type="text" id="dest_mun" placeholder="RIO DOS CEDROS" style="text-transform:uppercase"/></div>
+        <div><label>UF</label>
+          <select id="dest_uf">
+            <option>SC</option><option>RS</option><option>PR</option><option>SP</option><option>RJ</option><option>MG</option><option>BA</option><option>GO</option><option>DF</option><option>MT</option><option>MS</option><option>PA</option><option>AM</option><option>CE</option><option>PE</option><option>RN</option><option>PB</option><option>AL</option><option>SE</option><option>MA</option><option>PI</option><option>TO</option><option>RO</option><option>AC</option><option>RR</option><option>AP</option><option>ES</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITENS -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-amber"><i class="ti ti-package"></i></div><div><div class="panel-title">Produtos</div><div class="panel-sub" id="itens-sub">Nenhum item</div></div></div>
+    <div class="panel-body">
+      <div class="mb14">
+        <label>Buscar produto habilitado para NF-e</label>
+        <div class="prod-search">
+          <input type="text" id="prod-busca" placeholder="Nome ou código..." autocomplete="off" oninput="buscaProd()"/>
+          <div id="prod-sug" class="prod-sug"></div>
+        </div>
+      </div>
+      <div id="itens-container"></div>
+      <button class="add-item-btn" onclick="addItemManual()"><i class="ti ti-plus"></i> Adicionar item manualmente</button>
+    </div>
+  </div>
+
+  <!-- TOTAIS + FRETE -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-cyan"><i class="ti ti-receipt"></i></div><div><div class="panel-title">Totais e frete</div></div></div>
+    <div class="panel-body">
+      <div class="grid3 mb14">
+        <div><label>Frete</label><input type="number" step="0.01" id="valor_frete" value="0" oninput="calcTotais()"/></div>
+        <div><label>Desconto global</label><input type="number" step="0.01" id="valor_desconto" value="0" oninput="calcTotais()"/></div>
+        <div><label>Frete por conta</label>
+          <select id="frete_conta">
+            <option value="9">9 — Sem frete</option>
+            <option value="0">0 — Emitente (CIF)</option>
+            <option value="1">1 — Destinatário (FOB)</option>
+            <option value="3">3 — Terceiros</option>
+          </select>
+        </div>
+      </div>
+      <div class="tot-box">
+        <div class="tot-row"><span style="color:var(--sub)">Valor dos produtos</span><span id="tot-prod">R$ 0,00</span></div>
+        <div class="tot-row"><span style="color:var(--sub)">+ Frete</span><span id="tot-frete">R$ 0,00</span></div>
+        <div class="tot-row"><span style="color:var(--sub)">- Desconto</span><span id="tot-desc">R$ 0,00</span></div>
+        <div class="tot-sep"></div>
+        <div class="tot-row big"><span>Total da NF-e</span><span id="tot-total">R$ 0,00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGAMENTO -->
+  <div class="panel">
+    <div class="panel-head"><div class="panel-icon pi-green"><i class="ti ti-currency-dollar"></i></div><div><div class="panel-title">Pagamento</div></div></div>
+    <div class="panel-body">
+      <div class="grid2">
+        <div><label>Forma de pagamento</label>
+          <select id="forma_pag">
+            <option value="01">01 — Dinheiro</option>
+            <option value="03">03 — Cartão de crédito</option>
+            <option value="04">04 — Cartão de débito</option>
+            <option value="05">05 — Crédito loja</option>
+            <option value="15">15 — Boleto bancário</option>
+            <option value="17">17 — PIX</option>
+            <option value="90">90 — Sem pagamento</option>
+            <option value="99">99 — Outros</option>
+          </select>
+        </div>
+        <div><label>Observações <span class="label-opt">opcional</span></label><input type="text" id="obs" placeholder="INFORMAÇÕES ADICIONAIS..." style="text-transform:uppercase"/></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+// ── EMITENTE FIXO ────────────────────────────────────────────
+const EMIT={
+  CNPJ:'12227221000186',xNome:'THIAGO RICHARD GAZANIGA',
+  IE:'256177503',CRT:'1', // 1=Simples Nacional
+  xLgr:'AVENIDA TIRADENTES',nro:'334',xCpl:'SALA 04',
+  xBairro:'CENTRO',cMun:'4214706',xMun:'Rio dos Cedros',
+  UF:'SC',CEP:'89121000',xPais:'BRASIL',cPais:'1058',
+  fone:'4733860507',
+};
+
+let ITENS=[], PRODS_CACHE=null;
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ── DESTINATÁRIO ─────────────────────────────────────────────
+let destTimer;
+async function buscaDest(){
+  const q=document.getElementById('dest-busca').value.trim();
+  const sug=document.getElementById('dest-sug');
+  clearTimeout(destTimer);
+  if(q.length<2){sug.className='dest-sug';return;}
+  destTimer=setTimeout(async()=>{
+    const{data}=await db.from('pessoas').select('id,nome,documento,tipo_doc,celular,cep,logradouro,numero,bairro,cidade,estado,email')
+      .or(`nome.ilike.%${q.toUpperCase()}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
+      .eq('ativo',true).limit(6);
+    if(!data||!data.length){sug.innerHTML='<div style="padding:10px 14px;font-size:13px;color:var(--sub)">Nenhum encontrado.</div>';sug.className='dest-sug open';return;}
+    sug.innerHTML=data.map(p=>`
+      <div class="dest-sug-item" onmousedown="selecionarDest(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px;color:var(--dark)">${p.nome}</div>
+          <div style="font-size:11.5px;color:var(--sub)">${p.tipo_doc}: ${p.documento||''}</div>
+        </div>
+      </div>`).join('');
+    sug.className='dest-sug open';
+  },280);
+}
+
+function selecionarDest(p){
+  document.getElementById('dest-sug').className='dest-sug';
+  document.getElementById('dest-busca').value='';
+  document.getElementById('dest_nome').value=p.nome||'';
+  document.getElementById('dest_doc').value=p.documento||'';
+  document.getElementById('dest_email').value=p.email||'';
+  document.getElementById('dest_cep').value=(p.cep||'').replace(/(\d{5})(\d{3})/,'$1-$2');
+  document.getElementById('dest_lgr').value=p.logradouro||'';
+  document.getElementById('dest_num').value=p.numero||'';
+  document.getElementById('dest_bairro').value=p.bairro||'';
+  document.getElementById('dest_mun').value=p.cidade||'';
+  if(p.estado)document.getElementById('dest_uf').value=p.estado;
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.dest-search'))document.getElementById('dest-sug').className='dest-sug';
+  if(!e.target.closest('.prod-search'))document.getElementById('prod-sug').className='prod-sug';
+});
+
+// ── PRODUTOS ─────────────────────────────────────────────────
+async function carregarProdos(){
+  if(PRODS_CACHE) return PRODS_CACHE;
+  // só produtos com habilita_nfe_saida=true nos compra_itens (ou todos, dependendo do filtro futuro)
+  const{data}=await db.from('produtos').select('id,codigo,nome,valor_venda,ncm,codigo_barras,estoque_atual').eq('ativo',true);
+  PRODS_CACHE=data||[];return PRODS_CACHE;
+}
+
+let prodTimer;
+async function buscaProd(){
+  const q=document.getElementById('prod-busca').value.trim();
+  const sug=document.getElementById('prod-sug');
+  clearTimeout(prodTimer);
+  if(q.length<1){sug.className='prod-sug';return;}
+  prodTimer=setTimeout(async()=>{
+    const prods=await carregarProdos();
+    const res=prods.filter(p=>p.nome.toUpperCase().includes(q.toUpperCase())||String(p.codigo).includes(q)).slice(0,8);
+    if(!res.length){sug.innerHTML='<div style="padding:10px 14px;font-size:13px;color:var(--sub)">Nenhum produto encontrado.</div>';sug.className='prod-sug open';return;}
+    sug.innerHTML=res.map((p,i)=>`
+      <div class="prod-sug-item" onmousedown="adicionarProd(${i},${JSON.stringify(res).replace(/"/g,'&quot;')})">
+        <div class="prod-sug-icon"><i class="ti ti-package"></i></div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--dark)">${p.nome}</div>
+          <div style="font-size:11.5px;color:var(--sub)">COD: ${String(p.codigo).padStart(3,'0')} · ${fmt(p.valor_venda)}</div>
+        </div>
+      </div>`).join('');
+    sug.className='prod-sug open';
+  },250);
+}
+
+function adicionarProd(idx,prods){
+  const p=prods[idx];
+  document.getElementById('prod-sug').className='prod-sug';
+  document.getElementById('prod-busca').value='';
+  const ex=ITENS.find(it=>it.produto_id===p.id);
+  if(ex){ex.quantidade++;ex.valor_total=ex.quantidade*ex.valor_unitario;}
+  else ITENS.push({
+    produto_id:p.id,
+    descricao:p.nome,
+    codigo:String(p.codigo).padStart(3,'0'),
+    codigo_barras:p.codigo_barras||'SEM GTIN',
+    ncm:p.ncm||'',
+    cfop:'5102',
+    unidade:'UND',
+    quantidade:1,
+    valor_unitario:Number(p.valor_venda),
+    valor_total:Number(p.valor_venda),
+    valor_desconto:0,
+    origem:0,
+    csosn:'400',
+    aliq_icms:0,valor_icms:0,
+    cst_pis:'07',cst_cofins:'07',
+  });
+  renderItens();calcTotais();
+}
+
+function addItemManual(){
+  ITENS.push({produto_id:null,descricao:'',codigo:'',codigo_barras:'SEM GTIN',ncm:'',cfop:'5102',unidade:'UND',quantidade:1,valor_unitario:0,valor_total:0,valor_desconto:0,origem:0,csosn:'400',aliq_icms:0,valor_icms:0,cst_pis:'07',cst_cofins:'07'});
+  renderItens();
+}
+
+function renderItens(){
+  document.getElementById('itens-sub').textContent=ITENS.length+' item(ns)';
+  const c=document.getElementById('itens-container');
+  if(!ITENS.length){c.innerHTML='';return;}
+  c.innerHTML=ITENS.map((it,i)=>`
+    <div class="item-card">
+      <span class="item-num-badge">ITEM ${i+1}</span>
+      <button class="item-del" onclick="ITENS.splice(${i},1);renderItens();calcTotais()"><i class="ti ti-trash"></i></button>
+      <div class="grid2 mb14">
+        <div style="grid-column:span 2"><label>Descrição</label><input type="text" value="${it.descricao}" oninput="ITENS[${i}].descricao=this.value.toUpperCase()" style="text-transform:uppercase"/></div>
+      </div>
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><label>Qtd</label><input type="number" step="0.001" value="${it.quantidade}" oninput="ITENS[${i}].quantidade=parseFloat(this.value)||1;recalc(${i})" style="text-transform:none"/></div>
+        <div><label>Valor unit.</label><input type="number" step="0.01" value="${it.valor_unitario}" oninput="ITENS[${i}].valor_unitario=parseFloat(this.value)||0;recalc(${i})" style="text-transform:none"/></div>
+        <div><label>Desconto</label><input type="number" step="0.01" value="${it.valor_desconto}" oninput="ITENS[${i}].valor_desconto=parseFloat(this.value)||0;recalc(${i})" style="text-transform:none"/></div>
+        <div><label>Total</label><input type="number" value="${it.valor_total.toFixed(2)}" readonly style="background:#F0EFEA;cursor:not-allowed;text-transform:none"/></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px">
+        <div><label>NCM</label><input type="text" value="${it.ncm}" oninput="ITENS[${i}].ncm=this.value" style="text-transform:none"/></div>
+        <div><label>CFOP</label>
+          <select onchange="ITENS[${i}].cfop=this.value">
+            <option value="5102" ${it.cfop==='5102'?'selected':''}>5102 — Venda produção</option>
+            <option value="5405" ${it.cfop==='5405'?'selected':''}>5405 — Venda ST</option>
+            <option value="5910" ${it.cfop==='5910'?'selected':''}>5910 — Remessa bonif.</option>
+            <option value="6102" ${it.cfop==='6102'?'selected':''}>6102 — Venda interest.</option>
+          </select>
+        </div>
+        <div><label>CSOSN (SN)</label>
+          <select onchange="ITENS[${i}].csosn=this.value">
+            <option value="400" ${it.csosn==='400'?'selected':''}>400 — Trib. s/ crédito</option>
+            <option value="102" ${it.csosn==='102'?'selected':''}>102 — Tributada</option>
+            <option value="500" ${it.csosn==='500'?'selected':''}>500 — ST cobrada ant.</option>
+            <option value="900" ${it.csosn==='900'?'selected':''}>900 — Outros</option>
+          </select>
+        </div>
+        <div><label>Unidade</label><input type="text" value="${it.unidade}" oninput="ITENS[${i}].unidade=this.value.toUpperCase()" style="text-transform:uppercase"/></div>
+        <div><label>Origem</label>
+          <select onchange="ITENS[${i}].origem=parseInt(this.value)">
+            <option value="0" ${it.origem===0?'selected':''}>0 — Nacional</option>
+            <option value="1" ${it.origem===1?'selected':''}>1 — Estrangeira imp. direta</option>
+            <option value="2" ${it.origem===2?'selected':''}>2 — Estrangeira merc. interno</option>
+          </select>
+        </div>
+      </div>
+      <div class="csosn-box"><i class="ti ti-info-circle"></i>Simples Nacional: PIS/COFINS CST 07 (sem tributação). ICMS via CSOSN.</div>
+    </div>`).join('');
+  calcTotais();
+}
+
+function recalc(i){ITENS[i].valor_total=ITENS[i].quantidade*ITENS[i].valor_unitario-ITENS[i].valor_desconto;if(ITENS[i].valor_total<0)ITENS[i].valor_total=0;renderItens();}
+
+function calcTotais(){
+  const prod=ITENS.reduce((s,it)=>s+it.valor_total,0);
+  const frete=parseFloat(document.getElementById('valor_frete').value)||0;
+  const desc=parseFloat(document.getElementById('valor_desconto').value)||0;
+  const total=prod+frete-desc;
+  document.getElementById('tot-prod').textContent=fmt(prod);
+  document.getElementById('tot-frete').textContent=fmt(frete);
+  document.getElementById('tot-desc').textContent=fmt(desc);
+  document.getElementById('tot-total').textContent=fmt(total);
+}
+
+// ── MÁSCARAS ─────────────────────────────────────────────────
+function maskDoc(inp){
+  let v=inp.value.replace(/\D/g,'');
+  if(v.length<=11) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  else v=v.slice(0,14).replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/,'$1.$2.$3/$4-$5');
+  inp.value=v;
+}
+function maskCep(inp){let v=inp.value.replace(/\D/g,'').slice(0,8);if(v.length>5)v=v.replace(/(\d{5})(\d{0,3})/,'$1-$2');inp.value=v;}
+
+// ── GERAR XML (NF-e 4.00 Simples Nacional) ───────────────────
+async function gerarXml(){
+  const destNome=document.getElementById('dest_nome').value.trim();
+  if(!destNome){toast('Informe o destinatário.','error');return;}
+  if(!ITENS.length){toast('Adicione pelo menos um produto.','error');return;}
+
+  const btn=document.getElementById('btn-gerar');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Gerando...';
+
+  try{
+    // próximo número
+    const{data:seq}=await db.from('nota_sequencia').select('ultimo_numero').eq('modelo','55').eq('serie','1').single();
+    const nNF=(seq?.ultimo_numero||0)+1;
+
+    const dhEmi=new Date().toISOString().slice(0,19)+'-03:00';
+    const destDoc=document.getElementById('dest_doc').value.replace(/\D/g,'');
+    const destUF=document.getElementById('dest_uf').value;
+    const indDest=destUF==='SC'?'1':'2';
+    const prod=ITENS.reduce((s,it)=>s+it.valor_total,0);
+    const frete=parseFloat(document.getElementById('valor_frete').value)||0;
+    const descGlobal=parseFloat(document.getElementById('valor_desconto').value)||0;
+    const total=prod+frete-descGlobal;
+
+    const itenXml=ITENS.map((it,i)=>{
+      const nitem=i+1;
+      return`<det nItem="${nitem}"><prod><cProd>${it.codigo||String(nitem).padStart(4,'0')}</cProd><cEAN>${it.codigo_barras||'SEM GTIN'}</cEAN><xProd>${it.descricao}</xProd><NCM>${it.ncm||'00000000'}</NCM><CFOP>${it.cfop}</CFOP><uCom>${it.unidade}</uCom><qCom>${it.quantidade.toFixed(4)}</qCom><vUnCom>${it.valor_unitario.toFixed(4)}</vUnCom><vProd>${it.valor_total.toFixed(2)}</vProd><cEANTrib>${it.codigo_barras||'SEM GTIN'}</cEANTrib><uTrib>${it.unidade}</uTrib><qTrib>${it.quantidade.toFixed(4)}</qTrib><vUnTrib>${it.valor_unitario.toFixed(4)}</vUnTrib>${it.valor_desconto>0?`<vDesc>${it.valor_desconto.toFixed(2)}</vDesc>`:''}<indTot>1</indTot></prod><imposto><ICMS><ICMSSN400><orig>${it.origem}</orig><CSOSN>${it.csosn}</CSOSN></ICMSSN400></ICMS><PIS><PISNT><CST>07</CST></PISNT></PIS><COFINS><COFINSNT><CST>07</CST></COFINSNT></COFINS></imposto></det>`;
+    }).join('');
+
+    const destDocTag=destDoc.length===11?`<CPF>${destDoc}</CPF>`:`<CNPJ>${destDoc}</CNPJ>`;
+    const ieTag=document.getElementById('dest_ie').value.trim().toUpperCase()==='ISENTO'||!document.getElementById('dest_ie').value.trim()?'':`<IE>${document.getElementById('dest_ie').value.trim()}</IE>`;
+
+    const xml=`<?xml version="1.0" encoding="UTF-8"?><nfeProc versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe"><NFe xmlns="http://www.portalfiscal.inf.br/nfe"><infNFe versao="4.00"><ide><cUF>42</cUF><cNF>${String(Math.floor(Math.random()*99999999)).padStart(8,'0')}</cNF><natOp>${document.getElementById('nat_op').value}</natOp><mod>55</mod><serie>1</serie><nNF>${nNF}</nNF><dhEmi>${dhEmi}</dhEmi><tpNF>1</tpNF><idDest>${indDest}</idDest><cMunFG>4214706</cMunFG><tpImp>1</tpImp><tpEmis>1</tpEmis><cDV>0</cDV><tpAmb>2</tpAmb><finNFe>${document.getElementById('finalidade').value}</finNFe><indFinal>0</indFinal><indPres>0</indPres><procEmi>0</procEmi><verProc>Dottec1.0</verProc></ide><emit><CNPJ>${EMIT.CNPJ}</CNPJ><xNome>${EMIT.xNome}</xNome><enderEmit><xLgr>${EMIT.xLgr}</xLgr><nro>${EMIT.nro}</nro><xCpl>${EMIT.xCpl}</xCpl><xBairro>${EMIT.xBairro}</xBairro><cMun>${EMIT.cMun}</cMun><xMun>${EMIT.xMun}</xMun><UF>${EMIT.UF}</UF><CEP>${EMIT.CEP}</CEP><cPais>${EMIT.cPais}</cPais><xPais>${EMIT.xPais}</xPais><fone>${EMIT.fone}</fone></enderEmit><IE>${EMIT.IE}</IE><CRT>${EMIT.CRT}</CRT></emit><dest>${destDocTag}<xNome>${destNome}</xNome><enderDest><xLgr>${document.getElementById('dest_lgr').value||'NAO INFORMADO'}</xLgr><nro>${document.getElementById('dest_num').value||'SN'}</nro><xBairro>${document.getElementById('dest_bairro').value||'NAO INFORMADO'}</xBairro><cMun>0000000</cMun><xMun>${document.getElementById('dest_mun').value||'NAO INFORMADO'}</xMun><UF>${destUF}</UF><CEP>${document.getElementById('dest_cep').value.replace(/\D/g,'')}</CEP><cPais>1058</cPais><xPais>BRASIL</xPais></enderDest><indIEDest>${document.getElementById('ind_ie_dest').value}</indIEDest>${ieTag}${document.getElementById('dest_email').value?`<email>${document.getElementById('dest_email').value}</email>`:''}</dest>${itenXml}<total><ICMSTot><vBC>0.00</vBC><vICMS>0.00</vICMS><vICMSDeson>0.00</vICMSDeson><vFCP>0.00</vFCP><vBCST>0.00</vBCST><vST>0.00</vST><vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet><vProd>${prod.toFixed(2)}</vProd><vFrete>${frete.toFixed(2)}</vFrete><vSeg>0.00</vSeg><vDesc>${descGlobal.toFixed(2)}</vDesc><vII>0.00</vII><vIPI>0.00</vIPI><vIPIDevol>0.00</vIPIDevol><vPIS>0.00</vPIS><vCOFINS>0.00</vCOFINS><vOutro>0.00</vOutro><vNF>${total.toFixed(2)}</vNF></ICMSTot></total><transp><modFrete>${document.getElementById('frete_conta').value}</modFrete></transp><pag><detPag><tPag>${document.getElementById('forma_pag').value}</tPag><vPag>${total.toFixed(2)}</vPag></detPag></pag>${document.getElementById('obs').value?`<infAdic><infCpl>${document.getElementById('obs').value}</infCpl></infAdic>`:''}</infNFe></NFe></nfeProc>`;
+
+    // salvar no banco
+    const{error}=await db.from('notas_fiscais').insert({
+      modelo:'55',serie:'1',numero:nNF,
+      dest_nome:destNome,dest_doc:destDoc,
+      dest_tipo_doc:destDoc.length===11?'CPF':'CNPJ',
+      dest_ie:document.getElementById('dest_ie').value||null,
+      dest_email:document.getElementById('dest_email').value||null,
+      dest_logradouro:document.getElementById('dest_lgr').value||null,
+      dest_numero:document.getElementById('dest_num').value||null,
+      dest_bairro:document.getElementById('dest_bairro').value||null,
+      dest_cep:document.getElementById('dest_cep').value.replace(/\D/g,'')||null,
+      dest_municipio:document.getElementById('dest_mun').value||null,
+      dest_uf:destUF,
+      natureza_op:document.getElementById('nat_op').value,
+      finalidade:document.getElementById('finalidade').value,
+      tipo_operacao:'1',indicador_dest:indDest,
+      cfop_padrao:ITENS[0]?.cfop||'5102',
+      valor_produtos:prod,valor_frete:frete,valor_desconto:descGlobal,valor_icms:0,valor_total:total,
+      forma_pagamento:document.getElementById('forma_pag').value,
+      frete_por_conta:document.getElementById('frete_conta').value,
+      status:'RASCUNHO',
+      xml_gerado:xml,
+      observacoes:document.getElementById('obs').value||null,
+    });
+    if(error) throw new Error(error.message);
+
+    // atualiza sequência
+    await db.from('nota_sequencia').update({ultimo_numero:nNF}).eq('modelo','55').eq('serie','1');
+
+    // salva itens
+    const{data:nota}=await db.from('notas_fiscais').select('id').eq('modelo','55').eq('numero',nNF).single();
+    if(nota){
+      await db.from('nota_itens').insert(ITENS.map((it,i)=>({
+        nota_id:nota.id,produto_id:it.produto_id||null,nitem:i+1,
+        descricao:it.descricao,codigo:it.codigo||null,codigo_barras:it.codigo_barras||null,
+        ncm:it.ncm||null,cfop:it.cfop,unidade:it.unidade,
+        quantidade:it.quantidade,valor_unitario:it.valor_unitario,
+        valor_total:it.valor_total,valor_desconto:it.valor_desconto,
+        origem:it.origem,csosn:it.csosn,aliq_icms:0,valor_icms:0,
+        cst_pis:'07',cst_cofins:'07',
+      })));
+    }
+
+    // baixar XML automaticamente
+    const blob=new Blob([xml],{type:'application/xml'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`NFe_${String(nNF).padStart(6,'0')}_serie1.xml`;
+    a.click();
+
+    toast('NF-e nº '+nNF+' gerada! XML baixado.','success');
+    setTimeout(()=>window.location.href='nfe.html',1500);
+
+  }catch(err){
+    toast('Erro: '+err.message,'error');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-file-code"></i> Gerar XML';
+  }
+}
+
+async function salvar(status='RASCUNHO'){
+  const destNome=document.getElementById('dest_nome').value.trim();
+  if(!destNome){toast('Informe o destinatário.','error');return;}
+  const prod=ITENS.reduce((s,it)=>s+it.valor_total,0);
+  const frete=parseFloat(document.getElementById('valor_frete').value)||0;
+  const desc=parseFloat(document.getElementById('valor_desconto').value)||0;
+  const total=prod+frete-desc;
+  await db.from('notas_fiscais').insert({
+    modelo:'55',serie:'1',dest_nome:destNome,
+    dest_doc:document.getElementById('dest_doc').value.replace(/\D/g,'')||null,
+    natureza_op:document.getElementById('nat_op').value,
+    valor_produtos:prod,valor_frete:frete,valor_desconto:desc,valor_icms:0,valor_total:total,
+    forma_pagamento:document.getElementById('forma_pag').value,
+    status,
+  });
+  toast('Rascunho salvo!','success');
+  setTimeout(()=>window.location.href='nfe.html',1200);
+}
+
+renderItens();
+</script>
+</body>
+</html>

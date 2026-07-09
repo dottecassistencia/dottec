@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NFS-e — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(154,96,0,.07),transparent 42%),var(--bg)}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
+  .crumb{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
+  .back-btn:hover{background:#E2DFD6}
+  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
+  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  .content{max-width:1100px;margin:0 auto;padding:2rem}
+
+  .info-box{background:var(--amber-bg);border:1px solid rgba(154,96,0,.25);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--amber);line-height:1.6;margin-bottom:1.5rem}
+  .info-box i{font-size:18px;flex-shrink:0;margin-top:1px}
+  .info-box a{color:var(--amber);font-weight:700}
+
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
+  .metric{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem}
+  .metric-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+  .metric-value{font-family:'Lora',serif;font-size:21px;font-weight:700;color:var(--dark)}
+  .metric-value.amber{color:var(--amber)}.metric-value.green{color:var(--green)}
+
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-amber{background:var(--amber);color:#fff}.btn-amber:hover{background:#7A4B00}
+  .search-wrap{position:relative;margin-left:auto}
+  .search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
+  .search-wrap input{width:240px;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;text-transform:uppercase}
+  .search-wrap input::placeholder{text-transform:none}
+  .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
+
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAF7}
+  thead th.right{text-align:right}
+  tbody td{padding:12px 16px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:#FAFAF7}
+  .td-total{text-align:right;font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+  .td-iss{text-align:right;font-size:12.5px;color:var(--sub)}
+  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
+  .act-edit{background:var(--cyan-bg);color:var(--cyan-dark)}.act-edit:hover{background:var(--cyan);color:#fff}
+  .act-del{background:var(--coral-bg);color:var(--coral)}.act-del:hover{background:var(--coral);color:#fff}
+  .empty-row td{padding:3rem;text-align:center;color:var(--sub)}
+  .empty-row i{font-size:32px;display:block;margin-bottom:10px;opacity:.35}
+  .table-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub)}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
+  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
+  .modal-body{padding:1.5rem}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
+  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .label-opt{font-weight:400;text-transform:none;font-size:10px;margin-left:3px}
+  input,select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3.5px rgba(41,184,194,.13);background:#fff}
+  input::placeholder{color:#B5B2A8}
+  textarea{height:70px;resize:vertical;padding:10px 13px}
+  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--amber);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
+  .btn-save:hover{background:#7A4B00}
+  .btn-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
+  .btn-cancel:hover{background:var(--bg)}
+
+  /* ISS CALCULADO */
+  .iss-preview{background:var(--amber-bg);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  .iss-preview span{font-size:12.5px;color:var(--amber)}
+  .iss-preview strong{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--amber)}
+
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Registrar NFS-e</div>
+      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field">
+          <label>Número da NFS-e</label>
+          <input type="text" id="m-numero" placeholder="EX: 000123" style="text-transform:none"/>
+        </div>
+        <div class="field">
+          <label>Data de emissão</label>
+          <input type="date" id="m-data"/>
+        </div>
+      </div>
+
+      <!-- busca cliente -->
+      <div class="field">
+        <label>Tomador <span class="label-opt">opcional</span></label>
+        <div style="position:relative">
+          <input type="text" id="m-tomador-busca" placeholder="Buscar cliente cadastrado..." autocomplete="off" oninput="buscaTomador()"/>
+          <div id="tom-sug" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;z-index:50"></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Nome do tomador <span class="label-opt">ou preencha manualmente</span></label>
+          <input type="text" id="m-tomador-nome" placeholder="NOME DO CLIENTE" style="text-transform:uppercase"/>
+        </div>
+        <div class="field">
+          <label>CPF / CNPJ <span class="label-opt">opcional</span></label>
+          <input type="text" id="m-tomador-doc" placeholder="000.000.000-00" style="text-transform:none"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Descrição do serviço</label>
+        <textarea id="m-descricao" placeholder="EX: MANUTENÇÃO E REPARO DE CELULAR MARCA SAMSUNG..."></textarea>
+      </div>
+
+      <div class="grid2">
+        <div class="field no-mb">
+          <label>Valor do serviço (R$)</label>
+          <input type="number" step="0.01" id="m-valor" placeholder="0,00" oninput="calcIss()"/>
+        </div>
+        <div class="field no-mb">
+          <label>Alíquota ISS (%)</label>
+          <select id="m-aliq" onchange="calcIss()">
+            <option value="2">2%</option>
+            <option value="3">3%</option>
+            <option value="4" selected>4%</option>
+            <option value="5">5%</option>
+            <option value="0">Isento / 0%</option>
+          </select>
+        </div>
+      </div>
+      <div class="iss-preview">
+        <span>ISS a recolher</span>
+        <strong id="iss-preview-val">R$ 0,00</strong>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>Observações <span class="label-opt">opcional</span></label>
+        <input type="text" id="m-obs" placeholder="INFORMAÇÕES ADICIONAIS" style="text-transform:uppercase"/>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" id="btn-salvar" onclick="salvar()"><i class="ti ti-device-floppy"></i> Registrar</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="crumb">
+    <a class="back-btn" href="fiscal.html"><i class="ti ti-arrow-left"></i></a>
+    <div>
+      <div class="crumb-title">NFS-e — Nota Fiscal de Serviços</div>
+      <div class="crumb-sub">Registro de notas emitidas pela prefeitura · Rio dos Cedros</div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+
+  <div class="info-box">
+    <i class="ti ti-building"></i>
+    <div>
+      A NFS-e é emitida diretamente no <strong>portal da prefeitura de Rio dos Cedros</strong>. Este módulo serve para <strong>registrar e controlar</strong> as notas emitidas, mantendo o histórico integrado ao sistema.
+      <br>Após emitir no site da prefeitura, registre aqui para manter o controle centralizado.
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">NFS-e este mês</div>
+      <div class="metric-value amber" id="m-qtd">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total serviços mês</div>
+      <div class="metric-value green" id="m-total">R$ —</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">ISS a recolher mês</div>
+      <div class="metric-value amber" id="m-iss">R$ —</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-amber" onclick="abrirModal()"><i class="ti ti-plus"></i> Registrar NFS-e</button>
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="busca" placeholder="Buscar por tomador ou número..." oninput="filtrar()"/>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:90px">Número</th>
+          <th>Tomador</th>
+          <th>Descrição</th>
+          <th style="width:90px">Data</th>
+          <th style="width:100px" class="right">ISS</th>
+          <th style="width:120px" class="right">Total</th>
+          <th style="width:80px;text-align:right">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr class="empty-row"><td colspan="7"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Carregando...</td></tr>
+      </tbody>
+    </table>
+    <div class="table-footer"><span id="count">—</span><span>Dottec · NFS-e Municipal</span></div>
+  </div>
+</main>
+
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+const mes=new Date().toISOString().slice(0,8)+'01';
+
+let TODOS=[], EDIT_ID=null, TOMADOR_ID=null;
+
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(type==='success'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+function calcIss(){
+  const valor=parseFloat(document.getElementById('m-valor').value)||0;
+  const aliq=parseFloat(document.getElementById('m-aliq').value)||0;
+  const iss=valor*(aliq/100);
+  document.getElementById('iss-preview-val').textContent=fmt(iss);
+}
+
+async function load(){
+  const{data}=await db.from('nfse_registros').select('*,pessoas(nome)').order('data_emissao',{ascending:false});
+  TODOS=data||[];
+  const mes_r=TODOS.filter(n=>n.data_emissao>=mes);
+  const totalMes=mes_r.reduce((s,n)=>s+Number(n.valor_servico),0);
+  const issMes=mes_r.reduce((s,n)=>s+Number(n.valor_iss||0),0);
+  document.getElementById('m-qtd').textContent=mes_r.length;
+  document.getElementById('m-total').textContent=fmt(totalMes);
+  document.getElementById('m-iss').textContent=fmt(issMes);
+  filtrar();
+}
+
+function filtrar(){
+  const q=document.getElementById('busca').value.trim().toUpperCase();
+  const lista=TODOS.filter(n=>!q||
+    (n.tomador_nome||'').toUpperCase().includes(q)||
+    (n.numero||'').includes(q)||
+    (n.descricao||'').toUpperCase().includes(q)
+  );
+  renderTable(lista);
+}
+
+function renderTable(lista){
+  const tb=document.getElementById('tbody');
+  if(!lista.length){
+    tb.innerHTML=`<tr class="empty-row"><td colspan="7"><i class="ti ti-tool"></i>Nenhuma NFS-e registrada.</td></tr>`;
+    document.getElementById('count').textContent='0';return;
+  }
+  tb.innerHTML=lista.map(n=>`<tr>
+    <td style="font-weight:700;font-size:13px">${n.numero}</td>
+    <td>
+      <div style="font-weight:600;color:var(--dark)">${n.tomador_nome||n.pessoas?.nome||'—'}</div>
+      ${n.tomador_doc?`<div style="font-size:11.5px;color:var(--sub)">${n.tomador_doc}</div>`:''}
+    </td>
+    <td style="font-size:12.5px;color:var(--sub);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.descricao}</td>
+    <td style="font-size:12.5px;color:var(--sub)">${fmtDate(n.data_emissao)}</td>
+    <td class="td-iss">${n.valor_iss>0?fmt(n.valor_iss):'—'}</td>
+    <td class="td-total">${fmt(n.valor_servico)}</td>
+    <td>
+      <div style="display:flex;gap:5px;justify-content:flex-end">
+        <button class="act-btn act-edit" onclick="editarRegistro('${n.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+        <button class="act-btn act-del" onclick="excluir('${n.id}','${n.numero}')" title="Excluir"><i class="ti ti-trash"></i></button>
+      </div>
+    </td>
+  </tr>`).join('');
+  document.getElementById('count').textContent=lista.length+' registro(s)';
+}
+
+// BUSCA TOMADOR
+let tomTimer;
+async function buscaTomador(){
+  const q=document.getElementById('m-tomador-busca').value.trim();
+  const sug=document.getElementById('tom-sug');
+  clearTimeout(tomTimer);TOMADOR_ID=null;
+  if(q.length<2){sug.style.display='none';return;}
+  tomTimer=setTimeout(async()=>{
+    const{data}=await db.from('pessoas').select('id,nome,documento,tipo_doc')
+      .or(`nome.ilike.%${q.toUpperCase()}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
+      .eq('ativo',true).limit(6);
+    if(!data||!data.length){sug.innerHTML='<div style="padding:10px 14px;font-size:13px;color:var(--sub)">Nenhum encontrado.</div>';sug.style.display='block';return;}
+    sug.innerHTML=data.map(p=>`
+      <div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #F2F0EA;transition:background .12s"
+        onmousedown="selecionarTomador('${p.id}','${p.nome.replace(/'/g,"\\'")}','${p.documento||''}')"
+        onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+        <div style="font-weight:700;color:var(--dark)">${p.nome}</div>
+        <div style="font-size:11.5px;color:var(--sub)">${p.tipo_doc}: ${p.documento||''}</div>
+      </div>`).join('');
+    sug.style.display='block';
+  },280);
+}
+
+function selecionarTomador(id,nome,doc){
+  TOMADOR_ID=id;
+  document.getElementById('tom-sug').style.display='none';
+  document.getElementById('m-tomador-busca').value='';
+  document.getElementById('m-tomador-nome').value=nome;
+  document.getElementById('m-tomador-doc').value=doc;
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('#m-tomador-busca')&&!e.target.closest('#tom-sug'))document.getElementById('tom-sug').style.display='none';});
+
+// MODAL
+function abrirModal(){
+  EDIT_ID=null;TOMADOR_ID=null;
+  document.getElementById('modal-title').textContent='Registrar NFS-e';
+  document.getElementById('m-numero').value='';
+  document.getElementById('m-data').value=new Date().toISOString().slice(0,10);
+  document.getElementById('m-tomador-busca').value='';
+  document.getElementById('m-tomador-nome').value='';
+  document.getElementById('m-tomador-doc').value='';
+  document.getElementById('m-descricao').value='';
+  document.getElementById('m-valor').value='';
+  document.getElementById('m-aliq').value='4';
+  document.getElementById('m-obs').value='';
+  document.getElementById('iss-preview-val').textContent='R$ 0,00';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('m-numero').focus(),100);
+}
+
+function fecharModal(){document.getElementById('modal').classList.remove('open');EDIT_ID=null;}
+
+function editarRegistro(id){
+  const n=TODOS.find(x=>x.id===id);if(!n) return;
+  EDIT_ID=id;TOMADOR_ID=n.pessoa_id||null;
+  document.getElementById('modal-title').textContent='Editar NFS-e';
+  document.getElementById('m-numero').value=n.numero;
+  document.getElementById('m-data').value=n.data_emissao;
+  document.getElementById('m-tomador-nome').value=n.tomador_nome||'';
+  document.getElementById('m-tomador-doc').value=n.tomador_doc||'';
+  document.getElementById('m-descricao').value=n.descricao;
+  document.getElementById('m-valor').value=n.valor_servico;
+  document.getElementById('m-aliq').value=n.aliq_iss||4;
+  document.getElementById('m-obs').value=n.observacoes||'';
+  calcIss();
+  document.getElementById('modal').classList.add('open');
+}
+
+async function salvar(){
+  const numero=document.getElementById('m-numero').value.trim();
+  const data=document.getElementById('m-data').value;
+  const desc=document.getElementById('m-descricao').value.trim();
+  const valor=parseFloat(document.getElementById('m-valor').value)||0;
+  if(!numero){toast('Informe o número da NFS-e.','error');return;}
+  if(!data){toast('Informe a data.','error');return;}
+  if(!desc){toast('Informe a descrição do serviço.','error');return;}
+  if(!valor){toast('Informe o valor do serviço.','error');return;}
+
+  const aliq=parseFloat(document.getElementById('m-aliq').value)||0;
+  const iss=valor*(aliq/100);
+
+  const payload={
+    numero,
+    data_emissao:data,
+    pessoa_id:TOMADOR_ID||null,
+    tomador_nome:document.getElementById('m-tomador-nome').value.trim().toUpperCase()||null,
+    tomador_doc:document.getElementById('m-tomador-doc').value.replace(/\D/g,'')||null,
+    descricao:desc.toUpperCase(),
+    valor_servico:valor,
+    aliq_iss:aliq,
+    valor_iss:parseFloat(iss.toFixed(2)),
+    observacoes:document.getElementById('m-obs').value.trim().toUpperCase()||null,
+  };
+
+  const btn=document.getElementById('btn-salvar');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i>';
+
+  let error;
+  if(EDIT_ID){({error}=await db.from('nfse_registros').update(payload).eq('id',EDIT_ID));}
+  else{({error}=await db.from('nfse_registros').insert(payload));}
+
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Registrar';
+
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast(EDIT_ID?'Atualizado!':'NFS-e registrada!','success');
+  fecharModal();load();
+}
+
+async function excluir(id,num){
+  if(!confirm('Excluir o registro da NFS-e nº '+num+'?')) return;
+  const{error}=await db.from('nfse_registros').delete().eq('id',id);
+  if(error){toast('Erro: '+error.message,'error');return;}
+  toast('Registro excluído.','success');load();
+}
+
+load();
+</script>
+</body>
+</html>

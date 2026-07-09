@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova NFC-e — Dottec Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--purple:#5B3FA6;--purple-bg:#EEEAF8}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+  .back-btn{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:15px;cursor:pointer;text-decoration:none;flex-shrink:0}
+  .back-btn:hover{background:#E2DFD6}
+  .topbar-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark);flex:1}
+  .topbar-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--purple-bg);color:var(--purple)}
+  .pdv-layout{display:grid;grid-template-columns:1fr 380px;flex:1;min-height:calc(100vh - 57px)}
+  /* ESQUERDO */
+  .pdv-left{display:flex;flex-direction:column;border-right:1px solid var(--border)}
+  /* CPF OPCIONAL */
+  .cpf-row{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:#FAFAF7;display:flex;align-items:center;gap:10px}
+  .cpf-row label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  .cpf-row input{flex:1;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:none}
+  .cpf-row input:focus{border-color:var(--purple)}
+  /* BUSCA */
+  .search-area{padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0}
+  .search-box{position:relative}
+  .search-box .si{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:18px}
+  .search-box input{width:100%;height:48px;padding:0 14px 0 46px;border-radius:12px;border:1.5px solid var(--border);background:#FAFAF7;font-size:15px;font-family:inherit;outline:none;text-transform:uppercase;transition:border-color .15s}
+  .search-box input::placeholder{text-transform:none;color:#B5B2A8}
+  .search-box input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,63,166,.12);background:#fff}
+  .prod-sug{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);max-height:280px;overflow-y:auto;z-index:50;display:none}
+  .prod-sug.open{display:block}
+  .sug-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #F2F0EA;transition:background .12s}
+  .sug-item:hover,.sug-item.focused{background:var(--bg)}
+  .sug-icon{width:36px;height:36px;border-radius:10px;background:var(--purple-bg);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .sug-info{flex:1}.sug-nome{font-size:13.5px;font-weight:700;color:var(--dark)}.sug-det{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .sug-preco{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);flex-shrink:0}
+  .itens-area{flex:1;overflow-y:auto}
+  .itens-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--sub);gap:10px}
+  .itens-empty i{font-size:48px;opacity:.2}
+  .item-row{display:flex;align-items:center;gap:12px;padding:14px 1.25rem;border-bottom:1px solid #F2F0EA;animation:slideIn .2s ease;transition:background .12s}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  .item-row:hover{background:#FAFAF7}
+  .item-icon{width:40px;height:40px;border-radius:10px;background:var(--purple-bg);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .item-info{flex:1;min-width:0}
+  .item-nome{font-size:13.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item-unit{font-size:11.5px;color:var(--sub);margin-top:1px}
+  .item-qty{display:flex;align-items:center;gap:6px;flex-shrink:0}
+  .qty-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+  .qty-btn:hover{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .qty-num{width:34px;text-align:center;font-size:14px;font-weight:800}
+  .item-sub{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark);min-width:80px;text-align:right;flex-shrink:0}
+  .item-del{width:28px;height:28px;border-radius:8px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:background .12s}
+  .item-del:hover{background:var(--coral);color:#fff}
+  /* DIREITO */
+  .pdv-right{background:var(--white);display:flex;flex-direction:column}
+  .right-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
+  .right-header-title{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--dark)}
+  .right-header-sub{font-size:11.5px;color:var(--sub);margin-top:2px}
+  .totais-area{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
+  .tot-row{display:flex;justify-content:space-between;margin-bottom:8px}
+  .tot-row:last-child{margin-bottom:0}
+  .tot-lbl{font-size:12.5px;color:var(--sub)}.tot-val{font-size:13.5px;font-weight:700}
+  .tot-row.big .tot-lbl{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--dark)}
+  .tot-row.big .tot-val{font-family:'Lora',serif;font-size:24px;font-weight:800;color:var(--dark)}
+  .divider{height:1px;background:var(--border);margin:10px 0}
+  .desc-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .desc-row label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;white-space:nowrap}
+  .desc-row input{flex:1;height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:#FAFAF7;font-size:13px;font-family:inherit;outline:none;text-align:right;transition:border-color .15s}
+  .desc-row input:focus{border-color:var(--purple);background:#fff}
+  .pag-area{padding:1.1rem 1.25rem;flex:1;overflow-y:auto}
+  .pag-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+  .formas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .forma-btn{height:46px;border-radius:12px;border:1.5px solid var(--border);background:#FAFAF7;cursor:pointer;font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:700;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s}
+  .forma-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+  .forma-btn.selected{border-color:var(--purple);background:var(--purple);color:#fff}
+  .recebido-row{margin-bottom:14px}
+  .recebido-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:6px}
+  .recebido-input{width:100%;height:48px;padding:0 14px;border-radius:12px;border:1.5px solid var(--border);background:#FAFAF7;font-size:18px;font-family:'Lora',serif;font-weight:700;outline:none;text-align:right;transition:border-color .15s}
+  .recebido-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(91,63,166,.12);background:#fff}
+  .troco-box{background:var(--green-bg);border:1px solid rgba(59,109,17,.2);border-radius:12px;padding:12px 14px;display:none;margin-bottom:12px}
+  .troco-box.show{display:block}
+  .troco-label{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:4px}
+  .troco-value{font-family:'Lora',serif;font-size:22px;font-weight:800;color:var(--green)}
+  .finalizar-area{padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+  .btn-finalizar{width:100%;height:54px;border-radius:14px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .18s}
+  .btn-finalizar.ready{background:var(--purple);color:#fff;box-shadow:0 4px 18px rgba(91,63,166,.3)}
+  .btn-finalizar.ready:hover{background:#4A2F95}
+  .btn-finalizar.disabled{background:#E2E0DA;color:var(--sub);cursor:not-allowed}
+  .btn-cancelar{width:100%;height:38px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--sub);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s}
+  .btn-cancelar:hover{background:var(--coral-bg);color:var(--coral)}
+  /* MODAL SUCESSO */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal-sucesso{background:#fff;border-radius:22px;padding:2.5rem 2rem;text-align:center;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+  .suc-icon{width:64px;height:64px;border-radius:50%;background:var(--purple-bg);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 1rem}
+  .suc-title{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--dark);margin-bottom:6px}
+  .suc-num{font-size:13px;color:var(--sub);margin-bottom:.5rem}
+  .suc-total{font-family:'Lora',serif;font-size:28px;font-weight:800;color:var(--purple);margin-bottom:.5rem}
+  .suc-troco{font-size:14px;color:var(--amber);font-weight:600;margin-bottom:1.5rem}
+  .suc-btns{display:flex;flex-direction:column;gap:8px}
+  .btn-nova{height:46px;border-radius:12px;border:none;background:var(--purple);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn-nova:hover{background:#4A2F95}
+  .btn-hist{height:40px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+  .toast.show{transform:translateX(0)}
+  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .spin{animation:spin .7s linear infinite;display:inline-block}
+  @media(max-width:900px){.pdv-layout{grid-template-columns:1fr}.pdv-right{border-top:1px solid var(--border)}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i class="ti ti-alert-circle"></i><span id="tm"></span></div>
+<div class="modal-overlay" id="modal-suc">
+  <div class="modal-sucesso">
+    <div class="suc-icon"><i class="ti ti-check"></i></div>
+    <div class="suc-title">NFC-e emitida!</div>
+    <div class="suc-num" id="s-num">—</div>
+    <div class="suc-total" id="s-total">R$ 0,00</div>
+    <div class="suc-troco" id="s-troco" style="display:none"></div>
+    <div class="suc-btns">
+      <button class="btn-nova" onclick="novaVenda()"><i class="ti ti-plus"></i> Nova NFC-e</button>
+      <button class="btn-hist" onclick="window.location.href='nfce.html'">Ver histórico</button>
+    </div>
+  </div>
+</div>
+<header class="topbar">
+  <a class="back-btn" href="nfce.html"><i class="ti ti-arrow-left"></i></a>
+  <div class="topbar-title">Nova NFC-e — Cupom Fiscal</div>
+  <div class="topbar-badge">MODELO 65 · CONSUMIDOR FINAL</div>
+</header>
+<div class="pdv-layout">
+  <div class="pdv-left">
+    <!-- CPF opcional -->
+    <div class="cpf-row">
+      <label>CPF do consumidor</label>
+      <input type="text" id="cpf-cons" placeholder="000.000.000-00 (opcional)" oninput="maskCpf(this)"/>
+      <span style="font-size:11.5px;color:var(--sub);white-space:nowrap">Opcional para DANFE</span>
+    </div>
+    <div class="search-area">
+      <div class="search-box" style="position:relative">
+        <i class="ti ti-search si"></i>
+        <input type="text" id="busca-prod" placeholder="Buscar produto por nome ou código..." autocomplete="off" oninput="buscaProd()" onkeydown="navSug(event)"/>
+        <div class="prod-sug" id="prod-sug"></div>
+      </div>
+    </div>
+    <div class="itens-area" id="itens-area">
+      <div class="itens-empty"><i class="ti ti-receipt"></i><p>Nenhum item adicionado</p><small>Busque acima para começar</small></div>
+    </div>
+  </div>
+  <div class="pdv-right">
+    <div class="right-header"><div class="right-header-title">NFC-e</div><div class="right-header-sub" id="itens-count">0 itens</div></div>
+    <div class="totais-area">
+      <div class="tot-row"><span class="tot-lbl">Subtotal</span><span class="tot-val" id="subtotal-val">R$ 0,00</span></div>
+      <div class="desc-row"><label>Desc. R$</label><input type="number" step="0.01" id="desc-val" placeholder="0,00" oninput="calcTotais()"/></div>
+      <div class="divider"></div>
+      <div class="tot-row big"><span class="tot-lbl">Total</span><span class="tot-val" id="total-val">R$ 0,00</span></div>
+    </div>
+    <div class="pag-area">
+      <div class="pag-title">Forma de pagamento</div>
+      <div class="formas-grid">
+        <button class="forma-btn" id="f-DINHEIRO" onclick="setForma('DINHEIRO','01')"><i class="ti ti-cash"></i>Dinheiro</button>
+        <button class="forma-btn" id="f-PIX" onclick="setForma('PIX','17')"><i class="ti ti-qrcode"></i>PIX</button>
+        <button class="forma-btn" id="f-DEBITO" onclick="setForma('DEBITO','04')"><i class="ti ti-credit-card"></i>Débito</button>
+        <button class="forma-btn" id="f-CREDITO" onclick="setForma('CREDITO','03')"><i class="ti ti-credit-card"></i>Crédito</button>
+      </div>
+      <div class="recebido-row" id="recebido-wrap" style="display:none">
+        <div class="recebido-label">Valor recebido</div>
+        <input type="number" step="0.01" class="recebido-input" id="recebido-val" placeholder="0,00" oninput="calcTroco()"/>
+      </div>
+      <div class="troco-box" id="troco-box"><div class="troco-label">Troco</div><div class="troco-value" id="troco-val">R$ 0,00</div></div>
+    </div>
+    <div class="finalizar-area">
+      <button class="btn-finalizar disabled" id="btn-fin" onclick="emitir()"><i class="ti ti-file-invoice"></i> Emitir NFC-e</button>
+      <button class="btn-cancelar" onclick="if(confirm('Cancelar?'))novaVenda()"><i class="ti ti-x"></i> Cancelar</button>
+    </div>
+  </div>
+</div>
+<script>
+const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const EMIT={CNPJ:'12227221000186',xNome:'THIAGO RICHARD GAZANIGA',IE:'256177503',CRT:'1',cMun:'4214706',xMun:'Rio dos Cedros',UF:'SC',CEP:'89121000'};
+
+let ITENS=[],FORMA=null,FORMA_COD=null,SUG_IDX=-1,CACHE=null;
+
+function toast(msg){const t=document.getElementById('toast');document.getElementById('tm').textContent=msg;t.className='toast error show';setTimeout(()=>t.classList.remove('show'),3500);}
+
+let busTimer;
+async function buscaProd(){
+  const q=document.getElementById('busca-prod').value.trim();
+  const sug=document.getElementById('prod-sug');
+  clearTimeout(busTimer);SUG_IDX=-1;
+  if(q.length<1){sug.className='prod-sug';return;}
+  busTimer=setTimeout(async()=>{
+    if(!CACHE){const{data}=await db.from('produtos').select('id,codigo,nome,valor_venda,ncm,codigo_barras').eq('ativo',true);CACHE=data||[];}
+    const res=CACHE.filter(p=>p.nome.toUpperCase().includes(q.toUpperCase())||String(p.codigo).includes(q)).slice(0,8);
+    if(!res.length){sug.innerHTML='<div style="padding:1rem;font-size:13px;color:var(--sub);text-align:center">Nenhum produto encontrado.</div>';sug.className='prod-sug open';return;}
+    sug.innerHTML=res.map((p,i)=>`<div class="sug-item" data-idx="${i}" onmousedown="addProd(${i},${JSON.stringify(res).replace(/"/g,'&quot;')})"><div class="sug-icon"><i class="ti ti-package"></i></div><div class="sug-info"><div class="sug-nome">${p.nome}</div><div class="sug-det">COD: ${String(p.codigo).padStart(3,'0')}</div></div><div class="sug-preco">${fmt(p.valor_venda)}</div></div>`).join('');
+    sug.className='prod-sug open';
+  },250);
+}
+function navSug(e){
+  const items=document.querySelectorAll('.sug-item');if(!items.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();SUG_IDX=Math.min(SUG_IDX+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();SUG_IDX=Math.max(SUG_IDX-1,0);}
+  else if(e.key==='Escape'){document.getElementById('prod-sug').className='prod-sug';return;}
+  items.forEach((it,i)=>it.classList.toggle('focused',i===SUG_IDX));
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.search-box'))document.getElementById('prod-sug').className='prod-sug';});
+
+function addProd(i,prods){
+  document.getElementById('prod-sug').className='prod-sug';
+  document.getElementById('busca-prod').value='';
+  const p=prods[i];
+  const ex=ITENS.find(it=>it.produto_id===p.id);
+  if(ex){ex.quantidade++;ex.valor_total=ex.quantidade*ex.valor_unitario;}
+  else ITENS.push({produto_id:p.id,descricao:p.nome,codigo:String(p.codigo).padStart(3,'0'),codigo_barras:p.codigo_barras||'SEM GTIN',ncm:p.ncm||'00000000',cfop:'5102',unidade:'UND',quantidade:1,valor_unitario:Number(p.valor_venda),valor_total:Number(p.valor_venda),csosn:'400',cst_pis:'07',cst_cofins:'07',origem:0});
+  renderItens();calcTotais();
+}
+function renderItens(){
+  const a=document.getElementById('itens-area');
+  document.getElementById('itens-count').textContent=ITENS.length+(ITENS.length===1?' item':' itens');
+  if(!ITENS.length){a.innerHTML='<div class="itens-empty"><i class="ti ti-receipt"></i><p>Nenhum item adicionado</p><small>Busque acima para começar</small></div>';return;}
+  a.innerHTML=ITENS.map((it,i)=>`<div class="item-row">
+    <div class="item-icon"><i class="ti ti-package"></i></div>
+    <div class="item-info"><div class="item-nome">${it.descricao}</div><div class="item-unit">${fmt(it.valor_unitario)} / un</div></div>
+    <div class="item-qty">
+      <button class="qty-btn" onclick="altQty(${i},-1)"><i class="ti ti-minus"></i></button>
+      <span class="qty-num">${it.quantidade}</span>
+      <button class="qty-btn" onclick="altQty(${i},1)"><i class="ti ti-plus"></i></button>
+    </div>
+    <div class="item-sub">${fmt(it.valor_total)}</div>
+    <button class="item-del" onclick="ITENS.splice(${i},1);renderItens();calcTotais()"><i class="ti ti-trash"></i></button>
+  </div>`).join('');
+}
+function altQty(i,d){ITENS[i].quantidade=Math.max(1,ITENS[i].quantidade+d);ITENS[i].valor_total=ITENS[i].quantidade*ITENS[i].valor_unitario;renderItens();calcTotais();}
+function calcTotais(){
+  const sub=ITENS.reduce((s,it)=>s+it.valor_total,0);
+  const desc=parseFloat(document.getElementById('desc-val').value)||0;
+  const total=Math.max(0,sub-desc);
+  document.getElementById('subtotal-val').textContent=fmt(sub);
+  document.getElementById('total-val').textContent=fmt(total);
+  calcTroco();atualizarBotao();
+}
+function getTotal(){const sub=ITENS.reduce((s,it)=>s+it.valor_total,0);const desc=parseFloat(document.getElementById('desc-val').value)||0;return Math.max(0,sub-desc);}
+function calcTroco(){
+  const total=getTotal();const rec=parseFloat(document.getElementById('recebido-val').value)||0;const troco=rec-total;
+  const box=document.getElementById('troco-box');
+  if(FORMA==='DINHEIRO'&&rec>0){document.getElementById('troco-val').textContent=fmt(Math.max(0,troco));box.className='troco-box'+(troco>=0?' show':'');}
+  else box.className='troco-box';
+}
+function setForma(f,cod){
+  FORMA=f;FORMA_COD=cod;
+  document.querySelectorAll('.forma-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('f-'+f).classList.add('selected');
+  document.getElementById('recebido-wrap').style.display=f==='DINHEIRO'?'block':'none';
+  if(f!=='DINHEIRO')document.getElementById('troco-box').className='troco-box';
+  calcTroco();atualizarBotao();
+}
+function atualizarBotao(){const ok=ITENS.length>0&&FORMA&&getTotal()>0;document.getElementById('btn-fin').className='btn-finalizar '+(ok?'ready':'disabled');}
+
+async function emitir(){
+  if(!ITENS.length||!FORMA||!getTotal()){return;}
+  const total=getTotal();const sub=ITENS.reduce((s,it)=>s+it.valor_total,0);
+  const desc=parseFloat(document.getElementById('desc-val').value)||0;
+  const rec=FORMA==='DINHEIRO'?(parseFloat(document.getElementById('recebido-val').value)||0):total;
+  const troco=FORMA==='DINHEIRO'?Math.max(0,rec-total):0;
+  const cpf=document.getElementById('cpf-cons').value.replace(/\D/g,'');
+  const btn=document.getElementById('btn-fin');
+  btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Emitindo...';btn.className='btn-finalizar disabled';
+
+  try{
+    const{data:seq}=await db.from('nota_sequencia').select('ultimo_numero').eq('modelo','65').eq('serie','1').single();
+    const nNF=(seq?.ultimo_numero||0)+1;
+    const dhEmi=new Date().toISOString().slice(0,19)+'-03:00';
+
+    const itensXml=ITENS.map((it,i)=>`<det nItem="${i+1}"><prod><cProd>${it.codigo}</cProd><cEAN>${it.codigo_barras}</cEAN><xProd>${it.descricao}</xProd><NCM>${it.ncm}</NCM><CFOP>5102</CFOP><uCom>UND</uCom><qCom>${it.quantidade.toFixed(4)}</qCom><vUnCom>${it.valor_unitario.toFixed(4)}</vUnCom><vProd>${it.valor_total.toFixed(2)}</vProd><cEANTrib>${it.codigo_barras}</cEANTrib><uTrib>UND</uTrib><qTrib>${it.quantidade.toFixed(4)}</qTrib><vUnTrib>${it.valor_unitario.toFixed(4)}</vUnTrib><indTot>1</indTot></prod><imposto><ICMS><ICMSSN400><orig>0</orig><CSOSN>400</CSOSN></ICMSSN400></ICMS><PIS><PISNT><CST>07</CST></PISNT></PIS><COFINS><COFINSNT><CST>07</CST></COFINSNT></COFINS></imposto></det>`).join('');
+    const destTag=cpf?`<dest><CPF>${cpf}</CPF><xNome>CONSUMIDOR</xNome><indIEDest>9</indIEDest></dest>`:`<dest><xNome>CONSUMIDOR FINAL</xNome><indIEDest>9</indIEDest></dest>`;
+
+    const xml=`<?xml version="1.0" encoding="UTF-8"?><nfeProc versao="4.00" xmlns="http://www.portalfiscal.inf.br/nfe"><NFe xmlns="http://www.portalfiscal.inf.br/nfe"><infNFe versao="4.00"><ide><cUF>42</cUF><cNF>${String(Math.floor(Math.random()*99999999)).padStart(8,'0')}</cNF><natOp>VENDA A CONSUMIDOR</natOp><mod>65</mod><serie>1</serie><nNF>${nNF}</nNF><dhEmi>${dhEmi}</dhEmi><tpNF>1</tpNF><idDest>1</idDest><cMunFG>${EMIT.cMun}</cMunFG><tpImp>4</tpImp><tpEmis>1</tpEmis><cDV>0</cDV><tpAmb>2</tpAmb><finNFe>1</finNFe><indFinal>1</indFinal><indPres>1</indPres><procEmi>0</procEmi><verProc>Dottec1.0</verProc></ide><emit><CNPJ>${EMIT.CNPJ}</CNPJ><xNome>${EMIT.xNome}</xNome><enderEmit><xLgr>AVENIDA TIRADENTES</xLgr><nro>334</nro><xCpl>SALA 04</xCpl><xBairro>CENTRO</xBairro><cMun>${EMIT.cMun}</cMun><xMun>${EMIT.xMun}</xMun><UF>${EMIT.UF}</UF><CEP>${EMIT.CEP}</CEP><cPais>1058</cPais><xPais>BRASIL</xPais></enderEmit><IE>${EMIT.IE}</IE><CRT>${EMIT.CRT}</CRT></emit>${destTag}${itensXml}<total><ICMSTot><vBC>0.00</vBC><vICMS>0.00</vICMS><vICMSDeson>0.00</vICMSDeson><vFCP>0.00</vFCP><vBCST>0.00</vBCST><vST>0.00</vST><vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet><vProd>${sub.toFixed(2)}</vProd><vFrete>0.00</vFrete><vSeg>0.00</vSeg><vDesc>${desc.toFixed(2)}</vDesc><vII>0.00</vII><vIPI>0.00</vIPI><vIPIDevol>0.00</vIPIDevol><vPIS>0.00</vPIS><vCOFINS>0.00</vCOFINS><vOutro>0.00</vOutro><vNF>${total.toFixed(2)}</vNF></ICMSTot></total><transp><modFrete>9</modFrete></transp><pag><detPag><tPag>${FORMA_COD}</tPag><vPag>${rec.toFixed(2)}</vPag></detPag>${troco>0?`<vTroco>${troco.toFixed(2)}</vTroco>`:''}</pag></infNFe></NFe></nfeProc>`;
+
+    await db.from('notas_fiscais').insert({modelo:'65',serie:'1',numero:nNF,dest_nome:cpf?'CONSUMIDOR':'CONSUMIDOR FINAL',dest_doc:cpf||null,dest_tipo_doc:cpf?'CPF':null,natureza_op:'VENDA A CONSUMIDOR',valor_produtos:sub,valor_frete:0,valor_desconto:desc,valor_icms:0,valor_total:total,forma_pagamento:FORMA,valor_recebido:rec,troco,status:'RASCUNHO',xml_gerado:xml});
+    await db.from('nota_sequencia').update({ultimo_numero:nNF}).eq('modelo','65').eq('serie','1');
+
+    const blob=new Blob([xml],{type:'application/xml'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`NFCe_${String(nNF).padStart(6,'0')}.xml`;a.click();
+
+    document.getElementById('s-num').textContent='NFC-e nº '+String(nNF).padStart(6,'0');
+    document.getElementById('s-total').textContent=fmt(total);
+    const tr=document.getElementById('s-troco');
+    if(troco>0){tr.textContent='Troco: '+fmt(troco);tr.style.display='block';}else tr.style.display='none';
+    document.getElementById('modal-suc').classList.add('open');
+  }catch(err){toast('Erro: '+err.message);btn.innerHTML='<i class="ti ti-file-invoice"></i> Emitir NFC-e';btn.className='btn-finalizar ready';}
+}
+
+function novaVenda(){
+  ITENS=[];FORMA=null;FORMA_COD=null;
+  document.getElementById('busca-prod').value='';document.getElementById('desc-val').value='';
+  document.getElementById('recebido-val').value='';document.getElementById('cpf-cons').value='';
+  document.getElementById('recebido-wrap').style.display='none';
+  document.getElementById('troco-box').className='troco-box';
+  document.querySelectorAll('.forma-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('modal-suc').classList.remove('open');
+  renderItens();calcTotais();document.getElementById('busca-prod').focus();
+}
+
+function maskCpf(inp){let v=inp.value.replace(/\D/g,'').slice(0,11);if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');else if(v.length>3)v=v.replace(/(\d{3})(\d{0,3})/,'$1.$2');inp.value=v;}
+
+renderItens();calcTotais();
+document.getElementById('busca-prod').focus();
+</script>
+</body>
+</html>
