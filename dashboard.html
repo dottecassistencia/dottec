@@ -581,12 +581,13 @@ function onBusca(){
 async function executaBusca(q){
   const t=q.toUpperCase();
   const doc=q.replace(/\D/g,'');
+  const safe=async p=>{try{return await p;}catch{return{data:[]};}}
   const[rP,rPr,rOS,rC,rV]=await Promise.all([
     db.from('pessoas').select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor').or(`nome.ilike.%${t}%${doc?`,documento.ilike.%${doc}%`:''}`).eq('ativo',true).limit(4),
     db.from('produtos').select('id,codigo,nome,valor_venda,estoque_atual').ilike('nome','%'+t+'%').eq('ativo',true).limit(4),
-    db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status').or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%`).limit(4).catch(()=>({data:[]})),
-    db.from('contas').select('id,tipo,descricao,valor,status').ilike('descricao','%'+t+'%').limit(3).catch(()=>({data:[]})),
-    db.from('vendas').select('id,numero,total,nome_cliente,criado_em').ilike('nome_cliente','%'+t+'%').order('criado_em',{ascending:false}).limit(3).catch(()=>({data:[]})),
+    safe(db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status').or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%`).limit(4)),
+    safe(db.from('contas').select('id,tipo,descricao,valor,status').ilike('descricao','%'+t+'%').limit(3)),
+    safe(db.from('vendas').select('id,numero,total,nome_cliente,criado_em').ilike('nome_cliente','%'+t+'%').order('criado_em',{ascending:false}).limit(3)),
   ]);
   RESULTADOS=[];let html='';
   const pessoas=rP.data||[];
@@ -605,8 +606,8 @@ async function executaBusca(q){
       </div>`;
       // sub: OS e contas da pessoa
       const[rOp,rCp]=await Promise.all([
-        db.from('ordens_servico').select('id,numero,status,aparelho').eq('pessoa_id',p.id).limit(2).catch(()=>({data:[]})),
-        db.from('contas').select('id,tipo,descricao,valor,status').eq('pessoa_id',p.id).in('status',['ABERTA','PARCIAL','VENCIDA']).limit(2).catch(()=>({data:[]})),
+        safe(db.from('ordens_servico').select('id,numero,status,aparelho').eq('pessoa_id',p.id).limit(2)),
+        safe(db.from('contas').select('id,tipo,descricao,valor,status').eq('pessoa_id',p.id).in('status',['ABERTA','PARCIAL','VENCIDA']).limit(2)),
       ]);
       const subs=[...(rOp.data||[]).map(o=>({i:'ti-tool',txt:`OS #${String(o.numero).padStart(4,'0')} — ${o.status} · ${o.aparelho||''}`,url:`os.html?id=${o.id}`})),
                   ...(rCp.data||[]).map(c=>({i:'ti-currency-dollar',txt:`${c.tipo==='PAGAR'?'Pagar':'Receber'}: ${c.descricao} — ${fmt(c.valor)}`,url:`contas.html`}))];

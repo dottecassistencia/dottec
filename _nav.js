@@ -286,19 +286,19 @@ document.addEventListener("DOMContentLoaded", function(){
     const db = supabase.createClient(SB_URL, SB_KEY);
     const t = q.toUpperCase(), doc = q.replace(/\D/g,'');
     const fmt = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+    const safe = async(p) => { try{ return await p; }catch{ return {data:[]}; } };
     const [rP,rPr,rOS,rC,rV] = await Promise.all([
       db.from('pessoas').select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor')
         .or(`nome.ilike.%${t}%${doc?`,documento.ilike.%${doc}%`:''}`)
         .eq('ativo',true).limit(4),
       db.from('produtos').select('id,codigo,nome,valor_venda,estoque_atual')
         .ilike('nome','%'+t+'%').eq('ativo',true).limit(3),
-      db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status')
-        .or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%`)
-        .limit(4).catch(()=>({data:[]})),
-      db.from('contas').select('id,tipo,descricao,valor,status')
-        .ilike('descricao','%'+t+'%').limit(3).catch(()=>({data:[]})),
-      db.from('vendas').select('id,numero,total,nome_cliente,criado_em')
-        .ilike('nome_cliente','%'+t+'%').order('criado_em',{ascending:false}).limit(3).catch(()=>({data:[]})),
+      safe(db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status')
+        .or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%`).limit(4)),
+      safe(db.from('contas').select('id,tipo,descricao,valor,status')
+        .ilike('descricao','%'+t+'%').limit(3)),
+      safe(db.from('vendas').select('id,numero,total,nome_cliente,criado_em')
+        .ilike('nome_cliente','%'+t+'%').order('criado_em',{ascending:false}).limit(3)),
     ]);
     RESULTADOS = []; let html = '';
 
@@ -416,4 +416,5 @@ document.addEventListener("DOMContentLoaded", function(){
     if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey) inp.focus();
   });
 
+})();
 });
