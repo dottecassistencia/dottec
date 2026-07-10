@@ -410,10 +410,14 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!e.target.closest('#dnt-search-wrap')) sr.classList.remove('open');
   });
 
-  // atalho teclado: qualquer tecla foca na busca
+  // atalho teclado: só foca na busca se não há nenhum campo ativo
   document.addEventListener('keydown', e => {
-    if(document.activeElement === inp) return;
-    if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey) inp.focus();
+    const active = document.activeElement;
+    const tag = active ? active.tagName : '';
+    // ignora se já está na busca ou em qualquer campo de input
+    if(active === inp) return;
+    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable) return;
+    if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey) inp.focus();
   });
 
 })();
