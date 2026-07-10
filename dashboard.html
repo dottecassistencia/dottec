@@ -369,7 +369,19 @@ function toast(msg,tipo='ok'){
 }
 
 // ── MODAIS ───────────────────────────────────────────────────
-function abre(id){document.getElementById('ov-'+id).classList.add('open');}
+function abre(id){
+  // fecha busca antes de abrir modal
+  document.getElementById('dnt-sr')?.classList.remove('open');
+  document.getElementById('dnt-search-inp')?.blur();
+  const ov=document.getElementById('ov-'+id);
+  if(!ov) return;
+  ov.classList.add('open');
+  // foca no primeiro campo do modal após animação
+  setTimeout(()=>{
+    const primeiro=ov.querySelector('input:not([type=hidden]),select,textarea');
+    if(primeiro) primeiro.focus();
+  },80);
+}
 function fecha(id){document.getElementById('ov-'+id).classList.remove('open');}
 
 // ── ALERTAS ──────────────────────────────────────────────────

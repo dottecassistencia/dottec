@@ -407,12 +407,14 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 
   inp.addEventListener('keydown', e => {
+    // fecha busca se ESC
+    if(e.key === 'Escape') { sr.classList.remove('open'); inp.blur(); return; }
     const rows = sr.querySelectorAll('.dnt-sr-row,.dnt-sr-subr');
     if(!rows.length) return;
     if(e.key==='ArrowDown'){e.preventDefault();FOCI=Math.min(FOCI+1,rows.length-1);}
     else if(e.key==='ArrowUp'){e.preventDefault();FOCI=Math.max(FOCI-1,0);}
     else if(e.key==='Enter'){e.preventDefault();const r=rows[FOCI];if(r){const i=+r.dataset.i;if(RESULTADOS[i])location.href=RESULTADOS[i].url;}}
-    else if(e.key==='Escape'){sr.classList.remove('open');inp.blur();return;}
+
     rows.forEach((r,i)=>r.classList.toggle('foc',i===FOCI));
     if(FOCI>=0)rows[FOCI].scrollIntoView({block:'nearest'});
   });
@@ -421,15 +423,27 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!e.target.closest('#dnt-search-wrap')) sr.classList.remove('open');
   });
 
-  // atalho teclado: foca na busca apenas com / ou Ctrl+K, NUNCA captura letras soltas
+  // atalho teclado: / ou Ctrl+K abre busca, mas NUNCA quando modal está aberto ou campo ativo
   document.addEventListener('keydown', e => {
-    // Só ativa com atalho explícito: barra "/" ou Ctrl+K
+    // bloqueia se qualquer overlay/modal estiver aberto
+    const modalAberto = document.querySelector(
+      '.modal-overlay.open, .overlay.open, [role="dialog"]:not([hidden]), .modal.open'
+    );
+    if(modalAberto) return;
+
     if((e.key === '/' || (e.key === 'k' && e.ctrlKey)) && !e.metaKey) {
       const active = document.activeElement;
       const tag = active ? active.tagName : '';
       if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable) return;
       e.preventDefault();
       inp.focus();
+    }
+  });
+
+  // fecha busca quando foco vai para qualquer input fora da busca
+  document.addEventListener('focusin', e => {
+    if(e.target !== inp && !sr.contains(e.target)) {
+      sr.classList.remove('open');
     }
   });
 
