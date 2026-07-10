@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Serviços — Dottec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.back{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);text-decoration:none;flex-shrink:0}
+.back:hover{background:#E2DFD6}
+.page-title{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark);flex:1}
+.btn{height:38px;padding:0 14px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s}
+.btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cd)}
+.content{max-width:900px;margin:0 auto;padding:1.5rem}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:0 12px;height:38px}
+.search-box:focus-within{border-color:var(--cyan)}
+.search-box i{font-size:16px;color:var(--sub)}
+.search-box input{border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--dark);background:transparent;flex:1;text-transform:uppercase}
+.search-box input::placeholder{text-transform:none;color:#B5B2A8}
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:10px 14px;border-bottom:1px solid var(--border);background:#FAFAF7;text-align:left}
+tbody td{padding:11px 14px;font-size:13.5px;border-bottom:1px solid #F2F0EA;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FAFAF7}
+.cat-badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:5px}
+.cat-sw{background:var(--cbg);color:var(--cd)}
+.cat-hw{background:var(--abg);color:var(--amber)}
+.cat-mn{background:var(--gbg);color:var(--green)}
+.act-btn{width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .12s}
+.act-e{background:var(--cbg);color:var(--cd)}.act-e:hover{background:var(--cyan);color:#fff}
+.act-d{background:var(--cbg2);color:var(--coral)}.act-d:hover{background:var(--coral);color:#fff}
+.tf{padding:10px 14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub);display:flex;justify-content:space-between}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark)}
+.modal-x{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub)}
+.modal-body{padding:1.25rem 1.4rem;display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:#fff}
+.field input::placeholder{color:#B5B2A8}
+.field textarea{height:70px;resize:none;padding:10px 12px}
+.modal-foot{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.btn-sec{height:38px;padding:0 14px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-pri{height:38px;padding:0 16px;border-radius:9px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-pri:hover{background:var(--cd)}
+.toast{position:fixed;top:1.25rem;right:1.25rem;z-index:999;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(0)}
+.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+<div class="overlay" id="modal-ov" onclick="if(event.target===this)fechar()">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="modal-title">Novo serviço</div><button class="modal-x" onclick="fechar()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nome do serviço</label><input id="m-nome" type="text" placeholder="EX: TROCA DE TELA" style="text-transform:uppercase"/></div>
+      <div class="field"><label>Descrição <span style="font-weight:400;text-transform:none">(opcional)</span></label><textarea id="m-desc" placeholder="Detalhes do serviço..."></textarea></div>
+      <div class="grid2">
+        <div class="field"><label>Valor padrão (R$)</label><input id="m-valor" type="number" step="0.01" min="0" placeholder="0,00"/></div>
+        <div class="field"><label>Garantia (dias)</label><input id="m-garantia" type="number" min="0" placeholder="0 = sem garantia"/></div>
+      </div>
+      <div class="field"><label>Categoria</label>
+        <select id="m-cat">
+          <option value="HARDWARE">Hardware</option>
+          <option value="SOFTWARE">Software</option>
+          <option value="MANUTENCAO">Manutenção</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fechar()">Cancelar</button>
+      <button class="btn-pri" onclick="salvar()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+<header class="topbar">
+  <a class="back" href="configuracoes.html"><i class="ti ti-arrow-left"></i></a>
+  <div class="page-title">Tabela de Serviços</div>
+  <button class="btn btn-cyan" onclick="abrirNovo()"><i class="ti ti-plus"></i> Novo serviço</button>
+</header>
+<main class="content">
+  <div class="toolbar">
+    <div class="search-box"><i class="ti ti-search"></i><input type="text" id="busca" placeholder="Buscar serviço..." oninput="filtrar()"/></div>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead><tr><th>Serviço</th><th>Categoria</th><th style="text-align:right">Valor padrão</th><th style="text-align:center">Garantia</th><th style="width:80px;text-align:right">Ações</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--sub)"><i class="ti ti-loader-2 spin" style="font-size:22px;display:block;margin-bottom:8px"></i></td></tr></tbody>
+    </table>
+    <div class="tf"><span id="tf-count">—</span><span>Dottec · Serviços</span></div>
+  </div>
+</main>
+<script>
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SB_URL,SB_KEY);
+const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+let TODOS=[], EDIT_ID=null;
+function toast(m,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=m;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+async function load(){const{data}=await db.from('servicos').select('*').eq('ativo',true).order('nome');TODOS=data||[];filtrar();}
+function filtrar(){const q=document.getElementById('busca').value.trim().toUpperCase();const lista=TODOS.filter(s=>!q||s.nome.includes(q));renderTable(lista);}
+function renderTable(lista){
+  const tb=document.getElementById('tbody');
+  if(!lista.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--sub)">Nenhum serviço cadastrado.</td></tr>';document.getElementById('tf-count').textContent='0';return;}
+  const catCls={'SOFTWARE':'cat-sw','HARDWARE':'cat-hw','MANUTENCAO':'cat-mn'};
+  tb.innerHTML=lista.map(s=>`<tr>
+    <td><div style="font-weight:600;color:var(--dark)">${s.nome}</div>${s.descricao?`<div style="font-size:11.5px;color:var(--sub);margin-top:1px">${s.descricao}</div>`:''}</td>
+    <td><span class="cat-badge ${catCls[s.categoria]||''}">${s.categoria||'—'}</span></td>
+    <td style="text-align:right;font-weight:700;font-family:'Lora',serif">${fmt(s.valor_padrao)}</td>
+    <td style="text-align:center;font-size:12.5px;color:var(--sub)">${s.garantia_dias>0?s.garantia_dias+' dias':'Sem garantia'}</td>
+    <td><div style="display:flex;gap:5px;justify-content:flex-end">
+      <button class="act-btn act-e" onclick="editar('${s.id}')"><i class="ti ti-pencil"></i></button>
+      <button class="act-btn act-d" onclick="excluir('${s.id}','${s.nome.replace(/'/g,"\\'")}')" ><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+  document.getElementById('tf-count').textContent=lista.length+' serviço(s)';
+}
+function abrirNovo(){EDIT_ID=null;document.getElementById('modal-title').textContent='Novo serviço';['m-nome','m-desc','m-valor','m-garantia'].forEach(id=>document.getElementById(id).value='');document.getElementById('m-cat').value='HARDWARE';document.getElementById('modal-ov').classList.add('open');setTimeout(()=>document.getElementById('m-nome').focus(),100);}
+function editar(id){const s=TODOS.find(x=>x.id===id);if(!s)return;EDIT_ID=id;document.getElementById('modal-title').textContent='Editar serviço';document.getElementById('m-nome').value=s.nome;document.getElementById('m-desc').value=s.descricao||'';document.getElementById('m-valor').value=s.valor_padrao;document.getElementById('m-garantia').value=s.garantia_dias;document.getElementById('m-cat').value=s.categoria||'HARDWARE';document.getElementById('modal-ov').classList.add('open');}
+function fechar(){document.getElementById('modal-ov').classList.remove('open');EDIT_ID=null;}
+async function salvar(){
+  const nome=document.getElementById('m-nome').value.trim().toUpperCase();
+  if(!nome){toast('Informe o nome.','err');return;}
+  const payload={nome,descricao:document.getElementById('m-desc').value.trim()||null,valor_padrao:parseFloat(document.getElementById('m-valor').value)||0,garantia_dias:parseInt(document.getElementById('m-garantia').value)||0,categoria:document.getElementById('m-cat').value,ativo:true};
+  let error;
+  if(EDIT_ID){({error}=await db.from('servicos').update(payload).eq('id',EDIT_ID));}
+  else{({error}=await db.from('servicos').insert(payload));}
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast(EDIT_ID?'Atualizado!':'Serviço criado!');fechar();load();
+}
+async function excluir(id,nome){if(!confirm('Excluir "'+nome+'"?'))return;await db.from('servicos').update({ativo:false}).eq('id',id);toast('Excluído.');load();}
+load();
+</script>
+</body>
+</html>
