@@ -243,9 +243,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
   // ── alertas OS ───────────────────────────────────────────────
   async function checkAlertas(){
-    if(typeof supabase === 'undefined') return;
     try {
-      const db = supabase.createClient(SB_URL, SB_KEY);
+      const db = getDb(); if(!db) return;
       const {data:sc} = await db.from('status_config')
         .select('nome').eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
       if(!sc||!sc.length) return;
@@ -281,9 +280,21 @@ document.addEventListener("DOMContentLoaded", function(){
   kf.textContent = '@keyframes _dnt_spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
   document.head.appendChild(kf);
 
+  // reutiliza instância existente da página ou cria uma só vez
+  let _navDb = null;
+  function getDb(){
+    if(_navDb) return _navDb;
+    if(typeof supabase === 'undefined') return null;
+    // tenta reutilizar o cliente da página se existir (window.db ou window._sb)
+    if(window._dottecDb) return window._dottecDb;
+    _navDb = supabase.createClient(SB_URL, SB_KEY);
+    window._dottecDb = _navDb;
+    return _navDb;
+  }
+
   async function executaBusca(q){
-    if(typeof supabase === 'undefined'){sr.classList.remove('open');return;}
-    const db = supabase.createClient(SB_URL, SB_KEY);
+    const db = getDb();
+    if(!db){sr.classList.remove('open');return;}
     const t = q.toUpperCase(), doc = q.replace(/\D/g,'');
     const fmt = v => 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
     const safe = async(p) => { try{ return await p; }catch{ return {data:[]}; } };
@@ -410,14 +421,16 @@ document.addEventListener("DOMContentLoaded", function(){
     if(!e.target.closest('#dnt-search-wrap')) sr.classList.remove('open');
   });
 
-  // atalho teclado: só foca na busca se não há nenhum campo ativo
+  // atalho teclado: foca na busca apenas com / ou Ctrl+K, NUNCA captura letras soltas
   document.addEventListener('keydown', e => {
-    const active = document.activeElement;
-    const tag = active ? active.tagName : '';
-    // ignora se já está na busca ou em qualquer campo de input
-    if(active === inp) return;
-    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable) return;
-    if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey) inp.focus();
+    // Só ativa com atalho explícito: barra "/" ou Ctrl+K
+    if((e.key === '/' || (e.key === 'k' && e.ctrlKey)) && !e.metaKey) {
+      const active = document.activeElement;
+      const tag = active ? active.tagName : '';
+      if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable) return;
+      e.preventDefault();
+      inp.focus();
+    }
   });
 
 })();
