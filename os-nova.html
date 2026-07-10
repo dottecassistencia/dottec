@@ -142,24 +142,19 @@ textarea.tall{height:120px}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
 </style>
+
+<!-- NAV DOTTEC -->
+<script>
+const PAGE_ID = "os";
+const BREADCRUMB = [{label:"OS",href:"os.html"}];
+</script>
+<script src="_nav.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
 <!-- TOPBAR -->
-<header class="topbar">
-  <a class="back" href="os.html"><i class="ti ti-arrow-left"></i></a>
-  <div>
-    <div class="os-num" id="os-num">Nova OS</div>
-    <div class="os-sub" id="os-sub">Preencha os dados abaixo</div>
-  </div>
-  <div id="os-status-badge" style="margin-left:4px"></div>
-  <div class="tb-right">
-    <button class="btn btn-ghost" onclick="imprimir()" id="btn-print" style="display:none"><i class="ti ti-printer"></i> Imprimir via</button>
-    <button class="btn btn-red" onclick="cancelar()" id="btn-cancel" style="display:none"><i class="ti ti-ban"></i> Cancelar OS</button>
-    <button class="btn btn-cyan" onclick="salvar()" id="btn-salvar"><i class="ti ti-device-floppy"></i> Salvar OS</button>
-  </div>
-</header>
+
 
 <!-- TABS -->
 <div class="tabs">

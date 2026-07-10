@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
+
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Figtree,sans-serif;background:#F5F4F0;color:#1A1A18;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Figtree,sans-serif;
 .hd-av{width:27px;height:27px;border-radius:50%;background:#29B8C2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0}
 
 /* ── BODY ── */
-.body{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:20px 24px;gap:16px}
+.body{flex:1;;display:flex;flex-direction:column;padding:20px 24px;gap:16px}
 
 /* BUSCA */
 .search-wrap{position:relative}
@@ -179,6 +179,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Figtree,sans-serif;
 .spin{animation:spin .7s linear infinite;display:inline-block}
 @media(max-width:860px){.panels{grid-template-columns:1fr}.body{padding:14px 16px}}
 </style>
+
+<!-- NAV DOTTEC -->
+<script>
+const PAGE_ID = "dashboard";
+const BREADCRUMB = [];
+</script>
+<script src="_nav.js"></script>
 </head>
 <body>
 
@@ -234,29 +241,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Figtree,sans-serif;
 </div>
 
 <!-- HEADER -->
-<header class="hd">
-  <a class="hd-brand" href="dashboard.html">
-    <div class="hd-dot"></div>
-    <span class="hd-name">Dottec</span>
-  </a>
-  <nav class="hd-nav">
-    <a class="hd-item on" href="dashboard.html"><i class="ti ti-home"></i> Início</a>
-    <a class="hd-item" href="os.html" id="nav-os"><i class="ti ti-tool"></i> OS</a>
-    <a class="hd-item" href="venda.html"><i class="ti ti-shopping-cart"></i> Vendas</a>
-    <a class="hd-item" href="financeiro.html"><i class="ti ti-currency-dollar"></i> Financeiro</a>
-    <a class="hd-item" href="orcamentos.html"><i class="ti ti-calculator"></i> Orçamentos</a>
-    <a class="hd-item" href="produtos.html"><i class="ti ti-package"></i> Estoque</a>
-    <a class="hd-item" href="pessoas.html"><i class="ti ti-users"></i> Clientes</a>
-    <a class="hd-item" href="fiscal.html"><i class="ti ti-file-invoice"></i> Fiscal</a>
-    <a class="hd-item" href="compras.html"><i class="ti ti-truck-delivery"></i> Compras</a>
-    <a class="hd-item" href="configuracoes.html"><i class="ti ti-settings"></i></a>
-  </nav>
-  <div class="hd-right">
-    <span class="hd-time" id="hd-time">—</span>
-    <span class="hd-saud" id="hd-saud">—</span>
-    <div class="hd-av" id="hd-av">G</div>
-  </div>
-</header>
+
 
 <!-- BODY -->
 <div class="body">

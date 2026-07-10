@@ -89,6 +89,13 @@
   @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
   .spin{animation:spin .7s linear infinite;display:inline-block}
 </style>
+
+<!-- NAV DOTTEC -->
+<script>
+const PAGE_ID = "configuracoes";
+const BREADCRUMB = [{label:"Configurações",href:"configuracoes.html"}];
+</script>
+<script src="_nav.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
@@ -159,15 +166,7 @@
   </div>
 </div>
 
-<header class="topbar">
-  <div class="crumb">
-    <a class="back-btn" href="configuracoes.html"><i class="ti ti-arrow-left"></i></a>
-    <div>
-      <div class="crumb-title">Status Configuráveis</div>
-      <div class="crumb-sub">Defina os status e quais geram alerta no dashboard</div>
-    </div>
-  </div>
-</header>
+
 
 <main class="content">
   <div class="modulo-tabs">
