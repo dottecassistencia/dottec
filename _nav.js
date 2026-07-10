@@ -10,6 +10,7 @@
      ];
    ───────────────────────────────────────────────────────────── */
 
+document.addEventListener("DOMContentLoaded", function(){
 (function(){
   const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
   const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
@@ -415,4 +416,4 @@
     if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey) inp.focus();
   });
 
-})();
+});

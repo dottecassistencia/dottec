@@ -348,18 +348,15 @@ const hoje=new Date().toISOString().slice(0,10);
 // ── SESSÃO ──────────────────────────────────────────────────
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s){const p=JSON.parse(s);USR=p;}}catch{}
-document.getElementById('hd-av').textContent=USR.nome[0].toUpperCase();
+// removido _nav.js
 
 // ── RELÓGIO ─────────────────────────────────────────────────
 function tick(){
   const n=new Date(),h=n.getHours();
-  document.getElementById('hd-time').textContent=
-    n.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).toUpperCase()+' · '+
-    n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('hd-saud').textContent=
-    (h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', '+USR.nome;
+  // removido _nav.js
+  // removido _nav.js
 }
-tick();setInterval(tick,15000);
+
 
 // ── TOAST ────────────────────────────────────────────────────
 function toast(msg,tipo='ok'){
@@ -399,15 +396,9 @@ async function loadAlertas(){
 
   badge.style.display='inline';
   badge.textContent=lista.length;
-  // badge nav OS
-  const navOs=document.getElementById('nav-os');
-  if(navOs){
-    const old=navOs.querySelector('.nbadge');
-    if(old)old.remove();
-    const nb=document.createElement('span');
-    nb.className='nbadge';nb.textContent=lista.length;
-    navOs.appendChild(nb);
-  }
+  // badge nav OS (via _nav.js)
+  const osBadge=document.getElementById('dnt-os-badge');
+  if(osBadge){osBadge.style.display='inline';osBadge.textContent=lista.length;}
 
   const tempoStr=dt=>{
     const m=Math.floor((new Date()-new Date(dt))/60000);
