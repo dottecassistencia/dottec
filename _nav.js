@@ -61,21 +61,21 @@ document.addEventListener('DOMContentLoaded', function() {
     #dottec-nav-shell *, #dottec-nav-shell *::before, #dottec-nav-shell *::after { box-sizing: border-box; margin: 0; padding: 0; }
     #dottec-nav-shell { position: fixed; top: 0; left: 0; right: 0; z-index: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
-    #dnt-top { background: #fff; border-bottom: 1px solid #EAE7DF; display: flex; align-items: center; height: 54px; padding: 0 20px; gap: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-    #dnt-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
-    #dnt-logo-circle { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#29B8C2,#1E9099); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(41,184,194,.35); font-size: 16px; color: #fff; flex-shrink: 0; }
-    #dnt-logo-name { font-size: 14px; font-weight: 700; color: #1C1C1A; letter-spacing: -.01em; white-space: nowrap; }
-    #dnt-logo-sub { font-size: 10px; color: #8A887F; margin-top: 1px; white-space: nowrap; }
-    #dnt-crumb { display: flex; align-items: center; gap: 5px; flex: 1; overflow: hidden; padding: 0 4px; }
-    .dnt-crumb-sep { font-size: 12px; color: #C8C5BC; flex-shrink: 0; }
-    .dnt-crumb-item { font-size: 12.5px; color: #8A887F; text-decoration: none; white-space: nowrap; padding: 3px 8px; border-radius: 6px; transition: background .12s, color .12s; flex-shrink: 0; }
-    .dnt-crumb-item:hover { background: #F0EDE7; color: #1C1C1A; }
-    .dnt-crumb-item.current { color: #1C1C1A; font-weight: 600; cursor: default; }
-    .dnt-crumb-item.current:hover { background: transparent; }
-    #dnt-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto; }
-    #dnt-time { font-size: 11px; color: #8A887F; white-space: nowrap; }
-    #dnt-saud { font-size: 11.5px; color: #5A5855; white-space: nowrap; font-weight: 500; }
-    #dnt-av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#29B8C2,#1E9099); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(41,184,194,.3); }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     #dnt-bar { background: #FAFAF7; border-bottom: 1px solid #EAE7DF; display: flex; align-items: center; height: 42px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     #dnt-nav { display: flex; align-items: center; height: 100%; overflow-x: auto; flex-shrink: 0; }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .dnt-sr-empty i { font-size: 26px; display: block; margin-bottom: 8px; opacity: .3; }
     .dnt-sr-foot { padding: 8px 14px; border-top: 1px solid #F0EDE7; font-size: 11px; color: #94938E; text-align: center; }
 
-    body { padding-top: 96px !important; }
+    body { padding-top: 42px !important; }
     @keyframes _dnt_spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
   `;
   document.head.appendChild(style);
@@ -146,10 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const shell = document.createElement('div');
   shell.id = 'dottec-nav-shell';
   shell.innerHTML = `
-    <div id="dnt-top">
-      <a id="dnt-logo" href="dashboard.html">
-        <div id="dnt-logo-circle"><i class="ti ti-device-laptop"></i></div>
-        <div>
+    <div>
           <div id="dnt-logo-name">Dottec Assistência</div>
           <div id="dnt-logo-sub">Sistema de Gestão</div>
         </div>
