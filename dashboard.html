@@ -9,17 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script>
-const PAGE_ID = "dashboard";
-const BREADCRUMB = [];
-</script>
-<script src="_nav.js"></script>
 <style>
-
-/* ── SUPRIME NAV DO _nav.js — dashboard tem header próprio ── */
-#dottec-nav-shell { display: none !important; }
-body { padding-top: 0 !important; }
-
 :root{
   --cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;
   --coral:#E8604A;--cbg2:#FBE9E5;
@@ -28,288 +18,239 @@ body { padding-top: 0 !important; }
   --amber:#9A6000;--abg:#FBEEDB;
   --green:#3B6D11;--gbg:#EAF3DE;
   --red:#DC2626;--rbg:#FEF2F2;
-  --purple:#5B3FA6;--pbg:#EEEAF8;
-  --slate:#3A4A6B;--sbg:#EEF0F5;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);min-height:100vh}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
 
-/* ── HEADER CUSTOMIZADO ─────────────────────────── */
-.dash-header{
-  position:fixed;top:0;left:0;right:0;z-index:950;
-  background:var(--white);border-bottom:1px solid var(--border);
-  height:60px;display:flex;align-items:center;padding:0 1.5rem;gap:16px;
-  box-shadow:0 1px 6px rgba(0,0,0,.06);
+/* ── HEADER ─────────────────────────────────────────── */
+.header{
+  height:62px;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.05);
 }
-.dh-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.dh-logo-img{
-  width:42px;height:42px;border-radius:50%;overflow:hidden;
+.h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.h-logo-circle{
+  width:40px;height:40px;border-radius:50%;overflow:hidden;
   background:linear-gradient(135deg,#29B8C2,#1E9099);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 10px rgba(41,184,194,.35);
-  flex-shrink:0;position:relative;
+  box-shadow:0 2px 10px rgba(41,184,194,.3);flex-shrink:0;
 }
-.dh-logo-img img{width:100%;height:100%;object-fit:cover;display:block}
-.dh-logo-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-.dh-logo-fallback i{font-size:20px;color:#fff}
-.dh-logo-text{display:flex;flex-direction:column;gap:0}
-.dh-logo-nome{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark);line-height:1.1}
-.dh-logo-sub{font-size:9.5px;color:var(--sub);font-weight:500;letter-spacing:.03em}
-.dh-saud{flex:1}
-.dh-saud-greeting{font-size:13px;color:var(--sub)}
-.dh-saud-name{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark);margin-top:0px;line-height:1.1}
-.dh-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.dh-datetime{text-align:right}
-.dh-hora{font-family:'Lora',serif;font-size:17px;font-weight:700;color:var(--dark);line-height:1}
-.dh-data{font-size:11px;color:var(--sub);margin-top:2px}
-.dh-perfil{
+.h-logo-circle img{width:100%;height:100%;object-fit:cover;display:block}
+.h-logo-circle i{font-size:20px;color:#fff}
+.h-logo-text{}
+.h-logo-nome{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark);line-height:1.1}
+.h-logo-sub{font-size:10px;color:var(--sub)}
+.h-saud{flex:1;padding-left:4px}
+.h-saud-top{font-size:12px;color:var(--sub)}
+.h-saud-nome{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark);line-height:1.1}
+.h-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.h-dt{text-align:right}
+.h-hora{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark);line-height:1}
+.h-data{font-size:11px;color:var(--sub);margin-top:1px}
+.h-perfil{
   width:36px;height:36px;border-radius:50%;
   background:var(--bg);border:1.5px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  font-size:17px;color:var(--sub);cursor:pointer;
-  transition:all .15s;flex-shrink:0;text-decoration:none;
+  font-size:18px;color:var(--sub);cursor:pointer;
+  transition:all .15s;text-decoration:none;flex-shrink:0;
 }
-.dh-perfil:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.h-perfil:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
 
-/* ── NAV BAR fica em baixo do header ── */
-/* O _nav.js injeta com position:fixed;top:0 — ajustamos via padding */
-/* Sobrepomos o topbar do _nav com nosso header */
-#dottec-nav-shell #dnt-bar{top:60px!important;position:fixed!important}
-body{padding-top:102px!important} /* 60 header + 42 nav */
+/* ── BODY SCROLL ─────────────────────────────────────── */
+.body{flex:1;overflow-y:auto;padding:16px 20px 24px}
 
-/* ── LAYOUT ── */
-.main{max-width:1500px;margin:0 auto;padding:1.25rem 1.5rem 3rem}
-
-/* ── BOLINHAS ── */
-.modulos-bar{
-  background:var(--white);border:1px solid var(--border);border-radius:16px;
-  padding:14px 18px;margin-bottom:1rem;
-  display:flex;align-items:center;gap:0;
-}
-.mods-inner{
-  flex:1;display:grid;gap:8px;
-  /* responsivo: preenche o espaço todo */
-  grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
-}
-.mod-ball{
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  cursor:pointer;text-decoration:none;color:inherit;
-  padding:4px 0;
-}
-.mod-ball-icon{
-  width:54px;height:54px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:23px;position:relative;
-  transition:transform .22s cubic-bezier(.34,1.5,.64,1),box-shadow .22s;
-}
-.mod-ball:hover .mod-ball-icon{transform:translateY(-4px) scale(1.1);box-shadow:0 10px 24px rgba(0,0,0,.13)}
-.mod-ball-label{font-size:10px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap;line-height:1.2}
-.mod-ball:hover .mod-ball-label{color:var(--dark)}
-.mod-ball-badge{position:absolute;top:-1px;right:-1px;width:16px;height:16px;border-radius:50%;background:var(--red);border:2px solid var(--white);font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center}
-
-/* botão mais */
-.mod-more-wrap{position:relative;flex-shrink:0;margin-left:8px}
-.mod-more{width:54px;height:54px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--sub);cursor:pointer;transition:all .15s}
-.mod-more:hover{background:#E2DFD6;border-color:var(--sub)}
-.mod-more-drop{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:8px;z-index:300;min-width:190px}
-.mod-more-drop.open{display:block}
-.mod-more-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
-.mod-more-item:hover{background:var(--bg)}
-.mod-more-item i{font-size:17px;width:22px;text-align:center}
-.mod-config-btn{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub);cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:10px}
-.mod-config-btn:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
-
-/* ── MÉTRICAS ── */
-.metrics-bar{
-  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
-  gap:12px;margin-bottom:1.1rem;
-}
-.mc{
+/* ── BOLINHAS ─────────────────────────────────────────── */
+.mod-bar{
   background:var(--white);border:1px solid var(--border);border-radius:14px;
-  padding:14px 16px;cursor:default;
-  transition:box-shadow .2s,transform .18s,border-color .2s;
-  text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;
-  position:relative;overflow:hidden;
+  padding:14px 16px;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
 }
-.mc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none}
-.mc:hover{box-shadow:0 6px 22px rgba(0,0,0,.08);transform:translateY(-2px)}
-.mc-os{cursor:pointer}.mc-os::before{background:radial-gradient(circle at 80% -10%,rgba(232,96,74,.12),transparent 60%)}
-.mc-os:hover{border-color:rgba(232,96,74,.35)}.mc-os::before,.mc-os:hover::before{opacity:1}
-.mc-venda::before{background:radial-gradient(circle at 80% -10%,rgba(190,24,93,.10),transparent 60%)}
-.mc-venda{cursor:pointer}.mc-venda:hover{border-color:rgba(190,24,93,.3)}.mc-venda:hover::before{opacity:1}
-.mc-meta::before{background:radial-gradient(circle at 80% -10%,rgba(41,184,194,.10),transparent 60%)}
-.mc-meta:hover::before{opacity:1}
+.mods-grid{
+  flex:1;display:grid;gap:6px;
+  grid-template-columns:repeat(auto-fill,minmax(60px,1fr));
+}
+.mod-ball{display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:inherit;cursor:pointer}
+.mod-ball-icon{
+  width:50px;height:50px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  position:relative;transition:transform .22s cubic-bezier(.34,1.5,.64,1),box-shadow .22s;
+}
+.mod-ball:hover .mod-ball-icon{transform:translateY(-4px) scale(1.1);box-shadow:0 8px 20px rgba(0,0,0,.14)}
+.mod-ball-lbl{font-size:9.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap}
+.mod-ball:hover .mod-ball-lbl{color:var(--dark)}
+.mod-ball-bdg{position:absolute;top:-2px;right:-2px;width:15px;height:15px;border-radius:50%;background:var(--red);border:2px solid var(--white);font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center}
 
-.mc-header{display:flex;align-items:center;gap:8px}
-.mc-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--cbg2);color:var(--coral)}
-.mc-os .mc-icon{background:var(--cbg2);color:var(--coral)}
-.mc-venda .mc-icon{background:var(--rbg);color:var(--red)}
-.mc-icon-meta{background:var(--cbg);color:var(--cd)}
-.mc-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;flex:1}
-.mc-edit{width:22px;height:22px;border-radius:6px;border:none;background:var(--bg);color:var(--sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.mod-more-wrap{position:relative;flex-shrink:0}
+.mod-more{width:50px;height:50px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--sub);cursor:pointer;transition:all .15s}
+.mod-more:hover{background:#E2DFD6}
+.mod-more-drop{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:300;min-width:180px}
+.mod-more-drop.open{display:block}
+.mod-more-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
+.mod-more-item:hover{background:var(--bg)}
+.mod-more-item i{font-size:16px;width:20px;text-align:center}
+.mod-cfg{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub);cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:6px}
+.mod-cfg:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+/* ── MÉTRICAS ─────────────────────────────────────────── */
+.metrics{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin-bottom:12px}
+.mc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:13px 15px;overflow:hidden;position:relative}
+.mc::after{content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 12px 12px 0}
+.mc-os::after{background:var(--coral)}.mc-vd::after{background:#BE185D}
+.mc-sw::after{background:var(--cyan)}.mc-mn::after{background:var(--green)}
+.mc a{text-decoration:none;color:inherit}
+.mc-head{display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.mc-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.mc-lbl{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;flex:1}
+.mc-edit{width:20px;height:20px;border-radius:5px;border:none;background:var(--bg);color:var(--sub);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .mc-edit:hover{background:var(--cyan);color:#fff}
+.mc-nums{display:flex;align-items:center;gap:0;flex:1}
+.mc-grp{flex:1;text-align:center}
+.mc-div{width:1px;height:32px;background:var(--border);flex-shrink:0}
+.mc-big{font-family:'Lora',serif;font-size:26px;font-weight:700;color:var(--dark);line-height:1}
+.mc-big.warn{color:var(--amber)}
+.mc-sm{font-size:10px;color:var(--sub);margin-top:3px}
+.mc-meta-nums{display:flex;align-items:baseline;gap:3px;margin-bottom:7px}
+.mc-atual{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--dark)}
+.mc-sep{font-size:14px;color:var(--sub)}
+.mc-tot{font-size:13px;font-weight:600;color:var(--sub)}
+.mc-unit{font-size:10px;color:var(--sub);margin-left:3px}
+.mc-bar{height:5px;background:var(--border);border-radius:10px;overflow:hidden}
+.mc-fill{height:100%;border-radius:10px;transition:width .8s cubic-bezier(.34,1.2,.64,1)}
+.fill-cyan{background:linear-gradient(90deg,var(--cyan),var(--cd))}
+.fill-green{background:linear-gradient(90deg,#5BB832,var(--green))}
+.mc-pct{font-size:10px;font-weight:800;color:var(--sub);margin-top:4px;display:block}
 
-.mc-numbers{display:flex;align-items:center;gap:0}
-.mc-num-group{flex:1;text-align:center}
-.mc-divider{width:1px;height:36px;background:var(--border);flex-shrink:0;margin:0 4px}
-.mc-big{font-family:'Lora',serif;font-size:28px;font-weight:700;color:var(--dark);line-height:1}
-.mc-big.mc-warn{color:var(--amber)}
-.mc-small{font-size:10.5px;color:var(--sub);margin-top:3px}
+/* card metas unificado */
+.mc-metas{display:flex;flex-direction:column;gap:10px}
+.mc-meta-row{display:flex;flex-direction:column;gap:4px}
+.mc-meta-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mc-meta-periodo{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.mc-meta-nums-inline{display:flex;align-items:baseline;gap:3px}
+.mc-meta-atual-sm{font-family:'Lora',serif;font-size:17px;font-weight:700;color:var(--dark)}
+.mc-meta-sep-sm{font-size:12px;color:var(--sub)}
+.mc-meta-tot-sm{font-size:12px;font-weight:600;color:var(--sub)}
+.mc-meta-unit-sm{font-size:9.5px;color:var(--sub);margin-left:2px}
+.mc-meta-bar-row{display:flex;align-items:center;gap:7px}
+.mc-meta-bar{flex:1;height:5px;background:var(--border);border-radius:10px;overflow:hidden}
+.mc-meta-pct-lbl{font-size:10px;font-weight:800;flex-shrink:0;min-width:32px;text-align:right}
+.mc-meta-pct-lbl.quase{color:var(--green)}
+.mc-meta-pct-lbl.meio{color:var(--cyan)}
+.mc-meta-pct-lbl.inicio{color:var(--sub)}
+.mc-meta-divider{height:1px;background:var(--border);margin:2px 0}
 
-.mc-meta-wrap{display:flex;flex-direction:column;gap:8px}
-.mc-meta-nums{display:flex;align-items:baseline;gap:3px}
-.mc-meta-atual{font-family:'Lora',serif;font-size:24px;font-weight:700;color:var(--dark)}
-.mc-meta-sep{font-size:16px;color:var(--sub)}
-.mc-meta-total{font-size:15px;font-weight:600;color:var(--sub)}
-.mc-meta-unit{font-size:11px;color:var(--sub);margin-left:4px}
-.mc-bar-wrap{display:flex;align-items:center;gap:8px}
-.mc-bar{flex:1;height:6px;background:var(--border);border-radius:10px;overflow:hidden}
-.mc-bar-fill{height:100%;border-radius:10px;transition:width .8s cubic-bezier(.34,1.2,.64,1)}
-.mc-bar-cyan{background:linear-gradient(90deg,var(--cyan),var(--cd))}
-.mc-bar-green{background:linear-gradient(90deg,#5BB832,var(--green))}
-.mc-pct{font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0;min-width:30px;text-align:right}
-@media(max-width:900px){.metrics-bar{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.metrics-bar{grid-template-columns:1fr}}
-
-/* ── GRID 3 COLUNAS ── */
-.panels{display:grid;grid-template-columns:1fr 1.1fr 0.9fr;gap:14px;align-items:start}
-
-/* ── PAINEL ── */
-.panel{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-.panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.ph-left{display:flex;align-items:center;gap:8px}
-.ph-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.phi-red{background:var(--rbg);color:var(--red)}.phi-cyan{background:var(--cbg);color:var(--cd)}.phi-amber{background:var(--abg);color:var(--amber)}.phi-green{background:var(--gbg);color:var(--green)}
-.ph-title{font-size:13px;font-weight:700;color:var(--dark)}
-.ph-count{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:10px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
-.ph-count.red{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.2)}
-.ph-add{width:28px;height:28px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0}
+/* ── GRID 3 PAINEIS ─────────────────────────────────────── */
+.panels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 296px);min-height:320px}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ph-l{display:flex;align-items:center;gap:7px}
+.ph-ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.phi-red{background:var(--rbg);color:var(--red)}.phi-cyan{background:var(--cbg);color:var(--cd)}.phi-green{background:var(--gbg);color:var(--green)}.phi-amber{background:var(--abg);color:var(--amber)}
+.ph-title{font-size:12.5px;font-weight:700;color:var(--dark)}
+.ph-cnt{font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
+.ph-cnt.r{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.2)}
+.ph-add{width:26px;height:26px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0}
 .ph-add:hover{background:var(--cd)}
-.panel-body{overflow-y:auto}
+.panel-body{overflow-y:auto;flex:1}
 .panel-body::-webkit-scrollbar{width:3px}
 .panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
 
-/* Painel alertas: altura grande (ocupa 2 paineis) */
-/* Todos os paineis com mesma altura */
-.panel-tall,
-.panel-compras{
-  height:calc(100vh - 300px);
-  min-height:400px;
-}
-.panel-tall .panel-body,
-.panel-compras .panel-body{
-  flex:1;
-  overflow-y:auto;
-  min-height:0;
-}
-/* painel do meio (agenda+contas): flex para distribuir */
-.panel-tall{display:flex;flex-direction:column}
-
-/* ── LINHAS ALERTAS ── */
-.al-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #F5F4F0;cursor:pointer;transition:background .1s;text-decoration:none}
+/* linhas alertas */
+.al-row{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid #F5F4F0;text-decoration:none;transition:background .1s;cursor:pointer}
 .al-row:last-child{border-bottom:none}
 .al-row:hover{background:var(--bg)}
-.al-pip{width:3px;height:36px;border-radius:2px;flex-shrink:0}
+.al-pip{width:3px;height:32px;border-radius:2px;flex-shrink:0}
 .al-pip.crit{background:var(--red)}.al-pip.alta{background:var(--amber)}.al-pip.norm{background:var(--border)}
 .al-info{flex:1;min-width:0}
-.al-t{font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.al-s{font-size:11.5px;color:var(--sub);margin-top:2px}
-.al-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;white-space:nowrap}
+.al-t{font-size:12.5px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-s{font-size:11px;color:var(--sub);margin-top:1px}
+.al-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:12px;flex-shrink:0}
 .al-tag.crit{background:var(--rbg);color:var(--red)}.al-tag.alta{background:var(--abg);color:var(--amber)}.al-tag.norm{background:var(--bg);color:var(--sub)}
-.al-time{font-size:10.5px;color:#B5B2A8;flex-shrink:0;margin-left:4px}
+.al-time{font-size:10px;color:#B5B2A8;flex-shrink:0;margin-left:3px}
 
-/* ── SEÇÃO CONTAS (dentro do painel combinado) ── */
-.sec-contas{border-bottom:2px solid var(--border);padding-bottom:4px;margin-bottom:0}
-.sec-contas-head{display:flex;align-items:center;gap:7px;padding:10px 16px 8px;background:linear-gradient(to bottom,#FDFCFA,transparent)}
-.sec-contas-icon{font-size:13px;color:var(--amber)}
-.sec-contas-label{font-size:10.5px;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;flex:1}
-.sec-contas-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;background:var(--abg);color:var(--amber)}
-.ct-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #F5F4F0}
+/* contas + agenda no painel do meio */
+.sec-head{display:flex;align-items:center;gap:7px;padding:9px 14px 7px;border-bottom:2px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;flex:1}
+.sec-lbl.amber{color:var(--amber)}.sec-lbl.cyan{color:var(--cd)}
+.sec-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px}
+.sec-badge.amber{background:var(--abg);color:var(--amber)}
+.sec-add{width:22px;height:22px;border-radius:6px;border:none;background:var(--cyan);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.sec-add:hover{background:var(--cd)}
+.ct-row{display:flex;align-items:center;gap:9px;padding:8px 14px;border-bottom:1px solid #F5F4F0}
 .ct-row:last-child{border-bottom:none}
-.ct-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.ct-dot.vencida{background:var(--red)}.ct-dot.hoje{background:var(--amber)}.ct-dot.prox{background:var(--border)}
+.ct-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ct-dot.v{background:var(--red)}.ct-dot.h{background:var(--amber)}.ct-dot.p{background:var(--border)}
 .ct-info{flex:1;min-width:0}
 .ct-desc{font-size:12.5px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ct-venc{font-size:10.5px;color:var(--sub);margin-top:1px}
+.ct-tag{font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:4px}
+.ct-tag.v{background:var(--rbg);color:var(--red)}.ct-tag.h{background:var(--abg);color:var(--amber)}
 .ct-val{font-size:12.5px;font-weight:700;color:var(--dark);flex-shrink:0}
-.ct-tag{font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px}
-.ct-tag.vencida{background:var(--rbg);color:var(--red)}.ct-tag.hoje{background:var(--abg);color:var(--amber)}
-
-/* ── SEÇÃO AGENDA (dentro do painel combinado) ── */
-.sec-agenda-head{display:flex;align-items:center;gap:7px;padding:10px 16px 6px}
-.sec-agenda-icon{font-size:13px;color:var(--cd)}
-.sec-agenda-label{font-size:10.5px;font-weight:800;color:var(--cd);text-transform:uppercase;letter-spacing:.07em;flex:1}
-.sec-agenda-add{width:24px;height:24px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
-.sec-agenda-add:hover{background:var(--cd)}
-
-.ag-row{display:flex;align-items:flex-start;gap:10px;padding:9px 16px;border-bottom:1px solid #F5F4F0;cursor:pointer;transition:background .1s}
+.ag-row{display:flex;align-items:flex-start;gap:9px;padding:8px 14px;border-bottom:1px solid #F5F4F0;cursor:pointer;transition:background .1s}
 .ag-row:last-child{border-bottom:none}
 .ag-row:hover{background:var(--bg)}
-.ag-row.atras{background:#FEF9F8}
-.ag-row.hj{background:#F5FDFE}
-.ag-dt{flex-shrink:0;width:34px;text-align:center}
-.ag-dia{font-size:17px;font-weight:800;color:var(--dark);line-height:1}
+.ag-row.atras{background:#FEF9F8}.ag-row.hj{background:#F5FDFE}
+.ag-dt{flex-shrink:0;width:30px;text-align:center}
+.ag-dia{font-size:16px;font-weight:800;color:var(--dark);line-height:1}
 .ag-dia.hj{color:var(--cyan)}.ag-dia.atras{color:var(--red)}
-.ag-mes{font-size:8.5px;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
-.ag-vl{width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin:2px 0}
+.ag-mes{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.04em}
+.ag-vl{width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin:1px 0}
 .ag-info{flex:1;min-width:0;padding-left:2px}
 .ag-titulo{font-size:12.5px;font-weight:600;color:var(--dark);line-height:1.3}
 .ag-row.atras .ag-titulo{color:var(--red)}
-.ag-resp{font-size:10.5px;color:var(--sub);margin-top:2px;display:flex;align-items:center;gap:3px}
-.ag-resp i{font-size:11px}
-.ag-hr{font-size:10px;font-weight:700;color:var(--sub);flex-shrink:0;padding-top:2px;white-space:nowrap}
+.ag-resp{font-size:10px;color:var(--sub);margin-top:2px;display:flex;align-items:center;gap:3px}
+.ag-hr{font-size:9.5px;font-weight:700;color:var(--sub);flex-shrink:0;padding-top:2px}
 .ag-hr.hj{color:var(--cyan)}.ag-hr.atras{color:var(--red)}
 
-/* ── LISTA COMPRAS ── */
-.lc-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #F5F4F0}
+/* lista compras */
+.lc-row{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid #F5F4F0}
 .lc-row:last-child{border-bottom:none}
-.lc-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s}
-.lc-check:hover{border-color:var(--green);background:var(--gbg)}
+.lc-chk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s}
+.lc-chk:hover{border-color:var(--green);background:var(--gbg)}
 .lc-info{flex:1;min-width:0}
 .lc-prod{font-size:12.5px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lc-forn{font-size:10.5px;color:var(--sub);margin-top:1px}
-.lc-urg{font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:4px}
-.lc-urg.URGENTE{background:var(--rbg);color:var(--red)}.lc-urg.PODE_ESPERAR{background:var(--bg);color:var(--sub)}
-.lc-qty{font-size:10.5px;font-weight:700;color:var(--sub);background:var(--bg);padding:2px 8px;border-radius:5px;flex-shrink:0}
-.lc-del{width:24px;height:24px;border-radius:6px;border:none;background:transparent;color:var(--sub);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lc-urg{font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:3px}
+.lc-urg.U{background:var(--rbg);color:var(--red)}
+.lc-qty{font-size:10px;font-weight:700;color:var(--sub);background:var(--bg);padding:2px 7px;border-radius:4px;flex-shrink:0}
+.lc-del{width:20px;height:20px;border-radius:5px;border:none;background:transparent;color:var(--sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .lc-del:hover{background:var(--cbg2);color:var(--red)}
 
-/* vazio */
 .p-empty{padding:2.5rem 1rem;text-align:center;color:var(--sub);font-size:12.5px}
-.p-empty i{font-size:30px;display:block;margin-bottom:8px;opacity:.2}
+.p-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.2}
 
-/* ── MODAIS ── */
-.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:700;align-items:center;justify-content:center;padding:1rem}
+/* ── MODAIS ─────────────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
-.modal{background:var(--white);border-radius:18px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
-.modal-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark)}
-.modal-x{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub)}
-.modal-body{padding:1.25rem 1.4rem;display:flex;flex-direction:column;gap:12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field label{display:block;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-.field input,.field select,.field textarea{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:440px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.modal-x{width:26px;height:26px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.modal-body{padding:1.1rem 1.25rem;display:flex;flex-direction:column;gap:11px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.field label{display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;height:40px;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
 .field input::placeholder,.field textarea::placeholder{color:#B5B2A8}
-.field textarea{height:72px;resize:none;padding:10px 12px}
-.modal-foot{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-.btn-cancel{height:38px;padding:0 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn-primary{height:38px;padding:0 18px;border-radius:9px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s}
-.btn-primary:hover{background:var(--cd)}
+.field textarea{height:68px;resize:none;padding:9px 11px}
+.modal-foot{padding:.85rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-pri{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-pri:hover{background:var(--cd)}
 
-/* modal lg */
-.modal-lg{max-width:540px}
-.config-list{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto}
-.config-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:9px}
-.config-item-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.config-item-name{flex:1;font-size:13px;font-weight:600;color:var(--dark)}
-.config-toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
-.config-toggle.on{background:var(--cyan)}.config-toggle.off{background:#D4D2CB}
-.config-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.config-toggle.on::after{left:19px}.config-toggle.off::after{left:3px}
+/* modal config */
+.modal-lg{max-width:500px}
+.cfg-list{display:flex;flex-direction:column;gap:5px;max-height:340px;overflow-y:auto}
+.cfg-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:var(--bg);border-radius:8px}
+.cfg-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.cfg-name{flex:1;font-size:13px;font-weight:600;color:var(--dark)}
+.cfg-tog{width:34px;height:18px;border-radius:9px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.cfg-tog.on{background:var(--cyan)}.cfg-tog.off{background:#D4D2CB}
+.cfg-tog::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.cfg-tog.on::after{left:19px}.cfg-tog.off::after{left:3px}
 
 /* toast */
-.toast{position:fixed;top:1.25rem;right:1.25rem;z-index:999;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:300px}
+.toast{position:fixed;top:1rem;right:1rem;z-index:999;padding:10px 15px;border-radius:10px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:280px}
 .toast.show{transform:translateX(0)}
 .toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
 .toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
@@ -317,329 +258,237 @@ body{padding-top:102px!important} /* 60 header + 42 nav */
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
 
-@media(max-width:1100px){.panels{grid-template-columns:1fr 1fr}}
-@media(max-width:680px){.panels{grid-template-columns:1fr}.mods-inner{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1000px){.metrics{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.panels{grid-template-columns:1fr}.mods-grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
-<!-- HEADER -->
-<header class="dash-header">
-  <!-- LOGO -->
-  <a class="dh-logo" href="dashboard.html">
-    <div class="dh-logo-img">
-      <!-- Coloca logo.png na raiz do repositório para aparecer aqui -->
-      <img src="logo.png" alt="Dottec" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <div class="dh-logo-fallback" style="display:none">
-        <i class="ti ti-device-laptop"></i>
-      </div>
-    </div>
-    <div class="dh-logo-text">
-      <div class="dh-logo-nome">Dottec</div>
-      <div class="dh-logo-sub">Assistência Inteligente</div>
-    </div>
-  </a>
-  <!-- SAUDAÇÃO -->
-  <div class="dh-saud">
-    <div class="dh-saud-greeting" id="dh-greeting">—</div>
-    <div class="dh-saud-name" id="dh-name">—</div>
-  </div>
-  <!-- DIREITA: hora + data + perfil -->
-  <div class="dh-right">
-    <div class="dh-datetime">
-      <div class="dh-hora" id="dh-hora">—</div>
-      <div class="dh-data" id="dh-data">—</div>
-    </div>
-    <a class="dh-perfil" href="#" title="Meu perfil"><i class="ti ti-id-badge-2"></i></a>
-  </div>
-</header>
-
 <!-- MODAIS -->
 <div class="overlay" id="ov-agenda">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">Nova tarefa</div>
-      <button class="modal-x" onclick="fechar('agenda')"><i class="ti ti-x"></i></button>
-    </div>
+    <div class="modal-head"><div class="modal-title">Nova tarefa</div><button class="modal-x" onclick="fecha('agenda')"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
-      <div class="field">
-        <label>Título</label>
-        <input type="text" id="ag-titulo" placeholder="Ex: ligar para cliente, buscar peça..."/>
+      <div class="field"><label>Título</label><input type="text" id="ag-titulo" placeholder="Ex: ligar para cliente..."/></div>
+      <div class="g2">
+        <div class="field"><label>Data e hora</label><input type="datetime-local" id="ag-data"/></div>
+        <div class="field"><label>Responsável</label><select id="ag-resp"><option value="">Todos</option></select></div>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label>Data e hora</label>
-          <input type="datetime-local" id="ag-data"/>
-        </div>
-        <div class="field">
-          <label>Responsável</label>
-          <select id="ag-resp"><option value="">Todos</option></select>
-        </div>
-      </div>
-      <div class="field">
-        <label>Descrição <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
-        <textarea id="ag-desc" placeholder="Detalhes..."></textarea>
-      </div>
+      <div class="field"><label>Descrição <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label><textarea id="ag-desc" placeholder="Detalhes..."></textarea></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-cancel" onclick="fechar('agenda')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarAgenda()"><i class="ti ti-calendar-plus"></i> Agendar</button>
+      <button class="btn-sec" onclick="fecha('agenda')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarAgenda()"><i class="ti ti-calendar-plus"></i> Agendar</button>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="ov-compra">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">Adicionar à lista</div>
-      <button class="modal-x" onclick="fechar('compra')"><i class="ti ti-x"></i></button>
-    </div>
+    <div class="modal-head"><div class="modal-title">Adicionar à lista</div><button class="modal-x" onclick="fecha('compra')"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
-      <div class="field">
-        <label>Produto / Item</label>
-        <input type="text" id="lc-produto" placeholder="Ex: tela iPhone 15, pasta térmica..."/>
+      <div class="field"><label>Produto / Item</label><input type="text" id="lc-produto" placeholder="Ex: tela iPhone 15..."/></div>
+      <div class="g2">
+        <div class="field"><label>Quantidade</label><input type="number" id="lc-qtd" value="1" min="1"/></div>
+        <div class="field"><label>Urgência</label><select id="lc-urg"><option value="NORMAL">Normal</option><option value="URGENTE">Urgente</option><option value="PODE_ESPERAR">Pode esperar</option></select></div>
       </div>
-      <div class="grid2">
-        <div class="field">
-          <label>Quantidade</label>
-          <input type="number" id="lc-qtd" value="1" min="1"/>
-        </div>
-        <div class="field">
-          <label>Urgência</label>
-          <select id="lc-urgencia">
-            <option value="NORMAL">Normal</option>
-            <option value="URGENTE">Urgente</option>
-            <option value="PODE_ESPERAR">Pode esperar</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label>Fornecedor <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
-        <input type="text" id="lc-forn" placeholder="Nome ou 'a procurar'"/>
-      </div>
-      <div class="field">
-        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
-        <textarea id="lc-obs" placeholder="Cor, modelo, especificações..."></textarea>
-      </div>
+      <div class="field"><label>Fornecedor <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label><input type="text" id="lc-forn" placeholder="Nome ou 'a procurar'"/></div>
+      <div class="field"><label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label><textarea id="lc-obs" placeholder="Cor, modelo..."></textarea></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-cancel" onclick="fechar('compra')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarCompra()"><i class="ti ti-plus"></i> Adicionar</button>
+      <button class="btn-sec" onclick="fecha('compra')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarCompra()"><i class="ti ti-plus"></i> Adicionar</button>
     </div>
   </div>
 </div>
 
-<div class="overlay" id="ov-config-mods">
+<div class="overlay" id="ov-mods">
   <div class="modal modal-lg">
-    <div class="modal-head">
-      <div class="modal-title">Personalizar módulos</div>
-      <button class="modal-x" onclick="fechar('config-mods')"><i class="ti ti-x"></i></button>
-    </div>
+    <div class="modal-head"><div class="modal-title">Personalizar módulos</div><button class="modal-x" onclick="fecha('mods')"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
-      <p style="font-size:12.5px;color:var(--sub);margin-bottom:4px">Ative até 8 módulos para aparecer como bolinhas. O restante fica no menu "...".</p>
-      <div class="config-list" id="config-list"></div>
+      <p style="font-size:12px;color:var(--sub)">Ative até 8 módulos para aparecer como bolinhas.</p>
+      <div class="cfg-list" id="cfg-list"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-cancel" onclick="fechar('config-mods')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarConfigMods()"><i class="ti ti-device-floppy"></i> Salvar</button>
+      <button class="btn-sec" onclick="fecha('mods')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarMods()"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- MAIN -->
-<!-- MODAL META -->
 <div class="overlay" id="ov-meta">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-head">
-      <div class="modal-title" id="meta-modal-title">Editar meta</div>
-      <button class="modal-x" onclick="fechar('meta')"><i class="ti ti-x"></i></button>
-    </div>
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Editar metas</div><button class="modal-x" onclick="fecha('meta')"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
       <div class="field">
-        <label>Tipo de meta</label>
-        <select id="meta-tipo">
-          <option value="vendas">Número de vendas</option>
-          <option value="os">OS finalizadas</option>
-        </select>
+        <label>Período</label>
+        <div style="display:flex;gap:6px">
+          <button id="meta-btn-sem" onclick="setMetaPeriodo('semanal')" style="flex:1;height:36px;border-radius:8px;border:1.5px solid var(--cyan);background:var(--cbg);color:var(--cd);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">Semanal</button>
+          <button id="meta-btn-men" onclick="setMetaPeriodo('mensal')" style="flex:1;height:36px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">Mensal</button>
+        </div>
       </div>
-      <div class="field">
-        <label>Meta (quantidade)</label>
-        <input type="number" id="meta-valor" min="1" placeholder="Ex: 50"/>
-      </div>
+      <div class="field"><label>Indicador</label><select id="meta-tipo"><option value="vendas">Número de vendas</option><option value="os">OS abertas</option><option value="clientes">Novos clientes</option></select></div>
+      <div class="field"><label>Meta (quantidade)</label><input type="number" id="meta-val" min="1" placeholder="Ex: 30"/></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-cancel" onclick="fechar('meta')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarMeta()"><i class="ti ti-device-floppy"></i> Salvar</button>
+      <button class="btn-sec" onclick="fecha('meta')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarMeta()"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
   </div>
 </div>
 
-<main class="main">
+<!-- HEADER -->
+<header class="header">
+  <a class="h-logo" href="dashboard.html">
+    <div class="h-logo-circle">
+      <img src="logo.png" alt="Dottec" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center"><i class="ti ti-device-laptop"></i></span>
+    </div>
+    <div class="h-logo-text">
+      <div class="h-logo-nome">Dottec</div>
+      <div class="h-logo-sub">Assistência Inteligente</div>
+    </div>
+  </a>
+  <div class="h-saud">
+    <div class="h-saud-top" id="h-saud-top">—</div>
+    <div class="h-saud-nome" id="h-saud-nome">—</div>
+  </div>
+  <div class="h-right">
+    <div class="h-dt">
+      <div class="h-hora" id="h-hora">—</div>
+      <div class="h-data" id="h-data">—</div>
+    </div>
+    <a class="h-perfil" href="#" title="Meu perfil"><i class="ti ti-id-badge-2"></i></a>
+  </div>
+</header>
+
+<!-- BODY SCROLLÁVEL -->
+<div class="body">
 
   <!-- BOLINHAS -->
-  <div class="modulos-bar">
-    <div class="mods-inner" id="mods-inner">
-      <div style="padding:8px;color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div>
+  <div class="mod-bar">
+    <div class="mods-grid" id="mods-grid">
+      <div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div>
     </div>
-    <div class="mod-more-wrap" id="mod-more-wrap" style="display:none">
-      <div class="mod-more" onclick="toggleMore(event)" title="Mais módulos">
-        <i class="ti ti-dots"></i>
-        <span style="font-size:9px;font-weight:700;display:block;line-height:1;margin-top:2px">mais</span>
-      </div>
-      <div class="mod-more-drop" id="mod-more-drop"></div>
+    <div class="mod-more-wrap" id="more-wrap" style="display:none">
+      <div class="mod-more" onclick="toggleMore(event)" title="Mais módulos"><i class="ti ti-dots"></i></div>
+      <div class="mod-more-drop" id="more-drop"></div>
     </div>
-    <button class="mod-config-btn" onclick="abrirConfigMods()" title="Personalizar">
-      <i class="ti ti-layout-grid"></i>
-    </button>
+    <div class="mod-cfg" onclick="abre('mods')" title="Personalizar"><i class="ti ti-layout-grid"></i></div>
   </div>
 
-  <!-- MÉTRICAS + METAS -->
-  <div class="metrics-bar">
-
-    <!-- OS hoje / em aberto -->
-    <a class="mc mc-os" href="os.html">
-      <div class="mc-header">
-        <div class="mc-icon"><i class="ti ti-tool"></i></div>
-        <span class="mc-label">Ordens de Serviço</span>
-      </div>
-      <div class="mc-numbers">
-        <div class="mc-num-group">
-          <div class="mc-big" id="m-os-hoje">—</div>
-          <div class="mc-small">abertas hoje</div>
-        </div>
-        <div class="mc-divider"></div>
-        <div class="mc-num-group">
-          <div class="mc-big mc-warn" id="m-os-total">—</div>
-          <div class="mc-small">em aberto</div>
-        </div>
+  <!-- MÉTRICAS -->
+  <div class="metrics">
+    <a class="mc mc-os" href="os.html" style="text-decoration:none">
+      <div class="mc-head"><div class="mc-ico" style="background:var(--cbg2);color:var(--coral)"><i class="ti ti-tool"></i></div><span class="mc-lbl">Ordens de Serviço</span></div>
+      <div class="mc-nums">
+        <div class="mc-grp"><div class="mc-big" id="m-os-hj">—</div><div class="mc-sm">abertas hoje</div></div>
+        <div class="mc-div"></div>
+        <div class="mc-grp"><div class="mc-big warn" id="m-os-tot">—</div><div class="mc-sm">em aberto</div></div>
       </div>
     </a>
-
-    <!-- Vendas hoje / semana -->
-    <a class="mc mc-venda" href="vendas.html">
-      <div class="mc-header">
-        <div class="mc-icon"><i class="ti ti-shopping-cart"></i></div>
-        <span class="mc-label">Vendas</span>
-      </div>
-      <div class="mc-numbers">
-        <div class="mc-num-group">
-          <div class="mc-big" id="m-vd-hoje">—</div>
-          <div class="mc-small">hoje</div>
-        </div>
-        <div class="mc-divider"></div>
-        <div class="mc-num-group">
-          <div class="mc-big" id="m-vd-semana">—</div>
-          <div class="mc-small">esta semana</div>
-        </div>
+    <a class="mc mc-vd" href="vendas.html" style="text-decoration:none">
+      <div class="mc-head"><div class="mc-ico" style="background:#FCE7F3;color:#BE185D"><i class="ti ti-shopping-cart"></i></div><span class="mc-lbl">Vendas</span></div>
+      <div class="mc-nums">
+        <div class="mc-grp"><div class="mc-big" id="m-vd-hj">—</div><div class="mc-sm">hoje</div></div>
+        <div class="mc-div"></div>
+        <div class="mc-grp"><div class="mc-big" id="m-vd-sem">—</div><div class="mc-sm">esta semana</div></div>
       </div>
     </a>
-
-    <!-- Meta semanal -->
-    <div class="mc mc-meta">
-      <div class="mc-header">
-        <div class="mc-icon mc-icon-meta"><i class="ti ti-target"></i></div>
-        <span class="mc-label">Meta semanal</span>
-        <button class="mc-edit" onclick="editarMeta('semanal')" title="Editar meta"><i class="ti ti-pencil"></i></button>
+    <div class="mc" style="border-right:3px solid var(--cyan)">
+      <div class="mc-head">
+        <div class="mc-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-target"></i></div>
+        <span class="mc-lbl">Metas</span>
+        <button class="mc-edit" onclick="editMeta('semanal')" title="Editar metas" style="width:auto;padding:0 6px;gap:3px"><i class="ti ti-pencil"></i></button>
       </div>
-      <div class="mc-meta-wrap">
-        <div class="mc-meta-nums">
-          <span class="mc-meta-atual" id="m-meta-sw-atual">—</span>
-          <span class="mc-meta-sep">/</span>
-          <span class="mc-meta-total" id="m-meta-sw-total">—</span>
-          <span class="mc-meta-unit" id="m-meta-sw-unit">vendas</span>
-        </div>
-        <div class="mc-bar-wrap">
-          <div class="mc-bar">
-            <div class="mc-bar-fill mc-bar-cyan" id="m-bar-sw" style="width:0%"></div>
+      <div class="mc-metas">
+        <!-- SEMANAL -->
+        <div class="mc-meta-row">
+          <div class="mc-meta-top">
+            <span class="mc-meta-periodo">Esta semana</span>
+            <div class="mc-meta-nums-inline">
+              <span class="mc-meta-atual-sm" id="sw-atual">—</span>
+              <span class="mc-meta-sep-sm">/</span>
+              <span class="mc-meta-tot-sm" id="sw-tot">—</span>
+              <span class="mc-meta-unit-sm" id="sw-unit">vendas</span>
+            </div>
           </div>
-          <span class="mc-pct" id="m-pct-sw">0%</span>
+          <div class="mc-meta-bar-row">
+            <div class="mc-meta-bar"><div class="mc-fill fill-cyan" id="sw-bar" style="width:0%"></div></div>
+            <span class="mc-meta-pct-lbl inicio" id="sw-pct">0%</span>
+          </div>
+        </div>
+        <div class="mc-meta-divider"></div>
+        <!-- MENSAL -->
+        <div class="mc-meta-row">
+          <div class="mc-meta-top">
+            <span class="mc-meta-periodo">Este mês</span>
+            <div class="mc-meta-nums-inline">
+              <span class="mc-meta-atual-sm" id="mn-atual">—</span>
+              <span class="mc-meta-sep-sm">/</span>
+              <span class="mc-meta-tot-sm" id="mn-tot">—</span>
+              <span class="mc-meta-unit-sm" id="mn-unit">vendas</span>
+            </div>
+          </div>
+          <div class="mc-meta-bar-row">
+            <div class="mc-meta-bar"><div class="mc-fill fill-green" id="mn-bar" style="width:0%"></div></div>
+            <span class="mc-meta-pct-lbl inicio" id="mn-pct">0%</span>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Meta mensal -->
-    <div class="mc mc-meta">
-      <div class="mc-header">
-        <div class="mc-icon mc-icon-meta"><i class="ti ti-chart-line"></i></div>
-        <span class="mc-label">Meta mensal</span>
-        <button class="mc-edit" onclick="editarMeta('mensal')" title="Editar meta"><i class="ti ti-pencil"></i></button>
-      </div>
-      <div class="mc-meta-wrap">
-        <div class="mc-meta-nums">
-          <span class="mc-meta-atual" id="m-meta-mn-atual">—</span>
-          <span class="mc-meta-sep">/</span>
-          <span class="mc-meta-total" id="m-meta-mn-total">—</span>
-          <span class="mc-meta-unit" id="m-meta-mn-unit">vendas</span>
-        </div>
-        <div class="mc-bar-wrap">
-          <div class="mc-bar">
-            <div class="mc-bar-fill mc-bar-green" id="m-bar-mn" style="width:0%"></div>
-          </div>
-          <span class="mc-pct" id="m-pct-mn">0%</span>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- 3 COLUNAS -->
+  <!-- 3 PAINEIS -->
   <div class="panels">
 
-    <!-- COL 1: ALERTAS -->
-    <div class="panel panel-tall">
-      <div class="panel-head">
-        <div class="ph-left">
-          <div class="ph-icon phi-red"><i class="ti ti-bell"></i></div>
+    <!-- ALERTAS OS -->
+    <div class="panel">
+      <div class="ph">
+        <div class="ph-l">
+          <div class="ph-ico phi-red"><i class="ti ti-bell"></i></div>
           <span class="ph-title">Alertas OS</span>
-          <span class="ph-count red" id="al-count" style="display:none">0</span>
+          <span class="ph-cnt r" id="al-cnt" style="display:none">0</span>
         </div>
       </div>
-      <div class="panel-body" id="al-body">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
-      </div>
+      <div class="panel-body" id="al-body"><div class="p-empty"><i class="ti ti-loader-2 spin"></i></div></div>
     </div>
 
-    <!-- COL 2: CONTAS + AGENDA -->
-    <div class="panel panel-tall" style="display:flex;flex-direction:column">
-      <div class="sec-contas" id="sec-contas">
-        <div class="sec-contas-head">
-          <i class="ti ti-currency-dollar sec-contas-icon"></i>
-          <span class="sec-contas-label">Contas a pagar</span>
-          <span class="sec-contas-badge" id="ct-badge" style="display:none">0 hoje</span>
-        </div>
-        <div id="ct-body">
-          <div style="padding:.75rem 1rem;font-size:12px;color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div>
-        </div>
+    <!-- CONTAS + AGENDA -->
+    <div class="panel">
+      <!-- contas no topo -->
+      <div class="sec-head">
+        <i class="ti ti-currency-dollar" style="font-size:13px;color:var(--amber)"></i>
+        <span class="sec-lbl amber">Contas a pagar</span>
+        <span class="sec-badge amber" id="ct-badge" style="display:none">0 hoje</span>
       </div>
-      <div class="sec-agenda-head">
-        <i class="ti ti-calendar-event sec-agenda-icon"></i>
-        <span class="sec-agenda-label">Agenda</span>
-        <button class="sec-agenda-add" onclick="abrirAgenda()"><i class="ti ti-plus"></i></button>
+      <div id="ct-body"><div style="padding:.7rem 1rem;font-size:12px;color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div></div>
+      <!-- separador + agenda -->
+      <div class="sec-head" style="margin-top:auto;border-top:1px solid var(--border)">
+        <i class="ti ti-calendar-event" style="font-size:13px;color:var(--cd)"></i>
+        <span class="sec-lbl cyan">Agenda</span>
+        <button class="sec-add" onclick="abreAgenda()"><i class="ti ti-plus"></i></button>
       </div>
-      <div class="panel-body" id="ag-body" style="flex:1">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
-      </div>
+      <div class="panel-body" id="ag-body" style="flex:1"><div class="p-empty"><i class="ti ti-loader-2 spin"></i></div></div>
     </div>
 
-    <!-- COL 3: LISTA DE COMPRAS -->
-    <div class="panel panel-compras">
-      <div class="panel-head">
-        <div class="ph-left">
-          <div class="ph-icon phi-green"><i class="ti ti-shopping-bag"></i></div>
+    <!-- LISTA DE COMPRAS -->
+    <div class="panel">
+      <div class="ph">
+        <div class="ph-l">
+          <div class="ph-ico phi-green"><i class="ti ti-shopping-bag"></i></div>
           <span class="ph-title">Lista de compras</span>
-          <span class="ph-count" id="lc-count">0</span>
+          <span class="ph-cnt" id="lc-cnt">0</span>
         </div>
-        <button class="ph-add" onclick="abrirModal('compra')"><i class="ti ti-plus"></i></button>
+        <button class="ph-add" onclick="abre('compra')"><i class="ti ti-plus"></i></button>
       </div>
-      <div class="panel-body" id="lc-body">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
-      </div>
+      <div class="panel-body" id="lc-body"><div class="p-empty"><i class="ti ti-loader-2 spin"></i></div></div>
     </div>
 
   </div>
-</main>
+</div><!-- /body -->
 
 <script>
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
@@ -649,227 +498,218 @@ const db=window._dottecDb;
 const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
 const hoje=new Date().toISOString().slice(0,10);
 const fmtDt=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
+const safe=async p=>{try{return await p;}catch{return{data:[],count:0};}};
 
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 
-// ── RELÓGIO / HEADER ─────────────────────────────────────────
+// ── RELÓGIO ───────────────────────────────────────
 function tick(){
   const n=new Date(),h=n.getHours();
-  document.getElementById('dh-greeting').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
-  document.getElementById('dh-name').textContent=USR.nome;
-  document.getElementById('dh-hora').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('dh-data').textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  document.getElementById('h-saud-top').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
+  document.getElementById('h-saud-nome').textContent=USR.nome;
+  document.getElementById('h-hora').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('h-data').textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
 }
 tick();setInterval(tick,10000);
 
-// ── MÓDULOS ──────────────────────────────────────────────────
-const TODOS_MODS=[
-  {id:'os',         label:'OS',         icon:'ti-tool',            href:'os.html',           bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',color:'#C94835'},
-  {id:'venda',      label:'Venda',      icon:'ti-shopping-cart',   href:'venda.html',         bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',color:'#BE185D'},
-  {id:'caixa',      label:'Caixa',      icon:'ti-wallet',          href:'caixa.html',         bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',color:'#3B6D11'},
-  {id:'financeiro', label:'Financeiro', icon:'ti-currency-dollar', href:'financeiro.html',    bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',color:'#3B6D11'},
-  {id:'orcamentos', label:'Orçamentos', icon:'ti-calculator',      href:'orcamentos.html',    bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',color:'#0E7490'},
-  {id:'cadastro',   label:'Cadastro',   icon:'ti-users',           href:'pessoas.html',       bg:'linear-gradient(135deg,#E3F4F5,#B8EDF0)',color:'#1E9099'},
-  {id:'produtos',   label:'Produtos',   icon:'ti-package',         href:'produtos.html',      bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',color:'#C94835'},
-  {id:'compras',    label:'Compras',    icon:'ti-truck-delivery',  href:'compras.html',       bg:'linear-gradient(135deg,#EEF0F5,#D4D9E8)',color:'#3A4A6B'},
-  {id:'fiscal',     label:'Fiscal',     icon:'ti-file-invoice',    href:'fiscal.html',        bg:'linear-gradient(135deg,#EEEAF8,#D8D0F4)',color:'#5B3FA6'},
-  {id:'config',     label:'Config.',    icon:'ti-settings',        href:'configuracoes.html', bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',color:'#5A5855'},
-];
+// ── TOAST ─────────────────────────────────────────
+function toast(msg,t='ok'){
+  const el=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  el.className='toast '+t+' show';
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
 
-let MODS_ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
-let MODS_TMP=[];
+// ── MODAIS ────────────────────────────────────────
+function abre(id){
+  const ov=document.getElementById('ov-'+id);
+  if(!ov)return;
+  ov.classList.add('open');
+  setTimeout(()=>{const f=ov.querySelector('input:not([type=hidden]),select,textarea');if(f)f.focus();},60);
+}
+function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+['agenda','compra','mods','meta'].forEach(id=>{
+  document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);});
+});
+
+// ── MÓDULOS ───────────────────────────────────────
+const MODS=[
+  {id:'os',         lbl:'OS',         ico:'ti-tool',            href:'os.html',           bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'venda',      lbl:'Venda',      ico:'ti-shopping-cart',   href:'venda.html',         bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
+  {id:'caixa',      lbl:'Caixa',      ico:'ti-wallet',          href:'caixa.html',         bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'financeiro', lbl:'Financeiro', ico:'ti-currency-dollar', href:'financeiro.html',    bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'orcamentos', lbl:'Orçamentos', ico:'ti-calculator',      href:'orcamentos.html',    bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',c:'#0E7490'},
+  {id:'cadastro',   lbl:'Cadastro',   ico:'ti-users',           href:'pessoas.html',       bg:'linear-gradient(135deg,#E3F4F5,#B8EDF0)',c:'#1E9099'},
+  {id:'produtos',   lbl:'Produtos',   ico:'ti-package',         href:'produtos.html',      bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'compras',    lbl:'Compras',    ico:'ti-truck-delivery',  href:'compras.html',       bg:'linear-gradient(135deg,#EEF0F5,#D4D9E8)',c:'#3A4A6B'},
+  {id:'fiscal',     lbl:'Fiscal',     ico:'ti-file-invoice',    href:'fiscal.html',        bg:'linear-gradient(135deg,#EEEAF8,#D8D0F4)',c:'#5B3FA6'},
+  {id:'config',     lbl:'Config.',    ico:'ti-settings',        href:'configuracoes.html', bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
+];
+let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
+let ATIVOS_TMP=[];
 
 async function loadMods(){
   if(USR.id){
-    const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_usuario_'+USR.id).maybeSingle();
-    if(data?.valor){try{MODS_ATIVOS=JSON.parse(data.valor);}catch{}}
+    const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_u_'+USR.id).maybeSingle();
+    if(data?.valor){try{ATIVOS=JSON.parse(data.valor);}catch{}}
   }
   renderMods();
 }
 
 function renderMods(){
-  const ativos=MODS_ATIVOS.slice(0,8).map(id=>TODOS_MODS.find(m=>m.id===id)).filter(Boolean);
-  const resto=TODOS_MODS.filter(m=>!MODS_ATIVOS.slice(0,8).includes(m.id));
-  const inner=document.getElementById('mods-inner');
-  const moreWrap=document.getElementById('mod-more-wrap');
-
-  inner.innerHTML=ativos.map(m=>`
-    <a class="mod-ball" href="${m.href}" title="${m.label}">
+  const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
+  const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
+  document.getElementById('mods-grid').innerHTML=ativos.map(m=>`
+    <a class="mod-ball" href="${m.href}" title="${m.lbl}">
       <div class="mod-ball-icon" style="background:${m.bg}">
-        <i class="ti ${m.icon}" style="color:${m.color}"></i>
-        ${m.id==='os'?'<span class="mod-ball-badge" id="os-badge" style="display:none">!</span>':''}
+        <i class="ti ${m.ico}" style="color:${m.c}"></i>
+        ${m.id==='os'?'<span class="mod-ball-bdg" id="os-bdg" style="display:none">!</span>':''}
       </div>
-      <span class="mod-ball-label">${m.label}</span>
+      <span class="mod-ball-lbl">${m.lbl}</span>
     </a>`).join('');
-
+  const mw=document.getElementById('more-wrap');
   if(resto.length){
-    moreWrap.style.display='block';
-    document.getElementById('mod-more-drop').innerHTML=resto.map(m=>`
-      <a class="mod-more-item" href="${m.href}">
-        <i class="ti ${m.icon}" style="color:${m.color}"></i>${m.label}
-      </a>`).join('');
-  } else {
-    moreWrap.style.display='none';
-  }
-  checkOsBadge();
+    mw.style.display='block';
+    document.getElementById('more-drop').innerHTML=resto.map(m=>`
+      <a class="mod-more-item" href="${m.href}"><i class="ti ${m.ico}" style="color:${m.c}"></i>${m.lbl}</a>`).join('');
+  } else mw.style.display='none';
+  checkOsBdg();
 }
 
-function toggleMore(e){e.stopPropagation();document.getElementById('mod-more-drop').classList.toggle('open');}
-document.addEventListener('click',()=>document.getElementById('mod-more-drop')?.classList.remove('open'));
+function toggleMore(e){e.stopPropagation();document.getElementById('more-drop').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('more-drop')?.classList.remove('open'));
 
-async function checkOsBadge(){
+async function checkOsBdg(){
   try{
     const{data:sc}=await db.from('status_config').select('nome').eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
-    if(!sc?.length) return;
+    if(!sc?.length)return;
     const{count}=await db.from('ordens_servico').select('id',{count:'exact',head:true}).in('status',sc.map(s=>s.nome));
-    const b=document.getElementById('os-badge');
+    const b=document.getElementById('os-bdg');
     if(b&&count>0){b.style.display='flex';b.textContent=count>9?'9+':count;}
   }catch{}
 }
 
-function abrirConfigMods(){
-  MODS_TMP=[...MODS_ATIVOS];
-  renderConfigList();
-  abrirModal('config-mods');
-}
-
-function renderConfigList(){
-  document.getElementById('config-list').innerHTML=TODOS_MODS.map(m=>{
-    const on=MODS_TMP.slice(0,8).includes(m.id);
-    return`<div class="config-item">
-      <div class="config-item-icon" style="background:${m.bg}"><i class="ti ${m.icon}" style="color:${m.color}"></i></div>
-      <span class="config-item-name">${m.label}</span>
-      <button class="config-toggle ${on?'on':'off'}" onclick="toggleMod('${m.id}',this)"></button>
+function abrirCfgMods(){
+  ATIVOS_TMP=[...ATIVOS];
+  document.getElementById('cfg-list').innerHTML=MODS.map(m=>{
+    const on=ATIVOS_TMP.slice(0,8).includes(m.id);
+    return`<div class="cfg-item">
+      <div class="cfg-icon" style="background:${m.bg}"><i class="ti ${m.ico}" style="color:${m.c}"></i></div>
+      <span class="cfg-name">${m.lbl}</span>
+      <button class="cfg-tog ${on?'on':'off'}" onclick="togMod('${m.id}',this)"></button>
     </div>`;
   }).join('');
+  abre('mods');
 }
 
-function toggleMod(id,btn){
-  const i=MODS_TMP.indexOf(id);
-  if(i>=0){MODS_TMP.splice(i,1);btn.className='config-toggle off';}
-  else{MODS_TMP.push(id);btn.className='config-toggle on';}
-  renderConfigList();
+function togMod(id,btn){
+  const i=ATIVOS_TMP.indexOf(id);
+  if(i>=0){ATIVOS_TMP.splice(i,1);btn.className='cfg-tog off';}
+  else{ATIVOS_TMP.push(id);btn.className='cfg-tog on';}
 }
 
-async function salvarConfigMods(){
-  MODS_ATIVOS=MODS_TMP.slice(0,8);
-  if(USR.id){
-    await db.from('configuracoes_sistema').upsert(
-      {chave:'mods_usuario_'+USR.id,valor:JSON.stringify(MODS_ATIVOS)},{onConflict:'chave'}
-    );
-  }
-  fechar('config-mods');renderMods();toast('Módulos salvos!');
+async function salvarMods(){
+  ATIVOS=ATIVOS_TMP.slice(0,8);
+  if(USR.id) await db.from('configuracoes_sistema').upsert({chave:'mods_u_'+USR.id,valor:JSON.stringify(ATIVOS)},{onConflict:'chave'});
+  fecha('mods');renderMods();toast('Módulos salvos!');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-function toast(msg,tipo='ok'){
-  const t=document.getElementById('toast');
-  document.getElementById('ti').className='ti '+(tipo==='ok'?'ti-check':'ti-alert-circle');
-  document.getElementById('tm').textContent=msg;
-  t.className='toast '+tipo+' show';
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
+// override abre('mods') para abrir cfg
+const _abre=abre;
+window.abre=function(id){if(id==='mods')abrirCfgMods();else _abre(id);};
 
-// ── MODAIS ─────────────────────────────────────────────────────
-function abrirModal(id){
-  const ov=document.getElementById('ov-'+id);
-  if(!ov) return;
-  ov.classList.add('open');
-  setTimeout(()=>{const f=ov.querySelector('input:not([type=hidden]),select,textarea');if(f)f.focus();},60);
-}
-function fechar(id){document.getElementById('ov-'+id)?.classList.remove('open');}
-
-// fecha clicando fora — usa addEventListener em cada overlay explicitamente
-document.getElementById('ov-agenda').addEventListener('click',function(e){if(e.target===this)fechar('agenda');});
-document.getElementById('ov-compra').addEventListener('click',function(e){if(e.target===this)fechar('compra');});
-document.getElementById('ov-config-mods').addEventListener('click',function(e){if(e.target===this)fechar('config-mods');});
-document.getElementById('ov-meta').addEventListener('click',function(e){if(e.target===this)fechar('meta');});
-
-// ── AGENDA ─────────────────────────────────────────────────────
-let AGENDA=[], USUARIOS=[];
-
-function abrirAgenda(){
-  document.getElementById('ag-titulo').value='';
-  document.getElementById('ag-desc').value='';
-  const d=new Date();d.setHours(d.getHours()+1,0,0,0);
-  document.getElementById('ag-data').value=d.toISOString().slice(0,16);
-  document.getElementById('ag-resp').value='';
-  abrirModal('agenda');
-}
-
-async function loadUsuarios(){
-  const{data}=await db.from('usuarios').select('id,nome,perfil').eq('ativo',true);
-  USUARIOS=data||[];
-  const sel=document.getElementById('ag-resp');
-  sel.innerHTML='<option value="">Todos</option>'+USUARIOS.map(u=>`<option value="${u.id}">${u.nome}</option>`).join('');
-}
-
-async function loadAgenda(){
-  const{data}=await db.from('agenda')
-    .select('*,usuarios!agenda_responsavel_id_fkey(nome)')
-    .eq('concluido',false)
-    .order('data_hora',{ascending:true}).limit(12);
-  AGENDA=data||[];
-  renderAgenda();
-}
-
-function renderAgenda(){
-  const body=document.getElementById('ag-body');
-  if(!AGENDA.length){body.innerHTML='<div class="p-empty"><i class="ti ti-calendar-off"></i>Sem tarefas</div>';return;}
+// ── MÉTRICAS ──────────────────────────────────────
+async function loadMetricas(){
   const agora=new Date();
-  body.innerHTML=AGENDA.map(a=>{
-    const dt=new Date(a.data_hora);
-    const dh=a.data_hora.slice(0,10);
-    const isHj=dh===hoje,isAtras=dt<agora;
-    const cls=isAtras?'atras':isHj?'hj':'';
-    const hrCls=isAtras?'atras':isHj?'hj':'';
-    return`<div class="ag-row ${cls}">
-      <div class="ag-dt">
-        <div class="ag-dia ${cls}">${dt.getDate()}</div>
-        <div class="ag-mes">${dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</div>
-      </div>
-      <div class="ag-vl"></div>
-      <div class="ag-info">
-        <div class="ag-titulo">${a.titulo}</div>
-        ${a.usuarios?.nome?`<div class="ag-resp"><i class="ti ti-user"></i>${a.usuarios.nome}</div>`:''}
-      </div>
-      <div class="ag-hr ${hrCls}">${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>`;
-  }).join('');
+  const iniSem=new Date(agora);iniSem.setDate(agora.getDate()-agora.getDay());iniSem.setHours(0,0,0,0);
+  const iniMes=new Date(agora.getFullYear(),agora.getMonth(),1);
+
+  const[osHj,osTot,vdHj,vdSem]=await Promise.all([
+    safe(db.from('ordens_servico').select('id',{count:'exact',head:true}).gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
+    safe(db.from('ordens_servico').select('id',{count:'exact',head:true}).not('status','in','("ENTREGUE","CANCELADA")')),
+    safe(db.from('vendas').select('id',{count:'exact',head:true}).gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
+    safe(db.from('vendas').select('id',{count:'exact',head:true}).gte('criado_em',iniSem.toISOString())),
+  ]);
+
+  document.getElementById('m-os-hj').textContent=osHj.count??0;
+  document.getElementById('m-os-tot').textContent=osTot.count??0;
+  document.getElementById('m-vd-hj').textContent=vdHj.count??0;
+  document.getElementById('m-vd-sem').textContent=vdSem.count??0;
+
+  // metas
+  const[mSemD,mMenD]=await Promise.all([
+    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_semanal').maybeSingle()),
+    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_mensal').maybeSingle()),
+  ]);
+  const pm=d=>{try{return JSON.parse(d?.data?.valor||'null');}catch{return null;}};
+  const mSem=pm(mSemD)||{tipo:'vendas',valor:30};
+  const mMen=pm(mMenD)||{tipo:'vendas',valor:120};
+
+  const atSem=mSem.tipo==='vendas'?vdSem.count??0:0;
+  const{count:vdMes}=await safe(db.from('vendas').select('id',{count:'exact',head:true}).gte('criado_em',iniMes.toISOString()));
+  const atMen=mMen.tipo==='vendas'?vdMes??0:0;
+
+  const pSem=Math.min(100,Math.round((atSem/mSem.valor)*100));
+  const pMen=Math.min(100,Math.round((atMen/mMen.valor)*100));
+  const falta=p=>p>=100?'✓ meta':p===0?'0%':'falta '+(100-p)+'%';
+  const corPct=p=>p>=100?'quase':p>=50?'meio':'inicio';
+
+  document.getElementById('sw-atual').textContent=atSem;
+  document.getElementById('sw-tot').textContent=mSem.valor;
+  document.getElementById('sw-unit').textContent=mSem.tipo==='os'?'OS':'vendas';
+  const swPct=document.getElementById('sw-pct');
+  swPct.textContent=falta(pSem);swPct.className='mc-meta-pct-lbl '+corPct(pSem);
+  setTimeout(()=>document.getElementById('sw-bar').style.width=pSem+'%',100);
+
+  document.getElementById('mn-atual').textContent=atMen;
+  document.getElementById('mn-tot').textContent=mMen.valor;
+  document.getElementById('mn-unit').textContent=mMen.tipo==='os'?'OS':'vendas';
+  const mnPct=document.getElementById('mn-pct');
+  mnPct.textContent=falta(pMen);mnPct.className='mc-meta-pct-lbl '+corPct(pMen);
+  setTimeout(()=>document.getElementById('mn-bar').style.width=pMen+'%',100);
 }
 
-async function salvarAgenda(){
-  const titulo=document.getElementById('ag-titulo').value.trim();
-  const data=document.getElementById('ag-data').value;
-  if(!titulo){toast('Informe o título.','err');return;}
-  if(!data){toast('Informe a data.','err');return;}
-  const{error}=await db.from('agenda').insert({
-    titulo:titulo.toUpperCase(),
-    data_hora:new Date(data).toISOString(),
-    responsavel_id:document.getElementById('ag-resp').value||null,
-    descricao:document.getElementById('ag-desc').value.trim().toUpperCase()||null,
-    criado_por_id:USR.id||null,criado_por_nome:USR.nome,
-  });
-  if(error){toast('Erro: '+error.message,'err');return;}
-  toast('Tarefa agendada!');fechar('agenda');loadAgenda();
+let META_P='semanal';
+function setMetaPeriodo(p){
+  META_P=p;
+  const bs=document.getElementById('meta-btn-sem');
+  const bm=document.getElementById('meta-btn-men');
+  if(p==='semanal'){
+    bs.style.cssText='flex:1;height:36px;border-radius:8px;border:1.5px solid var(--cyan);background:var(--cbg);color:var(--cd);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit';
+    bm.style.cssText='flex:1;height:36px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit';
+  } else {
+    bm.style.cssText='flex:1;height:36px;border-radius:8px;border:1.5px solid var(--green);background:var(--gbg);color:var(--green);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit';
+    bs.style.cssText='flex:1;height:36px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit';
+  }
+}
+function editMeta(p){
+  META_P=p||'semanal';
+  setMetaPeriodo(META_P);
+  document.getElementById('meta-val').value='';
+  abre('meta');
+}
+async function salvarMeta(){
+  const tipo=document.getElementById('meta-tipo').value;
+  const valor=parseInt(document.getElementById('meta-val').value)||0;
+  if(!valor){toast('Informe um valor.','err');return;}
+  await db.from('configuracoes_sistema').upsert({chave:'meta_'+(META_P==='semanal'?'semanal':'mensal'),valor:JSON.stringify({tipo,valor})},{onConflict:'chave'});
+  toast('Meta salva!');fecha('meta');loadMetricas();
 }
 
-// ── ALERTAS OS ──────────────────────────────────────────────────
+// ── ALERTAS OS ─────────────────────────────────────
 async function loadAlertas(){
   const{data:sc}=await db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
-  const alBody=document.getElementById('al-body');
-  if(!sc?.length){alBody.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';return;}
-  const{data:os}=await db.from('ordens_servico')
-    .select('id,numero,cliente_nome,aparelho,status,atualizado_em')
-    .in('status',sc.map(s=>s.nome))
-    .order('atualizado_em',{ascending:true}).limit(15);
+  const body=document.getElementById('al-body');
+  if(!sc?.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';return;}
+  const{data:os}=await db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status,atualizado_em').in('status',sc.map(s=>s.nome)).order('atualizado_em',{ascending:true}).limit(15);
   const lista=os||[];
-  const badge=document.getElementById('al-count');
-  if(!lista.length){alBody.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';badge.style.display='none';return;}
+  const badge=document.getElementById('al-cnt');
+  if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';badge.style.display='none';return;}
   badge.style.display='inline';badge.textContent=lista.length;
   const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
-  alBody.innerHTML=lista.map(o=>{
+  body.innerHTML=lista.map(o=>{
     const s=sc.find(x=>x.nome===o.status)||{alerta_prioridade:'NORMAL'};
     const p=s.alerta_prioridade.toLowerCase();
     const cls=p==='critica'?'crit':p==='alta'?'alta':'norm';
@@ -886,189 +726,107 @@ async function loadAlertas(){
   }).join('');
 }
 
-// ── CONTAS A PAGAR ───────────────────────────────────────────────
+// ── CONTAS ─────────────────────────────────────────
 async function loadContas(){
-  if(USR.perfil==='TECNICO'){
-    document.getElementById('ct-body').innerHTML='<div style="padding:.75rem 1rem;font-size:12px;color:var(--sub)">Restrito ao comercial</div>';
-    return;
-  }
-  const proximos7=new Date();proximos7.setDate(proximos7.getDate()+7);
-  const ate=proximos7.toISOString().slice(0,10);
-  const{data}=await db.from('contas')
-    .select('id,descricao,valor,vencimento,status')
-    .eq('tipo','PAGAR').in('status',['ABERTA','VENCIDA','PARCIAL'])
-    .lte('vencimento',ate).order('vencimento',{ascending:true}).limit(8);
+  if(USR.perfil==='TECNICO'){document.getElementById('ct-body').innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Restrito ao comercial</div>';return;}
+  const ate=new Date();ate.setDate(ate.getDate()+7);
+  const{data}=await db.from('contas').select('id,descricao,valor,vencimento,status').eq('tipo','PAGAR').in('status',['ABERTA','VENCIDA','PARCIAL']).lte('vencimento',ate.toISOString().slice(0,10)).order('vencimento',{ascending:true}).limit(6);
   const lista=data||[];
   const badge=document.getElementById('ct-badge');
-  const vencendoHoje=lista.filter(c=>c.vencimento<=hoje).length;
-  if(vencendoHoje>0){badge.style.display='inline';badge.textContent=vencendoHoje+' hoje';}
-  const body=document.getElementById('ct-body');
-  if(!lista.length){body.innerHTML='<div style="padding:.75rem 1rem;font-size:12px;color:var(--sub)">Nenhuma nos próximos 7 dias</div>';return;}
-  body.innerHTML=lista.map(c=>{
-    const vencida=c.vencimento<hoje||c.status==='VENCIDA';
-    const ehHoje=c.vencimento===hoje;
-    const cls=vencida?'vencida':ehHoje?'hoje':'prox';
-    const tag=vencida?'<span class="ct-tag vencida">VENCIDA</span>':ehHoje?'<span class="ct-tag hoje">HOJE</span>':'';
+  const vhj=lista.filter(c=>c.vencimento<=hoje).length;
+  if(vhj>0){badge.style.display='inline';badge.textContent=vhj+' hoje';}
+  if(!lista.length){document.getElementById('ct-body').innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Nenhuma nos próximos 7 dias</div>';return;}
+  document.getElementById('ct-body').innerHTML=lista.map(c=>{
+    const venc=c.vencimento<hoje||c.status==='VENCIDA';
+    const ehHj=c.vencimento===hoje;
+    const cls=venc?'v':ehHj?'h':'p';
+    const tag=venc?'<span class="ct-tag v">VENCIDA</span>':ehHj?'<span class="ct-tag h">HOJE</span>':'';
     return`<div class="ct-row">
       <div class="ct-dot ${cls}"></div>
-      <div class="ct-info">
-        <div class="ct-desc">${c.descricao}${tag}</div>
-        <div class="ct-venc">Vence ${fmtDt(c.vencimento)}</div>
-      </div>
+      <div class="ct-info"><div class="ct-desc">${c.descricao}${tag}</div><div class="ct-venc">Vence ${fmtDt(c.vencimento)}</div></div>
       <div class="ct-val">${fmt(c.valor)}</div>
     </div>`;
   }).join('');
 }
 
-// ── LISTA COMPRAS ────────────────────────────────────────────────
+// ── AGENDA ─────────────────────────────────────────
+let AGENDA=[], USUARIOS=[];
+function abreAgenda(){
+  document.getElementById('ag-titulo').value='';
+  document.getElementById('ag-desc').value='';
+  const d=new Date();d.setHours(d.getHours()+1,0,0,0);
+  document.getElementById('ag-data').value=d.toISOString().slice(0,16);
+  document.getElementById('ag-resp').value='';
+  abre('agenda');
+}
+async function loadUsuarios(){
+  const{data}=await db.from('usuarios').select('id,nome').eq('ativo',true);
+  USUARIOS=data||[];
+  document.getElementById('ag-resp').innerHTML='<option value="">Todos</option>'+USUARIOS.map(u=>`<option value="${u.id}">${u.nome}</option>`).join('');
+}
+async function loadAgenda(){
+  const{data}=await db.from('agenda').select('*,usuarios!agenda_responsavel_id_fkey(nome)').eq('concluido',false).order('data_hora',{ascending:true}).limit(12);
+  AGENDA=data||[];renderAgenda();
+}
+function renderAgenda(){
+  const body=document.getElementById('ag-body');
+  if(!AGENDA.length){body.innerHTML='<div class="p-empty"><i class="ti ti-calendar-off"></i>Sem tarefas</div>';return;}
+  const agora=new Date();
+  body.innerHTML=AGENDA.map(a=>{
+    const dt=new Date(a.data_hora);
+    const isHj=a.data_hora.slice(0,10)===hoje,isAtras=dt<agora;
+    const cls=isAtras?'atras':isHj?'hj':'';
+    return`<div class="ag-row ${cls}">
+      <div class="ag-dt"><div class="ag-dia ${cls}">${dt.getDate()}</div><div class="ag-mes">${dt.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</div></div>
+      <div class="ag-vl"></div>
+      <div class="ag-info"><div class="ag-titulo">${a.titulo}</div>${a.usuarios?.nome?`<div class="ag-resp"><i class="ti ti-user"></i>${a.usuarios.nome}</div>`:''}</div>
+      <div class="ag-hr ${cls}">${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`;
+  }).join('');
+}
+async function salvarAgenda(){
+  const titulo=document.getElementById('ag-titulo').value.trim();
+  const data=document.getElementById('ag-data').value;
+  if(!titulo){toast('Informe o título.','err');return;}
+  if(!data){toast('Informe a data.','err');return;}
+  const{error}=await db.from('agenda').insert({titulo:titulo.toUpperCase(),data_hora:new Date(data).toISOString(),responsavel_id:document.getElementById('ag-resp').value||null,descricao:document.getElementById('ag-desc').value.trim().toUpperCase()||null,criado_por_id:USR.id||null,criado_por_nome:USR.nome});
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Agendado!');fecha('agenda');loadAgenda();
+}
+
+// ── COMPRAS ────────────────────────────────────────
 async function loadCompras(){
   const{data}=await db.from('lista_compras').select('*').eq('concluido',false).order('criado_em',{ascending:false}).limit(20);
   const lista=data||[];
-  document.getElementById('lc-count').textContent=lista.length;
+  document.getElementById('lc-cnt').textContent=lista.length;
   const body=document.getElementById('lc-body');
   if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-shopping-bag"></i>Lista vazia</div>';return;}
   body.innerHTML=lista.map(c=>`
     <div class="lc-row">
-      <div class="lc-check" onclick="concluirCompra('${c.id}')" title="Marcar como comprado">
-        <i class="ti ti-check" style="font-size:11px;color:transparent"></i>
-      </div>
+      <div class="lc-chk" onclick="concluirC('${c.id}')"></div>
       <div class="lc-info">
-        <div class="lc-prod">${c.produto}${c.urgencia!=='NORMAL'?`<span class="lc-urg ${c.urgencia}">${c.urgencia==='URGENTE'?'URGENTE':'DEPOIS'}</span>`:''}</div>
+        <div class="lc-prod">${c.produto}${c.urgencia==='URGENTE'?'<span class="lc-urg U">URGENTE</span>':''}</div>
         <div class="lc-forn">${c.fornecedor||'Fornecedor a definir'}${c.observacao?' · '+c.observacao:''}</div>
       </div>
       <span class="lc-qty">${c.quantidade}x</span>
-      <button class="lc-del" onclick="excluirCompra('${c.id}')"><i class="ti ti-x"></i></button>
+      <button class="lc-del" onclick="delC('${c.id}')"><i class="ti ti-x"></i></button>
     </div>`).join('');
 }
-
 async function salvarCompra(){
-  const produto=document.getElementById('lc-produto').value.trim();
-  if(!produto){toast('Informe o produto.','err');return;}
-  const{error}=await db.from('lista_compras').insert({
-    produto:produto.toUpperCase(),
-    quantidade:parseInt(document.getElementById('lc-qtd').value)||1,
-    urgencia:document.getElementById('lc-urgencia').value,
-    fornecedor:document.getElementById('lc-forn').value.trim().toUpperCase()||null,
-    observacao:document.getElementById('lc-obs').value.trim().toUpperCase()||null,
-    criado_por:USR.nome,concluido:false,
-  });
+  const prod=document.getElementById('lc-produto').value.trim();
+  if(!prod){toast('Informe o produto.','err');return;}
+  const{error}=await db.from('lista_compras').insert({produto:prod.toUpperCase(),quantidade:parseInt(document.getElementById('lc-qtd').value)||1,urgencia:document.getElementById('lc-urg').value,fornecedor:document.getElementById('lc-forn').value.trim().toUpperCase()||null,observacao:document.getElementById('lc-obs').value.trim().toUpperCase()||null,criado_por:USR.nome,concluido:false});
   if(error){toast('Erro: '+error.message,'err');return;}
-  toast('Adicionado!');fechar('compra');
+  toast('Adicionado!');fecha('compra');
   ['lc-produto','lc-forn','lc-obs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('lc-qtd').value=1;
   loadCompras();
 }
+async function concluirC(id){await db.from('lista_compras').update({concluido:true}).eq('id',id);toast('Comprado!');loadCompras();}
+async function delC(id){await db.from('lista_compras').delete().eq('id',id);loadCompras();}
 
-async function concluirCompra(id){
-  await db.from('lista_compras').update({concluido:true}).eq('id',id);toast('Comprado!');loadCompras();
-}
-async function excluirCompra(id){
-  await db.from('lista_compras').delete().eq('id',id);loadCompras();
-}
-
-// ── MÉTRICAS ─────────────────────────────────────────────────────
-let META_PERIODO=null;
-
-async function loadMetricas(){
-  const agora=new Date();
-  const inicioSemana=new Date(agora);
-  inicioSemana.setDate(agora.getDate()-agora.getDay());
-  inicioSemana.setHours(0,0,0,0);
-  const inicioMes=new Date(agora.getFullYear(),agora.getMonth(),1);
-
-  const safe=async p=>{try{return await p;}catch{return{data:[],count:0};}};
-
-  const[osHoje,osTotal,vdHoje,vdSemana]=await Promise.all([
-    safe(db.from('ordens_servico').select('id',{count:'exact',head:true})
-      .gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
-    safe(db.from('ordens_servico').select('id',{count:'exact',head:true})
-      .not('status','in','("ENTREGUE","CANCELADA")')),
-    safe(db.from('vendas').select('id',{count:'exact',head:true})
-      .gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
-    safe(db.from('vendas').select('id',{count:'exact',head:true})
-      .gte('criado_em',inicioSemana.toISOString())),
-  ]);
-
-  document.getElementById('m-os-hoje').textContent=osHoje.count??0;
-  document.getElementById('m-os-total').textContent=osTotal.count??0;
-  document.getElementById('m-vd-hoje').textContent=vdHoje.count??0;
-  document.getElementById('m-vd-semana').textContent=vdSemana.count??0;
-
-  // metas
-  await loadMetas(vdSemana.count??0, vdHoje.count??0, inicioMes);
-}
-
-async function loadMetas(vdSemana, vdHoje, inicioMes){
-  const safe=async p=>{try{return await p;}catch{return{data:null};}};
-
-  // carrega metas salvas
-  const[metaSem,metaMen]=await Promise.all([
-    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_semanal').maybeSingle()),
-    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_mensal').maybeSingle()),
-  ]);
-
-  const parseMeta=d=>{try{return JSON.parse(d?.data?.valor||'null');}catch{return null;}};
-  const mSem=parseMeta(metaSem)||{tipo:'vendas',valor:30};
-  const mMen=parseMeta(metaMen)||{tipo:'vendas',valor:120};
-
-  // calcula atual para semana
-  let atualSem=vdSemana;
-  if(mSem.tipo==='os'){
-    const{count}=await db.from('ordens_servico').select('id',{count:'exact',head:true})
-      .eq('status','ENTREGUE')
-      .gte('atualizado_em', (() => {const d=new Date();d.setDate(d.getDate()-d.getDay());d.setHours(0,0,0,0);return d.toISOString();})())
-      .catch(()=>({count:0}));
-    atualSem=count||0;
-  }
-
-  // calcula atual para mês
-  const{count:vdMes}=await db.from('vendas').select('id',{count:'exact',head:true})
-    .gte('criado_em',inicioMes.toISOString()).catch(()=>({count:0}));
-  let atualMen=vdMes||0;
-  if(mMen.tipo==='os'){
-    const{count}=await db.from('ordens_servico').select('id',{count:'exact',head:true})
-      .eq('status','ENTREGUE').gte('atualizado_em',inicioMes.toISOString()).catch(()=>({count:0}));
-    atualMen=count||0;
-  }
-
-  // renderiza semana
-  const pctSem=Math.min(100,Math.round((atualSem/mSem.valor)*100));
-  document.getElementById('m-meta-sw-atual').textContent=atualSem;
-  document.getElementById('m-meta-sw-total').textContent=mSem.valor;
-  document.getElementById('m-meta-sw-unit').textContent=mSem.tipo==='os'?'OS finalizadas':'vendas';
-  document.getElementById('m-pct-sw').textContent=pctSem+'%';
-  setTimeout(()=>document.getElementById('m-bar-sw').style.width=pctSem+'%',100);
-
-  // renderiza mês
-  const pctMen=Math.min(100,Math.round((atualMen/mMen.valor)*100));
-  document.getElementById('m-meta-mn-atual').textContent=atualMen;
-  document.getElementById('m-meta-mn-total').textContent=mMen.valor;
-  document.getElementById('m-meta-mn-unit').textContent=mMen.tipo==='os'?'OS finalizadas':'vendas';
-  document.getElementById('m-pct-mn').textContent=pctMen+'%';
-  setTimeout(()=>document.getElementById('m-bar-mn').style.width=pctMen+'%',100);
-}
-
-// editar meta
-function editarMeta(periodo){
-  META_PERIODO=periodo;
-  document.getElementById('meta-modal-title').textContent=
-    'Meta '+(periodo==='semanal'?'semanal':'mensal');
-  abrirModal('meta');
-}
-
-async function salvarMeta(){
-  const tipo=document.getElementById('meta-tipo').value;
-  const valor=parseInt(document.getElementById('meta-valor').value)||0;
-  if(!valor){toast('Informe um valor.','err');return;}
-  const chave='meta_'+(META_PERIODO==='semanal'?'semanal':'mensal');
-  await db.from('configuracoes_sistema').upsert(
-    {chave,valor:JSON.stringify({tipo,valor})},{onConflict:'chave'}
-  );
-  toast('Meta salva!');fechar('meta');loadMetricas();
-}
-
-// ── INIT ──────────────────────────────────────────────────────────
-Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadAgenda(),loadContas(),loadCompras(),loadMetricas()]).catch(console.error);
+// ── INIT ───────────────────────────────────────────
+Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas()]).catch(console.error);
 setInterval(loadAlertas,60000);
 </script>
 </body>
