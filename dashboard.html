@@ -110,26 +110,57 @@ body{padding-top:102px!important} /* 60 header + 42 nav */
 .mod-config-btn{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sub);cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:10px}
 .mod-config-btn:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
 
-/* ── BUSCA ── */
-.search-wrap{position:relative;margin-bottom:1.1rem}
-.search-row{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:0 16px;height:46px;transition:border-color .2s,box-shadow .2s}
-.search-row:focus-within{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(41,184,194,.1)}
-.search-row i.si{font-size:18px;color:var(--sub);flex-shrink:0}
-.search-row input{flex:1;border:none;outline:none;font-size:14px;font-family:inherit;color:var(--dark);background:transparent;text-transform:uppercase;caret-color:var(--cyan)}
-.search-row input::placeholder{text-transform:none;color:#B5B2A8;font-size:13.5px}
-.search-row .s-kbd{font-size:10px;color:var(--sub);background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 7px;flex-shrink:0}
-.sr-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.13);max-height:440px;overflow-y:auto;z-index:400}
-.sr-drop.open{display:block}
-.sr-sec{padding:8px 14px 4px;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
-.sr-sec::after{content:'';flex:1;height:1px;background:#F0EDE7}
-.sr-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid #F5F4F0;transition:background .1s}
-.sr-item:hover,.sr-item.foc{background:var(--bg)}
-.sr-item:last-child{border-bottom:none}
-.sri{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.sri-p{background:var(--cbg);color:var(--cd)}.sri-pr{background:var(--cbg2);color:var(--coral)}.sri-os{background:var(--abg);color:var(--amber)}.sri-c{background:var(--gbg);color:var(--green)}
-.sr-info{flex:1;min-width:0}.sr-t{font-size:13px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sr-s{font-size:11px;color:var(--sub);margin-top:1px}.sr-m{font-size:11.5px;color:var(--sub);flex-shrink:0}
-.sr-empty{padding:2rem;text-align:center;color:var(--sub)}.sr-empty i{font-size:26px;display:block;margin-bottom:8px;opacity:.3}
-.sr-foot{padding:8px 14px;border-top:1px solid #F0EDE7;font-size:11px;color:var(--sub);text-align:center}
+/* ── MÉTRICAS ── */
+.metrics-bar{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;margin-bottom:1.1rem;
+}
+.mc{
+  background:var(--white);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;cursor:default;
+  transition:box-shadow .2s,transform .18s,border-color .2s;
+  text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:10px;
+  position:relative;overflow:hidden;
+}
+.mc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none}
+.mc:hover{box-shadow:0 6px 22px rgba(0,0,0,.08);transform:translateY(-2px)}
+.mc-os{cursor:pointer}.mc-os::before{background:radial-gradient(circle at 80% -10%,rgba(232,96,74,.12),transparent 60%)}
+.mc-os:hover{border-color:rgba(232,96,74,.35)}.mc-os::before,.mc-os:hover::before{opacity:1}
+.mc-venda::before{background:radial-gradient(circle at 80% -10%,rgba(190,24,93,.10),transparent 60%)}
+.mc-venda{cursor:pointer}.mc-venda:hover{border-color:rgba(190,24,93,.3)}.mc-venda:hover::before{opacity:1}
+.mc-meta::before{background:radial-gradient(circle at 80% -10%,rgba(41,184,194,.10),transparent 60%)}
+.mc-meta:hover::before{opacity:1}
+
+.mc-header{display:flex;align-items:center;gap:8px}
+.mc-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--cbg2);color:var(--coral)}
+.mc-os .mc-icon{background:var(--cbg2);color:var(--coral)}
+.mc-venda .mc-icon{background:var(--rbg);color:var(--red)}
+.mc-icon-meta{background:var(--cbg);color:var(--cd)}
+.mc-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;flex:1}
+.mc-edit{width:22px;height:22px;border-radius:6px;border:none;background:var(--bg);color:var(--sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.mc-edit:hover{background:var(--cyan);color:#fff}
+
+.mc-numbers{display:flex;align-items:center;gap:0}
+.mc-num-group{flex:1;text-align:center}
+.mc-divider{width:1px;height:36px;background:var(--border);flex-shrink:0;margin:0 4px}
+.mc-big{font-family:'Lora',serif;font-size:28px;font-weight:700;color:var(--dark);line-height:1}
+.mc-big.mc-warn{color:var(--amber)}
+.mc-small{font-size:10.5px;color:var(--sub);margin-top:3px}
+
+.mc-meta-wrap{display:flex;flex-direction:column;gap:8px}
+.mc-meta-nums{display:flex;align-items:baseline;gap:3px}
+.mc-meta-atual{font-family:'Lora',serif;font-size:24px;font-weight:700;color:var(--dark)}
+.mc-meta-sep{font-size:16px;color:var(--sub)}
+.mc-meta-total{font-size:15px;font-weight:600;color:var(--sub)}
+.mc-meta-unit{font-size:11px;color:var(--sub);margin-left:4px}
+.mc-bar-wrap{display:flex;align-items:center;gap:8px}
+.mc-bar{flex:1;height:6px;background:var(--border);border-radius:10px;overflow:hidden}
+.mc-bar-fill{height:100%;border-radius:10px;transition:width .8s cubic-bezier(.34,1.2,.64,1)}
+.mc-bar-cyan{background:linear-gradient(90deg,var(--cyan),var(--cd))}
+.mc-bar-green{background:linear-gradient(90deg,#5BB832,var(--green))}
+.mc-pct{font-size:11px;font-weight:800;color:var(--sub);flex-shrink:0;min-width:30px;text-align:right}
+@media(max-width:900px){.metrics-bar{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.metrics-bar{grid-template-columns:1fr}}
 
 /* ── GRID 3 COLUNAS ── */
 .panels{display:grid;grid-template-columns:1fr 1.1fr 0.9fr;gap:14px;align-items:start}
@@ -389,6 +420,33 @@ body{padding-top:102px!important} /* 60 header + 42 nav */
 </div>
 
 <!-- MAIN -->
+<!-- MODAL META -->
+<div class="overlay" id="ov-meta">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <div class="modal-title" id="meta-modal-title">Editar meta</div>
+      <button class="modal-x" onclick="fechar('meta')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Tipo de meta</label>
+        <select id="meta-tipo">
+          <option value="vendas">Número de vendas</option>
+          <option value="os">OS finalizadas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Meta (quantidade)</label>
+        <input type="number" id="meta-valor" min="1" placeholder="Ex: 50"/>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fechar('meta')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarMeta()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
 <main class="main">
 
   <!-- BOLINHAS -->
@@ -408,71 +466,90 @@ body{padding-top:102px!important} /* 60 header + 42 nav */
     </button>
   </div>
 
-  <!-- BUSCA -->
-  <div class="search-wrap">
-    <div class="search-row">
-      <i class="ti ti-search si"></i>
-      <input type="text" id="busca" placeholder="Buscar clientes, OS, produtos, contas... (Ctrl+K)" autocomplete="off" autocorrect="off" spellcheck="false" oninput="onBusca()" onkeydown="onBuscaKey(event)"/>
-      <span class="s-kbd">Ctrl+K</span>
+  <!-- MÉTRICAS + METAS -->
+  <div class="metrics-bar">
+
+    <!-- OS hoje / em aberto -->
+    <a class="mc mc-os" href="os.html">
+      <div class="mc-header">
+        <div class="mc-icon"><i class="ti ti-tool"></i></div>
+        <span class="mc-label">Ordens de Serviço</span>
+      </div>
+      <div class="mc-numbers">
+        <div class="mc-num-group">
+          <div class="mc-big" id="m-os-hoje">—</div>
+          <div class="mc-small">abertas hoje</div>
+        </div>
+        <div class="mc-divider"></div>
+        <div class="mc-num-group">
+          <div class="mc-big mc-warn" id="m-os-total">—</div>
+          <div class="mc-small">em aberto</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Vendas hoje / semana -->
+    <a class="mc mc-venda" href="vendas.html">
+      <div class="mc-header">
+        <div class="mc-icon"><i class="ti ti-shopping-cart"></i></div>
+        <span class="mc-label">Vendas</span>
+      </div>
+      <div class="mc-numbers">
+        <div class="mc-num-group">
+          <div class="mc-big" id="m-vd-hoje">—</div>
+          <div class="mc-small">hoje</div>
+        </div>
+        <div class="mc-divider"></div>
+        <div class="mc-num-group">
+          <div class="mc-big" id="m-vd-semana">—</div>
+          <div class="mc-small">esta semana</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Meta semanal -->
+    <div class="mc mc-meta">
+      <div class="mc-header">
+        <div class="mc-icon mc-icon-meta"><i class="ti ti-target"></i></div>
+        <span class="mc-label">Meta semanal</span>
+        <button class="mc-edit" onclick="editarMeta('semanal')" title="Editar meta"><i class="ti ti-pencil"></i></button>
+      </div>
+      <div class="mc-meta-wrap">
+        <div class="mc-meta-nums">
+          <span class="mc-meta-atual" id="m-meta-sw-atual">—</span>
+          <span class="mc-meta-sep">/</span>
+          <span class="mc-meta-total" id="m-meta-sw-total">—</span>
+          <span class="mc-meta-unit" id="m-meta-sw-unit">vendas</span>
+        </div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar">
+            <div class="mc-bar-fill mc-bar-cyan" id="m-bar-sw" style="width:0%"></div>
+          </div>
+          <span class="mc-pct" id="m-pct-sw">0%</span>
+        </div>
+      </div>
     </div>
-    <div class="sr-drop" id="sr-drop"></div>
-  </div>
 
-  <!-- 3 COLUNAS -->
-  <div class="panels">
-
-    <!-- COL 1: ALERTAS (altura dupla) -->
-    <div class="panel panel-tall">
-      <div class="panel-head">
-        <div class="ph-left">
-          <div class="ph-icon phi-red"><i class="ti ti-bell"></i></div>
-          <span class="ph-title">Alertas OS</span>
-          <span class="ph-count red" id="al-count" style="display:none">0</span>
+    <!-- Meta mensal -->
+    <div class="mc mc-meta">
+      <div class="mc-header">
+        <div class="mc-icon mc-icon-meta"><i class="ti ti-chart-line"></i></div>
+        <span class="mc-label">Meta mensal</span>
+        <button class="mc-edit" onclick="editarMeta('mensal')" title="Editar meta"><i class="ti ti-pencil"></i></button>
+      </div>
+      <div class="mc-meta-wrap">
+        <div class="mc-meta-nums">
+          <span class="mc-meta-atual" id="m-meta-mn-atual">—</span>
+          <span class="mc-meta-sep">/</span>
+          <span class="mc-meta-total" id="m-meta-mn-total">—</span>
+          <span class="mc-meta-unit" id="m-meta-mn-unit">vendas</span>
         </div>
-      </div>
-      <div class="panel-body" id="al-body">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
-      </div>
-    </div>
-
-    <!-- COL 2: AGENDA + CONTAS UNIFICADAS -->
-    <div class="panel panel-tall">
-      <!-- CONTAS NO TOPO (destaque) -->
-      <div class="sec-contas" id="sec-contas">
-        <div class="sec-contas-head">
-          <i class="ti ti-currency-dollar sec-contas-icon"></i>
-          <span class="sec-contas-label">Contas a pagar</span>
-          <span class="sec-contas-badge" id="ct-badge" style="display:none">0 hoje</span>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar">
+            <div class="mc-bar-fill mc-bar-green" id="m-bar-mn" style="width:0%"></div>
+          </div>
+          <span class="mc-pct" id="m-pct-mn">0%</span>
         </div>
-        <div id="ct-body">
-          <div class="p-empty" style="padding:1rem"><i class="ti ti-loader-2 spin"></i></div>
-        </div>
-      </div>
-      <!-- AGENDA EMBAIXO -->
-      <div class="sec-agenda-head">
-        <i class="ti ti-calendar-event sec-agenda-icon"></i>
-        <span class="sec-agenda-label">Agenda</span>
-        <button class="sec-agenda-add" onclick="abrirAgenda()" title="Nova tarefa">
-          <i class="ti ti-plus"></i>
-        </button>
-      </div>
-      <div class="panel-body" id="ag-body" style="flex:1">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
-      </div>
-    </div>
-
-    <!-- COL 3: LISTA DE COMPRAS -->
-    <div class="panel panel-compras">
-      <div class="panel-head">
-        <div class="ph-left">
-          <div class="ph-icon phi-green"><i class="ti ti-shopping-bag"></i></div>
-          <span class="ph-title">Lista de compras</span>
-          <span class="ph-count" id="lc-count">0</span>
-        </div>
-        <button class="ph-add" onclick="abrirModal('compra')"><i class="ti ti-plus"></i></button>
-      </div>
-      <div class="panel-body" id="lc-body">
-        <div class="p-empty"><i class="ti ti-loader-2 spin"></i></div>
       </div>
     </div>
 
@@ -622,6 +699,7 @@ function fechar(id){document.getElementById('ov-'+id)?.classList.remove('open');
 document.getElementById('ov-agenda').addEventListener('click',function(e){if(e.target===this)fechar('agenda');});
 document.getElementById('ov-compra').addEventListener('click',function(e){if(e.target===this)fechar('compra');});
 document.getElementById('ov-config-mods').addEventListener('click',function(e){if(e.target===this)fechar('config-mods');});
+document.getElementById('ov-meta').addEventListener('click',function(e){if(e.target===this)fechar('meta');});
 
 // ── AGENDA ─────────────────────────────────────────────────────
 let AGENDA=[], USUARIOS=[];
@@ -803,60 +881,109 @@ async function excluirCompra(id){
   await db.from('lista_compras').delete().eq('id',id);loadCompras();
 }
 
-// ── BUSCA GLOBAL ──────────────────────────────────────────────────
-let busTimer,RESULTADOS=[],FOCI=-1;
+// ── MÉTRICAS ─────────────────────────────────────────────────────
+let META_PERIODO=null;
 
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('busca').focus();}
-});
+async function loadMetricas(){
+  const agora=new Date();
+  const inicioSemana=new Date(agora);
+  inicioSemana.setDate(agora.getDate()-agora.getDay());
+  inicioSemana.setHours(0,0,0,0);
+  const inicioMes=new Date(agora.getFullYear(),agora.getMonth(),1);
 
-function onBusca(){
-  const q=document.getElementById('busca').value.trim();
-  clearTimeout(busTimer);FOCI=-1;
-  const drop=document.getElementById('sr-drop');
-  if(q.length<2){drop.classList.remove('open');return;}
-  drop.innerHTML='<div class="sr-empty"><i class="ti ti-loader-2 spin" style="font-size:22px"></i></div>';
-  drop.classList.add('open');
-  busTimer=setTimeout(()=>executaBusca(q),300);
-}
+  const safe=async p=>{try{return await p;}catch{return{data:[],count:0};}};
 
-async function executaBusca(q){
-  const t=q.toUpperCase(),doc=q.replace(/\D/g,'');
-  const safe=async p=>{try{return await p;}catch{return{data:[]};}};
-  const[rP,rPr,rOS,rC]=await Promise.all([
-    db.from('pessoas').select('id,nome,documento,tipo_doc,celular,is_cliente').or(`nome.ilike.%${t}%${doc?`,documento.ilike.%${doc}%`:''}`).eq('ativo',true).limit(4),
-    db.from('produtos').select('id,nome,valor_venda,estoque_atual').ilike('nome','%'+t+'%').eq('ativo',true).limit(3),
-    safe(db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status').or(`cliente_nome.ilike.%${t}%,aparelho.ilike.%${t}%`).limit(4)),
-    safe(db.from('contas').select('id,tipo,descricao,valor,status').ilike('descricao','%'+t+'%').limit(3)),
+  const[osHoje,osTotal,vdHoje,vdSemana]=await Promise.all([
+    safe(db.from('ordens_servico').select('id',{count:'exact',head:true})
+      .gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
+    safe(db.from('ordens_servico').select('id',{count:'exact',head:true})
+      .not('status','in','("ENTREGUE","CANCELADA")')),
+    safe(db.from('vendas').select('id',{count:'exact',head:true})
+      .gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
+    safe(db.from('vendas').select('id',{count:'exact',head:true})
+      .gte('criado_em',inicioSemana.toISOString())),
   ]);
-  RESULTADOS=[];let html='';
-  const p=rP.data||[];
-  if(p.length){html+='<div class="sr-sec">Pessoas</div>';p.forEach(x=>{const url=`pessoa-novo.html?id=${x.id}`;RESULTADOS.push({url});html+=`<div class="sr-item" data-i="${RESULTADOS.length-1}" onclick="location.href='${url}'"><div class="sri sri-p"><i class="ti ti-user"></i></div><div class="sr-info"><div class="sr-t">${x.nome}</div><div class="sr-s">${x.tipo_doc}: ${x.documento||''}</div></div><div class="sr-m">${x.is_cliente?'CLI':''}</div></div>`;});}
-  const pr=rPr.data||[];
-  if(pr.length){html+='<div class="sr-sec">Produtos</div>';pr.forEach(x=>{const url=`produto-novo.html?id=${x.id}`;RESULTADOS.push({url});html+=`<div class="sr-item" data-i="${RESULTADOS.length-1}" onclick="location.href='${url}'"><div class="sri sri-pr"><i class="ti ti-package"></i></div><div class="sr-info"><div class="sr-t">${x.nome}</div><div class="sr-s">Est: ${x.estoque_atual||0}</div></div><div class="sr-m">${fmt(x.valor_venda)}</div></div>`;});}
-  const os=rOS.data||[];
-  if(os.length){html+='<div class="sr-sec">OS</div>';os.forEach(x=>{const url=`os-nova.html?id=${x.id}`;RESULTADOS.push({url});html+=`<div class="sr-item" data-i="${RESULTADOS.length-1}" onclick="location.href='${url}'"><div class="sri sri-os"><i class="ti ti-tool"></i></div><div class="sr-info"><div class="sr-t">OS #${String(x.numero).padStart(4,'0')} — ${x.cliente_nome}</div><div class="sr-s">${x.aparelho||''} · ${x.status}</div></div></div>`;});}
-  const ct=rC.data||[];
-  if(ct.length){html+='<div class="sr-sec">Contas</div>';ct.forEach(x=>{RESULTADOS.push({url:'contas.html'});html+=`<div class="sr-item" data-i="${RESULTADOS.length-1}" onclick="location.href='contas.html'"><div class="sri sri-c"><i class="ti ti-currency-dollar"></i></div><div class="sr-info"><div class="sr-t">${x.descricao}</div><div class="sr-s">${x.tipo==='PAGAR'?'A Pagar':'A Receber'}</div></div><div class="sr-m">${fmt(x.valor)}</div></div>`;});}
-  if(!RESULTADOS.length)html='<div class="sr-empty"><i class="ti ti-search-off"></i>Sem resultados</div>';
-  else html+='<div class="sr-foot">↑ ↓ navegar · Enter abrir · ESC fechar</div>';
-  document.getElementById('sr-drop').innerHTML=html;
+
+  document.getElementById('m-os-hoje').textContent=osHoje.count??0;
+  document.getElementById('m-os-total').textContent=osTotal.count??0;
+  document.getElementById('m-vd-hoje').textContent=vdHoje.count??0;
+  document.getElementById('m-vd-semana').textContent=vdSemana.count??0;
+
+  // metas
+  await loadMetas(vdSemana.count??0, vdHoje.count??0, inicioMes);
 }
 
-function onBuscaKey(e){
-  const rows=document.querySelectorAll('.sr-item');
-  if(e.key==='Escape'){document.getElementById('sr-drop').classList.remove('open');document.getElementById('busca').blur();return;}
-  if(!rows.length) return;
-  if(e.key==='ArrowDown'){e.preventDefault();FOCI=Math.min(FOCI+1,rows.length-1);}
-  else if(e.key==='ArrowUp'){e.preventDefault();FOCI=Math.max(FOCI-1,0);}
-  else if(e.key==='Enter'){e.preventDefault();const r=rows[FOCI];if(r){const i=+r.dataset.i;if(RESULTADOS[i])location.href=RESULTADOS[i].url;}}
-  rows.forEach((r,i)=>r.classList.toggle('foc',i===FOCI));
-  if(FOCI>=0)rows[FOCI].scrollIntoView({block:'nearest'});
+async function loadMetas(vdSemana, vdHoje, inicioMes){
+  const safe=async p=>{try{return await p;}catch{return{data:null};}};
+
+  // carrega metas salvas
+  const[metaSem,metaMen]=await Promise.all([
+    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_semanal').maybeSingle()),
+    safe(db.from('configuracoes_sistema').select('valor').eq('chave','meta_mensal').maybeSingle()),
+  ]);
+
+  const parseMeta=d=>{try{return JSON.parse(d?.data?.valor||'null');}catch{return null;}};
+  const mSem=parseMeta(metaSem)||{tipo:'vendas',valor:30};
+  const mMen=parseMeta(metaMen)||{tipo:'vendas',valor:120};
+
+  // calcula atual para semana
+  let atualSem=vdSemana;
+  if(mSem.tipo==='os'){
+    const{count}=await db.from('ordens_servico').select('id',{count:'exact',head:true})
+      .eq('status','ENTREGUE')
+      .gte('atualizado_em', (() => {const d=new Date();d.setDate(d.getDate()-d.getDay());d.setHours(0,0,0,0);return d.toISOString();})())
+      .catch(()=>({count:0}));
+    atualSem=count||0;
+  }
+
+  // calcula atual para mês
+  const{count:vdMes}=await db.from('vendas').select('id',{count:'exact',head:true})
+    .gte('criado_em',inicioMes.toISOString()).catch(()=>({count:0}));
+  let atualMen=vdMes||0;
+  if(mMen.tipo==='os'){
+    const{count}=await db.from('ordens_servico').select('id',{count:'exact',head:true})
+      .eq('status','ENTREGUE').gte('atualizado_em',inicioMes.toISOString()).catch(()=>({count:0}));
+    atualMen=count||0;
+  }
+
+  // renderiza semana
+  const pctSem=Math.min(100,Math.round((atualSem/mSem.valor)*100));
+  document.getElementById('m-meta-sw-atual').textContent=atualSem;
+  document.getElementById('m-meta-sw-total').textContent=mSem.valor;
+  document.getElementById('m-meta-sw-unit').textContent=mSem.tipo==='os'?'OS finalizadas':'vendas';
+  document.getElementById('m-pct-sw').textContent=pctSem+'%';
+  setTimeout(()=>document.getElementById('m-bar-sw').style.width=pctSem+'%',100);
+
+  // renderiza mês
+  const pctMen=Math.min(100,Math.round((atualMen/mMen.valor)*100));
+  document.getElementById('m-meta-mn-atual').textContent=atualMen;
+  document.getElementById('m-meta-mn-total').textContent=mMen.valor;
+  document.getElementById('m-meta-mn-unit').textContent=mMen.tipo==='os'?'OS finalizadas':'vendas';
+  document.getElementById('m-pct-mn').textContent=pctMen+'%';
+  setTimeout(()=>document.getElementById('m-bar-mn').style.width=pctMen+'%',100);
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))document.getElementById('sr-drop').classList.remove('open');});
+
+// editar meta
+function editarMeta(periodo){
+  META_PERIODO=periodo;
+  document.getElementById('meta-modal-title').textContent=
+    'Meta '+(periodo==='semanal'?'semanal':'mensal');
+  abrirModal('meta');
+}
+
+async function salvarMeta(){
+  const tipo=document.getElementById('meta-tipo').value;
+  const valor=parseInt(document.getElementById('meta-valor').value)||0;
+  if(!valor){toast('Informe um valor.','err');return;}
+  const chave='meta_'+(META_PERIODO==='semanal'?'semanal':'mensal');
+  await db.from('configuracoes_sistema').upsert(
+    {chave,valor:JSON.stringify({tipo,valor})},{onConflict:'chave'}
+  );
+  toast('Meta salva!');fechar('meta');loadMetricas();
+}
 
 // ── INIT ──────────────────────────────────────────────────────────
-Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadAgenda(),loadContas(),loadCompras()]).catch(console.error);
+Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadAgenda(),loadContas(),loadCompras(),loadMetricas()]).catch(console.error);
 setInterval(loadAlertas,60000);
 </script>
 </body>
