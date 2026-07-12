@@ -1,50 +1,159 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ordens de Serviço — Dottec</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OS — Dottec</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
+:root{
+  --cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;
+  --coral:#E8604A;--cbg2:#FBE9E5;
+  --dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;
+  --border:#EAE7DF;--bg:#EDEAE3;--white:#fff;
+  --amber:#9A6000;--abg:#FBEEDB;
+  --green:#3B6D11;--gbg:#EAF3DE;
+  --red:#DC2626;--rbg:#FEF2F2;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
-/* TOPBAR */
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
-.back{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);text-decoration:none;flex-shrink:0;transition:background .15s}
-.back:hover{background:#E2DFD6}
-.page-title{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark);flex:1}
-.btn{height:38px;padding:0 16px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s;text-decoration:none}
-.btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cd)}
-/* CONTENT */
-.content{max-width:1200px;margin:0 auto;padding:1.5rem 1.5rem}
-/* FILTROS */
-.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
-.search-box{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:0 12px;height:38px}
-.search-box:focus-within{border-color:var(--cyan)}
-.search-box i{font-size:16px;color:var(--sub)}
-.search-box input{border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--dark);background:transparent;flex:1;text-transform:uppercase}
-.search-box input::placeholder{text-transform:none;color:#B5B2A8}
-.status-filter{display:flex;gap:5px;flex-wrap:wrap}
-.sf{height:32px;padding:0 11px;border-radius:7px;border:1px solid var(--border);background:var(--white);font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
-.sf.active{background:var(--dark);color:#fff;border-color:var(--dark)}
-.sf.crit{border-color:var(--red)}.sf.alta{border-color:var(--amber)}
-/* TABELA */
-.table-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
+
+/* ── HEADER ─────────────────────────── */
+.header{
+  height:60px;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;
+  box-shadow:0 1px 6px rgba(0,0,0,.05);
+}
+.h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.h-logo-circle{
+  width:38px;height:38px;border-radius:50%;overflow:hidden;
+  background:linear-gradient(135deg,#29B8C2,#1E9099);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(41,184,194,.3);flex-shrink:0;
+}
+.h-logo-circle img{width:100%;height:100%;object-fit:cover;display:block}
+.h-logo-circle i{font-size:18px;color:#fff}
+.h-logo-text .h-logo-nome{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);line-height:1.1}
+.h-logo-text .h-logo-sub{font-size:9.5px;color:var(--sub)}
+.h-divider{width:1px;height:24px;background:var(--border);flex-shrink:0}
+.h-page{display:flex;align-items:center;gap:6px}
+.h-page-icon{width:28px;height:28px;border-radius:8px;background:var(--cbg2);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.h-page-name{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.h-page-cnt{font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;background:var(--bg);color:var(--sub);border:1px solid var(--border);margin-left:4px}
+.h-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.h-btn{height:34px;padding:0 14px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s;text-decoration:none;white-space:nowrap}
+.h-btn-cyan{background:var(--cyan);color:#fff}.h-btn-cyan:hover{background:var(--cd)}
+.h-saud{font-size:12px;color:var(--sub);flex-shrink:0}
+
+/* ── BARRA DE MÓDULOS ────────────────── */
+.mods-bar{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.mods-inner{
+  flex:1;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(56px,1fr));
+  gap:4px;justify-items:center;
+}
+.mod-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:inherit;cursor:pointer;width:100%;max-width:68px}
+.mod-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;transition:transform .2s cubic-bezier(.34,1.5,.64,1),box-shadow .2s}
+.mod-ball:hover .mod-icon{transform:translateY(-3px) scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.mod-ball.active .mod-icon{box-shadow:0 0 0 2.5px var(--cyan),0 4px 12px rgba(41,184,194,.25)}
+.mod-lbl{font-size:8.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap}
+.mod-ball.active .mod-lbl{color:var(--cyan)}
+.mod-bdg{position:absolute;top:-2px;right:-2px;width:13px;height:13px;border-radius:50%;background:var(--red);border:2px solid var(--white);font-size:7px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center}
+.mod-more-wrap{position:relative;flex-shrink:0}
+.mod-more-btn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.mod-more-icon{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub);transition:all .15s}
+.mod-more-icon:hover{background:#E2DFD6}
+.mod-more-lbl{font-size:8.5px;font-weight:700;color:var(--sub)}
+.mod-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:300;min-width:170px}
+.mod-more-drop.open{display:block}
+.mod-more-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
+.mod-more-item:hover{background:var(--bg)}
+.mod-more-item i{font-size:15px;width:18px;text-align:center}
+
+/* ── BUSCA ────────────────────────────── */
+.search-bar{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:8px 20px;flex-shrink:0;
+}
+.search-box{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:0 14px;height:40px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.search-box i{font-size:16px;color:var(--sub);flex-shrink:0}
+.search-box input{flex:1;border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--dark);background:transparent;text-transform:uppercase;caret-color:var(--cyan)}
+.search-box input::placeholder{text-transform:none;color:#B5B2A8;font-size:13px}
+.search-cnt{font-size:11px;color:var(--sub);flex-shrink:0;white-space:nowrap}
+
+/* ── FILTROS STATUS ────────────────────── */
+.status-bar{
+  background:var(--white);border-bottom:2px solid var(--border);
+  padding:0 20px;display:flex;align-items:center;gap:0;flex-shrink:0;
+  overflow-x:auto;
+}
+.status-bar::-webkit-scrollbar{display:none}
+.sf{
+  height:42px;padding:0 14px;border:none;background:transparent;
+  font-family:'Figtree',sans-serif;font-size:12.5px;font-weight:600;
+  color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  transition:color .15s,border-color .15s;flex-shrink:0;
+  margin-bottom:-2px;
+}
+.sf:hover{color:var(--dark)}
+.sf.active{color:var(--dark);border-bottom-color:var(--cyan)}
+.sf-cnt{
+  font-size:9.5px;font-weight:800;padding:2px 6px;
+  border-radius:10px;background:var(--bg);color:var(--sub);
+  border:1px solid var(--border);transition:all .15s;
+}
+.sf.active .sf-cnt{background:var(--dark);color:#fff;border-color:var(--dark)}
+/* cores dos contadores por prioridade */
+.sf-cnt.crit{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.2)}
+.sf-cnt.alta{background:var(--abg);color:var(--amber);border-color:rgba(154,96,0,.2)}
+.sf-cnt.cyan{background:var(--cbg);color:var(--cd);border-color:rgba(41,184,194,.2)}
+.sf-cnt.green{background:var(--gbg);color:var(--green);border-color:rgba(59,109,17,.2)}
+
+/* ── TABELA ────────────────────────────── */
+.body{flex:1;overflow-y:auto;padding:16px 20px 24px}
+.table-wrap{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
-thead th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:11px 14px;border-bottom:1px solid var(--border);background:#FAFAF7;white-space:nowrap}
-tbody td{padding:11px 14px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
+thead th{
+  text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--sub);
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  background:#FAFAF7;white-space:nowrap;
+}
+tbody td{padding:11px 14px;font-size:13px;color:var(--text);border-bottom:1px solid #F2F0EA}
 tbody tr:last-child td{border-bottom:none}
 tbody tr{transition:background .1s;cursor:pointer}
 tbody tr:hover{background:#FAFAF7}
-.num{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark)}
-.cliente-nome{font-weight:600;color:var(--dark)}
-.aparelho-txt{font-size:12px;color:var(--sub);margin-top:1px}
-/* BADGE STATUS */
-.status-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-block}
+.td-num{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);white-space:nowrap}
+.td-cliente{font-weight:600;color:var(--dark)}
+.td-ap{font-size:11px;color:var(--sub);margin-top:2px}
+.td-def{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--sub);font-size:12px}
+.td-tempo{font-size:11.5px;color:var(--sub);white-space:nowrap}
+.td-actions{display:flex;gap:4px;justify-content:flex-end}
+.act{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;flex-shrink:0}
+.act-edit{background:var(--bg);color:var(--sub)}.act-edit:hover{background:var(--cbg);color:var(--cd)}
+.act-del{background:var(--bg);color:var(--sub)}.act-del:hover{background:var(--rbg);color:var(--red)}
+.act-cancel{background:var(--bg);color:var(--sub)}.act-cancel:hover{background:var(--abg);color:var(--amber)}
+.tf{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:space-between}
+.empty{padding:3rem;text-align:center;color:var(--sub)}
+.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.2}
+
+/* badges */
+.sb{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
 .sb-aberta{background:var(--cbg);color:var(--cd)}
 .sb-execucao{background:var(--abg);color:var(--amber)}
 .sb-orcamento{background:var(--rbg);color:var(--red);animation:pulse 1.4s ease infinite}
@@ -53,129 +162,370 @@ tbody tr:hover{background:#FAFAF7}
 .sb-pronta{background:var(--gbg);color:var(--green);animation:pulse 1.4s ease infinite}
 .sb-entregue{background:#F1F5F9;color:#64748B}
 .sb-cancelada{background:#F8F8F7;color:#94938E}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.tempo{font-size:12px;color:var(--sub)}
-.tf{padding:11px 14px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub);display:flex;align-items:center;justify-content:space-between}
-.empty{padding:3rem;text-align:center;color:var(--sub)}
-.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.25}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
-</style>
 
-<!-- NAV DOTTEC -->
-<script>
-const PAGE_ID = "os";
-const BREADCRUMB = [];
-</script>
-<script src="_nav.js"></script>
+/* toast */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+
+/* modal confirm */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.modal-head-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.modal-title{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.modal-body{padding:1rem 1.25rem;font-size:13.5px;color:var(--text);line-height:1.5}
+.modal-body strong{color:var(--dark)}
+.modal-foot{padding:.85rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-red{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--red);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-amber{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+</style>
 </head>
 <body>
 
-<main class="content">
-  <div class="filter-bar">
-    <div class="search-box">
-      <i class="ti ti-search"></i>
-      <input type="text" id="busca" placeholder="Buscar por cliente, aparelho, número..." oninput="filtrar()"/>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL CONFIRMAR EXCLUSÃO -->
+<div class="overlay" id="ov-del">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon" style="background:var(--rbg);color:var(--red)"><i class="ti ti-trash"></i></div>
+      <div class="modal-title">Excluir OS</div>
     </div>
-    <div class="status-filter" id="status-filters"></div>
+    <div class="modal-body">Tem certeza que deseja excluir a <strong id="del-num"></strong>? Esta ação não pode ser desfeita.</div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fechaModal('del')">Cancelar</button>
+      <button class="btn-red" onclick="confirmarExcluir()"><i class="ti ti-trash"></i> Excluir</button>
+    </div>
   </div>
-  <div class="table-card">
+</div>
+
+<!-- MODAL CANCELAR OS -->
+<div class="overlay" id="ov-cancel">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon" style="background:var(--abg);color:var(--amber)"><i class="ti ti-ban"></i></div>
+      <div class="modal-title">Cancelar OS</div>
+    </div>
+    <div class="modal-body">Deseja cancelar a <strong id="cancel-num"></strong>? Ela continuará visível na listagem com status CANCELADA.</div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fechaModal('cancel')">Voltar</button>
+      <button class="btn-amber" onclick="confirmarCancelar()"><i class="ti ti-ban"></i> Cancelar OS</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER FIXO -->
+<header class="header">
+  <a class="h-logo" href="dashboard.html">
+    <div class="h-logo-circle">
+      <img src="logo.png" alt="Dottec" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center"><i class="ti ti-device-laptop"></i></span>
+    </div>
+    <div class="h-logo-text">
+      <div class="h-logo-nome">Dottec</div>
+      <div class="h-logo-sub">Assistência Inteligente</div>
+    </div>
+  </a>
+  <div class="h-divider"></div>
+  <div class="h-page">
+    <div class="h-page-icon"><i class="ti ti-tool"></i></div>
+    <span class="h-page-name">Ordens de Serviço</span>
+    <span class="h-page-cnt" id="h-total">—</span>
+  </div>
+  <div class="h-right">
+    <span class="h-saud" id="h-saud">—</span>
+    <a class="h-btn h-btn-cyan" href="os-nova.html"><i class="ti ti-plus"></i> Nova OS</a>
+  </div>
+</header>
+
+<!-- BOLINHAS FIXAS -->
+<div class="mods-bar">
+  <div class="mods-inner" id="mods-inner">
+    <div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div>
+  </div>
+  <div class="mod-more-wrap" id="more-wrap" style="display:none">
+    <div class="mod-more-btn" onclick="toggleMore(event)">
+      <div class="mod-more-icon"><i class="ti ti-dots"></i></div>
+      <span class="mod-more-lbl">mais</span>
+    </div>
+    <div class="mod-more-drop" id="more-drop"></div>
+  </div>
+</div>
+
+<!-- BUSCA -->
+<div class="search-bar">
+  <div class="search-box">
+    <i class="ti ti-search"></i>
+    <input type="text" id="busca" placeholder="Buscar por Nº, cliente ou dispositivo..." autocomplete="off" oninput="filtrar()"/>
+    <span class="search-cnt" id="search-cnt"></span>
+  </div>
+</div>
+
+<!-- FILTROS STATUS (abas) -->
+<div class="status-bar" id="status-bar">
+  <button class="sf active" onclick="setFiltro('')" id="sf-todos">
+    Todos <span class="sf-cnt" id="cnt-todos">0</span>
+  </button>
+</div>
+
+<!-- TABELA -->
+<div class="body">
+  <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th style="width:70px">Nº</th>
-          <th>Cliente / Aparelho</th>
+          <th style="width:72px">Nº</th>
+          <th>Cliente / Dispositivo</th>
           <th>Defeito</th>
           <th>Status</th>
           <th>Técnico</th>
           <th>Abertura</th>
-          <th style="width:80px">Tempo</th>
+          <th style="width:70px">Tempo</th>
+          <th style="width:90px"></th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="7"><div class="empty"><i class="ti ti-loader-2 spin"></i></div></td></tr>
+        <tr><td colspan="8"><div class="empty"><i class="ti ti-loader-2 spin"></i></div></td></tr>
       </tbody>
     </table>
     <div class="tf"><span id="tf-count">—</span><span>Dottec · OS</span></div>
   </div>
-</main>
+</div>
+
 <script>
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-const db=supabase.createClient(SB_URL,SB_KEY);
+if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
+const db=window._dottecDb;
+
+let USR={nome:'Gaza',perfil:'ADMIN',id:null};
+try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
+
 const fmtDt=d=>new Date(d).toLocaleDateString('pt-BR');
 const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 
-let TODOS=[], STATUS_CFG=[], FILTRO_STATUS='';
-
-const STATUS_CLASS={
+const SB_CLASS={
   'ABERTA':'sb-aberta','EM EXECUÇÃO':'sb-execucao',
   'PASSAR ORÇAMENTO':'sb-orcamento','AGUARDANDO APROVAÇÃO':'sb-aguardando',
   'AGUARDANDO PEÇA':'sb-peca','PRONTA':'sb-pronta',
   'ENTREGUE':'sb-entregue','CANCELADA':'sb-cancelada',
 };
 
+const SB_CNT_CLASS={
+  'PASSAR ORÇAMENTO':'crit','PRONTA':'crit',
+  'AGUARDANDO APROVAÇÃO':'alta','EM EXECUÇÃO':'alta',
+  'ABERTA':'cyan','AGUARDANDO PEÇA':'cyan',
+  'ENTREGUE':'green','CANCELADA':'',
+};
+
+let TODOS=[], STATUS_CFG=[], FILTRO='', OS_ID_ACTION=null;
+
+// ── SAUDAÇÃO ───────────────────────────
+const h=new Date().getHours();
+document.getElementById('h-saud').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', '+USR.nome;
+
+// ── MÓDULOS ────────────────────────────
+const MODS=[
+  {id:'os',         lbl:'OS',         ico:'ti-tool',            href:'os.html',           bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'venda',      lbl:'Venda',      ico:'ti-shopping-cart',   href:'venda.html',         bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
+  {id:'caixa',      lbl:'Caixa',      ico:'ti-wallet',          href:'caixa.html',         bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'financeiro', lbl:'Financeiro', ico:'ti-currency-dollar', href:'financeiro.html',    bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'orcamentos', lbl:'Orçamentos', ico:'ti-calculator',      href:'orcamentos.html',    bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',c:'#0E7490'},
+  {id:'cadastro',   lbl:'Cadastro',   ico:'ti-users',           href:'pessoas.html',       bg:'linear-gradient(135deg,#E3F4F5,#B8EDF0)',c:'#1E9099'},
+  {id:'produtos',   lbl:'Produtos',   ico:'ti-package',         href:'produtos.html',      bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'compras',    lbl:'Compras',    ico:'ti-truck-delivery',  href:'compras.html',       bg:'linear-gradient(135deg,#EEF0F5,#D4D9E8)',c:'#3A4A6B'},
+  {id:'fiscal',     lbl:'Fiscal',     ico:'ti-file-invoice',    href:'fiscal.html',        bg:'linear-gradient(135deg,#EEEAF8,#D8D0F4)',c:'#5B3FA6'},
+  {id:'config',     lbl:'Config.',    ico:'ti-settings',        href:'configuracoes.html', bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
+];
+let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
+
+async function loadMods(){
+  if(USR.id){
+    const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_u_'+USR.id).maybeSingle().catch(()=>({data:null}));
+    if(data?.valor){try{ATIVOS=JSON.parse(data.valor);}catch{}}
+  }
+  const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
+  const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
+  document.getElementById('mods-inner').innerHTML=ativos.map(m=>`
+    <a class="mod-ball${m.id==='os'?' active':''}" href="${m.href}">
+      <div class="mod-icon" style="background:${m.bg}">
+        <i class="ti ${m.ico}" style="color:${m.c}"></i>
+      </div>
+      <span class="mod-lbl">${m.lbl}</span>
+    </a>`).join('');
+  const mw=document.getElementById('more-wrap');
+  if(resto.length){
+    mw.style.display='block';
+    document.getElementById('more-drop').innerHTML=resto.map(m=>`
+      <a class="mod-more-item" href="${m.href}">
+        <i class="ti ${m.ico}" style="color:${m.c}"></i>${m.lbl}
+      </a>`).join('');
+  } else mw.style.display='none';
+}
+
+function toggleMore(e){e.stopPropagation();document.getElementById('more-drop').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('more-drop')?.classList.remove('open'));
+
+// ── LOAD OS ───────────────────────────
 async function load(){
   const[{data:os},{data:sc}]=await Promise.all([
-    db.from('ordens_servico').select('*,usuarios!ordens_servico_tecnico_id_fkey(nome)').order('numero',{ascending:false}).limit(200),
-    db.from('status_config').select('nome,alerta_prioridade,gera_alerta').eq('modulo','OS').eq('ativo',true).order('ordem'),
+    db.from('ordens_servico')
+      .select('id,numero,cliente_nome,aparelho,defeito,status,tecnico_nome,criado_em,atualizado_em')
+      .order('criado_em',{ascending:false})
+      .limit(200),
+    db.from('status_config').select('nome,alerta_prioridade,cor').eq('modulo','OS').eq('ativo',true).order('ordem'),
   ]);
-  TODOS=os||[];STATUS_CFG=sc||[];
-  renderFilters();filtrar();
+  TODOS=os||[];
+  STATUS_CFG=sc||[];
+  document.getElementById('h-total').textContent=TODOS.length;
+  buildStatusBar();
+  render();
 }
 
-function renderFilters(){
-  const div=document.getElementById('status-filters');
-  const todos=[{nome:'TODOS'},...STATUS_CFG];
-  div.innerHTML=todos.map(s=>{
-    const al=s.gera_alerta&&s.alerta_prioridade;
-    const cls=al==='CRITICA'?'crit':al==='ALTA'?'alta':'';
-    return`<button class="sf ${cls}${FILTRO_STATUS===s.nome||(!FILTRO_STATUS&&s.nome==='TODOS')?' active':''}" onclick="setStatus('${s.nome==='TODOS'?'':s.nome}')">${s.nome}</button>`;
-  }).join('');
+function buildStatusBar(){
+  // conta por status
+  const cnts={};
+  TODOS.forEach(o=>{cnts[o.status]=(cnts[o.status]||0)+1;});
+  const total=TODOS.length;
+
+  let html=`<button class="sf${FILTRO===''?' active':''}" onclick="setFiltro('')" id="sf-todos">
+    Todos <span class="sf-cnt">${total}</span>
+  </button>`;
+
+  // ordena pelos definidos no banco, depois os que não estão no cfg
+  const statusOrdem=STATUS_CFG.map(s=>s.nome);
+  const statusUnicos=[...new Set([...statusOrdem,...Object.keys(cnts)])];
+
+  statusUnicos.forEach(s=>{
+    const cnt=cnts[s]||0;
+    if(cnt===0) return; // não mostra status sem OS
+    const cfg=STATUS_CFG.find(x=>x.nome===s);
+    const prioridade=cfg?.alerta_prioridade?.toLowerCase()||'';
+    const cntCls=prioridade==='critica'?'crit':prioridade==='alta'?'alta':SB_CNT_CLASS[s]||'';
+    const ativo=FILTRO===s?' active':'';
+    html+=`<button class="sf${ativo}" onclick="setFiltro('${s}')">
+      ${s} <span class="sf-cnt ${cntCls}">${cnt}</span>
+    </button>`;
+  });
+
+  document.getElementById('status-bar').innerHTML=html;
 }
 
-function setStatus(s){FILTRO_STATUS=s;renderFilters();filtrar();}
+function setFiltro(s){
+  FILTRO=s;
+  buildStatusBar();
+  render();
+}
 
-function filtrar(){
+function filtrar(){render();}
+
+function render(){
   const q=document.getElementById('busca').value.trim().toUpperCase();
   let lista=TODOS;
-  if(FILTRO_STATUS) lista=lista.filter(o=>o.status===FILTRO_STATUS);
+
+  if(FILTRO) lista=lista.filter(o=>o.status===FILTRO);
   if(q) lista=lista.filter(o=>
-    o.cliente_nome?.toUpperCase().includes(q)||
-    o.aparelho?.toUpperCase().includes(q)||
-    o.modelo?.toUpperCase().includes(q)||
-    String(o.numero).includes(q)
+    String(o.numero).padStart(4,'0').includes(q)||
+    (o.cliente_nome||'').toUpperCase().includes(q)||
+    (o.aparelho||'').toUpperCase().includes(q)||
+    (o.defeito||'').toUpperCase().includes(q)
   );
-  renderTable(lista);
-}
 
-function renderTable(lista){
-  const tb=document.getElementById('tbody');
+  document.getElementById('search-cnt').textContent=q?lista.length+' resultado'+(lista.length!==1?'s':''):'';
+  document.getElementById('tf-count').textContent=lista.length+' OS';
+
   if(!lista.length){
-    tb.innerHTML='<tr><td colspan="7"><div class="empty"><i class="ti ti-tool"></i>Nenhuma OS encontrada.</div></td></tr>';
-    document.getElementById('tf-count').textContent='0 registros';return;
+    document.getElementById('tbody').innerHTML=`<tr><td colspan="8"><div class="empty"><i class="ti ti-search-off"></i>${q?'Nenhuma OS encontrada para "'+q+'"':'Nenhuma OS neste status'}</div></td></tr>`;
+    return;
   }
-  tb.innerHTML=lista.map(o=>{
-    const cls=STATUS_CLASS[o.status]||'sb-aberta';
-    return`<tr onclick="window.location.href='os-nova.html?id=${o.id}'">
-      <td><span class="num">#${String(o.numero).padStart(4,'0')}</span></td>
+
+  const isAdmin=USR.perfil==='ADMIN';
+
+  document.getElementById('tbody').innerHTML=lista.map(o=>`
+    <tr onclick="irOS('${o.id}',event)">
+      <td><span class="td-num">#${String(o.numero).padStart(4,'0')}</span></td>
       <td>
-        <div class="cliente-nome">${o.cliente_nome}</div>
-        <div class="aparelho-txt">${o.aparelho||''}${o.modelo?' · '+o.modelo:''}</div>
+        <div class="td-cliente">${o.cliente_nome||'—'}</div>
+        <div class="td-ap">${o.aparelho||''}</div>
       </td>
-      <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--sub)">${o.defeito||'—'}</td>
-      <td><span class="status-badge ${cls}">${o.status}</span></td>
-      <td style="font-size:12.5px;color:var(--sub)">${o.usuarios?.nome||'—'}</td>
-      <td class="tempo">${fmtDt(o.criado_em)}</td>
-      <td class="tempo">${tempo(o.criado_em)}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('tf-count').textContent=lista.length+' registro(s)';
+      <td><div class="td-def">${o.defeito||'—'}</div></td>
+      <td><span class="sb ${SB_CLASS[o.status]||''}">${o.status}</span></td>
+      <td style="font-size:12px;color:var(--sub)">${o.tecnico_nome||'—'}</td>
+      <td class="td-tempo">${fmtDt(o.criado_em)}</td>
+      <td class="td-tempo">${tempo(o.criado_em)}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="td-actions">
+          <button class="act act-edit" onclick="irOS('${o.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+          ${isAdmin
+            ? `<button class="act act-del" onclick="confirDeleteOS('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Excluir"><i class="ti ti-trash"></i></button>`
+            : o.status!=='CANCELADA'
+              ? `<button class="act act-cancel" onclick="confirCancelOS('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Cancelar"><i class="ti ti-ban"></i></button>`
+              : ''
+          }
+        </div>
+      </td>
+    </tr>`).join('');
 }
 
+function irOS(id,e){
+  if(e&&e.target.closest('.act')) return;
+  location.href='os-nova.html?id='+id;
+}
+
+// ── AÇÕES ─────────────────────────────
+function toast(msg,t='ok'){
+  const el=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  el.className='toast '+t+' show';
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+function fechaModal(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+
+function confirDeleteOS(id,num){
+  OS_ID_ACTION=id;
+  document.getElementById('del-num').textContent=num;
+  document.getElementById('ov-del').classList.add('open');
+}
+async function confirmarExcluir(){
+  const{error}=await db.from('ordens_servico').delete().eq('id',OS_ID_ACTION);
+  fechaModal('del');
+  if(error){toast('Erro ao excluir.','err');return;}
+  toast('OS excluída.');
+  TODOS=TODOS.filter(o=>o.id!==OS_ID_ACTION);
+  buildStatusBar();render();
+}
+
+function confirCancelOS(id,num){
+  OS_ID_ACTION=id;
+  document.getElementById('cancel-num').textContent=num;
+  document.getElementById('ov-cancel').classList.add('open');
+}
+async function confirmarCancelar(){
+  const{error}=await db.from('ordens_servico').update({status:'CANCELADA'}).eq('id',OS_ID_ACTION);
+  fechaModal('cancel');
+  if(error){toast('Erro ao cancelar.','err');return;}
+  toast('OS cancelada.');
+  const os=TODOS.find(o=>o.id===OS_ID_ACTION);
+  if(os)os.status='CANCELADA';
+  buildStatusBar();render();
+}
+
+// fecha modal clicando fora
+['del','cancel'].forEach(id=>{
+  document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fechaModal(id);});
+});
+
+// ── INIT ──────────────────────────────
+loadMods();
 load();
-// redireciona ?novo=1
-if(new URLSearchParams(location.search).get('novo')==='1') location.href='os-nova.html';
 </script>
 </body>
 </html>
