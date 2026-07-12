@@ -409,7 +409,7 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
       </div>
       <div class="mod-more-drop" id="more-drop"></div>
     </div>
-    <div class="mod-cfg" onclick="abre('mods')" title="Personalizar"><i class="ti ti-layout-grid"></i></div>
+    <div class="mod-cfg" onclick="abrirCfgMods()" title="Personalizar"><i class="ti ti-layout-grid"></i></div>
   </div>
 
   <!-- MÉTRICAS -->
@@ -634,7 +634,12 @@ function abrirCfgMods(){
       <button class="cfg-tog ${on?'on':'off'}" onclick="togMod('${m.id}',this)"></button>
     </div>`;
   }).join('');
-  abre('mods');
+  // abre diretamente o overlay sem passar por abre()
+  const ov=document.getElementById('ov-mods');
+  if(ov){
+    ov.classList.add('open');
+    setTimeout(()=>{const f=ov.querySelector('input,select');if(f)f.focus();},60);
+  }
 }
 
 function togMod(id,btn){
@@ -649,9 +654,7 @@ async function salvarMods(){
   fecha('mods');renderMods();toast('Módulos salvos!');
 }
 
-// override abre('mods') para abrir cfg
-const _abre=abre;
-window.abre=function(id){if(id==='mods')abrirCfgMods();else _abre(id);};
+// abre() sem override — abrirCfgMods chama abreOverlay diretamente
 
 // ── MÉTRICAS ──────────────────────────────────────
 async function loadMetricas(){
