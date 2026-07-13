@@ -743,7 +743,7 @@ async function loadAlertas(){
     const p=s.alerta_prioridade.toLowerCase();
     const cls=p==='critica'?'crit':p==='alta'?'alta':'norm';
     const tag=p==='critica'?'CRÍTICO':p==='alta'?'ALTA':'NORMAL';
-    return`<div class="al-row" style="cursor:pointer" onclick="abrirOsSt('${o.id}','OS ${String(o.numero).padStart(4,\'0\')}','${o.status}')">
+    return`<div class="al-row" style="cursor:pointer" data-osid="${o.id}" data-osnum="${String(o.numero).padStart(4,'0')}" data-osstatus="${o.status}" onclick="abrirOsSt(this.dataset.osid,'OS '+this.dataset.osnum,this.dataset.osstatus)">
       <div class="al-pip ${cls}"></div>
       <div class="al-info">
         <div class="al-t">OS #${String(o.numero).padStart(4,'0')} — ${o.status}</div>
