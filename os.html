@@ -273,12 +273,13 @@ tbody tr:hover{background:#FAFAF7}
           <th>Data</th>
           <th>Cliente</th>
           <th>Dispositivo / Cor</th>
+          <th>Valor</th>
           <th>Status</th>
           <th>Tempo</th>
           <th></th>
         </tr>
       </thead>
-      <tbody id="tbody"><tr><td colspan="7"><div class="empty"><i class="ti ti-loader-2 spin"></i></div></td></tr></tbody>
+      <tbody id="tbody"><tr><td colspan="8"><div class="empty"><i class="ti ti-loader-2 spin"></i></div></td></tr></tbody>
     </table>
     <div class="tf"><span id="tf-cnt">—</span><span>Dottec · OS</span></div>
   </div>
@@ -412,7 +413,7 @@ function render(){
   document.getElementById('s-cnt').textContent=q?lista.length+' resultado'+(lista.length!==1?'s':''):'';
   document.getElementById('tf-cnt').textContent=lista.length+' OS';
   if(!lista.length){
-    document.getElementById('tbody').innerHTML=`<tr><td colspan="7"><div class="empty"><i class="ti ti-search-off"></i>Nenhuma OS</div></td></tr>`;
+    document.getElementById('tbody').innerHTML=`<tr><td colspan="8"><div class="empty"><i class="ti ti-search-off"></i>Nenhuma OS</div></td></tr>`;
     return;
   }
   const isAdmin=USR.perfil==='ADMIN';
@@ -423,10 +424,11 @@ function render(){
     const hex=COR_HEX[corUp]||null;
     const corHtml=o._cor?`<div class="td-cor">${hex?`<span class="cor-dot" style="background:${hex}"></span>`:''}<span>${o._cor}</span></div>`:'';
     return`<tr onclick="irOS('${o.id}',event)">
-      <td><span class="td-num">#${String(o.numero).padStart(4,'0')}</span></td>
+      <td><span class="td-num">${String(o.numero).padStart(4,'0')}</span></td>
       <td class="td-tempo">${fmtDt(o.criado_em)}</td>
       <td style="font-weight:600;color:var(--dark)">${o.cliente_nome||'—'}</td>
       <td><div class="td-device">${device}</div>${corHtml}</td>
+      <td class="td-val">${TOTAIS[o.id]>0?'R$ '+(TOTAIS[o.id]).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
       <td onclick="event.stopPropagation()">
         <span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status.replace(/'/g,"\\'")}')">
           ${o.status}
