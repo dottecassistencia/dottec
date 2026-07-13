@@ -1,910 +1,733 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OS — Dottec</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova OS — Dottec</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2;--purple:#5B3FA6;--pbg:#EEEAF8}
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg);display:flex;flex-direction:column}
-/* TOPBAR */
-.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-shrink:0}
-.back{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text);text-decoration:none;flex-shrink:0;transition:background .15s}
-.back:hover{background:#E2DFD6}
-.os-num{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark)}
-.os-sub{font-size:12px;color:var(--sub);margin-top:1px}
-.tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
-.btn{height:36px;padding:0 14px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s;text-decoration:none}
-.btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text)}.btn-ghost:hover{background:#E2DFD6}
-.btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cd)}
-.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#2A5509}
-.btn-red{background:var(--coral);color:#fff}.btn-red:hover{background:#C94835}
-.btn-amber{background:var(--amber);color:#fff}.btn-amber:hover{background:#7A4B00}
-/* STATUS BADGE */
-.status-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:default}
-.sb-aberta{background:var(--cbg);color:var(--cd)}
-.sb-execucao{background:var(--abg);color:var(--amber)}
-.sb-orcamento{background:var(--rbg);color:var(--red)}
-.sb-aguardando{background:#FEF3C7;color:#92400E}
-.sb-peca{background:#F3E8FF;color:#6D28D9}
-.sb-pronta{background:var(--gbg);color:var(--green)}
-.sb-entregue{background:#F1F5F9;color:#64748B}
-.sb-cancelada{background:#F8F8F7;color:#94938E}
-/* TABS */
-.tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 1.5rem;flex-shrink:0}
-.tab{height:42px;padding:0 16px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:6px}
-.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
-.tab i{font-size:15px}
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:1.5rem;max-width:1100px;width:100%;margin:0 auto}
-.tab-panel{display:none}.tab-panel.active{display:block}
-/* PANELS */
-.panel{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px}
-.ph{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-.ph-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.pi-cyan{background:var(--cbg);color:var(--cd)}
-.pi-amber{background:var(--abg);color:var(--amber)}
-.pi-green{background:var(--gbg);color:var(--green)}
-.pi-purple{background:var(--pbg);color:var(--purple)}
-.pi-red{background:var(--rbg);color:var(--red)}
-.ph-title{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);flex:1}
-.ph-sub{font-size:11.5px;color:var(--sub)}
-.pb{padding:16px}
-/* FORM */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
-.field:last-child{margin-bottom:0}
-label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.lopt{font-weight:400;text-transform:none;font-size:10px}
-input,select,textarea{width:100%;height:42px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:#fff}
-input::placeholder,textarea::placeholder{color:#B5B2A8}
-textarea{height:90px;resize:vertical;padding:10px 12px}
-textarea.tall{height:120px}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
+
+/* HEADER */
+.header{height:60px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.h-logo-circle{width:38px;height:38px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(41,184,194,.3);flex-shrink:0}
+.h-logo-circle img{width:100%;height:100%;object-fit:cover;display:block}
+.h-logo-circle i{font-size:18px;color:#fff}
+.h-logo-nome{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);line-height:1.1}
+.h-logo-sub{font-size:9.5px;color:var(--sub)}
+.h-div{width:1px;height:24px;background:var(--border);flex-shrink:0}
+.h-page{display:flex;align-items:center;gap:7px}
+.h-page-ico{width:28px;height:28px;border-radius:8px;background:var(--cbg2);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:14px}
+.h-page-name{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.h-os-num{font-size:12px;color:var(--sub);margin-left:4px}
+.h-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.h-back{height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.h-back:hover{background:var(--bg)}
+
+/* BOLINHAS (compactas) */
+.mods-row{background:var(--white);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mods-inner{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(48px,1fr));gap:4px;justify-items:center}
+.mod-ball{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:inherit;cursor:pointer;width:100%;max-width:60px}
+.mod-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;position:relative;transition:transform .2s,box-shadow .2s}
+.mod-ball:hover .mod-icon{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.mod-ball.active .mod-icon{box-shadow:0 0 0 2px var(--cyan)}
+.mod-lbl{font-size:7.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap}
+.mod-ball.active .mod-lbl{color:var(--cyan)}
+.mod-more-wrap{position:relative;flex-shrink:0}
+.mod-more-btn{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.mod-more-icon{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.mod-more-lbl{font-size:7.5px;font-weight:700;color:var(--sub)}
+.mod-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:300;min-width:160px}
+.mod-more-drop.open{display:block}
+.mod-more-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
+.mod-more-item:hover{background:var(--bg)}
+.mod-more-item i{font-size:14px;width:16px;text-align:center}
+
+/* SCROLL */
+.body{flex:1;overflow-y:auto;padding:0 0 120px}
+.content{max-width:900px;margin:0 auto;padding:20px 20px 0}
+
+/* SECOES */
+.sec{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.sec-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sec-head-l{display:flex;align-items:center;gap:8px}
+.sec-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.si-cyan{background:var(--cbg);color:var(--cd)}.si-amber{background:var(--abg);color:var(--amber)}.si-green{background:var(--gbg);color:var(--green)}.si-coral{background:var(--cbg2);color:var(--coral)}
+.sec-title{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark)}
+.sec-body{padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* FIELDS */
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.field .opt{font-weight:400;text-transform:none;font-size:9px;margin-left:3px;opacity:.8}
+.field input,.field select,.field textarea{width:100%;height:40px;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.field input::placeholder,.field textarea::placeholder{color:#B5B2A8}
+.field textarea{height:80px;resize:vertical;padding:9px 11px}
+.field textarea.tall{height:110px}
+
 /* AUTOCOMPLETE CLIENTE */
 .ac-wrap{position:relative}
-.ac-drop{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;z-index:200}
+.ac-drop{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.12);max-height:240px;overflow-y:auto;z-index:200}
 .ac-drop.open{display:block}
-.ac-item{padding:10px 14px;cursor:pointer;font-size:13.5px;transition:background .1s;border-bottom:1px solid #F5F4F0}
+.ac-item{padding:10px 14px;cursor:pointer;font-size:13px;transition:background .1s;border-bottom:1px solid #F5F4F0}
 .ac-item:last-child{border-bottom:none}
 .ac-item:hover,.ac-item.foc{background:var(--bg)}
 .ac-name{font-weight:600;color:var(--dark)}
-.ac-doc{font-size:11.5px;color:var(--sub);margin-top:1px}
-/* ITENS PEÇAS/SERVIÇOS */
-.item-search-row{display:flex;gap:8px;margin-bottom:10px}
-.item-search-row .search-inp{flex:1;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:uppercase}
-.item-search-row .search-inp:focus{border-color:var(--cyan)}
-.item-search-row .search-inp::placeholder{text-transform:none;color:#B5B2A8}
-.item-drop{display:none;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;margin-bottom:8px}
-.item-drop.open{display:block}
-.item-drop-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #F5F4F0;transition:background .1s}
-.item-drop-row:last-child{border-bottom:none}
-.item-drop-row:hover{background:var(--bg)}
-.idr-name{font-weight:600;color:var(--dark)}
-.idr-est{font-size:11px;color:var(--sub);margin-top:1px}
-.idr-val{font-size:13px;font-weight:700;color:var(--cd)}
-/* TABELA DE ITENS */
-.items-table{width:100%;border-collapse:collapse;margin-top:4px}
-.items-table th{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;background:#FAFAF7}
-.items-table td{padding:9px 10px;font-size:13.5px;border-bottom:1px solid #F2F0EA;vertical-align:middle}
-.items-table tr:last-child td{border-bottom:none}
-.items-table input{height:32px;padding:0 8px;font-size:13px}
-.del-btn{width:26px;height:26px;border-radius:7px;border:none;background:var(--cbg2);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .12s}
-.del-btn:hover{background:var(--coral);color:#fff}
-.total-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#FAFAF7;border-top:1px solid var(--border)}
-.total-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase}
-.total-value{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark)}
+.ac-info{font-size:11px;color:var(--sub);margin-top:2px;display:flex;align-items:center;gap:8px}
+.ac-novo{padding:10px 14px;font-size:12.5px;color:var(--cd);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border)}
+.ac-novo:hover{background:var(--cbg)}
+
+/* AUTOCOMPLETE MODELO */
+.mod-ac-wrap{position:relative}
+.mod-ac-drop{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;z-index:200}
+.mod-ac-drop.open{display:block}
+.mod-ac-item{padding:9px 14px;cursor:pointer;font-size:13px;transition:background .1s;border-bottom:1px solid #F5F4F0;display:flex;align-items:center;gap:8px}
+.mod-ac-item:last-child{border-bottom:none}
+.mod-ac-item:hover,.mod-ac-item.foc{background:var(--bg)}
+.mod-ac-ico{font-size:11px;background:var(--cbg2);color:var(--coral);padding:2px 6px;border-radius:5px;font-weight:700;flex-shrink:0}
+.mod-ac-ico.other{background:var(--bg);color:var(--sub)}
+
+/* APARELHOS */
+.aparelhos-list{display:flex;flex-direction:column;gap:12px}
+.aparelho-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;position:relative}
+.aparelho-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.aparelho-card-num{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.btn-rem-ap{width:26px;height:26px;border-radius:7px;border:none;background:var(--cbg2);color:var(--coral);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-rem-ap:hover{background:var(--coral);color:#fff}
+.btn-add-ap{display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;border:1.5px dashed var(--border);background:transparent;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--sub);transition:all .15s;margin-top:4px}
+.btn-add-ap:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
+
 /* STATUS SELECTOR */
-.status-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-.status-opt{height:34px;padding:0 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:12.5px;font-weight:600;color:var(--sub);cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:6px}
-.status-opt:hover{border-color:var(--cyan);color:var(--dark)}
-.status-opt.sel{border-color:currentColor}
-.so-aberta.sel{background:var(--cbg);color:var(--cd);border-color:var(--cd)}
-.so-execucao.sel{background:var(--abg);color:var(--amber);border-color:var(--amber)}
-.so-orcamento.sel{background:var(--rbg);color:var(--red);border-color:var(--red)}
-.so-aguardando.sel{background:#FEF3C7;color:#92400E;border-color:#92400E}
-.so-peca.sel{background:#F3E8FF;color:#6D28D9;border-color:#6D28D9}
-.so-pronta.sel{background:var(--gbg);color:var(--green);border-color:var(--green)}
-.so-entregue.sel{background:#F1F5F9;color:#64748B;border-color:#64748B}
-.so-cancelada.sel{background:#F8F8F7;color:#94938E;border-color:#94938E}
-.alerta-nota{border-radius:9px;padding:9px 13px;font-size:12.5px;display:flex;align-items:flex-start;gap:8px;margin-top:8px;border:1px solid}
-.an-orcamento{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.2)}
-.an-pronta{background:var(--gbg);color:var(--green);border-color:rgba(59,109,17,.2)}
-/* GARANTIA */
-.garantia-row{display:flex;align-items:center;gap:12px;background:var(--gbg);border:1px solid rgba(59,109,17,.2);border-radius:9px;padding:10px 14px;margin-top:12px}
-.garantia-row i{font-size:18px;color:var(--green);flex-shrink:0}
-.g-text{flex:1;font-size:12.5px;color:var(--green)}
-.g-text strong{font-weight:700}
-/* FINANCEIRO */
-.fin-totais{background:#FAFAF7;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
-.fin-linha{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:13.5px}
-.fin-linha.sep{border-top:1px solid var(--border);margin-top:8px;padding-top:12px}
-.fin-linha.total{font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--dark)}
-.fin-linha span:first-child{color:var(--sub)}
-/* HISTÓRICO */
-.hist-row{display:flex;align-items:flex-start;gap:12px;padding:10px 16px;border-bottom:1px solid #F2F0EA}
-.hist-row:last-child{border-bottom:none}
-.hist-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.hist-info{flex:1}
-.hist-status{font-size:13px;font-weight:600;color:var(--dark)}
-.hist-meta{font-size:11.5px;color:var(--sub);margin-top:2px}
-/* TOAST */
-.toast{position:fixed;top:1.25rem;right:1.25rem;z-index:999;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:320px}
-.toast.show{transform:translateX(0)}
-.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
-.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+.status-grid{display:flex;flex-wrap:wrap;gap:7px}
+.status-btn{height:32px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-family:inherit;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s}
+.status-btn:hover{border-color:var(--cyan);color:var(--cd)}
+.status-btn.sel{border-color:transparent}
+.status-btn[data-s="ABERTA"].sel{background:var(--cbg);color:var(--cd);border-color:rgba(41,184,194,.4)}
+.status-btn[data-s="EM EXECUÇÃO"].sel{background:var(--abg);color:var(--amber);border-color:rgba(154,96,0,.3)}
+.status-btn[data-s="PASSAR ORÇAMENTO"].sel{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.3)}
+.status-btn[data-s="AGUARDANDO APROVAÇÃO"].sel{background:#FEF3C7;color:#92400E;border-color:rgba(146,64,14,.3)}
+.status-btn[data-s="AGUARDANDO PEÇA"].sel{background:#F3E8FF;color:#6D28D9;border-color:rgba(109,40,217,.3)}
+.status-btn[data-s="PRONTA"].sel{background:var(--gbg);color:var(--green);border-color:rgba(59,109,17,.3)}
+.status-btn[data-s="ENTREGUE"].sel{background:#F1F5F9;color:#64748B;border-color:#CBD5E1}
+.status-btn[data-s="CANCELADA"].sel{background:#F8F8F7;color:var(--sub);border-color:var(--border)}
+
+/* SALVAR FIXO */
+.save-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(237,234,227,.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 20px}
+.save-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.save-info{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px}
+.save-actions{display:flex;gap:8px;align-items:center}
+.btn-cancel-os{height:38px;padding:0 14px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.btn-cancel-os:hover{background:var(--bg)}
+.btn-save-os{height:38px;padding:0 20px;border-radius:9px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:background .15s}
+.btn-save-os:hover{background:var(--cd)}
+.btn-save-os:disabled{opacity:.5;cursor:not-allowed}
+
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
+.toast{position:fixed;bottom:80px;right:1.25rem;z-index:999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
 </style>
-
-<!-- NAV DOTTEC -->
-<script>
-const PAGE_ID = "os";
-const BREADCRUMB = [{label:"OS",href:"os.html"}];
-</script>
-<script src="_nav.js"></script>
 </head>
 <body>
+
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
-<!-- TOPBAR -->
+<!-- HEADER -->
+<header class="header">
+  <a class="h-logo" href="dashboard.html">
+    <div class="h-logo-circle">
+      <img src="logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center"><i class="ti ti-device-laptop"></i></span>
+    </div>
+    <div><div class="h-logo-nome">Dottec</div><div class="h-logo-sub">Assistência Inteligente</div></div>
+  </a>
+  <div class="h-div"></div>
+  <div class="h-page">
+    <div class="h-page-ico"><i class="ti ti-tool"></i></div>
+    <span class="h-page-name" id="h-title">Nova OS</span>
+    <span class="h-os-num" id="h-os-num"></span>
+  </div>
+  <div class="h-right">
+    <a class="h-back" href="os.html"><i class="ti ti-arrow-left"></i> Voltar</a>
+  </div>
+</header>
 
-
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" id="tab-dados" onclick="setTab('dados')"><i class="ti ti-clipboard-text"></i> Dados</button>
-  <button class="tab" id="tab-tecnico" onclick="setTab('tecnico')"><i class="ti ti-tool"></i> Técnico</button>
-  <button class="tab" id="tab-financeiro" onclick="setTab('financeiro')"><i class="ti ti-currency-dollar"></i> Financeiro</button>
-  <button class="tab" id="tab-historico" onclick="setTab('historico')"><i class="ti ti-history"></i> Histórico</button>
+<!-- BOLINHAS -->
+<div class="mods-row">
+  <div class="mods-inner" id="mods-inner"><div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div></div>
+  <div class="mod-more-wrap" id="more-wrap" style="display:none">
+    <div class="mod-more-btn" onclick="toggleMore(event)">
+      <div class="mod-more-icon"><i class="ti ti-dots"></i></div>
+      <span class="mod-more-lbl">mais</span>
+    </div>
+    <div class="mod-more-drop" id="more-drop"></div>
+  </div>
 </div>
 
+<!-- CORPO SCROLLÁVEL -->
+<div class="body">
 <div class="content">
 
-  <!-- ABA DADOS -->
-  <div class="tab-panel active" id="panel-dados">
-
-    <!-- CLIENTE -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-cyan"><i class="ti ti-user"></i></div>
-        <div class="ph-title">Cliente</div>
-      </div>
-      <div class="pb">
-        <div class="field">
-          <label>Cliente</label>
-          <div class="ac-wrap">
-            <input type="text" id="cliente-busca" placeholder="Digite o nome ou CPF/CNPJ..." autocomplete="off" oninput="buscaCliente()"/>
-            <div class="ac-drop" id="cliente-drop"></div>
-          </div>
-        </div>
-        <div class="grid3">
-          <div class="field no-mb">
-            <label>Nome <span class="lopt">(preenchido automaticamente)</span></label>
-            <input type="text" id="cliente-nome" placeholder="NOME DO CLIENTE" style="text-transform:uppercase"/>
-          </div>
-          <div class="field no-mb">
-            <label>Celular</label>
-            <input type="text" id="cliente-celular" placeholder="(47) 9 0000-0000"/>
-          </div>
-          <div class="field no-mb">
-            <label>Técnico responsável</label>
-            <select id="tecnico-id"><option value="">Sem técnico</option></select>
-          </div>
-        </div>
+  <!-- 1. CLIENTE -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-head-l">
+        <div class="sec-ico si-cyan"><i class="ti ti-user"></i></div>
+        <span class="sec-title">Cliente</span>
       </div>
     </div>
-
-    <!-- APARELHO -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-amber"><i class="ti ti-device-mobile"></i></div>
-        <div class="ph-title">Aparelho</div>
-      </div>
-      <div class="pb">
-        <div class="grid3">
-          <div class="field">
-            <label>Tipo de aparelho</label>
-            <select id="aparelho">
-              <option value="">Selecione...</option>
-              <option>CELULAR</option><option>NOTEBOOK</option><option>COMPUTADOR</option>
-              <option>TABLET</option><option>SMARTWATCH</option><option>OUTRO</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Marca / Modelo</label>
-            <input type="text" id="modelo" placeholder="EX: IPHONE 15 PRO MAX" style="text-transform:uppercase"/>
-          </div>
-          <div class="field">
-            <label>Cor</label>
-            <input type="text" id="cor" placeholder="EX: PRETO TITÂNIO" style="text-transform:uppercase"/>
-          </div>
-        </div>
-        <div class="grid3">
-          <div class="field no-mb">
-            <label>IMEI / Número de série</label>
-            <input type="text" id="imei" placeholder="000000000000000" style="text-transform:none"/>
-          </div>
-          <div class="field no-mb">
-            <label>Senha do aparelho <span class="lopt">opcional</span></label>
-            <input type="text" id="senha-ap" placeholder="PIN, padrão ou biometria" style="text-transform:none"/>
-          </div>
-          <div class="field no-mb">
-            <label>Acessórios entregues <span class="lopt">opcional</span></label>
-            <input type="text" id="acessorios" placeholder="EX: CAPINHA, CARREGADOR" style="text-transform:uppercase"/>
-          </div>
+    <div class="sec-body">
+      <div class="field">
+        <label>Buscar cliente</label>
+        <div class="ac-wrap">
+          <input type="text" id="cl-busca" placeholder="Nome, sobrenome ou telefone..." autocomplete="off"
+            oninput="onBuscaCliente()"
+            onkeydown="onKeyCliente(event)"/>
+          <div class="ac-drop" id="cl-drop"></div>
         </div>
       </div>
-    </div>
-
-    <!-- DEFEITO -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-red"><i class="ti ti-alert-triangle"></i></div>
-        <div class="ph-title">Defeito relatado pelo cliente</div>
-      </div>
-      <div class="pb">
-        <div class="field no-mb">
-          <textarea id="defeito" class="tall" placeholder="DESCREVA O QUE O CLIENTE RELATOU..." style="text-transform:uppercase"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATUS -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-cyan"><i class="ti ti-toggle-right"></i></div>
-        <div class="ph-title">Status da OS</div>
-      </div>
-      <div class="pb">
-        <div class="status-grid" id="status-grid"></div>
-        <div id="status-alerta-nota"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ABA TÉCNICO -->
-  <div class="tab-panel" id="panel-tecnico">
-
-    <!-- LAUDO -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-amber"><i class="ti ti-microscope"></i></div>
-        <div class="ph-title">Laudo técnico</div>
-        <div class="ph-sub">O que foi encontrado</div>
-      </div>
-      <div class="pb">
-        <textarea id="laudo" class="tall" placeholder="EX: PROBLEMA NO HD, SETORES DEFEITUOSOS IDENTIFICADOS..." style="text-transform:uppercase"></textarea>
-      </div>
-    </div>
-
-    <!-- SOLUÇÃO -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-green"><i class="ti ti-check-circle"></i></div>
-        <div class="ph-title">Solução aplicada</div>
-        <div class="ph-sub">O que foi feito</div>
-      </div>
-      <div class="pb">
-        <textarea id="solucao" class="tall" placeholder="EX: TROCA DO HD POR SSD 480GB E FORMATAÇÃO COM BACKUP DOS DADOS..." style="text-transform:uppercase"></textarea>
-      </div>
-    </div>
-
-    <!-- PEÇAS -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-amber"><i class="ti ti-package"></i></div>
-        <div class="ph-title">Peças utilizadas</div>
-        <div class="ph-sub">Desconta do estoque ao salvar</div>
-      </div>
-      <div class="pb">
-        <div class="item-search-row">
-          <input type="text" class="search-inp" id="peca-busca" placeholder="Buscar produto no estoque..." autocomplete="off" oninput="buscaPeca()"/>
-        </div>
-        <div class="item-drop" id="peca-drop"></div>
-        <table class="items-table" id="pecas-table" style="display:none">
-          <thead><tr>
-            <th style="width:40%">Descrição</th>
-            <th style="width:15%">Qtd</th>
-            <th style="width:20%">Valor unit.</th>
-            <th style="width:20%">Total</th>
-            <th style="width:5%"></th>
-          </tr></thead>
-          <tbody id="pecas-body"></tbody>
-        </table>
-        <div class="total-row" id="pecas-total-row" style="display:none">
-          <span class="total-label">Total peças</span>
-          <span class="total-value" id="pecas-total">R$ 0,00</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SERVIÇOS -->
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-purple"><i class="ti ti-tool"></i></div>
-        <div class="ph-title">Serviços executados</div>
-      </div>
-      <div class="pb">
-        <div class="item-search-row">
-          <input type="text" class="search-inp" id="srv-busca" placeholder="Buscar serviço cadastrado..." autocomplete="off" oninput="buscaSrv()"/>
-          <button class="btn btn-ghost" onclick="addSrvManual()" style="height:38px;white-space:nowrap"><i class="ti ti-plus"></i> Manual</button>
-        </div>
-        <div class="item-drop" id="srv-drop"></div>
-        <table class="items-table" id="srv-table" style="display:none">
-          <thead><tr>
-            <th style="width:45%">Serviço</th>
-            <th style="width:20%">Valor</th>
-            <th style="width:20%">Garantia</th>
-            <th style="width:5%"></th>
-          </tr></thead>
-          <tbody id="srv-body"></tbody>
-        </table>
-        <div class="total-row" id="srv-total-row" style="display:none">
-          <span class="total-label">Total serviços</span>
-          <span class="total-value" id="srv-total">R$ 0,00</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ABA FINANCEIRO -->
-  <div class="tab-panel" id="panel-financeiro">
-
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-green"><i class="ti ti-calculator"></i></div>
-        <div class="ph-title">Resumo financeiro</div>
-      </div>
-      <div class="pb">
-        <div class="fin-totais">
-          <div class="fin-linha"><span>Peças</span><span id="fin-pecas">R$ 0,00</span></div>
-          <div class="fin-linha"><span>Serviços</span><span id="fin-srvs">R$ 0,00</span></div>
-          <div class="fin-linha"><span>Desconto</span>
-            <span style="display:flex;align-items:center;gap:8px">
-              <span>- R$</span>
-              <input type="number" id="fin-desconto" value="0" min="0" step="0.01" style="width:90px;height:30px;font-size:13px" oninput="calcTotal()"/>
-            </span>
-          </div>
-          <div class="fin-linha sep total"><span>Total</span><span id="fin-total">R$ 0,00</span></div>
-        </div>
-
+      <div id="cl-dados" style="display:none">
         <div class="grid2">
-          <div class="field">
-            <label>Forma de pagamento</label>
-            <select id="fin-forma">
-              <option value="">Selecione ao entregar</option>
-              <option>DINHEIRO</option><option>PIX</option>
-              <option>DÉBITO</option><option>CRÉDITO</option><option>A PRAZO</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Garantia geral da OS (dias)</label>
-            <input type="number" id="fin-garantia" value="90" min="0"/>
-          </div>
+          <div class="field"><label>Nome completo</label><input type="text" id="cl-nome" placeholder="NOME DO CLIENTE"/></div>
+          <div class="field"><label>Telefone / WhatsApp</label><input type="text" id="cl-tel" placeholder="(47) 99999-9999"/></div>
         </div>
-
-        <div id="garantia-info" class="garantia-row">
-          <i class="ti ti-shield-check"></i>
-          <div class="g-text">Garantia de <strong id="g-dias">90 dias</strong> a partir da entrega — válida para peças e serviços conforme laudo.</div>
+        <div class="grid2">
+          <div class="field"><label>CPF / CNPJ <span class="opt">(opcional)</span></label><input type="text" id="cl-doc" placeholder="000.000.000-00"/></div>
+          <div class="field"><label>E-mail <span class="opt">(opcional)</span></label><input type="text" id="cl-email" placeholder="cliente@email.com"/></div>
         </div>
       </div>
+      <input type="hidden" id="cl-id"/>
     </div>
-
-    <!-- AÇÃO DE PAGAMENTO -->
-    <div class="panel" id="panel-pagar" style="display:none">
-      <div class="ph">
-        <div class="ph-icon pi-green"><i class="ti ti-cash"></i></div>
-        <div class="ph-title">Receber pagamento</div>
-        <div class="ph-sub">Lança no caixa e conclui a OS</div>
-      </div>
-      <div class="pb">
-        <button class="btn btn-green" style="width:100%;height:44px;font-size:15px;justify-content:center" onclick="receberPagamento()">
-          <i class="ti ti-check"></i> Receber e marcar como ENTREGUE
-        </button>
-      </div>
-    </div>
-
   </div>
 
-  <!-- ABA HISTÓRICO -->
-  <div class="tab-panel" id="panel-historico">
-    <div class="panel">
-      <div class="ph">
-        <div class="ph-icon pi-cyan"><i class="ti ti-history"></i></div>
-        <div class="ph-title">Histórico de alterações</div>
+  <!-- 2. STATUS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-head-l">
+        <div class="sec-ico si-amber"><i class="ti ti-flag"></i></div>
+        <span class="sec-title">Status da OS</span>
       </div>
-      <div id="historico-body"><div style="padding:2rem;text-align:center;color:var(--sub)">Carregando...</div></div>
+    </div>
+    <div class="sec-body">
+      <div class="status-grid" id="status-grid">
+        <div style="color:var(--sub);font-size:12px"><i class="ti ti-loader-2 spin"></i> Carregando...</div>
+      </div>
+      <input type="hidden" id="os-status" value="ABERTA"/>
+    </div>
+  </div>
+
+  <!-- 3. APARELHOS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-head-l">
+        <div class="sec-ico si-coral"><i class="ti ti-device-mobile"></i></div>
+        <span class="sec-title">Aparelhos</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="aparelhos-list" id="aparelhos-list"></div>
+      <button class="btn-add-ap" onclick="addAparelho()" id="btn-add-ap">
+        <i class="ti ti-plus"></i> Adicionar outro aparelho
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. OBSERVAÇÕES GERAIS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-head-l">
+        <div class="sec-ico si-green"><i class="ti ti-notes"></i></div>
+        <span class="sec-title">Observações gerais</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="field">
+        <label>Acessórios entregues <span class="opt">(opcional)</span></label>
+        <input type="text" id="os-acessorios" placeholder="Ex: CARREGADOR, CAPINHA, SEM CHIP..."/>
+      </div>
+      <div class="field">
+        <label>Observações internas <span class="opt">(opcional)</span></label>
+        <textarea id="os-obs" class="tall" placeholder="Informações adicionais para a equipe..."></textarea>
+      </div>
     </div>
   </div>
 
 </div><!-- /content -->
+</div><!-- /body -->
+
+<!-- BARRA SALVAR FIXO -->
+<div class="save-bar">
+  <div class="save-inner">
+    <div class="save-info" id="save-info"><i class="ti ti-info-circle"></i> Preencha cliente e pelo menos 1 aparelho</div>
+    <div class="save-actions">
+      <a class="btn-cancel-os" href="os.html"><i class="ti ti-x"></i> Cancelar</a>
+      <button class="btn-save-os" id="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> <span id="btn-save-txt">Salvar OS</span></button>
+    </div>
+  </div>
+</div>
 
 <script>
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-const db=supabase.createClient(SB_URL,SB_KEY);
-const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
-const fmtN=v=>(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
+const db=window._dottecDb;
 
-let OS_ID=null, PESSOA_ID=null, STATUS_ATUAL='ABERTA', STATUS_CFG=[], PECAS=[], SRVS=[], USUARIOS=[];
-let EDIT_MODE=false;
-
-// sessão
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 
-function toast(msg,tipo='ok'){
-  const t=document.getElementById('toast');
-  document.getElementById('ti').className='ti '+(tipo==='ok'?'ti-check':'ti-alert-circle');
-  document.getElementById('tm').textContent=msg;
-  t.className='toast '+tipo+' show';
-  setTimeout(()=>t.classList.remove('show'),3800);
-}
+const OS_ID=new URLSearchParams(location.search).get('id');
+let APARELHOS=[];         // [{tipo,marca,modelo,cor,imei,senha,defeito,laudo,solucao}]
+let CLIENTES_CACHE=null;
+let MODELOS_CACHE=null;
+let STATUS_LIST=[];
+let AC_IDX=-1;
+let AC_LISTA=[];
+// dados do aparelho em edição por autocomplete
+const MOD_AC_IDX={}; // por ap index
+const MOD_AC_LISTA={};
 
-// ── TABS ─────────────────────────────────────────────────────
-function setTab(t){
-  ['dados','tecnico','financeiro','historico'].forEach(x=>{
-    document.getElementById('tab-'+x).classList.toggle('active',x===t);
-    document.getElementById('panel-'+x).classList.toggle('active',x===t);
-  });
-  if(t==='historico'&&OS_ID) loadHistorico();
-  if(t==='financeiro') calcTotal();
+// MÓDULOS
+const MODS=[
+  {id:'os',lbl:'OS',ico:'ti-tool',href:'os.html',bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'venda',lbl:'Venda',ico:'ti-shopping-cart',href:'venda.html',bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
+  {id:'caixa',lbl:'Caixa',ico:'ti-wallet',href:'caixa.html',bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'financeiro',lbl:'Financeiro',ico:'ti-currency-dollar',href:'financeiro.html',bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
+  {id:'orcamentos',lbl:'Orçamentos',ico:'ti-calculator',href:'orcamentos.html',bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',c:'#0E7490'},
+  {id:'cadastro',lbl:'Cadastro',ico:'ti-users',href:'pessoas.html',bg:'linear-gradient(135deg,#E3F4F5,#B8EDF0)',c:'#1E9099'},
+  {id:'produtos',lbl:'Produtos',ico:'ti-package',href:'produtos.html',bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
+  {id:'compras',lbl:'Compras',ico:'ti-truck-delivery',href:'compras.html',bg:'linear-gradient(135deg,#EEF0F5,#D4D9E8)',c:'#3A4A6B'},
+  {id:'fiscal',lbl:'Fiscal',ico:'ti-file-invoice',href:'fiscal.html',bg:'linear-gradient(135deg,#EEEAF8,#D8D0F4)',c:'#5B3FA6'},
+  {id:'config',lbl:'Config.',ico:'ti-settings',href:'configuracoes.html',bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
+];
+let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
+
+async function loadMods(){
+  if(USR.id){const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_u_'+USR.id).maybeSingle().catch(()=>({data:null}));if(data?.valor){try{ATIVOS=JSON.parse(data.valor);}catch{}}}
+  const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
+  const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
+  document.getElementById('mods-inner').innerHTML=ativos.map(m=>`
+    <a class="mod-ball${m.id==='os'?' active':''}" href="${m.href}">
+      <div class="mod-icon" style="background:${m.bg}"><i class="ti ${m.ico}" style="color:${m.c}"></i></div>
+      <span class="mod-lbl">${m.lbl}</span>
+    </a>`).join('');
+  const mw=document.getElementById('more-wrap');
+  if(resto.length){mw.style.display='block';document.getElementById('more-drop').innerHTML=resto.map(m=>`<a class="mod-more-item" href="${m.href}"><i class="ti ${m.ico}" style="color:${m.c}"></i>${m.lbl}</a>`).join('');}
+  else mw.style.display='none';
+}
+function toggleMore(e){e.stopPropagation();document.getElementById('more-drop').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('more-drop')?.classList.remove('open'));
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg,t='ok'){
+  const el=document.getElementById('toast');
+  document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');
+  document.getElementById('tm').textContent=msg;
+  el.className='toast '+t+' show';
+  setTimeout(()=>el.classList.remove('show'),3500);
 }
 
 // ── STATUS ───────────────────────────────────────────────────
-const STATUS_LIST=[
-  {nome:'ABERTA',cls:'so-aberta',icon:'ti-circle'},
-  {nome:'EM EXECUÇÃO',cls:'so-execucao',icon:'ti-player-play'},
-  {nome:'PASSAR ORÇAMENTO',cls:'so-orcamento',icon:'ti-currency-dollar'},
-  {nome:'AGUARDANDO APROVAÇÃO',cls:'so-aguardando',icon:'ti-clock'},
-  {nome:'AGUARDANDO PEÇA',cls:'so-peca',icon:'ti-package'},
-  {nome:'PRONTA',cls:'so-pronta',icon:'ti-check-circle'},
-  {nome:'ENTREGUE',cls:'so-entregue',icon:'ti-circle-check'},
-  {nome:'CANCELADA',cls:'so-cancelada',icon:'ti-ban'},
-];
-
-function renderStatusGrid(){
-  const grid=document.getElementById('status-grid');
-  grid.innerHTML=STATUS_LIST.map(s=>`
-    <button class="status-opt ${s.cls}${STATUS_ATUAL===s.nome?' sel':''}" onclick="setStatus('${s.nome}')">
-      <i class="ti ${s.icon}" style="font-size:14px"></i> ${s.nome}
-    </button>`).join('');
-  // nota de alerta
-  const nota=document.getElementById('status-alerta-nota');
-  const sc=STATUS_CFG.find(x=>x.nome===STATUS_ATUAL);
-  if(sc&&sc.gera_alerta){
-    const isCrit=sc.alerta_prioridade==='CRITICA';
-    nota.innerHTML=`<div class="alerta-nota ${isCrit?'an-orcamento':'an-pronta'}">
-      <i class="ti ti-bell" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
-      <span><strong>${isCrit?'⚠️ Alerta crítico':'✅ Alerta'}</strong> — este status notifica o comercial no dashboard até que seja alterado.</span>
-    </div>`;
-  } else nota.innerHTML='';
-  // badge topbar
-  const badge=document.getElementById('os-status-badge');
-  const badgeCls={'ABERTA':'sb-aberta','EM EXECUÇÃO':'sb-execucao','PASSAR ORÇAMENTO':'sb-orcamento','AGUARDANDO APROVAÇÃO':'sb-aguardando','AGUARDANDO PEÇA':'sb-peca','PRONTA':'sb-pronta','ENTREGUE':'sb-entregue','CANCELADA':'sb-cancelada'};
-  badge.innerHTML=STATUS_ATUAL?`<span class="status-badge ${badgeCls[STATUS_ATUAL]||'sb-aberta'}">${STATUS_ATUAL}</span>`:'';
-  // mostrar botão pagar se pronta ou pronto e comercial
-  document.getElementById('panel-pagar').style.display=(STATUS_ATUAL==='PRONTA'&&['ADMIN','COMERCIAL'].includes(USR.perfil))?'block':'none';
+async function loadStatus(){
+  const{data}=await db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('ativo',true).order('ordem');
+  STATUS_LIST=(data||[]).map(s=>s.nome);
+  if(!STATUS_LIST.length) STATUS_LIST=['ABERTA','EM EXECUÇÃO','PASSAR ORÇAMENTO','AGUARDANDO APROVAÇÃO','AGUARDANDO PEÇA','PRONTA','ENTREGUE','CANCELADA'];
+  const cur=document.getElementById('os-status').value||'ABERTA';
+  document.getElementById('status-grid').innerHTML=STATUS_LIST.map(s=>`
+    <button class="status-btn${s===cur?' sel':''}" data-s="${s}" onclick="setStatus('${s}')">${s}</button>
+  `).join('');
 }
-
-function setStatus(s){STATUS_ATUAL=s;renderStatusGrid();}
+function setStatus(s){
+  document.getElementById('os-status').value=s;
+  document.querySelectorAll('.status-btn').forEach(b=>b.classList.toggle('sel',b.dataset.s===s));
+}
 
 // ── BUSCA CLIENTE ─────────────────────────────────────────────
-let acTimer;
-async function buscaCliente(){
-  const q=document.getElementById('cliente-busca').value.trim();
-  const drop=document.getElementById('cliente-drop');
-  clearTimeout(acTimer);PESSOA_ID=null;
+let clTimer;
+async function onBuscaCliente(){
+  const q=document.getElementById('cl-busca').value.trim();
+  const drop=document.getElementById('cl-drop');
+  clearTimeout(clTimer); AC_IDX=-1;
   if(q.length<2){drop.classList.remove('open');return;}
-  acTimer=setTimeout(async()=>{
-    const{data}=await db.from('pessoas').select('id,nome,documento,tipo_doc,celular')
-      .or(`nome.ilike.%${q.toUpperCase()}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
-      .eq('ativo',true).limit(6);
-    if(!data||!data.length){drop.innerHTML='<div class="ac-item" style="color:var(--sub)">Nenhum encontrado</div>';drop.classList.add('open');return;}
-    drop.innerHTML=data.map(p=>`<div class="ac-item" onmousedown="selecionarCliente('${p.id}','${p.nome.replace(/'/g,"\\'")}','${p.celular||''}')">
-      <div class="ac-name">${p.nome}</div>
-      <div class="ac-doc">${p.tipo_doc}: ${p.documento||''} · ${p.celular||''}</div>
-    </div>`).join('');
+  clTimer=setTimeout(async()=>{
+    if(!CLIENTES_CACHE){
+      const{data}=await db.from('pessoas').select('id,nome,celular,documento,tipo_doc,email').eq('ativo',true).eq('is_cliente',true).order('nome').limit(200);
+      CLIENTES_CACHE=data||[];
+    }
+    const t=q.toUpperCase();
+    AC_LISTA=CLIENTES_CACHE.filter(p=>
+      p.nome.toUpperCase().includes(t)||
+      (p.celular||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))||
+      (p.documento||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))
+    ).slice(0,8);
+    if(!AC_LISTA.length){
+      drop.innerHTML=`<div class="ac-novo" onclick="novoCliente()"><i class="ti ti-user-plus"></i>Cadastrar "${q}" como novo cliente</div>`;
+    } else {
+      drop.innerHTML=AC_LISTA.map((p,i)=>`
+        <div class="ac-item${i===AC_IDX?' foc':''}" data-i="${i}" onmousedown="selecionarCliente(${i})">
+          <div class="ac-name">${p.nome}</div>
+          <div class="ac-info"><span>${p.celular||''}</span>${p.documento?`<span>${p.tipo_doc}: ${p.documento}</span>`:''}</div>
+        </div>`).join('')+
+        `<div class="ac-novo" onmousedown="novoCliente()"><i class="ti ti-user-plus"></i>Cadastrar novo cliente</div>`;
+    }
     drop.classList.add('open');
-  },280);
+  },250);
 }
 
-function selecionarCliente(id,nome,cel){
-  PESSOA_ID=id;
-  document.getElementById('cliente-busca').value='';
-  document.getElementById('cliente-nome').value=nome;
-  document.getElementById('cliente-celular').value=cel;
-  document.getElementById('cliente-drop').classList.remove('open');
+function onKeyCliente(e){
+  const drop=document.getElementById('cl-drop');
+  const items=drop.querySelectorAll('.ac-item');
+  if(e.key==='Escape'){
+    document.getElementById('cl-busca').value='';
+    drop.classList.remove('open');
+    AC_IDX=-1;
+    document.getElementById('cl-busca').focus();
+    return;
+  }
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();AC_IDX=Math.min(AC_IDX+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();AC_IDX=Math.max(AC_IDX-1,0);}
+  else if(e.key==='Enter'){e.preventDefault();if(AC_IDX>=0&&AC_LISTA[AC_IDX])selecionarCliente(AC_IDX);return;}
+  items.forEach((it,i)=>it.classList.toggle('foc',i===AC_IDX));
+  if(AC_IDX>=0)items[AC_IDX].scrollIntoView({block:'nearest'});
+  // autocomplete no campo conforme navega
+  if(AC_IDX>=0&&AC_LISTA[AC_IDX]){
+    document.getElementById('cl-busca').value=AC_LISTA[AC_IDX].nome;
+  }
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.ac-wrap'))document.getElementById('cliente-drop').classList.remove('open');});
 
-// ── BUSCA PEÇA ────────────────────────────────────────────────
-let pecaTimer;
-async function buscaPeca(){
-  const q=document.getElementById('peca-busca').value.trim();
-  const drop=document.getElementById('peca-drop');
-  clearTimeout(pecaTimer);
-  if(q.length<2){drop.classList.remove('open');return;}
-  pecaTimer=setTimeout(async()=>{
-    const{data}=await db.from('produtos').select('id,nome,valor_venda,estoque_atual')
-      .ilike('nome','%'+q.toUpperCase()+'%').eq('ativo',true).limit(8);
-    if(!data||!data.length){drop.innerHTML='<div class="item-drop-row"><span style="color:var(--sub)">Nenhum produto encontrado</span></div>';drop.classList.add('open');return;}
-    drop.innerHTML=data.map(p=>`<div class="item-drop-row" onclick="addPeca('${p.id}','${p.nome.replace(/'/g,"\\'")}',${p.valor_venda},${p.estoque_atual||0})">
-      <div><div class="idr-name">${p.nome}</div><div class="idr-est">Estoque: ${p.estoque_atual||0} un</div></div>
-      <div class="idr-val">${fmt(p.valor_venda)}</div>
+function selecionarCliente(i){
+  const p=AC_LISTA[i];
+  document.getElementById('cl-id').value=p.id;
+  document.getElementById('cl-busca').value=p.nome;
+  document.getElementById('cl-drop').classList.remove('open');
+  document.getElementById('cl-nome').value=p.nome;
+  document.getElementById('cl-tel').value=p.celular||'';
+  document.getElementById('cl-doc').value=p.documento||'';
+  document.getElementById('cl-email').value=p.email||'';
+  document.getElementById('cl-dados').style.display='block';
+  AC_IDX=-1;
+}
+
+function novoCliente(){
+  const q=document.getElementById('cl-busca').value.trim();
+  document.getElementById('cl-id').value='';
+  document.getElementById('cl-nome').value=q.toUpperCase();
+  document.getElementById('cl-tel').value='';
+  document.getElementById('cl-doc').value='';
+  document.getElementById('cl-email').value='';
+  document.getElementById('cl-dados').style.display='block';
+  document.getElementById('cl-drop').classList.remove('open');
+  setTimeout(()=>document.getElementById('cl-tel').focus(),50);
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ac-wrap'))document.getElementById('cl-drop').classList.remove('open');
+});
+
+// ── APARELHOS ─────────────────────────────────────────────────
+let TIPOS=[], MARCAS=[], MODELOS_DB=[], CORES=[];
+
+async function loadOpcoesAparelho(){
+  const safe=async p=>{try{return await p;}catch{return{data:[]};}};
+  const[{data:t},{data:m},{data:md},{data:c}]=await Promise.all([
+    safe(db.from('os_tipos_aparelho').select('id,nome').eq('ativo',true).order('nome')),
+    safe(db.from('os_marcas').select('id,nome').eq('ativo',true).order('nome')),
+    safe(db.from('os_modelos').select('id,nome,marca_id,prioritario').eq('ativo',true).order('prioritario',{ascending:false}).order('nome')),
+    safe(db.from('os_cores').select('id,nome,hex').eq('ativo',true).order('nome')),
+  ]);
+  TIPOS=t||[]; MARCAS=m||[]; MODELOS_DB=md||[]; CORES=c||[];
+  // fallbacks se tabelas não existem ainda
+  if(!TIPOS.length) TIPOS=[{id:'cel',nome:'Celular'},{id:'nb',nome:'Notebook'},{id:'tab',nome:'Tablet'},{id:'pc',nome:'Desktop/PC'},{id:'tv',nome:'TV'},{id:'out',nome:'Outro'}];
+  if(!MARCAS.length) MARCAS=[{id:'apple',nome:'Apple'},{id:'samsung',nome:'Samsung'},{id:'xiaomi',nome:'Xiaomi'},{id:'lg',nome:'LG'},{id:'motorola',nome:'Motorola'},{id:'out',nome:'Outra'}];
+  if(!CORES.length) CORES=[{id:'pr',nome:'Preto'},{id:'bc',nome:'Branco'},{id:'gz',nome:'Grafite'},{id:'dr',nome:'Dourado'},{id:'pr2',nome:'Prata'},{id:'az',nome:'Azul'},{id:'vd',nome:'Verde'},{id:'vm',nome:'Vermelho'},{id:'rs',nome:'Rosa'},{id:'am',nome:'Amarelo'},{id:'rx',nome:'Roxo'},{id:'out',nome:'Outra'}];
+}
+
+function addAparelho(){
+  APARELHOS.push({tipo:'',marca:'',modelo:'',cor:'',imei:'',senha:'',defeito:'',laudo:'',solucao:''});
+  renderAparelhos();
+}
+function remAparelho(i){
+  if(APARELHOS.length<=1){toast('A OS precisa ter pelo menos 1 aparelho.','err');return;}
+  APARELHOS.splice(i,1);
+  renderAparelhos();
+}
+
+function renderAparelhos(){
+  const list=document.getElementById('aparelhos-list');
+  list.innerHTML=APARELHOS.map((ap,i)=>`
+    <div class="aparelho-card" id="ap-card-${i}">
+      <div class="aparelho-card-head">
+        <span class="aparelho-card-num">Aparelho ${APARELHOS.length>1?i+1:''}</span>
+        ${APARELHOS.length>1?`<button class="btn-rem-ap" onclick="remAparelho(${i})" title="Remover"><i class="ti ti-x"></i></button>`:''}
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <label>Tipo</label>
+          <select id="ap-tipo-${i}" onchange="ap('tipo',${i},this.value)">
+            <option value="">Selecione...</option>
+            ${TIPOS.map(t=>`<option value="${t.nome}"${ap.tipo===t.nome?' selected':''}>${t.nome}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Marca</label>
+          <select id="ap-marca-${i}" onchange="ap('marca',${i},this.value);filtrarModelos(${i})">
+            <option value="">Selecione...</option>
+            ${MARCAS.map(m=>`<option value="${m.nome}"${ap.marca===m.nome?' selected':''}>${m.nome}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Cor</label>
+          <select id="ap-cor-${i}" onchange="ap('cor',${i},this.value)">
+            <option value="">Selecione...</option>
+            ${CORES.map(c=>`<option value="${c.nome}"${ap.cor===c.nome?' selected':''}>${c.nome}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Modelo</label>
+          <div class="mod-ac-wrap">
+            <input type="text" id="ap-modelo-${i}" value="${ap.modelo}" placeholder="Ex: iPhone 15 Pro..." autocomplete="off"
+              oninput="onModelo(${i})"
+              onkeydown="onKeyModelo(${i},event)"/>
+            <div class="mod-ac-drop" id="mod-drop-${i}"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>IMEI / Nº de série <span class="opt">(opcional)</span></label>
+          <input type="text" id="ap-imei-${i}" value="${ap.imei}" placeholder="000000000000000" oninput="ap('imei',${i},this.value)"/>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Senha / Padrão de desbloqueio <span class="opt">(opcional)</span></label>
+          <input type="text" id="ap-senha-${i}" value="${ap.senha}" placeholder="0000 ou sem senha" oninput="ap('senha',${i},this.value)"/>
+        </div>
+        <div class="field">
+          <label>Defeito relatado</label>
+          <input type="text" id="ap-defeito-${i}" value="${ap.defeito}" placeholder="O que o cliente descreveu..." oninput="ap('defeito',${i},this.value)"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Laudo técnico <span class="opt">(opcional — preencher após diagnóstico)</span></label>
+        <textarea id="ap-laudo-${i}" placeholder="O que foi encontrado no aparelho...">${ap.laudo}</textarea>
+      </div>
+      <div class="field">
+        <label>Solução aplicada <span class="opt">(opcional — preencher após o reparo)</span></label>
+        <textarea id="ap-solucao-${i}" placeholder="O que foi feito para resolver...">${ap.solucao}</textarea>
+      </div>
     </div>`).join('');
-    drop.classList.add('open');
-  },280);
+
+  // oculta botão de adicionar se tiver 3+ (raramente mais de 2)
+  document.getElementById('btn-add-ap').style.display=APARELHOS.length>=4?'none':'flex';
 }
 
-function addPeca(pid,nome,valor,est){
-  if(est<=0){toast('Produto sem estoque.','err');return;}
-  PECAS.push({produto_id:pid,descricao:nome,quantidade:1,valor_unit:parseFloat(valor),valor_total:parseFloat(valor)});
-  document.getElementById('peca-busca').value='';
-  document.getElementById('peca-drop').classList.remove('open');
-  renderPecas();
-}
+function ap(campo,i,val){APARELHOS[i][campo]=val;}
 
-function renderPecas(){
-  const tbody=document.getElementById('pecas-body');
-  const tbl=document.getElementById('pecas-table');
-  const trow=document.getElementById('pecas-total-row');
-  if(!PECAS.length){tbl.style.display='none';trow.style.display='none';return;}
-  tbl.style.display='table';trow.style.display='flex';
-  tbody.innerHTML=PECAS.map((p,i)=>`<tr>
-    <td style="font-weight:600">${p.descricao}</td>
-    <td><input type="number" value="${p.quantidade}" min="0.1" step="0.1" style="width:70px" onchange="updatePeca(${i},'quantidade',this.value)"/></td>
-    <td><input type="number" value="${fmtN(p.valor_unit)}" min="0" step="0.01" style="width:90px" onchange="updatePeca(${i},'valor_unit',this.value)"/></td>
-    <td style="font-weight:700">${fmt(p.valor_total)}</td>
-    <td><button class="del-btn" onclick="delPeca(${i})"><i class="ti ti-trash"></i></button></td>
-  </tr>`).join('');
-  const tot=PECAS.reduce((s,p)=>s+p.valor_total,0);
-  document.getElementById('pecas-total').textContent=fmt(tot);
-  calcTotal();
-}
-
-function updatePeca(i,campo,val){
-  PECAS[i][campo]=parseFloat(val)||0;
-  PECAS[i].valor_total=PECAS[i].quantidade*PECAS[i].valor_unit;
-  renderPecas();
-}
-function delPeca(i){PECAS.splice(i,1);renderPecas();}
-document.addEventListener('click',e=>{if(!e.target.closest('#peca-drop')&&!e.target.closest('#peca-busca'))document.getElementById('peca-drop').classList.remove('open');});
-
-// ── BUSCA SERVIÇO ─────────────────────────────────────────────
-let srvTimer, SERVICOS_CAD=[];
-async function loadServicos(){
-  const{data}=await db.from('servicos').select('*').eq('ativo',true).order('nome');
-  SERVICOS_CAD=data||[];
-}
-
-async function buscaSrv(){
-  const q=document.getElementById('srv-busca').value.trim().toUpperCase();
-  const drop=document.getElementById('srv-drop');
+// autocomplete modelo
+function filtrarModelos(i){
+  MOD_AC_IDX[i]=-1;
+  const drop=document.getElementById('mod-drop-'+i);
+  const q=document.getElementById('ap-modelo-'+i)?.value.trim().toUpperCase();
+  const marca=document.getElementById('ap-marca-'+i)?.value;
   if(!q){drop.classList.remove('open');return;}
-  const lista=SERVICOS_CAD.filter(s=>s.nome.includes(q)).slice(0,8);
-  if(!lista.length){drop.innerHTML='<div class="item-drop-row"><span style="color:var(--sub)">Nenhum serviço encontrado</span></div>';drop.classList.add('open');return;}
-  drop.innerHTML=lista.map(s=>`<div class="item-drop-row" onclick="addSrv('${s.id}','${s.nome.replace(/'/g,"\\'")}',${s.valor_padrao},${s.garantia_dias})">
-    <div><div class="idr-name">${s.nome}</div><div class="idr-est">${s.garantia_dias>0?s.garantia_dias+'d garantia':'Sem garantia'}</div></div>
-    <div class="idr-val">${fmt(s.valor_padrao)}</div>
-  </div>`).join('');
+  // filtra: prioridade iphone, depois por marca se selecionada
+  let lista=[...MODELOS_DB];
+  if(marca) lista=lista.filter(m=>MARCAS.find(x=>x.nome===marca&&x.id===m.marca_id)||lista);
+  // iphone primeiro
+  const iphones=lista.filter(m=>m.nome.toUpperCase().includes('IPHONE')&&m.nome.toUpperCase().includes(q));
+  const outros=lista.filter(m=>!m.nome.toUpperCase().includes('IPHONE')&&m.nome.toUpperCase().includes(q));
+  MOD_AC_LISTA[i]=[...iphones,...outros].slice(0,10);
+  if(!MOD_AC_LISTA[i].length){drop.classList.remove('open');return;}
+  drop.innerHTML=MOD_AC_LISTA[i].map((m,idx)=>`
+    <div class="mod-ac-item${idx===MOD_AC_IDX[i]?' foc':''}" data-idx="${idx}" onmousedown="selecionarModelo(${i},${idx})">
+      <span class="mod-ac-ico${m.nome.toUpperCase().includes('IPHONE')?'':' other'}">${m.nome.toUpperCase().includes('IPHONE')?'iPhone':'◦'}</span>
+      ${m.nome}
+    </div>`).join('');
   drop.classList.add('open');
 }
 
-function addSrv(sid,nome,valor,garantia){
-  SRVS.push({servico_id:sid,descricao:nome,valor:parseFloat(valor),garantia_dias:parseInt(garantia)||0});
-  document.getElementById('srv-busca').value='';
-  document.getElementById('srv-drop').classList.remove('open');
-  renderSrvs();
+function onModelo(i){
+  ap('modelo',i,document.getElementById('ap-modelo-'+i).value);
+  filtrarModelos(i);
 }
 
-function addSrvManual(){
-  SRVS.push({servico_id:null,descricao:'',valor:0,garantia_dias:0});
-  renderSrvs();
+function onKeyModelo(i,e){
+  const drop=document.getElementById('mod-drop-'+i);
+  const items=drop.querySelectorAll('.mod-ac-item');
+  if(e.key==='Escape'){drop.classList.remove('open');document.getElementById('ap-modelo-'+i).focus();return;}
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();MOD_AC_IDX[i]=Math.min((MOD_AC_IDX[i]||0)+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();MOD_AC_IDX[i]=Math.max((MOD_AC_IDX[i]||-1)-1,-1);}
+  else if(e.key==='Enter'&&(MOD_AC_IDX[i]||0)>=0){e.preventDefault();selecionarModelo(i,MOD_AC_IDX[i]);return;}
+  items.forEach((it,idx)=>it.classList.toggle('foc',idx===(MOD_AC_IDX[i]||0)));
+  if((MOD_AC_IDX[i]||0)>=0)items[MOD_AC_IDX[i]].scrollIntoView({block:'nearest'});
 }
 
-function renderSrvs(){
-  const tbody=document.getElementById('srv-body');
-  const tbl=document.getElementById('srv-table');
-  const trow=document.getElementById('srv-total-row');
-  if(!SRVS.length){tbl.style.display='none';trow.style.display='none';return;}
-  tbl.style.display='table';trow.style.display='flex';
-  tbody.innerHTML=SRVS.map((s,i)=>`<tr>
-    <td><input type="text" value="${s.descricao}" placeholder="Descrição do serviço" style="text-transform:uppercase" onchange="updateSrv(${i},'descricao',this.value)"/></td>
-    <td><input type="number" value="${fmtN(s.valor)}" min="0" step="0.01" style="width:100px" onchange="updateSrv(${i},'valor',this.value)"/></td>
-    <td><input type="number" value="${s.garantia_dias}" min="0" style="width:80px" onchange="updateSrv(${i},'garantia_dias',this.value)" placeholder="dias"/></td>
-    <td><button class="del-btn" onclick="delSrv(${i})"><i class="ti ti-trash"></i></button></td>
-  </tr>`).join('');
-  const tot=SRVS.reduce((s,v)=>s+v.valor,0);
-  document.getElementById('srv-total').textContent=fmt(tot);
-  calcTotal();
+function selecionarModelo(i,idx){
+  const m=MOD_AC_LISTA[i][idx];
+  document.getElementById('ap-modelo-'+i).value=m.nome;
+  ap('modelo',i,m.nome);
+  document.getElementById('mod-drop-'+i).classList.remove('open');
 }
 
-function updateSrv(i,campo,val){
-  SRVS[i][campo]=campo==='descricao'?val.toUpperCase():(parseFloat(val)||0);
-  renderSrvs();
-}
-function delSrv(i){SRVS.splice(i,1);renderSrvs();}
-document.addEventListener('click',e=>{if(!e.target.closest('#srv-drop')&&!e.target.closest('#srv-busca')&&!e.target.closest('.btn'))document.getElementById('srv-drop').classList.remove('open');});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.mod-ac-wrap')){
+    document.querySelectorAll('.mod-ac-drop').forEach(d=>d.classList.remove('open'));
+  }
+});
 
-// ── TOTAIS ────────────────────────────────────────────────────
-function calcTotal(){
-  const tp=PECAS.reduce((s,p)=>s+p.valor_total,0);
-  const ts=SRVS.reduce((s,v)=>s+v.valor,0);
-  const desc=parseFloat(document.getElementById('fin-desconto')?.value)||0;
-  const total=Math.max(0,tp+ts-desc);
-  document.getElementById('fin-pecas').textContent=fmt(tp);
-  document.getElementById('fin-srvs').textContent=fmt(ts);
-  document.getElementById('fin-total').textContent=fmt(total);
-  // garantia
-  const gd=parseInt(document.getElementById('fin-garantia')?.value)||0;
-  const el=document.getElementById('g-dias');
-  if(el) el.textContent=gd>0?gd+' dias':'sem garantia';
-}
-
-// ── SALVAR ────────────────────────────────────────────────────
-async function salvar(){
-  const clienteNome=document.getElementById('cliente-nome').value.trim();
-  const aparelho=document.getElementById('aparelho').value;
-  const defeito=document.getElementById('defeito').value.trim();
-  if(!clienteNome){toast('Informe o cliente.','err');setTab('dados');return;}
-  if(!aparelho){toast('Selecione o tipo de aparelho.','err');setTab('dados');return;}
-  if(!defeito){toast('Descreva o defeito.','err');setTab('dados');return;}
-
-  const payload={
-    pessoa_id:PESSOA_ID||null,
-    cliente_nome:clienteNome.toUpperCase(),
-    cliente_celular:document.getElementById('cliente-celular').value.trim()||null,
-    aparelho,
-    modelo:document.getElementById('modelo').value.trim().toUpperCase()||null,
-    imei:document.getElementById('imei').value.trim()||null,
-    numero_serie:document.getElementById('imei').value.trim()||null,
-    senha_aparelho:document.getElementById('senha-ap').value.trim()||null,
-    acessorios:document.getElementById('acessorios').value.trim().toUpperCase()||null,
-    defeito:defeito.toUpperCase(),
-    laudo:document.getElementById('laudo').value.trim().toUpperCase()||null,
-    solucao:document.getElementById('solucao').value.trim().toUpperCase()||null,
-    status:STATUS_ATUAL,
-    tecnico_id:document.getElementById('tecnico-id').value||null,
-    garantia_dias:parseInt(document.getElementById('fin-garantia')?.value)||90,
-    forma_pagamento:document.getElementById('fin-forma')?.value||null,
-    desconto:parseFloat(document.getElementById('fin-desconto')?.value)||0,
-    valor_pecas:PECAS.reduce((s,p)=>s+p.valor_total,0),
-    valor_servico:SRVS.reduce((s,v)=>s+v.valor,0),
-    valor_total:parseFloat(document.getElementById('fin-total')?.textContent?.replace(/[^0-9,]/g,'').replace(',','.'))||0,
-    alerta_ativo:STATUS_CFG.some(s=>s.nome===STATUS_ATUAL&&s.gera_alerta),
-  };
-  payload.valor_total=payload.valor_pecas+payload.valor_servico-(parseFloat(document.getElementById('fin-desconto')?.value)||0);
-
-  const btn=document.getElementById('btn-salvar');
-  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i>';
-
-  let osId=OS_ID, error;
-  if(OS_ID){
-    ({error}=await db.from('ordens_servico').update(payload).eq('id',OS_ID));
+// ── LOAD OS EXISTENTE ─────────────────────────────────────────
+async function loadOS(){
+  if(!OS_ID){
+    addAparelho();
+    return;
+  }
+  document.getElementById('h-title').textContent='Editar OS';
+  const{data}=await db.from('ordens_servico').select('*').eq('id',OS_ID).single();
+  if(!data){toast('OS não encontrada.','err');return;}
+  document.getElementById('h-os-num').textContent='· #'+String(data.numero).padStart(4,'0');
+  // cliente
+  document.getElementById('cl-busca').value=data.cliente_nome||'';
+  document.getElementById('cl-id').value=data.pessoa_id||'';
+  document.getElementById('cl-nome').value=data.cliente_nome||'';
+  document.getElementById('cl-tel').value=data.cliente_celular||'';
+  document.getElementById('cl-doc').value=data.cliente_doc||'';
+  document.getElementById('cl-email').value=data.cliente_email||'';
+  document.getElementById('cl-dados').style.display='block';
+  // status
+  document.getElementById('os-status').value=data.status||'ABERTA';
+  // obs
+  document.getElementById('os-acessorios').value=data.acessorios||'';
+  document.getElementById('os-obs').value=data.observacoes||'';
+  // aparelhos
+  const{data:aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem').catch(()=>({data:null}));
+  if(aps&&aps.length){
+    APARELHOS=aps.map(a=>({tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||''}));
   } else {
-    const{data,error:e}=await db.from('ordens_servico').insert(payload).select('id,numero').single();
-    error=e;if(data){osId=data.id;OS_ID=data.id;EDIT_MODE=true;
-      document.getElementById('os-num').textContent='OS #'+String(data.numero).padStart(4,'0');
-      document.getElementById('btn-print').style.display='flex';
-      document.getElementById('btn-cancel').style.display='flex';
-    }
+    // compatibilidade: OS sem tabela os_aparelhos
+    APARELHOS=[{tipo:'',marca:'',modelo:data.aparelho||'',cor:'',imei:data.numero_serie||'',senha:data.senha||'',defeito:data.defeito||'',laudo:data.laudo||'',solucao:data.solucao||''}];
   }
-  if(error){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar OS';toast('Erro: '+error.message,'err');return;}
+  renderAparelhos();
+  // reaplica status após carregar
+  setStatus(data.status||'ABERTA');
+  document.getElementById('btn-save-txt').textContent='Salvar alterações';
+}
 
-  // salva peças
-  if(osId&&PECAS.length){
-    await db.from('os_pecas').delete().eq('os_id',osId);
-    const pecasPayload=PECAS.map(p=>({...p,os_id:osId}));
-    await db.from('os_pecas').insert(pecasPayload);
-    // desconta estoque
-    for(const p of PECAS){
-      if(p.produto_id){
-        const{data:prod}=await db.from('produtos').select('estoque_atual').eq('id',p.produto_id).single();
-        if(prod){
-          const novo=Math.max(0,(prod.estoque_atual||0)-p.quantidade);
-          await db.from('produtos').update({estoque_atual:novo}).eq('id',p.produto_id);
-        }
+// ── SALVAR ─────────────────────────────────────────────────────
+async function salvar(){
+  // valida
+  const nomeCliente=document.getElementById('cl-nome').value.trim();
+  if(!nomeCliente){toast('Informe o nome do cliente.','err');document.getElementById('cl-nome').focus();return;}
+  // pega valores dos aparelhos dos inputs
+  APARELHOS.forEach((ap,i)=>{
+    ap.tipo=document.getElementById('ap-tipo-'+i)?.value||ap.tipo;
+    ap.marca=document.getElementById('ap-marca-'+i)?.value||ap.marca;
+    ap.modelo=document.getElementById('ap-modelo-'+i)?.value||ap.modelo;
+    ap.cor=document.getElementById('ap-cor-'+i)?.value||ap.cor;
+    ap.imei=document.getElementById('ap-imei-'+i)?.value||ap.imei;
+    ap.senha=document.getElementById('ap-senha-'+i)?.value||ap.senha;
+    ap.defeito=document.getElementById('ap-defeito-'+i)?.value||ap.defeito;
+    ap.laudo=document.getElementById('ap-laudo-'+i)?.value||ap.laudo;
+    ap.solucao=document.getElementById('ap-solucao-'+i)?.value||ap.solucao;
+  });
+  if(!APARELHOS.some(a=>a.defeito.trim())){toast('Informe o defeito de pelo menos 1 aparelho.','err');return;}
+
+  const btn=document.getElementById('btn-save');
+  btn.disabled=true;
+  document.getElementById('btn-save-txt').textContent=OS_ID?'Salvando...':'Criando OS...';
+
+  try {
+    // salva/atualiza cliente se necessário
+    let pessoaId=document.getElementById('cl-id').value||null;
+    if(!pessoaId&&nomeCliente){
+      const{data:np,error:ne}=await db.from('pessoas').insert({
+        nome:nomeCliente.toUpperCase(),
+        celular:document.getElementById('cl-tel').value||null,
+        documento:document.getElementById('cl-doc').value.replace(/\D/g,'')||null,
+        email:document.getElementById('cl-email').value||null,
+        is_cliente:true,ativo:true,
+      }).select('id').single();
+      if(ne){toast('Erro ao criar cliente: '+ne.message,'err');btn.disabled=false;document.getElementById('btn-save-txt').textContent=OS_ID?'Salvar alterações':'Salvar OS';return;}
+      pessoaId=np.id;
+      document.getElementById('cl-id').value=pessoaId;
+      CLIENTES_CACHE=null;
+    }
+
+    // resumo para campo legado (primeiro aparelho)
+    const ap0=APARELHOS[0];
+    const aparelhoResumido=[ap0.marca,ap0.modelo].filter(Boolean).join(' ')||ap0.tipo||'';
+
+    const status=document.getElementById('os-status').value||'ABERTA';
+    const payload={
+      pessoa_id:pessoaId,
+      cliente_nome:nomeCliente.toUpperCase(),
+      cliente_celular:document.getElementById('cl-tel').value||null,
+      cliente_doc:document.getElementById('cl-doc').value.replace(/\D/g,'')||null,
+      cliente_email:document.getElementById('cl-email').value||null,
+      aparelho:aparelhoResumido.toUpperCase()||null,
+      defeito:ap0.defeito.toUpperCase()||null,
+      laudo:ap0.laudo.toUpperCase()||null,
+      solucao:ap0.solucao.toUpperCase()||null,
+      numero_serie:ap0.imei||null,
+      senha:ap0.senha||null,
+      status,
+      acessorios:document.getElementById('os-acessorios').value.toUpperCase()||null,
+      observacoes:document.getElementById('os-obs').value.toUpperCase()||null,
+      atualizado_em:new Date().toISOString(),
+    };
+
+    let osId=OS_ID;
+    if(OS_ID){
+      const{error}=await db.from('ordens_servico').update(payload).eq('id',OS_ID);
+      if(error)throw new Error(error.message);
+    } else {
+      const{data:nova,error}=await db.from('ordens_servico').insert(payload).select('id').single();
+      if(error)throw new Error(error.message);
+      osId=nova.id;
+    }
+
+    // salva aparelhos na tabela os_aparelhos (se existir)
+    try {
+      await db.from('os_aparelhos').delete().eq('os_id',osId);
+      if(APARELHOS.length>0){
+        await db.from('os_aparelhos').insert(APARELHOS.map((a,idx)=>({
+          os_id:osId,ordem:idx+1,
+          tipo:a.tipo.toUpperCase()||null,marca:a.marca.toUpperCase()||null,
+          modelo:a.modelo.toUpperCase()||null,cor:a.cor.toUpperCase()||null,
+          imei:a.imei||null,senha:a.senha||null,
+          defeito:a.defeito.toUpperCase()||null,
+          laudo:a.laudo.toUpperCase()||null,
+          solucao:a.solucao.toUpperCase()||null,
+        })));
       }
-    }
+    } catch {} // silencia se tabela não existe
+
+    toast(OS_ID?'OS atualizada!':'OS criada com sucesso!');
+    setTimeout(()=>location.href='os.html',1000);
+
+  } catch(err){
+    toast('Erro: '+err.message,'err');
+    btn.disabled=false;
+    document.getElementById('btn-save-txt').textContent=OS_ID?'Salvar alterações':'Salvar OS';
   }
-
-  // salva serviços
-  if(osId&&SRVS.length){
-    await db.from('os_servicos').delete().eq('os_id',osId);
-    await db.from('os_servicos').insert(SRVS.map(s=>({...s,os_id:osId})));
-  }
-
-  // histórico
-  if(osId){
-    await db.from('os_historico').insert({
-      os_id:osId,status:STATUS_ATUAL,
-      usuario_id:USR.id||null,usuario_nome:USR.nome,
-      observacao:'Status: '+STATUS_ATUAL,
-    });
-  }
-
-  btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar OS';
-  toast('OS salva!');
-  renderStatusGrid();
-}
-
-// ── CANCELAR OS ───────────────────────────────────────────────
-async function cancelar(){
-  if(!OS_ID||!confirm('Cancelar esta OS?')) return;
-  await db.from('ordens_servico').update({status:'CANCELADA',alerta_ativo:false}).eq('id',OS_ID);
-  await db.from('os_historico').insert({os_id:OS_ID,status:'CANCELADA',usuario_id:USR.id||null,usuario_nome:USR.nome,observacao:'OS cancelada.'});
-  toast('OS cancelada.');STATUS_ATUAL='CANCELADA';renderStatusGrid();
-}
-
-// ── RECEBER PAGAMENTO ─────────────────────────────────────────
-async function receberPagamento(){
-  if(!OS_ID){toast('Salve a OS primeiro.','err');return;}
-  const forma=document.getElementById('fin-forma').value;
-  if(!forma){toast('Selecione a forma de pagamento.','err');return;}
-  const total=PECAS.reduce((s,p)=>s+p.valor_total,0)+SRVS.reduce((s,v)=>s+v.valor,0)-(parseFloat(document.getElementById('fin-desconto').value)||0);
-
-  // lança no caixa se dinheiro, ou em contas a receber
-  if(forma==='DINHEIRO'){
-    const{data:sessao}=await db.from('caixa_sessoes').select('id').eq('status','ABERTO').order('data_abertura',{ascending:false}).limit(1).single();
-    if(sessao){
-      const clienteNome=document.getElementById('cliente-nome').value.trim();
-      await db.from('caixa_movimentos').insert({
-        sessao_id:sessao.id,tipo:'ENTRADA',
-        descricao:'OS #'+document.getElementById('os-num').textContent.replace('OS ',''),
-        valor:total,categoria:'SERVIÇO',forma_pagamento:forma,
-        pessoa_id:PESSOA_ID||null,
-      });
-    }
-  }
-
-  await db.from('ordens_servico').update({
-    status:'ENTREGUE',pago:true,forma_pagamento:forma,
-    data_entrega:new Date().toISOString(),alerta_ativo:false,
-  }).eq('id',OS_ID);
-  await db.from('os_historico').insert({os_id:OS_ID,status:'ENTREGUE',usuario_id:USR.id||null,usuario_nome:USR.nome,observacao:'Pago e entregue. Forma: '+forma});
-
-  toast('OS entregue e pagamento registrado!');
-  STATUS_ATUAL='ENTREGUE';renderStatusGrid();
-}
-
-// ── IMPRIMIR ──────────────────────────────────────────────────
-function imprimir(){
-  const num=document.getElementById('os-num').textContent;
-  const cliente=document.getElementById('cliente-nome').value.toUpperCase();
-  const aparelho=document.getElementById('aparelho').value+' '+document.getElementById('modelo').value;
-  const imei=document.getElementById('imei').value;
-  const defeito=document.getElementById('defeito').value.toUpperCase();
-  const laudo=document.getElementById('laudo').value.toUpperCase();
-  const solucao=document.getElementById('solucao').value.toUpperCase();
-  const garantia=document.getElementById('fin-garantia')?.value||90;
-  const total=document.getElementById('fin-total')?.textContent||'R$ 0,00';
-  const hoje=new Date().toLocaleDateString('pt-BR');
-
-  const pecasHtml=PECAS.map((p,i)=>`<tr><td>${i+1}</td><td>${p.descricao}</td><td style="text-align:center">${p.quantidade}</td><td style="text-align:right">${fmt(p.valor_total)}</td></tr>`).join('');
-  const srvsHtml=SRVS.map((s,i)=>`<tr><td>${i+1}</td><td>${s.descricao}</td><td style="text-align:center">${s.garantia_dias>0?s.garantia_dias+'d':'—'}</td><td style="text-align:right">${fmt(s.valor)}</td></tr>`).join('');
-
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
-  <style>body{font-family:Arial,sans-serif;padding:28px;color:#1A1A18;max-width:680px;margin:0 auto}
-  h1{font-size:17px;font-weight:800;margin:0}p.sub{font-size:10px;color:#666;margin:3px 0 16px}
-  .os-num{font-size:22px;font-weight:800;color:#1A1A18;text-align:right}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1A1A18;padding-bottom:12px;margin-bottom:16px}
-  .sec{margin-bottom:14px}.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#666;border-bottom:1px solid #eee;padding-bottom:4px;margin-bottom:8px}
-  .row{display:flex;gap:20px;margin-bottom:5px}
-  .kv{flex:1}.kv .k{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.05em}.kv .v{font-size:13px;font-weight:600;color:#1A1A18}
-  table{width:100%;border-collapse:collapse;margin-bottom:8px}
-  thead th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#666;padding:5px 8px;border-bottom:1px solid #eee;text-align:left}
-  tbody td{padding:6px 8px;font-size:12.5px;border-bottom:1px solid #f5f5f5}
-  .total-box{background:#F5F4F0;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;font-size:18px;font-weight:800}
-  .garantia-box{background:#EAF3DE;border:1px solid rgba(59,109,17,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:#3B6D11;margin:10px 0}
-  .ass{display:flex;gap:20px;margin-top:32px}
-  .ass-box{flex:1;border-top:1px solid #999;padding-top:7px;text-align:center;font-size:10px;color:#666}
-  .footer{text-align:center;margin-top:20px;font-size:9px;color:#aaa}
-  @media print{body{padding:8mm}@page{margin:6mm}}</style>
-  </head><body>
-  <div class="header">
-    <div><h1>DOTTEC ASSISTÊNCIA INTELIGENTE</h1><p class="sub">CNPJ 12.227.221/0001-86 · Av. Tiradentes, 334 - Sala 04 · Rio dos Cedros/SC · (47) 9 8816-8931</p></div>
-    <div class="os-num">${num}</div>
-  </div>
-  <div class="sec"><div class="sec-title">Cliente</div>
-    <div class="row"><div class="kv"><div class="k">Nome</div><div class="v">${cliente}</div></div>
-    <div class="kv"><div class="k">Celular</div><div class="v">${document.getElementById('cliente-celular').value||'—'}</div></div></div>
-  </div>
-  <div class="sec"><div class="sec-title">Aparelho</div>
-    <div class="row">
-      <div class="kv"><div class="k">Aparelho</div><div class="v">${aparelho.trim()}</div></div>
-      <div class="kv"><div class="k">IMEI / Série</div><div class="v">${imei||'—'}</div></div>
-    </div>
-  </div>
-  <div class="sec"><div class="sec-title">Defeito relatado</div><p style="font-size:12.5px">${defeito||'—'}</p></div>
-  ${laudo?`<div class="sec"><div class="sec-title">Laudo técnico</div><p style="font-size:12.5px">${laudo}</p></div>`:''}
-  ${solucao?`<div class="sec"><div class="sec-title">Solução aplicada</div><p style="font-size:12.5px">${solucao}</p></div>`:''}
-  ${pecasHtml?`<div class="sec"><div class="sec-title">Peças utilizadas</div><table><thead><tr><th>#</th><th>Descrição</th><th style="text-align:center">Qtd</th><th style="text-align:right">Total</th></tr></thead><tbody>${pecasHtml}</tbody></table></div>`:''}
-  ${srvsHtml?`<div class="sec"><div class="sec-title">Serviços executados</div><table><thead><tr><th>#</th><th>Serviço</th><th style="text-align:center">Garantia</th><th style="text-align:right">Valor</th></tr></thead><tbody>${srvsHtml}</tbody></table></div>`:''}
-  <div class="total-box"><span>TOTAL</span><span>${total}</span></div>
-  ${garantia>0?`<div class="garantia-box">✅ Garantia de <strong>${garantia} dias</strong> a partir da data de entrega (${hoje}), válida para peças e serviços descritos acima.</div>`:''}
-  <div class="ass">
-    <div class="ass-box">___________________________<br>DOTTEC ASSISTÊNCIA<br>CNPJ 12.227.221/0001-86</div>
-    <div class="ass-box">___________________________<br>${cliente}<br>Cliente / Responsável</div>
-  </div>
-  <div class="footer">Emitido em ${hoje} · Dottec Assistência Inteligente · Sistema interno</div>
-  </body></html>`);
-  w.document.close();setTimeout(()=>w.print(),400);
-}
-
-// ── HISTÓRICO ─────────────────────────────────────────────────
-async function loadHistorico(){
-  const{data}=await db.from('os_historico').select('*').eq('os_id',OS_ID).order('criado_em',{ascending:false});
-  const body=document.getElementById('historico-body');
-  if(!data||!data.length){body.innerHTML='<div style="padding:2rem;text-align:center;color:var(--sub)">Sem histórico</div>';return;}
-  const fmtDtHr=d=>new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  const cls={'ABERTA':'var(--cyan)','EM EXECUÇÃO':'var(--amber)','PASSAR ORÇAMENTO':'var(--red)','PRONTA':'var(--green)','ENTREGUE':'#64748B','CANCELADA':'#94938E'};
-  body.innerHTML=data.map(h=>`<div class="hist-row">
-    <div class="hist-dot" style="background:${cls[h.status]||'var(--border)'}"></div>
-    <div class="hist-info">
-      <div class="hist-status">${h.status}</div>
-      <div class="hist-meta">${h.usuario_nome||'—'} · ${fmtDtHr(h.criado_em)}</div>
-      ${h.observacao?`<div style="font-size:12px;color:var(--sub);margin-top:2px">${h.observacao}</div>`:''}
-    </div>
-  </div>`).join('');
-}
-
-// ── CARREGAR OS EXISTENTE ─────────────────────────────────────
-async function loadOS(id){
-  const[{data:os},{data:pecas},{data:srvs}]=await Promise.all([
-    db.from('ordens_servico').select('*,usuarios!ordens_servico_tecnico_id_fkey(nome)').eq('id',id).single(),
-    db.from('os_pecas').select('*').eq('os_id',id),
-    db.from('os_servicos').select('*').eq('os_id',id),
-  ]);
-  if(!os) return;
-  OS_ID=id;EDIT_MODE=true;PESSOA_ID=os.pessoa_id;STATUS_ATUAL=os.status;
-  document.getElementById('os-num').textContent='OS #'+String(os.numero).padStart(4,'0');
-  document.getElementById('os-sub').textContent=os.cliente_nome+' · '+os.aparelho;
-  document.getElementById('btn-print').style.display='flex';
-  document.getElementById('btn-cancel').style.display='flex';
-  document.getElementById('cliente-nome').value=os.cliente_nome||'';
-  document.getElementById('cliente-celular').value=os.cliente_celular||'';
-  document.getElementById('aparelho').value=os.aparelho||'';
-  document.getElementById('modelo').value=os.modelo||'';
-  document.getElementById('imei').value=os.imei||os.numero_serie||'';
-  document.getElementById('senha-ap').value=os.senha_aparelho||'';
-  document.getElementById('acessorios').value=os.acessorios||'';
-  document.getElementById('defeito').value=os.defeito||'';
-  document.getElementById('laudo').value=os.laudo||'';
-  document.getElementById('solucao').value=os.solucao||'';
-  document.getElementById('tecnico-id').value=os.tecnico_id||'';
-  document.getElementById('fin-garantia').value=os.garantia_dias||90;
-  document.getElementById('fin-desconto').value=os.desconto||0;
-  document.getElementById('fin-forma').value=os.forma_pagamento||'';
-  PECAS=pecas||[];SRVS=srvs||[];
-  renderPecas();renderSrvs();renderStatusGrid();calcTotal();
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-async function init(){
-  const[{data:sc},{data:us}]=await Promise.all([
-    db.from('status_config').select('nome,alerta_prioridade,gera_alerta').eq('modulo','OS').eq('ativo',true).order('ordem'),
-    db.from('usuarios').select('id,nome,perfil').eq('ativo',true),
-  ]);
-  STATUS_CFG=sc||[];USUARIOS=us||[];
-  const sel=document.getElementById('tecnico-id');
-  sel.innerHTML='<option value="">Sem técnico</option>'+USUARIOS.map(u=>`<option value="${u.id}">${u.nome} (${u.perfil})</option>`).join('');
-  await loadServicos();
-  renderStatusGrid();
-  const id=new URLSearchParams(location.search).get('id');
-  if(id) await loadOS(id);
-  document.getElementById('fin-garantia').addEventListener('input',calcTotal);
-}
-init();
+Promise.all([loadMods(),loadStatus(),loadOpcoesAparelho()]).then(()=>loadOS());
 </script>
 </body>
 </html>
