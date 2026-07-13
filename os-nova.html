@@ -649,7 +649,10 @@ async function loadOS(){
 }
 
 // ── SALVAR ──────────────────────────────────────────
+let _SALVANDO=false;
 async function salvar(){
+  if(_SALVANDO)return;
+  _SALVANDO=true;
   const nome=document.getElementById('cl-nome').value.trim();
   if(!nome){toast('Informe o nome do cliente.','err');document.getElementById('cl-busca').focus();return;}
   // lê campos dos aparelhos
@@ -691,13 +694,14 @@ async function salvar(){
     }catch{}
     // grava histórico de status na criação
     if(!OS_ID){
-      await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome}).catch(()=>{});
+      try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}
     }
     toast(OS_ID?'OS atualizada!':'OS criada!');
     setTimeout(()=>location.href='os.html',900);
   }catch(err){
     toast('Erro: '+err.message,'err');
     btn.disabled=false;
+    _SALVANDO=false;
     document.getElementById('btn-txt').textContent=OS_ID?'Salvar alterações':'Salvar OS';
   }
 }
