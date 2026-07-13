@@ -15,7 +15,7 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
 
-/* HEADER */
+/* ── HEADER (igual dashboard) ─────────────────────── */
 .header{height:60px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .h-logo-circle{width:38px;height:38px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(41,184,194,.3);flex-shrink:0}
@@ -33,30 +33,28 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 .h-btn{height:34px;padding:0 14px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s;text-decoration:none;white-space:nowrap;background:var(--cyan);color:#fff}
 .h-btn:hover{background:var(--cd)}
 
-/* BARRA BOLINHAS + BUSCA + STATUS — TUDO JUNTO, separação clara */
-.nav-bar{background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0;padding:0}
-
-/* linha 1: bolinhas */
-.mods-row{padding:8px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.mods-inner{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:4px;justify-items:center}
-.mod-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:inherit;cursor:pointer;width:100%;max-width:68px}
-.mod-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;transition:transform .2s cubic-bezier(.34,1.5,.64,1),box-shadow .2s}
+/* ── BOLINHAS (igual dashboard — separado do header) ─ */
+.mods-bar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.mods-inner{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:6px 4px;justify-items:center}
+.mod-ball{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:inherit;cursor:pointer;width:100%;max-width:72px}
+.mod-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative;transition:transform .2s cubic-bezier(.34,1.5,.64,1),box-shadow .2s}
 .mod-ball:hover .mod-icon{transform:translateY(-3px) scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.12)}
 .mod-ball.active .mod-icon{box-shadow:0 0 0 2.5px var(--cyan),0 4px 12px rgba(41,184,194,.25)}
-.mod-lbl{font-size:8.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap}
+.mod-lbl{font-size:9px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap}
 .mod-ball.active .mod-lbl{color:var(--cyan)}
 .mod-more-wrap{position:relative;flex-shrink:0}
-.mod-more-btn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
-.mod-more-icon{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub);transition:all .15s}
+.mod-more-btn{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.mod-more-icon{width:46px;height:46px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--sub);transition:all .15s}
 .mod-more-icon:hover{background:#E2DFD6}
-.mod-more-lbl{font-size:8.5px;font-weight:700;color:var(--sub)}
+.mod-more-lbl{font-size:9px;font-weight:700;color:var(--sub)}
 .mod-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:300;min-width:170px}
 .mod-more-drop.open{display:block}
 .mod-more-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
 .mod-more-item:hover{background:var(--bg)}
 .mod-more-item i{font-size:15px;width:18px;text-align:center}
 
-/* linha 2: busca */
+/* ── BUSCA + STATUS (barra unificada) ─────────────── */
+.filter-bar{background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0}
 .search-row{padding:7px 20px;border-bottom:1px solid var(--border)}
 .search-box{display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;height:40px;transition:border-color .2s,box-shadow .2s}
 .search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
@@ -64,11 +62,9 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 .search-box input{flex:1;border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--dark);background:transparent;text-transform:uppercase;caret-color:var(--cyan)}
 .search-box input::placeholder{text-transform:none;color:#B5B2A8}
 .search-cnt{font-size:11px;color:var(--sub);flex-shrink:0;white-space:nowrap}
-
-/* linha 3: status tabs */
-.status-row{display:flex;align-items:center;overflow-x:auto;padding:0 20px}
+.status-row{display:flex;align-items:center;overflow-x:auto;padding:0 12px}
 .status-row::-webkit-scrollbar{display:none}
-.sf{height:40px;padding:0 13px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0;margin-bottom:-2px}
+.sf{height:40px;padding:0 12px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0;margin-bottom:-2px}
 .sf:hover{color:var(--dark)}
 .sf.active{color:var(--dark);border-bottom-color:var(--cyan)}
 .sf-cnt{font-size:9px;font-weight:800;padding:2px 5px;border-radius:8px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
@@ -76,9 +72,8 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 .sf-cnt.crit{background:var(--rbg);color:var(--red);border-color:rgba(220,38,38,.2)}
 .sf-cnt.alta{background:var(--abg);color:var(--amber);border-color:rgba(154,96,0,.2)}
 .sf-cnt.ok{background:var(--gbg);color:var(--green);border-color:rgba(59,109,17,.2)}
-.status-row-border{border-bottom:2px solid var(--border)}
 
-/* TABELA */
+/* ── TABELA ────────────────────────────────────────── */
 .body{flex:1;overflow-y:auto;padding:14px 20px 24px}
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
@@ -99,53 +94,124 @@ tbody tr:hover{background:#FAFAF7}
 .act-can{background:var(--bg);color:var(--sub)}.act-can:hover{background:var(--abg);color:var(--amber)}
 .tf{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:space-between}
 .empty{padding:3rem;text-align:center;color:var(--sub)}.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.2}
-.sb{font-size:10px;font-weight:700;padding:3px 8px;border-radius:16px;white-space:nowrap;display:inline-block}
+
+/* STATUS BADGES */
+.sb{font-size:10px;font-weight:700;padding:3px 9px;border-radius:16px;white-space:nowrap;display:inline-block;cursor:pointer;transition:opacity .15s}
+.sb:hover{opacity:.75}
 .sb-aberta{background:var(--cbg);color:var(--cd)}
 .sb-execucao{background:var(--abg);color:var(--amber)}
-.sb-orcamento,.sb-pronta{animation:pulse 1.4s ease infinite}
-.sb-orcamento{background:var(--rbg);color:var(--red)}
+.sb-orcamento{background:var(--rbg);color:var(--red);animation:pulse 1.4s ease infinite}
 .sb-aguardando{background:#FEF3C7;color:#92400E}
 .sb-peca{background:#F3E8FF;color:#6D28D9}
-.sb-pronta{background:var(--gbg);color:var(--green)}
+.sb-pronta{background:var(--gbg);color:var(--green);animation:pulse 1.4s ease infinite}
 .sb-entregue{background:#F1F5F9;color:#64748B}
 .sb-cancelada{background:#F8F8F7;color:var(--sub)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
-.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
-.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+
+/* ── MODAIS ────────────────────────────────────────── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
-.modal{background:var(--white);border-radius:16px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal{background:var(--white);border-radius:16px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+.modal-sm{max-width:400px}
+.modal-md{max-width:520px}
 .modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .mh-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.modal-title{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
-.modal-body{padding:1rem 1.25rem;font-size:13.5px;color:var(--text);line-height:1.5}
+.modal-title{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark);flex:1}
+.modal-x{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.modal-body{padding:1rem 1.25rem}
 .modal-body strong{color:var(--dark)}
 .modal-foot{padding:.85rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 .btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-red{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--red);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
 .btn-amb{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--amber);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-cyan{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-cyan:hover{background:var(--cd)}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.field select,.field textarea,.field input{width:100%;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;padding:0 11px;height:40px}
+.field select:focus,.field textarea:focus,.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.field textarea{height:72px;resize:none;padding:9px 11px}
+
+/* STATUS GRID no modal */
+.status-opts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.st-opt{height:32px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-family:inherit;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s}
+.st-opt:hover{border-color:var(--cyan);color:var(--cd)}
+.st-opt.sel{border-color:transparent}
+.st-opt[data-s="ABERTA"].sel{background:var(--cbg);color:var(--cd)}
+.st-opt[data-s="EM EXECUÇÃO"].sel{background:var(--abg);color:var(--amber)}
+.st-opt[data-s="PASSAR ORÇAMENTO"].sel{background:var(--rbg);color:var(--red)}
+.st-opt[data-s="AGUARDANDO APROVAÇÃO"].sel{background:#FEF3C7;color:#92400E}
+.st-opt[data-s="AGUARDANDO PEÇA"].sel{background:#F3E8FF;color:#6D28D9}
+.st-opt[data-s="PRONTA"].sel{background:var(--gbg);color:var(--green)}
+.st-opt[data-s="ENTREGUE"].sel{background:#F1F5F9;color:#64748B}
+.st-opt[data-s="CANCELADA"].sel{background:#F8F8F7;color:var(--sub)}
+
+/* HISTÓRICO STATUS */
+.hist-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:12px}
+.hist-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid #F2F0EA;font-size:12px}
+.hist-item:last-child{border-bottom:none}
+.hist-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;background:var(--cyan)}
+.hist-info{flex:1}
+.hist-status{font-weight:700;color:var(--dark)}
+.hist-obs{color:var(--sub);margin-top:2px}
+.hist-meta{font-size:10.5px;color:var(--sub);flex-shrink:0;text-align:right;white-space:nowrap}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
 </style>
 </head>
 <body>
-
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
+<!-- MODAL EXCLUIR -->
 <div class="overlay" id="ov-del">
-  <div class="modal">
+  <div class="modal modal-sm">
     <div class="modal-head"><div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-trash"></i></div><div class="modal-title">Excluir OS</div></div>
-    <div class="modal-body">Tem certeza que deseja excluir a <strong id="del-num"></strong>? Esta ação não pode ser desfeita.</div>
+    <div class="modal-body" style="font-size:13.5px;line-height:1.5">Tem certeza que deseja excluir a <strong id="del-num"></strong>? Esta ação não pode ser desfeita.</div>
     <div class="modal-foot"><button class="btn-sec" onclick="fecha('del')">Cancelar</button><button class="btn-red" onclick="confirmarDel()"><i class="ti ti-trash"></i> Excluir</button></div>
   </div>
 </div>
+
+<!-- MODAL CANCELAR -->
 <div class="overlay" id="ov-can">
-  <div class="modal">
+  <div class="modal modal-sm">
     <div class="modal-head"><div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-ban"></i></div><div class="modal-title">Cancelar OS</div></div>
-    <div class="modal-body">Deseja cancelar a <strong id="can-num"></strong>? Ela continuará visível com status CANCELADA.</div>
+    <div class="modal-body" style="font-size:13.5px;line-height:1.5">Deseja cancelar a <strong id="can-num"></strong>? Ela continuará visível com status CANCELADA.</div>
     <div class="modal-foot"><button class="btn-sec" onclick="fecha('can')">Voltar</button><button class="btn-amb" onclick="confirmarCan()"><i class="ti ti-ban"></i> Cancelar OS</button></div>
+  </div>
+</div>
+
+<!-- MODAL MUDAR STATUS -->
+<div class="overlay" id="ov-status">
+  <div class="modal modal-md">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-flag"></i></div>
+      <div class="modal-title">Atualizar status — <span id="st-num"></span></div>
+      <button class="modal-x" onclick="fecha('status')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:10px"><label>Novo status</label>
+        <div class="status-opts" id="st-opts"></div>
+      </div>
+      <div class="field">
+        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <textarea id="st-obs" placeholder="Ex: cliente aprovado orçamento, aguardando peça X..."></textarea>
+      </div>
+      <!-- histórico -->
+      <div id="st-hist-wrap" style="display:none">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-top:14px;margin-bottom:6px">Histórico de status</div>
+        <div class="hist-list" id="st-hist"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fecha('status')">Cancelar</button>
+      <button class="btn-cyan" onclick="confirmarStatus()"><i class="ti ti-check"></i> Salvar status</button>
+    </div>
   </div>
 </div>
 
@@ -170,20 +236,20 @@ tbody tr:hover{background:#FAFAF7}
   </div>
 </header>
 
-<!-- BARRA NAV: bolinhas + busca + status -->
-<div class="nav-bar">
-  <!-- bolinhas -->
-  <div class="mods-row">
-    <div class="mods-inner" id="mods-inner"><div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div></div>
-    <div class="mod-more-wrap" id="more-wrap" style="display:none">
-      <div class="mod-more-btn" onclick="toggleMore(event)">
-        <div class="mod-more-icon"><i class="ti ti-dots"></i></div>
-        <span class="mod-more-lbl">mais</span>
-      </div>
-      <div class="mod-more-drop" id="more-drop"></div>
+<!-- BOLINHAS (separadas do header com borda) -->
+<div class="mods-bar">
+  <div class="mods-inner" id="mods-inner"><div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div></div>
+  <div class="mod-more-wrap" id="more-wrap" style="display:none">
+    <div class="mod-more-btn" onclick="toggleMore(event)">
+      <div class="mod-more-icon"><i class="ti ti-dots"></i></div>
+      <span class="mod-more-lbl">mais</span>
     </div>
+    <div class="mod-more-drop" id="more-drop"></div>
   </div>
-  <!-- busca -->
+</div>
+
+<!-- BUSCA + STATUS -->
+<div class="filter-bar">
   <div class="search-row">
     <div class="search-box">
       <i class="ti ti-search"></i>
@@ -191,8 +257,7 @@ tbody tr:hover{background:#FAFAF7}
       <span class="search-cnt" id="s-cnt"></span>
     </div>
   </div>
-  <!-- status tabs -->
-  <div class="status-row status-row-border" id="status-row"></div>
+  <div class="status-row" id="status-row"></div>
 </div>
 
 <!-- TABELA -->
@@ -221,19 +286,16 @@ const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
 if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
 const db=window._dottecDb;
-
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 const h=new Date().getHours();
 document.getElementById('h-saud').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', '+USR.nome;
-
 const fmtDt=d=>new Date(d).toLocaleDateString('pt-BR');
-const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
-
+const fmtDtHr=d=>new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const hh=Math.floor(m/60);if(hh<24)return hh+'h';return Math.floor(hh/24)+'d';};
 const SB_CLS={'ABERTA':'sb-aberta','EM EXECUÇÃO':'sb-execucao','PASSAR ORÇAMENTO':'sb-orcamento','AGUARDANDO APROVAÇÃO':'sb-aguardando','AGUARDANDO PEÇA':'sb-peca','PRONTA':'sb-pronta','ENTREGUE':'sb-entregue','CANCELADA':'sb-cancelada'};
-const SB_PRIORIDADE={'PASSAR ORÇAMENTO':'crit','PRONTA':'crit','AGUARDANDO APROVAÇÃO':'alta','EM EXECUÇÃO':'alta','ABERTA':'','AGUARDANDO PEÇA':'','ENTREGUE':'ok','CANCELADA':''};
-
-let TODOS=[], STATUS_CFG=[], FILTRO='', OS_ACT=null;
+const SB_PRI={'PASSAR ORÇAMENTO':'crit','PRONTA':'crit','AGUARDANDO APROVAÇÃO':'alta','EM EXECUÇÃO':'alta','ENTREGUE':'ok'};
+let TODOS=[], STATUS_CFG=[], FILTRO='', OS_ACT=null, ST_OS_ID=null, ST_STATUS_SEL='';
 
 // MÓDULOS
 const MODS=[
@@ -249,7 +311,6 @@ const MODS=[
   {id:'config',lbl:'Config.',ico:'ti-settings',href:'configuracoes.html',bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
 ];
 let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
-
 async function loadMods(){
   if(USR.id){const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_u_'+USR.id).maybeSingle().catch(()=>({data:null}));if(data?.valor){try{ATIVOS=JSON.parse(data.valor);}catch{}}}
   const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
@@ -266,48 +327,39 @@ async function loadMods(){
 function toggleMore(e){e.stopPropagation();document.getElementById('more-drop').classList.toggle('open');}
 document.addEventListener('click',()=>document.getElementById('more-drop')?.classList.remove('open'));
 
-// LOAD
+// LOAD OS
 async function load(){
   const[{data:os},{data:sc}]=await Promise.all([
-    db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,defeito,status,criado_em,atualizado_em').order('criado_em',{ascending:false}).limit(300),
+    db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,defeito,status,criado_em').order('criado_em',{ascending:false}).limit(300),
     db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('ativo',true).order('ordem'),
   ]);
   TODOS=os||[]; STATUS_CFG=sc||[];
   document.getElementById('h-cnt').textContent=TODOS.length;
-  buildStatusRow();
-  render();
+  buildStatusRow(); render();
 }
 
 function buildStatusRow(){
   const cnts={};
   TODOS.forEach(o=>cnts[o.status]=(cnts[o.status]||0)+1);
-  const total=TODOS.length;
-  let html=`<button class="sf${FILTRO===''?' active':''}" onclick="setFiltro('')">Todos <span class="sf-cnt">${total}</span></button>`;
+  let html=`<button class="sf${FILTRO===''?' active':''}" onclick="setFiltro('')">Todos <span class="sf-cnt">${TODOS.length}</span></button>`;
   const ordem=STATUS_CFG.map(s=>s.nome);
   const todos=[...new Set([...ordem,...Object.keys(cnts)])];
   todos.forEach(s=>{
     const cnt=cnts[s]||0; if(!cnt) return;
     const cfg=STATUS_CFG.find(x=>x.nome===s);
     const p=cfg?.alerta_prioridade?.toLowerCase()||'';
-    const cls=p==='critica'?'crit':p==='alta'?'alta':SB_PRIORIDADE[s]||'';
+    const cls=p==='critica'?'crit':p==='alta'?'alta':SB_PRI[s]||'';
     html+=`<button class="sf${FILTRO===s?' active':''}" onclick="setFiltro('${s}')">${s} <span class="sf-cnt ${cls}">${cnt}</span></button>`;
   });
   document.getElementById('status-row').innerHTML=html;
 }
-
 function setFiltro(s){FILTRO=s;buildStatusRow();render();}
 function filtrar(){render();}
-
 function render(){
   const q=document.getElementById('busca').value.trim().toUpperCase();
   let lista=TODOS;
   if(FILTRO) lista=lista.filter(o=>o.status===FILTRO);
-  if(q) lista=lista.filter(o=>
-    String(o.numero).padStart(4,'0').includes(q)||
-    (o.cliente_nome||'').toUpperCase().includes(q)||
-    (o.aparelho||'').toUpperCase().includes(q)||
-    (o.defeito||'').toUpperCase().includes(q)
-  );
+  if(q) lista=lista.filter(o=>String(o.numero).padStart(4,'0').includes(q)||(o.cliente_nome||'').toUpperCase().includes(q)||(o.aparelho||'').toUpperCase().includes(q)||(o.defeito||'').toUpperCase().includes(q));
   document.getElementById('s-cnt').textContent=q?lista.length+' resultado'+(lista.length!==1?'s':''):'';
   document.getElementById('tf-cnt').textContent=lista.length+' OS';
   if(!lista.length){document.getElementById('tbody').innerHTML=`<tr><td colspan="7"><div class="empty"><i class="ti ti-search-off"></i>${q?'Nenhuma OS para "'+q+'"':'Nenhuma OS neste status'}</div></td></tr>`;return;}
@@ -317,34 +369,72 @@ function render(){
       <td><span class="td-num">#${String(o.numero).padStart(4,'0')}</span></td>
       <td><div class="td-cl">${o.cliente_nome||'—'}</div><div class="td-ap">${o.aparelho||''}</div></td>
       <td><div class="td-def">${o.defeito||'—'}</div></td>
-      <td><span class="sb ${SB_CLS[o.status]||''}">${o.status}</span></td>
+      <td onclick="event.stopPropagation()"><span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status}')">${o.status}</span></td>
       <td class="td-tempo">${fmtDt(o.criado_em)}</td>
       <td class="td-tempo">${tempo(o.criado_em)}</td>
       <td onclick="event.stopPropagation()"><div class="td-acts">
         <button class="act act-ed" onclick="irOS('${o.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
-        ${isAdmin
-          ?`<button class="act act-del" onclick="abrirDel('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Excluir"><i class="ti ti-trash"></i></button>`
-          :o.status!=='CANCELADA'?`<button class="act act-can" onclick="abrirCan('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Cancelar"><i class="ti ti-ban"></i></button>`:''
-        }
+        ${isAdmin?`<button class="act act-del" onclick="abrirDel('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Excluir"><i class="ti ti-trash"></i></button>`:o.status!=='CANCELADA'?`<button class="act act-can" onclick="abrirCan('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Cancelar"><i class="ti ti-ban"></i></button>`:''}
       </div></td>
     </tr>`).join('');
 }
+function irOS(id,e){if(e&&e.target.closest('.act,.sb'))return;location.href='os-nova.html?id='+id;}
 
-function irOS(id,e){if(e&&e.target.closest('.act'))return;location.href='os-nova.html?id='+id;}
-
+// TOAST
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
 
+// DEL / CANCEL
 function abrirDel(id,num){OS_ACT=id;document.getElementById('del-num').textContent=num;document.getElementById('ov-del').classList.add('open');}
 async function confirmarDel(){const{error}=await db.from('ordens_servico').delete().eq('id',OS_ACT);fecha('del');if(error){toast('Erro ao excluir.','err');return;}toast('OS excluída.');TODOS=TODOS.filter(o=>o.id!==OS_ACT);buildStatusRow();render();}
-
 function abrirCan(id,num){OS_ACT=id;document.getElementById('can-num').textContent=num;document.getElementById('ov-can').classList.add('open');}
 async function confirmarCan(){const{error}=await db.from('ordens_servico').update({status:'CANCELADA'}).eq('id',OS_ACT);fecha('can');if(error){toast('Erro.','err');return;}toast('OS cancelada.');const o=TODOS.find(x=>x.id===OS_ACT);if(o)o.status='CANCELADA';buildStatusRow();render();}
 
-['del','can'].forEach(id=>document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);}));
+// MODAL STATUS
+async function abrirStatus(id,num,statusAtual){
+  ST_OS_ID=id; ST_STATUS_SEL=statusAtual;
+  document.getElementById('st-num').textContent=num;
+  document.getElementById('st-obs').value='';
+  // monta botões de status
+  const lista=STATUS_CFG.length?STATUS_CFG.map(s=>s.nome):['ABERTA','EM EXECUÇÃO','PASSAR ORÇAMENTO','AGUARDANDO APROVAÇÃO','AGUARDANDO PEÇA','PRONTA','ENTREGUE','CANCELADA'];
+  document.getElementById('st-opts').innerHTML=lista.map(s=>`
+    <button class="st-opt${s===statusAtual?' sel':''}" data-s="${s}" onclick="setStOpt('${s}')">${s}</button>`).join('');
+  // carrega histórico
+  const{data:hist}=await db.from('os_historico').select('status,observacao,usuario_nome,criado_em').eq('os_id',id).order('criado_em',{ascending:false}).limit(20).catch(()=>({data:[]}));
+  const hw=document.getElementById('st-hist-wrap');
+  const hl=document.getElementById('st-hist');
+  if(hist&&hist.length){
+    hw.style.display='block';
+    hl.innerHTML=hist.map(h=>`<div class="hist-item">
+      <div class="hist-pip"></div>
+      <div class="hist-info"><div class="hist-status">${h.status}</div>${h.observacao?`<div class="hist-obs">${h.observacao}</div>`:''}</div>
+      <div class="hist-meta">${fmtDtHr(h.criado_em)}<br><span style="font-size:10px">${h.usuario_nome||''}</span></div>
+    </div>`).join('');
+  } else {
+    hw.style.display='none';
+  }
+  document.getElementById('ov-status').classList.add('open');
+}
+function setStOpt(s){
+  ST_STATUS_SEL=s;
+  document.querySelectorAll('.st-opt').forEach(b=>b.classList.toggle('sel',b.dataset.s===s));
+}
+async function confirmarStatus(){
+  if(!ST_STATUS_SEL){toast('Selecione um status.','err');return;}
+  const obs=document.getElementById('st-obs').value.trim();
+  const{error}=await db.from('ordens_servico').update({status:ST_STATUS_SEL,atualizado_em:new Date().toISOString()}).eq('id',ST_OS_ID);
+  if(error){toast('Erro ao atualizar.','err');return;}
+  // grava histórico
+  await db.from('os_historico').insert({os_id:ST_OS_ID,status:ST_STATUS_SEL,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome}).catch(()=>{});
+  fecha('status');
+  toast('Status atualizado!');
+  const o=TODOS.find(x=>x.id===ST_OS_ID);if(o)o.status=ST_STATUS_SEL;
+  buildStatusRow();render();
+}
 
-loadMods();
-load();
+['del','can','status'].forEach(id=>{document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);});});
+
+loadMods(); load();
 </script>
 </body>
 </html>
