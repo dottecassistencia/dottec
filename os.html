@@ -400,10 +400,10 @@ async function abrirStatus(id,num,statusAtual){
   document.getElementById('st-opts').innerHTML=lista.map(s=>`
     <button class="st-opt${s===statusAtual?' sel':''}" data-s="${s}" onclick="setStOpt('${s}')">${s}</button>`).join('');
   // carrega histórico
-  const{data:hist}=await db.from('os_historico').select('status,observacao,usuario_nome,criado_em').eq('os_id',id).order('criado_em',{ascending:false}).limit(20).catch(()=>({data:[]}));
+  let hist=[];try{const{data:hd}=await db.from('os_historico').select('status,observacao,usuario_nome,criado_em').eq('os_id',id).order('criado_em',{ascending:false}).limit(20);hist=hd||[];}catch{}
   const hw=document.getElementById('st-hist-wrap');
   const hl=document.getElementById('st-hist');
-  if(hist&&hist.length){
+  if(hist.length){
     hw.style.display='block';
     hl.innerHTML=hist.map(h=>`<div class="hist-item">
       <div class="hist-pip"></div>
@@ -425,7 +425,7 @@ async function confirmarStatus(){
   const{error}=await db.from('ordens_servico').update({status:ST_STATUS_SEL,atualizado_em:new Date().toISOString()}).eq('id',ST_OS_ID);
   if(error){toast('Erro ao atualizar.','err');return;}
   // grava histórico
-  await db.from('os_historico').insert({os_id:ST_OS_ID,status:ST_STATUS_SEL,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome}).catch(()=>{});
+  try{await db.from('os_historico').insert({os_id:ST_OS_ID,status:ST_STATUS_SEL,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}
   fecha('status');
   toast('Status atualizado!');
   const o=TODOS.find(x=>x.id===ST_OS_ID);if(o)o.status=ST_STATUS_SEL;
