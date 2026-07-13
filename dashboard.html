@@ -357,6 +357,36 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
   </div>
 </div>
 
+<!-- MODAL STATUS OS (Dashboard) -->
+<div class="overlay" id="ov-os-status" style="display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:900;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--white);border-radius:16px;width:100%;max-width:500px;box-shadow:0 24px 64px rgba(0,0,0,.18)">
+    <div style="padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px">
+      <div style="width:28px;height:28px;border-radius:8px;background:var(--cbg);color:var(--cd);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0"><i class="ti ti-flag"></i></div>
+      <div style="font-family:'Lora',serif;font-size:14.5px;font-weight:700;color:var(--dark);flex:1">Status — <span id="os-st-num"></span></div>
+      <button onclick="fechaOsSt()" style="width:24px;height:24px;border-radius:6px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub)"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:.9rem 1.2rem">
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Novo status</label>
+        <select id="os-st-sel" style="width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:13px;font-family:inherit;outline:none;font-weight:600;text-transform:uppercase"></select>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Observação <span style="font-weight:400;text-transform:none;opacity:.8">(opcional)</span></label>
+        <textarea id="os-st-obs" style="width:100%;height:68px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:12.5px;font-family:inherit;outline:none;resize:none;text-transform:uppercase" placeholder="Ex: cliente aprovou orçamento..."></textarea>
+      </div>
+      <!-- histórico -->
+      <div id="os-st-hist-wrap" style="display:none">
+        <div style="font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Histórico de alterações</div>
+        <div id="os-st-hist" style="border:1px solid var(--border);border-radius:9px;overflow:hidden;max-height:180px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div style="padding:.75rem 1.2rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px">
+      <button onclick="fechaOsSt()" style="height:34px;padding:0 13px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>
+      <button onclick="salvarOsSt()" style="height:34px;padding:0 14px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="ti ti-check"></i> Salvar status</button>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <header class="header">
   <a class="h-logo" href="dashboard.html">
@@ -713,7 +743,7 @@ async function loadAlertas(){
     const p=s.alerta_prioridade.toLowerCase();
     const cls=p==='critica'?'crit':p==='alta'?'alta':'norm';
     const tag=p==='critica'?'CRÍTICO':p==='alta'?'ALTA':'NORMAL';
-    return`<a class="al-row" href="os-nova.html?id=${o.id}">
+    return`<div class="al-row" style="cursor:pointer" onclick="abrirOsSt('${o.id}','OS ${String(o.numero).padStart(4,\'0\')}','${o.status}')">
       <div class="al-pip ${cls}"></div>
       <div class="al-info">
         <div class="al-t">OS #${String(o.numero).padStart(4,'0')} — ${o.status}</div>
@@ -721,7 +751,7 @@ async function loadAlertas(){
       </div>
       <span class="al-tag ${cls}">${tag}</span>
       <span class="al-time">${tempo(o.atualizado_em)}</span>
-    </a>`;
+    </div>`;
   }).join('');
 }
 
@@ -823,6 +853,53 @@ async function salvarCompra(){
 }
 async function concluirC(id){await db.from('lista_compras').update({concluido:true}).eq('id',id);toast('Comprado!');loadCompras();}
 async function delC(id){await db.from('lista_compras').delete().eq('id',id);loadCompras();}
+
+
+// ── MODAL STATUS (painel alertas) ─────────────────────
+let _osStId=null, _osStNome='', _osStLista=[];
+async function abrirOsSt(osId, osNum, statusAtual){
+  _osStId=osId; _osStNome=osNum;
+  document.getElementById('os-st-num').textContent=osNum;
+  document.getElementById('os-st-obs').value='';
+  // carrega status disponíveis
+  let lista=[];
+  try{const{data}=await db.from('status_config').select('nome').eq('modulo','OS').eq('ativo',true).order('ordem');lista=data||[];}catch{}
+  if(!lista.length)lista=[{nome:'ABERTA'},{nome:'EM EXECUÇÃO'},{nome:'PASSAR ORÇAMENTO'},{nome:'AGUARDANDO APROVAÇÃO'},{nome:'AGUARDANDO PEÇA'},{nome:'PRONTA'},{nome:'ENTREGUE'},{nome:'CANCELADA'}];
+  _osStLista=lista.map(s=>s.nome);
+  document.getElementById('os-st-sel').innerHTML=_osStLista.map(s=>`<option value="${s}"${s===statusAtual?' selected':''}>${s}</option>`).join('');
+  // histórico
+  let hist=[];
+  try{const{data:h}=await db.from('os_historico').select('status,observacao,usuario_nome,criado_em').eq('os_id',osId).order('criado_em',{ascending:false}).limit(15);hist=h||[];}catch{}
+  const hw=document.getElementById('os-st-hist-wrap');
+  if(hist.length){
+    hw.style.display='block';
+    const fmtDtHr=d=>new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    document.getElementById('os-st-hist').innerHTML=hist.map(h=>`
+      <div style="display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-bottom:1px solid #F2F0EA;font-size:11.5px">
+        <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;background:var(--cyan)"></div>
+        <div style="flex:1">
+          <div style="font-weight:700;color:var(--dark)">${h.status}</div>
+          ${h.observacao?`<div style="color:var(--sub);margin-top:1px;font-size:10.5px">${h.observacao}</div>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--sub);text-align:right;white-space:nowrap">${fmtDtHr(h.criado_em)}<br>${h.usuario_nome||''}</div>
+      </div>`).join('');
+  } else hw.style.display='none';
+  const ov=document.getElementById('ov-os-status');
+  ov.style.display='flex';
+}
+function fechaOsSt(){document.getElementById('ov-os-status').style.display='none';}
+document.getElementById('ov-os-status').addEventListener('click',function(e){if(e.target===this)fechaOsSt();});
+async function salvarOsSt(){
+  const novoStatus=document.getElementById('os-st-sel').value;
+  const obs=document.getElementById('os-st-obs').value.trim();
+  const{error}=await db.from('ordens_servico').update({status:novoStatus,atualizado_em:new Date().toISOString()}).eq('id',_osStId);
+  if(error){toast('Erro ao atualizar.','err');return;}
+  try{await db.from('os_historico').insert({os_id:_osStId,status:novoStatus,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}
+  fechaOsSt();
+  toast('Status atualizado!');
+  // recarrega alertas após 300ms
+  setTimeout(loadAlertas,300);
+}
 
 // ── INIT ───────────────────────────────────────────
 Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas()]).catch(console.error);

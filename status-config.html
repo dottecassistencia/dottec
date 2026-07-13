@@ -141,11 +141,17 @@ const BREADCRUMB = [{label:"Configurações",href:"configuracoes.html"}];
         <div class="grid2">
           <div class="field">
             <label>Notificar</label>
-            <select id="m-alerta-para">
-              <option value="COMERCIAL">Comercial</option>
-              <option value="ADMIN">Admin</option>
-              <option value="TODOS">Todos</option>
-            </select>
+            <div id="m-alerta-perfis" style="display:flex;gap:12px;flex-wrap:wrap;padding:6px 0">
+                <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--dark);cursor:pointer">
+                  <input type="checkbox" id="m-perfil-comercial" value="COMERCIAL" style="width:16px;height:16px;accent-color:var(--cyan)"/> Comercial
+                </label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--dark);cursor:pointer">
+                  <input type="checkbox" id="m-perfil-tecnico" value="TECNICO" style="width:16px;height:16px;accent-color:var(--cyan)"/> Técnico
+                </label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--dark);cursor:pointer">
+                  <input type="checkbox" id="m-perfil-admin" value="ADMIN" style="width:16px;height:16px;accent-color:var(--cyan)"/> Admin
+                </label>
+              </div>
           </div>
           <div class="field no-mb">
             <label>Prioridade</label>
@@ -232,7 +238,7 @@ function renderList(){
       <div class="status-ordem">#${s.ordem}</div>
       <div class="alerta-config">
         ${s.gera_alerta?`
-          <span style="font-size:11px;color:var(--sub)">Alerta para ${s.alerta_para||'TODOS'}</span>
+          <span style="font-size:11px;color:var(--sub)">Alerta: ${(s.alerta_perfis&&s.alerta_perfis.length?s.alerta_perfis:s.alerta_para?[s.alerta_para]:['—']).join(', ')}</span>
           ${prioPill(s.alerta_prioridade)}
           <div class="sw on" onclick="toggleAlerta('${s.id}',false)" title="Clique para desativar alerta"></div>
         `:`
@@ -248,7 +254,8 @@ function renderList(){
 }
 
 async function toggleAlerta(id,ativo){
-  await db.from('status_config').update({gera_alerta:ativo,alerta_prioridade:ativo?'ALTA':'NORMAL',alerta_para:ativo?'COMERCIAL':null}).eq('id',id);
+        alerta_perfis:[...document.querySelectorAll('#m-alerta-perfis input:checked')].map(c=>c.value),
+        alerta_para:[...document.querySelectorAll('#m-alerta-perfis input:checked')].map(c=>c.value)[0]||'COMERCIAL',
   toast(ativo?'Alerta ativado!':'Alerta desativado.','success');
   load();
 }
@@ -261,7 +268,11 @@ function abrirModal(sc=null){
   document.getElementById('m-cor-picker').value=sc?sc.cor:'#29B8C2';
   document.getElementById('m-cor-text').value=sc?sc.cor:'#29B8C2';
   document.getElementById('m-ordem').value=sc?sc.ordem:DADOS.length+1;
-  document.getElementById('m-alerta-para').value=sc?sc.alerta_para||'COMERCIAL':'COMERCIAL';
+  // popula checkboxes de perfis
+  const perfis=sc?.alerta_perfis||(sc?.alerta_para?[sc.alerta_para]:['COMERCIAL']);
+  document.getElementById('m-perfil-comercial').checked=perfis.includes('COMERCIAL');
+  document.getElementById('m-perfil-tecnico').checked=perfis.includes('TECNICO');
+  document.getElementById('m-perfil-admin').checked=perfis.includes('ADMIN');
   document.getElementById('m-prioridade').value=sc?sc.alerta_prioridade||'ALTA':'ALTA';
   const sw=document.getElementById('m-alerta-sw');
   sw.className='sw '+(ALERTA_ATIVO?'on':'off');
@@ -288,7 +299,7 @@ async function salvar(){
     cor:document.getElementById('m-cor-text').value||'#8A887F',
     ordem:parseInt(document.getElementById('m-ordem').value)||1,
     gera_alerta:ALERTA_ATIVO,
-    alerta_para:ALERTA_ATIVO?(document.getElementById('m-alerta-para').value||null):null,
+    alerta_perfis:ALERTA_ATIVO?[...document.querySelectorAll('#m-alerta-perfis input:checked')].map(c=>c.value):[],
     alerta_prioridade:ALERTA_ATIVO?(document.getElementById('m-prioridade').value||'NORMAL'):'NORMAL',
     ativo:true,
   };
