@@ -695,9 +695,7 @@ async function loadMetricas(){
   setTimeout(()=>document.getElementById('mn-bar').style.width=pMen+'%',100);
 }
 
-  await db.from('configuracoes_sistema').upsert({chave:'meta_'+(META_P==='semanal'?'semanal':'mensal'),valor:JSON.stringify({tipo,valor})},{onConflict:'chave'});
-  toast('Meta salva!');fecha('meta');loadMetricas();
-}
+
 
 // ── ALERTAS OS ─────────────────────────────────────
 async function loadAlertas(){
