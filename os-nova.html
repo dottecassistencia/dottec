@@ -381,8 +381,8 @@ document.getElementById('ov-cl').addEventListener('click',function(e){if(e.targe
 // ── STATUS ──────────────────────────────────────────
 let STATUS_LIST=[];
 async function loadStatus(){
-  const{data}=await db.from('status_config').select('nome').eq('modulo','OS').eq('ativo',true).order('ordem').catch(()=>({data:[]}));
-  STATUS_LIST=(data||[]).map(s=>s.nome);
+  let _scData=[];try{const{data:_sd}=await db.from('status_config').select('nome').eq('modulo','OS').eq('ativo',true).order('ordem');_scData=_sd||[];}catch{}
+  STATUS_LIST=_scData.map(s=>s.nome);
   if(!STATUS_LIST.length) STATUS_LIST=['ABERTA','EM EXECUÇÃO','PASSAR ORÇAMENTO','AGUARDANDO APROVAÇÃO','AGUARDANDO PEÇA','PRONTA','ENTREGUE','CANCELADA'];
   const cur=document.getElementById('os-status').value||'ABERTA';
   renderStatus(cur);
@@ -580,8 +580,8 @@ async function onBuscaItem(){
   clearTimeout(ITEM_TIMER); ITEM_IDX=-1;
   if(q.length<2){drop.classList.remove('open');return;}
   ITEM_TIMER=setTimeout(async()=>{
-    if(!SRVS_CACHE){const{data}=await db.from('servicos').select('id,nome,valor').eq('ativo',true).order('nome').catch(()=>({data:[]}));SRVS_CACHE=data||[];}
-    if(!PRODS_CACHE){const{data}=await db.from('produtos').select('id,nome,valor_venda,estoque_atual').eq('ativo',true).order('nome').limit(200).catch(()=>({data:[]}));PRODS_CACHE=data||[];}
+    if(!SRVS_CACHE){try{const{data}=await db.from('servicos').select('id,nome,valor').eq('ativo',true).order('nome');SRVS_CACHE=data||[];}catch{SRVS_CACHE=[];}}
+    if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda,estoque_atual').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
     const srvs=SRVS_CACHE.filter(s=>s.nome.toUpperCase().includes(q)).map(s=>({...s,tipo:'srv',preco:s.valor||0}));
     const prods=PRODS_CACHE.filter(p=>p.nome.toUpperCase().includes(q)).map(p=>({...p,tipo:'prd',preco:p.valor_venda||0}));
     ITEM_LISTA=[...srvs,...prods].slice(0,10);
@@ -636,7 +636,7 @@ async function loadOS(){
   const setStDelay=()=>{if(STATUS_LIST.length){setSt(data.status||'ABERTA');}else{setTimeout(setStDelay,100);}};
   setStDelay();
   // aparelhos
-  const{data:aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem').catch(()=>({data:null}));
+  let aps=null;try{const{data:_aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_aps;}catch{}
   if(aps&&aps.length){
     APS=aps.map(a=>({tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||''}));
   } else {
@@ -644,7 +644,7 @@ async function loadOS(){
   }
   renderAps();
   // itens
-  const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID).catch(()=>({data:null}));
+  let its=null;try{const{data:_its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);its=_its;}catch{}
   if(its&&its.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1}));renderItens();calcTotal();}
 }
 
