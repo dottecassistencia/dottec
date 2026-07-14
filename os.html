@@ -160,6 +160,14 @@ tbody tr:hover{background:#FAFAF7}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
 .toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+.cl-nome-link{font-weight:700;color:var(--dark);cursor:pointer;text-decoration:none;font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.cl-nome-link:hover{color:var(--cd);text-decoration:underline}
+.cl-wa{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#25D366;text-decoration:none;margin-top:2px;font-weight:600}
+.cl-wa:hover{opacity:.8}
+.cl-wa i{font-size:12px}
+.field label{display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.field input{width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
 .h-btn{height:34px;padding:0 14px;border-radius:9px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .15s;text-decoration:none;white-space:nowrap;background:var(--cyan);color:#fff;margin-left:auto}
 .h-btn:hover{background:var(--cd)}
 </style>
@@ -269,14 +277,14 @@ tbody tr:hover{background:#FAFAF7}
     <table>
       <thead>
         <tr>
-          <th>Nº</th>
-          <th>Data</th>
+          <th style="width:64px">Nº</th>
+          <th style="width:80px">Data</th>
           <th>Cliente</th>
           <th>Dispositivo / Cor</th>
-          <th>Valor</th>
-          <th>Status</th>
-          <th>Tempo</th>
-          <th></th>
+          <th style="width:130px">Status</th>
+          <th style="width:90px">Valor</th>
+          <th style="width:60px">Tempo</th>
+          <th style="width:70px"></th>
         </tr>
       </thead>
       <tbody id="tbody"><tr><td colspan="8"><div class="empty"><i class="ti ti-loader-2 spin"></i></div></td></tr></tbody>
@@ -363,7 +371,7 @@ document.addEventListener('click',()=>document.getElementById('more-drop')?.clas
 async function load(){
   const safe=async p=>{try{return await p;}catch{return{data:[]};}};
   const[{data:os},{data:sc},{data:aps}]=await Promise.all([
-    db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,defeito,status,criado_em').order('criado_em',{ascending:false}).limit(300),
+    db.from('ordens_servico').select('id,numero,cliente_nome,cliente_celular,cliente_doc,cliente_email,pessoa_id,aparelho,defeito,status,criado_em').order('criado_em',{ascending:false}).limit(300),
     db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('ativo',true).order('ordem'),
     safe(db.from('os_aparelhos').select('os_id,modelo,cor,marca').eq('ordem',1)),
   ]);
@@ -376,6 +384,10 @@ async function load(){
     const ap=AP_MAP[o.id];
     if(ap){o._modelo=ap.modelo||''; o._cor=ap.cor||''; o._marca=ap.marca||'';}
     else{o._modelo=''; o._cor=''; o._marca='';}
+    o._tel=o.cliente_celular||'';
+    o._doc=o.cliente_doc||'';
+    o._email=o.cliente_email||'';
+    o._pessoa_id=o.pessoa_id||'';
   });
   buildStatusRow();
   render();
@@ -452,7 +464,7 @@ function irOS(id,e){if(e&&e.target.closest('.act,.sb'))return;location.href='os-
 /* ── TOAST / MODAIS ── */
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
-['del','can','status'].forEach(id=>document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);}));
+['del','can','status','cl-edit'].forEach(id=>document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);}));
 
 function abrirDel(id,num){OS_ACT=id;document.getElementById('del-num').textContent=num;document.getElementById('ov-del').classList.add('open');}
 async function confirmarDel(){const{error}=await db.from('ordens_servico').delete().eq('id',OS_ACT);fecha('del');if(error){toast('Erro ao excluir.','err');return;}toast('OS excluída.');TODOS=TODOS.filter(o=>o.id!==OS_ACT);buildStatusRow();render();}
@@ -491,6 +503,48 @@ async function confirmarStatus(){
   toast('Status atualizado!');
   const o=TODOS.find(x=>x.id===ST_OS_ID);if(o)o.status=novoStatus;
   buildStatusRow();render();
+}
+
+
+// ── MODAL EDITAR CLIENTE ─────────────────────────────
+let _clEditOsId=null, _clEditPessoaId=null;
+function abrirClEdit(osId,nome,tel,doc,email,pessoaId){
+  _clEditOsId=osId; _clEditPessoaId=pessoaId||null;
+  document.getElementById('cle-nome').value=nome;
+  document.getElementById('cle-tel').value=tel;
+  document.getElementById('cle-doc').value=doc;
+  document.getElementById('cle-email').value=email;
+  document.getElementById('ov-cl-edit').classList.add('open');
+  setTimeout(()=>document.getElementById('cle-nome').focus(),60);
+}
+async function salvarClienteEdit(){
+  const nome=document.getElementById('cle-nome').value.trim().toUpperCase();
+  const tel=document.getElementById('cle-tel').value.trim();
+  const doc=document.getElementById('cle-doc').value.replace(/\D/g,'');
+  const email=document.getElementById('cle-email').value.trim();
+  if(!nome){toast('Informe o nome.','err');return;}
+  // atualiza a OS
+  const{error}=await db.from('ordens_servico').update({
+    cliente_nome:nome,
+    cliente_celular:tel||null,
+    cliente_doc:doc||null,
+    cliente_email:email||null,
+    atualizado_em:new Date().toISOString()
+  }).eq('id',_clEditOsId);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  // atualiza a pessoa no cache local se existir
+  if(_clEditPessoaId){
+    await db.from('pessoas').update({
+      nome,celular:tel||null,
+      documento:doc||null,email:email||null
+    }).eq('id',_clEditPessoaId).catch(()=>{});
+  }
+  fecha('cl-edit');
+  toast('Cliente atualizado!');
+  // atualiza localmente sem recarregar tudo
+  const o=TODOS.find(x=>x.id===_clEditOsId);
+  if(o){o.cliente_nome=nome;o._tel=tel;o._doc=doc;o._email=email;}
+  render();
 }
 
 /* ── INIT ── */
