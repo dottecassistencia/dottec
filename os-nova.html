@@ -780,11 +780,11 @@ async function salvar(){
     try{
       await db.from('os_aparelhos').delete().eq('os_id',osId);
       if(APS.length){
-        await db.from('os_aparelhos').insert(APS.map((a,idx)=>({
-          os_id:osId,ordem:idx+1,tipo_registro:a.tipo_registro||'dispositivo',
+        await db.from('os_aparelhos').insert(APS.map((a,apIdx)=>({
+          os_id:osId,ordem:apIdx+1,tipo_registro:a.tipo_registro||'dispositivo',
           tipo:(a.tipo||'').toUpperCase()||null,marca:(a.marca||'').toUpperCase()||null,
           modelo:(a.modelo||'').toUpperCase()||null,cor:(a.cor||'').toUpperCase()||null,
-          imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,fotos:idx===0?GD_FOTOS:[],
+          imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,fotos:apIdx===0?GD_FOTOS:[],
           defeito:(a.defeito||'').toUpperCase()||null,laudo:(a.laudo||'').toUpperCase()||null,
           solucao:(a.solucao||'').toUpperCase()||null,anydesk_id:a.anydesk_id||null,
         })));
