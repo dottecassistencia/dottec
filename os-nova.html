@@ -559,13 +559,13 @@ function renderAps(){
         <div class="field"><label>Tipo</label>
           <select id="ap-tipo-${i}" onchange="apV('tipo',${i},this.value)">
             <option value="">Tipo...</option>
-            ${TIPOS.map(t=>`<option value="${t}"${ap.tipo===t?' selected':''}>${t}</option>`).join('')}
+            ${TIPOS.map(t=>`<option value="${t}"${ap.tipo.toUpperCase()===t.toUpperCase()?' selected':''}>${t}</option>`).join('')}
           </select>
         </div>
         <div class="field"><label>Marca</label>
           <select id="ap-marca-${i}" onchange="apV('marca',${i},this.value);filtMod(${i})">
             <option value="">Marca...</option>
-            ${MARCAS.map(m=>`<option value="${m.nome}"${ap.marca===m.nome?' selected':''}>${m.nome}</option>`).join('')}
+            ${MARCAS.map(m=>`<option value="${m.nome}"${ap.marca.toUpperCase()===m.nome.toUpperCase()?' selected':''}>${m.nome}</option>`).join('')}
           </select>
         </div>
         <div class="field"><label>Modelo</label>
@@ -577,7 +577,7 @@ function renderAps(){
         <div class="field"><label>Cor</label>
           <select id="ap-cor-${i}" onchange="apV('cor',${i},this.value)">
             <option value="">Cor...</option>
-            ${CORES.map(c=>`<option value="${c}"${ap.cor===c?' selected':''}>${c}</option>`).join('')}
+            ${CORES.map(c=>`<option value="${c}"${ap.cor.toUpperCase()===c.toUpperCase()?' selected':''}>${c}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -711,7 +711,11 @@ async function loadOS(){
     let aps=null;
     try{const{data:_aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_aps;}catch{}
     if(aps&&aps.length){
-      APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
+      // normaliza tipo/marca/cor para o valor real dos options (case-insensitive match)
+      const matchTipo=v=>TIPOS.find(t=>t.toUpperCase()===(v||'').toUpperCase())||v||'';
+      const matchMarca=v=>MARCAS.find(m=>m.nome.toUpperCase()===(v||'').toUpperCase())?.nome||v||'';
+      const matchCor=v=>CORES.find(c=>c.toUpperCase()===(v||'').toUpperCase())||v||'';
+      APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:matchTipo(a.tipo),marca:matchMarca(a.marca),modelo:a.modelo||'',cor:matchCor(a.cor),imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
     } else {
       APS=[{tipo_registro:'dispositivo',tipo:'',marca:'',modelo:data.aparelho||'',cor:'',imei:data.numero_serie||'',senha:data.senha||'',acessorios:data.acessorios||'',defeito:data.defeito||'',laudo:data.laudo||'',solucao:data.solucao||'',anydesk_id:''}];
     }
@@ -815,17 +819,23 @@ const GD_SCOPE='https://www.googleapis.com/auth/drive.file';
 const GD_FOLDER_NAME='Dottec_Fotos_OS';
 let GD_TOKEN=null, GD_FOLDER_ID=null, GD_FOTOS=[];
 
+// cliente OAuth criado uma vez
+let _gdClient=null;
 function gdLogin(){
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:GD_CLIENT_ID,scope:GD_SCOPE,
-    callback:async(resp)=>{
-      if(resp.error)return;
-      GD_TOKEN=resp.access_token;
-      sessionStorage.setItem('gd_token',GD_TOKEN);
-      await gdInit();
-    }
-  });
-  client.requestAccessToken();
+  if(!_gdClient){
+    _gdClient=google.accounts.oauth2.initTokenClient({
+      client_id:GD_CLIENT_ID,
+      scope:GD_SCOPE,
+      callback:async(resp)=>{
+        if(resp.error){toast('Erro ao conectar ao Google.','err');return;}
+        GD_TOKEN=resp.access_token;
+        sessionStorage.setItem('gd_token',GD_TOKEN);
+        await gdInit();
+      }
+    });
+  }
+  // requestAccessToken DEVE ser chamado diretamente no click — sem await antes
+  _gdClient.requestAccessToken({prompt:'select_account'});
 }
 
 async function gdInit(){
