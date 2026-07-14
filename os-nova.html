@@ -81,15 +81,18 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .row-inline{display:flex;gap:8px;align-items:flex-end}
 
 /* CLIENTE */
-.cl-row{display:flex;align-items:center;gap:8px}
-.cl-display{flex:1;display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.cl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cl-display{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
 .cl-display:hover{border-color:var(--cyan);background:var(--cbg)}
-.cl-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--cd));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.cl-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--cd));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
 .cl-info{flex:1;min-width:0}
 .cl-name{font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-sub{font-size:10px;color:var(--sub)}
-.cl-whats{height:36px;padding:0 10px;border-radius:8px;border:none;background:#25D366;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;text-decoration:none;flex-shrink:0;transition:opacity .15s}
+.cl-whats{height:28px;padding:0 9px;border-radius:7px;border:none;background:#25D366;color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;text-decoration:none;flex-shrink:0;transition:opacity .15s}
 .cl-whats:hover{opacity:.85}
+.cl-status-inline{flex:0 0 180px}
+.cl-status-inline select{width:100%;height:34px;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:12px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;text-transform:uppercase;transition:border-color .15s}
+.cl-status-inline select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
 /* status inline com cliente */
 .cl-status-row{display:flex;gap:8px;margin-top:8px}
 .cl-status-row .field{flex:0 0 220px}
@@ -266,17 +269,29 @@ input::placeholder,textarea::placeholder{text-transform:none}
               <div class="cl-name" id="cl-display-nome">—</div>
               <div class="cl-sub" id="cl-display-sub"></div>
             </div>
-            <i class="ti ti-pencil" style="font-size:12px;color:var(--sub);flex-shrink:0"></i>
+            <i class="ti ti-pencil" style="font-size:11px;color:var(--sub);flex-shrink:0"></i>
           </div>
-          <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" title="Abrir WhatsApp"><i class="ti ti-brand-whatsapp"></i> WhatsApp</a>
+          <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i> WA</a>
+          <div class="cl-status-inline">
+            <select id="os-status" style="text-transform:uppercase;font-weight:600">
+              <option value="ABERTA">ABERTA</option>
+            </select>
+          </div>
         </div>
       </div>
       <!-- busca cliente -->
       <div id="cl-busca-wrap">
-        <div class="ac-wrap">
-          <input type="text" id="cl-busca" placeholder="Nome, sobrenome ou WhatsApp..." autocomplete="off"
-            oninput="onBuscaCl()" onkeydown="onKeyCl(event)"/>
-          <div class="ac-drop" id="cl-drop"></div>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div class="ac-wrap" style="flex:1">
+            <input type="text" id="cl-busca" placeholder="Nome, sobrenome ou WhatsApp..." autocomplete="off"
+              oninput="onBuscaCl()" onkeydown="onKeyCl(event)"/>
+            <div class="ac-drop" id="cl-drop"></div>
+          </div>
+          <div class="cl-status-inline">
+            <select id="os-status-2" onchange="document.getElementById('os-status')&&(document.getElementById('os-status').value=this.value)" style="text-transform:uppercase;font-weight:600;height:36px;width:100%;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;font-family:inherit;font-size:12px;outline:none">
+              <option value="ABERTA">ABERTA</option>
+            </select>
+          </div>
         </div>
       </div>
       <!-- status na mesma seção -->
@@ -416,7 +431,10 @@ async function loadStatus(){
   try{const{data}=await db.from('status_config').select('nome').eq('modulo','OS').eq('ativo',true).order('ordem');lista=data||[];}catch{}
   if(!lista.length)lista=[{nome:'ABERTA'},{nome:'EM EXECUÇÃO'},{nome:'PASSAR ORÇAMENTO'},{nome:'AGUARDANDO APROVAÇÃO'},{nome:'AGUARDANDO PEÇA'},{nome:'PRONTA'},{nome:'ENTREGUE'},{nome:'CANCELADA'}];
   const cur=document.getElementById('os-status').value||'ABERTA';
-  document.getElementById('os-status').innerHTML=lista.map(s=>`<option value="${s.nome}"${s.nome===cur?' selected':''}>${s.nome}</option>`).join('');
+  const opts=lista.map(s=>`<option value="${s.nome}"${s.nome===cur?' selected':''}>${s.nome}</option>`).join('');
+  document.getElementById('os-status').innerHTML=opts;
+  const s2=document.getElementById('os-status-2');
+  if(s2) s2.innerHTML=opts;
 }
 
 // CLIENTE
@@ -704,18 +722,14 @@ async function loadOS(){
     if(data.cliente_nome){
       mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome||'',celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
     }
-    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,100);};
+    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';const s2=document.getElementById('os-status-2');if(s2)s2.value=data.status||'ABERTA';}else setTimeout(setStDelay,100);};
     setStDelay();
     document.getElementById('os-obs').value=data.observacoes||'';
     // aparelhos
     let aps=null;
     try{const{data:_aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_aps;}catch{}
     if(aps&&aps.length){
-      // normaliza tipo/marca/cor para o valor real dos options (case-insensitive match)
-      const matchTipo=v=>TIPOS.find(t=>t.toUpperCase()===(v||'').toUpperCase())||v||'';
-      const matchMarca=v=>MARCAS.find(m=>m.nome.toUpperCase()===(v||'').toUpperCase())?.nome||v||'';
-      const matchCor=v=>CORES.find(c=>c.toUpperCase()===(v||'').toUpperCase())||v||'';
-      APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:matchTipo(a.tipo),marca:matchMarca(a.marca),modelo:a.modelo||'',cor:matchCor(a.cor),imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
+      APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
     } else {
       APS=[{tipo_registro:'dispositivo',tipo:'',marca:'',modelo:data.aparelho||'',cor:'',imei:data.numero_serie||'',senha:data.senha||'',acessorios:data.acessorios||'',defeito:data.defeito||'',laudo:data.laudo||'',solucao:data.solucao||'',anydesk_id:''}];
     }
