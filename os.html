@@ -281,7 +281,7 @@ tbody tr:hover{background:#FAFAF7}
           <th style="width:80px">Data</th>
           <th>Cliente</th>
           <th>Dispositivo / Cor</th>
-          <th style="width:130px">Status</th>
+          <th style="width:130px;text-align:center">Status</th>
           <th style="width:90px">Valor</th>
           <th style="width:60px">Tempo</th>
           <th style="width:70px"></th>
@@ -440,7 +440,7 @@ function render(){
       <td class="td-tempo">${fmtDt(o.criado_em)}</td>
       <td style="font-weight:600;color:var(--dark)">${o.cliente_nome||'—'}</td>
       <td><div class="td-device">${device}</div>${corHtml}</td>
-      <td onclick="event.stopPropagation()">
+      <td onclick="event.stopPropagation()" style="text-align:center">
         <span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status.replace(/'/g,"\\'")}')">
           ${o.status}
         </span>
