@@ -88,11 +88,11 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .cl-info{flex:1;min-width:0}
 .cl-name{font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-sub{font-size:10px;color:var(--sub)}
-.cl-whats{height:28px;padding:0 9px;border-radius:7px;border:none;background:#25D366;color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;text-decoration:none;flex-shrink:0;transition:opacity .15s}
-.cl-whats:hover{opacity:.85}
-.cl-status-inline{flex:0 0 180px}
-.cl-status-inline select{width:100%;height:34px;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:12px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;text-transform:uppercase;transition:border-color .15s}
-.cl-status-inline select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
+.cl-whats{width:32px;height:32px;border-radius:8px;border:none;background:#25D366;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;transition:opacity .15s}
+.cl-whats:hover{opacity:.8}
+/* select de status moderno */
+.st-sel{flex:0 0 190px;height:34px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--dark);font-size:12px;font-family:inherit;font-weight:700;outline:none;cursor:pointer;text-transform:uppercase;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A887F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;transition:border-color .15s,box-shadow .15s}
+.st-sel:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background-color:var(--white)}
 /* status inline com cliente */
 .cl-status-row{display:flex;gap:8px;margin-top:8px}
 .cl-status-row .field{flex:0 0 220px}
@@ -260,9 +260,9 @@ input::placeholder,textarea::placeholder{text-transform:none}
   <div class="sec">
     <div class="sec-head"><div class="sec-ico si-cyan"><i class="ti ti-user"></i></div><span class="sec-title">Cliente e Status</span></div>
     <div class="sec-body">
-      <!-- cliente selecionado -->
-      <div id="cl-display-wrap" style="display:none">
-        <div class="cl-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <!-- cliente selecionado -->
+        <div id="cl-display-wrap" style="display:none;flex:1;min-width:0">
           <div class="cl-display" onclick="iniciarTrocaCliente()">
             <div class="cl-av" id="cl-av">?</div>
             <div class="cl-info">
@@ -271,37 +271,21 @@ input::placeholder,textarea::placeholder{text-transform:none}
             </div>
             <i class="ti ti-pencil" style="font-size:11px;color:var(--sub);flex-shrink:0"></i>
           </div>
-          <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i> WA</a>
-          <div class="cl-status-inline">
-            <select id="os-status" style="text-transform:uppercase;font-weight:600">
-              <option value="ABERTA">ABERTA</option>
-            </select>
-          </div>
         </div>
-      </div>
-      <!-- busca cliente -->
-      <div id="cl-busca-wrap">
-        <div style="display:flex;gap:8px;align-items:flex-start">
-          <div class="ac-wrap" style="flex:1">
+        <!-- busca cliente -->
+        <div id="cl-busca-wrap" style="flex:1;min-width:0">
+          <div class="ac-wrap">
             <input type="text" id="cl-busca" placeholder="Nome, sobrenome ou WhatsApp..." autocomplete="off"
               oninput="onBuscaCl()" onkeydown="onKeyCl(event)"/>
             <div class="ac-drop" id="cl-drop"></div>
           </div>
-          <div class="cl-status-inline">
-            <select id="os-status-2" onchange="document.getElementById('os-status')&&(document.getElementById('os-status').value=this.value)" style="text-transform:uppercase;font-weight:600;height:36px;width:100%;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;font-family:inherit;font-size:12px;outline:none">
-              <option value="ABERTA">ABERTA</option>
-            </select>
-          </div>
         </div>
-      </div>
-      <!-- status na mesma seção -->
-      <div class="cl-status-row">
-        <div class="field">
-          <label>Status da OS</label>
-          <select id="os-status" style="text-transform:uppercase;font-weight:600">
-            <option value="ABERTA">ABERTA</option>
-          </select>
-        </div>
+        <!-- whats -->
+        <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" title="WhatsApp" style="display:none"><i class="ti ti-brand-whatsapp"></i></a>
+        <!-- status único -->
+        <select id="os-status" class="st-sel">
+          <option value="ABERTA">ABERTA</option>
+        </select>
       </div>
       <input type="hidden" id="cl-id"/>
       <input type="hidden" id="cl-nome-h"/>
@@ -433,8 +417,6 @@ async function loadStatus(){
   const cur=document.getElementById('os-status').value||'ABERTA';
   const opts=lista.map(s=>`<option value="${s.nome}"${s.nome===cur?' selected':''}>${s.nome}</option>`).join('');
   document.getElementById('os-status').innerHTML=opts;
-  const s2=document.getElementById('os-status-2');
-  if(s2) s2.innerHTML=opts;
 }
 
 // CLIENTE
@@ -449,10 +431,9 @@ function mostrarCliente(p){
   document.getElementById('cl-display-nome').textContent=(p.nome||'').toUpperCase();
   const tel=(p.celular||'').replace(/\D/g,'');
   document.getElementById('cl-display-sub').textContent=[p.celular,p.documento?'Doc: '+p.documento:''].filter(Boolean).join(' · ')||'Sem contato';
-  // WhatsApp link
   const wa=document.getElementById('cl-whats-btn');
   if(tel.length>=10){wa.href=`https://wa.me/55${tel}`;wa.style.display='flex';}
-  else wa.style.display='none';
+  else{wa.style.display='none';}
   document.getElementById('cl-display-wrap').style.display='block';
   document.getElementById('cl-busca-wrap').style.display='none';
   document.getElementById('cl-drop').classList.remove('open');
@@ -722,7 +703,7 @@ async function loadOS(){
     if(data.cliente_nome){
       mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome||'',celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
     }
-    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';const s2=document.getElementById('os-status-2');if(s2)s2.value=data.status||'ABERTA';}else setTimeout(setStDelay,100);};
+    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,100);};
     setStDelay();
     document.getElementById('os-obs').value=data.observacoes||'';
     // aparelhos
