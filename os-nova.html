@@ -135,9 +135,10 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .mac-iphone{background:var(--cbg2);color:var(--coral)}.mac-other{background:var(--bg);color:var(--sub)}
 
 /* FOTOS */
-.fotos-placeholder{border:2px dashed var(--border);border-radius:8px;padding:12px;text-align:center;color:var(--sub);font-size:12px;cursor:default}
-.fotos-placeholder i{font-size:22px;display:block;margin-bottom:4px;opacity:.3}
-.fotos-placeholder span{font-size:10.5px}
+.foto-thumb{width:72px;height:72px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);cursor:pointer;transition:transform .15s}
+.foto-thumb:hover{transform:scale(1.06)}
+.foto-wrap{position:relative;width:72px;height:72px}
+.foto-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
 /* PRODUTOS E SERVIÇOS */
 .item-search-wrap{position:relative;margin-bottom:8px}
@@ -188,6 +189,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
 .toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
@@ -323,13 +325,26 @@ input::placeholder,textarea::placeholder{text-transform:none}
     </div>
   </div>
 
-  <!-- FOTOS (futuro) -->
+  <!-- FOTOS (Google Drive) -->
   <div class="sec">
-    <div class="sec-head"><div class="sec-ico si-purple"><i class="ti ti-photo"></i></div><span class="sec-title">Fotos</span><span style="margin-left:auto;font-size:9.5px;color:var(--sub);font-weight:600;background:var(--bg);padding:2px 8px;border-radius:6px">EM BREVE</span></div>
+    <div class="sec-head"><div class="sec-ico si-purple"><i class="ti ti-photo"></i></div><span class="sec-title">Fotos</span><span id="fotos-status" style="margin-left:auto;font-size:9.5px;color:var(--sub);font-weight:600"></span></div>
     <div class="sec-body">
-      <div class="fotos-placeholder">
-        <i class="ti ti-cloud-upload"></i>
-        <span>Upload de fotos via Google Drive — disponível em breve</span>
+      <!-- não autenticado -->
+      <div id="fotos-login" style="text-align:center;padding:12px 0">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">Conecte ao Google Drive para fazer upload de fotos</div>
+        <button onclick="gdLogin()" style="height:36px;padding:0 16px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--dark);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Conectar ao Google Drive
+        </button>
+      </div>
+      <!-- autenticado -->
+      <div id="fotos-area" style="display:none">
+        <div id="fotos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+        <label style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;border:1.5px dashed var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--sub);transition:all .15s" id="fotos-upload-lbl">
+          <i class="ti ti-plus"></i> Adicionar foto
+          <input type="file" id="fotos-input" accept="image/*" multiple style="display:none" onchange="gdUpload(this.files)"/>
+        </label>
+        <div id="fotos-upload-progress" style="display:none;margin-top:8px;font-size:12px;color:var(--sub)"><i class="ti ti-loader-2 spin"></i> Enviando...</div>
       </div>
     </div>
   </div>
@@ -703,6 +718,8 @@ async function loadOS(){
     renderAps();
     // itens
     try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1}));renderItens();calcTotal();}}catch{}
+    // fotos: carrega do primeiro aparelho
+    if(aps&&aps.length&&aps[0].fotos) gdCarregarFotos(aps[0].fotos);
   }catch(err){toast('Erro ao carregar: '+err.message,'err');}
 }
 
@@ -767,7 +784,7 @@ async function salvar(){
           os_id:osId,ordem:idx+1,tipo_registro:a.tipo_registro||'dispositivo',
           tipo:(a.tipo||'').toUpperCase()||null,marca:(a.marca||'').toUpperCase()||null,
           modelo:(a.modelo||'').toUpperCase()||null,cor:(a.cor||'').toUpperCase()||null,
-          imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,
+          imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,fotos:idx===0?GD_FOTOS:[],
           defeito:(a.defeito||'').toUpperCase()||null,laudo:(a.laudo||'').toUpperCase()||null,
           solucao:(a.solucao||'').toUpperCase()||null,anydesk_id:a.anydesk_id||null,
         })));
@@ -791,7 +808,108 @@ async function salvar(){
   }
 }
 
+
+// ── GOOGLE DRIVE FOTOS ───────────────────────────────
+const GD_CLIENT_ID='682830430062-nrc3lp468a1cms3300fdc175bjm9cntj.apps.googleusercontent.com';
+const GD_SCOPE='https://www.googleapis.com/auth/drive.file';
+const GD_FOLDER_NAME='Dottec_Fotos_OS';
+let GD_TOKEN=null, GD_FOLDER_ID=null, GD_FOTOS=[];
+
+function gdLogin(){
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:GD_CLIENT_ID,scope:GD_SCOPE,
+    callback:async(resp)=>{
+      if(resp.error)return;
+      GD_TOKEN=resp.access_token;
+      sessionStorage.setItem('gd_token',GD_TOKEN);
+      await gdInit();
+    }
+  });
+  client.requestAccessToken();
+}
+
+async function gdInit(){
+  if(!GD_TOKEN)return;
+  document.getElementById('fotos-login').style.display='none';
+  document.getElementById('fotos-area').style.display='block';
+  document.getElementById('fotos-status').textContent='Drive conectado';
+  document.getElementById('fotos-status').style.color='var(--green)';
+  // garante pasta
+  GD_FOLDER_ID=await gdGetOrCreateFolder();
+}
+
+async function gdGetOrCreateFolder(){
+  const search=await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=name='${GD_FOLDER_NAME}'+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id)`,
+    {headers:{Authorization:'Bearer '+GD_TOKEN}}
+  ).then(r=>r.json());
+  if(search.files?.length) return search.files[0].id;
+  const created=await fetch('https://www.googleapis.com/drive/v3/files',{
+    method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},
+    body:JSON.stringify({name:GD_FOLDER_NAME,mimeType:'application/vnd.google-apps.folder'})
+  }).then(r=>r.json());
+  return created.id;
+}
+
+async function gdUpload(files){
+  if(!GD_TOKEN||!files.length) return;
+  const prog=document.getElementById('fotos-upload-progress');
+  prog.style.display='block';
+  for(const file of files){
+    try{
+      const meta={name:`OS_${OS_ID||'nova'}_${Date.now()}_${file.name}`,parents:[GD_FOLDER_ID]};
+      const form=new FormData();
+      form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+      form.append('file',file);
+      const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,thumbnailLink',{
+        method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN},body:form
+      }).then(r=>r.json());
+      // torna público (compartilha como link)
+      await fetch(`https://www.googleapis.com/drive/v3/files/${res.id}/permissions`,{
+        method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},
+        body:JSON.stringify({role:'reader',type:'anyone'})
+      });
+      const thumb=`https://drive.google.com/thumbnail?id=${res.id}&sz=w200`;
+      GD_FOTOS.push({id:res.id,url:res.webViewLink,thumb});
+      renderFotos();
+    }catch(e){toast('Erro no upload: '+e.message,'err');}
+  }
+  prog.style.display='none';
+  document.getElementById('fotos-input').value='';
+}
+
+function renderFotos(){
+  const grid=document.getElementById('fotos-grid');
+  grid.innerHTML=GD_FOTOS.map((f,i)=>`
+    <div class="foto-wrap">
+      <img class="foto-thumb" src="${f.thumb}" onclick="window.open('${f.url}')" title="Ver no Drive"/>
+      <button class="foto-del" onclick="delFoto(${i})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+
+async function delFoto(i){
+  const f=GD_FOTOS[i];
+  try{
+    await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`,{method:'DELETE',headers:{Authorization:'Bearer '+GD_TOKEN}});
+    GD_FOTOS.splice(i,1);renderFotos();
+  }catch{GD_FOTOS.splice(i,1);renderFotos();}
+}
+
+// ao carregar OS existente, carrega fotos salvas
+async function gdCarregarFotos(fotosJson){
+  if(!fotosJson||!fotosJson.length) return;
+  GD_FOTOS=fotosJson;
+  renderFotos();
+}
+
+// verifica token salvo
+function gdCheckToken(){
+  const t=sessionStorage.getItem('gd_token');
+  if(t){GD_TOKEN=t;gdInit();}
+}
+
 // INIT
+gdCheckToken();
 Promise.all([loadMods(),loadStatus(),loadOpcoesAp()]).then(()=>loadOS());
 </script>
 </body>

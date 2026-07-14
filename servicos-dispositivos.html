@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Serviços e Dispositivos — Dottec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2;--amber:#9A6000;--abg:#FBEEDB}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
+input,textarea,select{text-transform:uppercase}
+input::placeholder,textarea::placeholder{text-transform:none}
+
+/* HEADER */
+.header{height:62px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.h-logo-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(41,184,194,.3);flex-shrink:0}
+.h-logo-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.h-logo-circle i{font-size:20px;color:#fff}
+.h-logo-nome{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark);line-height:1.1}
+.h-logo-sub{font-size:10px;color:var(--sub)}
+.h-div{width:1px;height:24px;background:var(--border)}
+.h-page{display:flex;align-items:center;gap:7px}
+.h-page-ico{width:28px;height:28px;border-radius:8px;background:var(--cbg);color:var(--cd);display:flex;align-items:center;justify-content:center;font-size:14px}
+.h-page-name{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.h-back{margin-left:auto;height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.h-back:hover{background:var(--bg)}
+
+/* ABAS */
+.tabs-bar{background:var(--white);border-bottom:2px solid var(--border);display:flex;padding:0 20px;flex-shrink:0}
+.tab{height:44px;padding:0 16px;border:none;background:transparent;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab:hover{color:var(--dark)}
+.tab.active{color:var(--dark);border-bottom-color:var(--cyan)}
+.tab-cnt{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:8px;background:var(--bg);color:var(--sub);border:1px solid var(--border)}
+.tab.active .tab-cnt{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+/* BODY */
+.body{flex:1;overflow-y:auto;padding:16px 20px 28px}
+.pane{display:none}.pane.active{display:block}
+.pane-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pane-title{font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark)}
+.btn-add{height:34px;padding:0 14px;border-radius:9px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-add:hover{background:var(--cd)}
+
+/* LISTA */
+.lista{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.lista-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #F2F0EA}
+.lista-item:last-child{border-bottom:none}
+.lista-item:hover{background:#FAFAF7}
+.li-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.1)}
+.li-nome{flex:1;font-size:13.5px;font-weight:600;color:var(--dark)}
+.li-sub{font-size:11.5px;color:var(--sub);margin-left:4px}
+.li-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;background:var(--cbg);color:var(--cd);margin-left:6px}
+.li-badge.prio{background:var(--cbg2);color:var(--coral)}
+.li-acts{display:flex;gap:4px}
+.act{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.act-ed{background:var(--bg);color:var(--sub)}.act-ed:hover{background:var(--cbg);color:var(--cd)}
+.act-del{background:var(--bg);color:var(--sub)}.act-del:hover{background:var(--rbg);color:var(--red)}
+.act-tog{background:var(--bg);color:var(--sub)}.act-tog:hover{background:var(--gbg);color:var(--green)}
+.act-tog.off{color:var(--red)}.act-tog.off:hover{background:var(--rbg)}
+.empty-list{padding:2.5rem;text-align:center;color:var(--sub)}
+.empty-list i{font-size:32px;display:block;margin-bottom:8px;opacity:.15}
+
+/* MODAIS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.modal-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.mh-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.modal-title{font-family:'Lora',serif;font-size:14px;font-weight:700;color:var(--dark);flex:1}
+.modal-x{width:24px;height:24px;border-radius:6px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
+.modal-body{padding:.9rem 1.1rem;display:flex;flex-direction:column;gap:9px}
+.modal-foot{padding:.7rem 1.1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px}
+.field label{display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.field input,.field select{width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.btn-sec{height:33px;padding:0 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-pri{height:33px;padding:0 13px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:background .15s}
+.btn-pri:hover{background:var(--cd)}
+.btn-red{height:33px;padding:0 13px;border-radius:7px;border:none;background:var(--red);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+
+/* cor preview */
+.cor-prev{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0}
+
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+.toast{position:fixed;bottom:1rem;right:1rem;z-index:999;padding:9px 14px;border-radius:9px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
+.toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL GENÉRICO -->
+<div class="overlay" id="ov-form">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="mh-ico" id="m-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-plus"></i></div>
+      <div class="modal-title" id="m-title">Novo item</div>
+      <button class="modal-x" onclick="fechaForm()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fechaForm()">Cancelar</button>
+      <button class="btn-pri" id="btn-salvar-form" onclick="salvarForm()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR DELETE -->
+<div class="overlay" id="ov-del">
+  <div class="modal">
+    <div class="modal-head"><div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-trash"></i></div><div class="modal-title">Excluir</div></div>
+    <div class="modal-body" style="font-size:13px;color:var(--text);line-height:1.5"><span id="del-msg">Tem certeza?</span></div>
+    <div class="modal-foot"><button class="btn-sec" onclick="fechaDel()">Cancelar</button><button class="btn-red" onclick="confirmarDel()"><i class="ti ti-trash"></i> Excluir</button></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <a class="h-logo" href="dashboard.html">
+    <div class="h-logo-circle">
+      <img src="logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;border-radius:50%"><i class="ti ti-device-laptop"></i></span>
+    </div>
+    <div><div class="h-logo-nome">Dottec</div><div class="h-logo-sub">Assistência Inteligente</div></div>
+  </a>
+  <div class="h-div"></div>
+  <div class="h-page">
+    <div class="h-page-ico"><i class="ti ti-device-mobile-cog"></i></div>
+    <span class="h-page-name">Serviços e Dispositivos</span>
+  </div>
+  <a class="h-back" href="configuracoes.html"><i class="ti ti-arrow-left"></i> Configurações</a>
+</header>
+
+<!-- ABAS -->
+<div class="tabs-bar">
+  <button class="tab active" onclick="setAba('tipos')"><i class="ti ti-layout-list"></i> Tipos <span class="tab-cnt" id="cnt-tipos">—</span></button>
+  <button class="tab" onclick="setAba('marcas')"><i class="ti ti-building-factory-2"></i> Marcas <span class="tab-cnt" id="cnt-marcas">—</span></button>
+  <button class="tab" onclick="setAba('modelos')"><i class="ti ti-device-mobile"></i> Modelos <span class="tab-cnt" id="cnt-modelos">—</span></button>
+  <button class="tab" onclick="setAba('cores')"><i class="ti ti-palette"></i> Cores <span class="tab-cnt" id="cnt-cores">—</span></button>
+</div>
+
+<!-- PAINÉIS -->
+<div class="body">
+
+  <!-- TIPOS -->
+  <div class="pane active" id="pane-tipos">
+    <div class="pane-head">
+      <span class="pane-title">Tipos de aparelho</span>
+      <button class="btn-add" onclick="abrirForm('tipo')"><i class="ti ti-plus"></i> Novo tipo</button>
+    </div>
+    <div class="lista" id="lista-tipos"><div class="empty-list"><i class="ti ti-loader-2 spin"></i></div></div>
+  </div>
+
+  <!-- MARCAS -->
+  <div class="pane" id="pane-marcas">
+    <div class="pane-head">
+      <span class="pane-title">Marcas</span>
+      <button class="btn-add" onclick="abrirForm('marca')"><i class="ti ti-plus"></i> Nova marca</button>
+    </div>
+    <div class="lista" id="lista-marcas"><div class="empty-list"><i class="ti ti-loader-2 spin"></i></div></div>
+  </div>
+
+  <!-- MODELOS -->
+  <div class="pane" id="pane-modelos">
+    <div class="pane-head">
+      <span class="pane-title">Modelos</span>
+      <button class="btn-add" onclick="abrirForm('modelo')"><i class="ti ti-plus"></i> Novo modelo</button>
+    </div>
+    <div class="lista" id="lista-modelos"><div class="empty-list"><i class="ti ti-loader-2 spin"></i></div></div>
+  </div>
+
+  <!-- CORES -->
+  <div class="pane" id="pane-cores">
+    <div class="pane-head">
+      <span class="pane-title">Cores</span>
+      <button class="btn-add" onclick="abrirForm('cor')"><i class="ti ti-plus"></i> Nova cor</button>
+    </div>
+    <div class="lista" id="lista-cores"><div class="empty-list"><i class="ti ti-loader-2 spin"></i></div></div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
+const db=window._dottecDb;
+
+let ABA='tipos';
+let FORM_TYPE='', FORM_ID=null;
+let DEL_TYPE='', DEL_ID=null, DEL_NOME='';
+let MARCAS_CACHE=[];
+
+function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+
+// ABAS
+function setAba(aba){
+  ABA=aba;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['tipos','marcas','modelos','cores'][i]===aba);
+  });
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+aba).classList.add('active');
+  load(aba);
+}
+
+// LOAD
+async function loadAll(){
+  await Promise.all([load('tipos'),load('marcas'),load('modelos'),load('cores')]);
+}
+
+async function load(tipo){
+  const tabela={'tipos':'os_tipos_aparelho','marcas':'os_marcas','modelos':'os_modelos','cores':'os_cores'}[tipo];
+  let query=db.from(tabela).select(tipo==='modelos'?'id,nome,marca_id,prioritario,ativo':'id,nome,ativo'+(tipo==='cores'?',hex':'')).order('nome');
+  try{
+    const{data}=await query;
+    if(tipo==='marcas') MARCAS_CACHE=data||[];
+    document.getElementById('cnt-'+tipo).textContent=(data||[]).length;
+    render(tipo, data||[]);
+  }catch(e){console.error(tipo,e);}
+}
+
+function render(tipo, lista){
+  const el=document.getElementById('lista-'+tipo);
+  if(!lista.length){el.innerHTML='<div class="empty-list"><i class="ti ti-mood-empty"></i>Nenhum cadastrado ainda</div>';return;}
+  const marcaMap={};MARCAS_CACHE.forEach(m=>marcaMap[m.id]=m.nome);
+  el.innerHTML=lista.map(item=>{
+    const inativo=item.ativo===false;
+    let extra='';
+    if(tipo==='modelos')extra=`<span class="li-sub">${marcaMap[item.marca_id]||'—'}</span>${item.prioritario?'<span class="li-badge prio">Prioritário</span>':''}`;
+    if(tipo==='cores')extra=`<div class="cor-prev" style="background:${item.hex||'#ccc'}"></div>`;
+    return `<div class="lista-item" style="${inativo?'opacity:.45':''}">
+      ${tipo==='cores'?`<div class="cor-prev" style="background:${item.hex||'#EAE7DF'}"></div>`:''}
+      <span class="li-nome">${item.nome.toUpperCase()}</span>
+      ${tipo==='modelos'?`<span class="li-sub">${marcaMap[item.marca_id]||'—'}</span>${item.prioritario?'<span class="li-badge prio">iPhone</span>':''}`:tipo==='cores'?'':''}
+      ${inativo?'<span class="li-badge" style="background:var(--rbg);color:var(--red)">Inativo</span>':''}
+      <div class="li-acts">
+        <button class="act act-tog${inativo?' off':''}" onclick="toggleAtivo('${tipo}','${item.id}',${!inativo})" title="${inativo?'Ativar':'Desativar'}"><i class="ti ti-${inativo?'eye-off':'eye'}"></i></button>
+        <button class="act act-ed" onclick="abrirForm('${tipo.slice(0,-1)}','${item.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+        <button class="act act-del" onclick="abrirDel('${tipo}','${item.id}','${item.nome.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// TOGGLE ATIVO
+async function toggleAtivo(tipo, id, ativar){
+  const tabela={'tipos':'os_tipos_aparelho','marcas':'os_marcas','modelos':'os_modelos','cores':'os_cores'}[tipo];
+  try{await db.from(tabela).update({ativo:ativar}).eq('id',id);load(tipo);}
+  catch{toast('Erro.','err');}
+}
+
+// MODAL FORM
+function fechaForm(){document.getElementById('ov-form').classList.remove('open');}
+document.getElementById('ov-form').addEventListener('click',function(e){if(e.target===this)fechaForm();});
+
+async function abrirForm(tipo, id=null){
+  FORM_TYPE=tipo; FORM_ID=id;
+  const tabela={'tipo':'os_tipos_aparelho','marca':'os_marcas','modelo':'os_modelos','cor':'os_cores'}[tipo];
+  const nomes={'tipo':'Tipo de aparelho','marca':'Marca','modelo':'Modelo','cor':'Cor'};
+  const icos={'tipo':'ti-layout-list','marca':'ti-building-factory-2','modelo':'ti-device-mobile','cor':'ti-palette'};
+  document.getElementById('m-title').textContent=(id?'Editar ':'Novo ')+nomes[tipo];
+  document.getElementById('m-ico').innerHTML=`<i class="ti ${icos[tipo]}"></i>`;
+
+  let dados={nome:'',hex:'',marca_id:'',prioritario:false};
+  if(id){
+    try{const{data}=await db.from(tabela).select('*').eq('id',id).single();if(data)dados={...dados,...data};}catch{}
+  }
+
+  // monta campos do modal
+  let body=`<div class="field"><label>Nome</label><input type="text" id="f-nome" value="${dados.nome}" placeholder="Nome..."/></div>`;
+  if(tipo==='modelo'){
+    // carrega marcas para select
+    if(!MARCAS_CACHE.length){try{const{data}=await db.from('os_marcas').select('id,nome').eq('ativo',true).order('nome');MARCAS_CACHE=data||[];}catch{}}
+    body+=`<div class="field"><label>Marca</label><select id="f-marca">${MARCAS_CACHE.map(m=>`<option value="${m.id}"${dados.marca_id===m.id?' selected':''}>${m.nome}</option>`).join('')}</select></div>`;
+    body+=`<div class="field"><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="f-prio" style="width:15px;height:15px;accent-color:var(--cyan)"${dados.prioritario?' checked':''}/> Prioritário (aparece primeiro na lista)</label></div>`;
+  }
+  if(tipo==='cor'){
+    body+=`<div class="field" style="display:flex;gap:10px;align-items:flex-end">
+      <div style="flex:1"><label>Hex da cor <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label><input type="text" id="f-hex" value="${dados.hex||''}" placeholder="#1C1C1A" oninput="document.getElementById('f-cor-prev').style.background=this.value||'#ccc'"/></div>
+      <div id="f-cor-prev" style="width:38px;height:38px;border-radius:8px;border:1.5px solid var(--border);flex-shrink:0;background:${dados.hex||'#EAE7DF'}"></div>
+    </div>`;
+  }
+
+  document.getElementById('m-body').innerHTML=body;
+  document.getElementById('ov-form').classList.add('open');
+  setTimeout(()=>document.getElementById('f-nome').focus(),60);
+}
+
+async function salvarForm(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){toast('Informe o nome.','err');return;}
+  const tabela={'tipo':'os_tipos_aparelho','marca':'os_marcas','modelo':'os_modelos','cor':'os_cores'}[FORM_TYPE];
+  const payload={nome:nome.toUpperCase()};
+  if(FORM_TYPE==='modelo'){
+    payload.marca_id=document.getElementById('f-marca')?.value||null;
+    payload.prioritario=document.getElementById('f-prio')?.checked||false;
+  }
+  if(FORM_TYPE==='cor'){
+    payload.hex=document.getElementById('f-hex')?.value?.trim()||null;
+  }
+  try{
+    if(FORM_ID){await db.from(tabela).update(payload).eq('id',FORM_ID);}
+    else{await db.from(tabela).insert({...payload,ativo:true});}
+    fechaForm();
+    toast(FORM_ID?'Salvo!':'Criado!');
+    load(FORM_TYPE+'s');
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+// DELETE
+function fechaDel(){document.getElementById('ov-del').classList.remove('open');}
+document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fechaDel();});
+function abrirDel(tipo,id,nome){DEL_TYPE=tipo;DEL_ID=id;DEL_NOME=nome;document.getElementById('del-msg').innerHTML=`Tem certeza que deseja excluir <strong>${nome.toUpperCase()}</strong>? Esta ação não pode ser desfeita.`;document.getElementById('ov-del').classList.add('open');}
+async function confirmarDel(){
+  const tabela={'tipos':'os_tipos_aparelho','marcas':'os_marcas','modelos':'os_modelos','cores':'os_cores'}[DEL_TYPE];
+  try{await db.from(tabela).delete().eq('id',DEL_ID);fechaDel();toast('Excluído.');load(DEL_TYPE);}
+  catch(e){toast('Erro: '+e.message,'err');}
+}
+
+loadAll();
+</script>
+</body>
+</html>

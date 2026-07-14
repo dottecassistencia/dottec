@@ -254,8 +254,12 @@ function renderList(){
 }
 
 async function toggleAlerta(id,ativo){
-        alerta_perfis:[...document.querySelectorAll('#m-alerta-perfis input:checked')].map(c=>c.value),
-        alerta_para:[...document.querySelectorAll('#m-alerta-perfis input:checked')].map(c=>c.value)[0]||'COMERCIAL',
+  await db.from('status_config').update({
+    gera_alerta:ativo,
+    alerta_prioridade:ativo?'ALTA':'NORMAL',
+    alerta_perfis:ativo?['COMERCIAL']:[],
+    alerta_para:ativo?'COMERCIAL':null
+  }).eq('id',id);
   toast(ativo?'Alerta ativado!':'Alerta desativado.','success');
   load();
 }
