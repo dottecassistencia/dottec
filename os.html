@@ -440,12 +440,12 @@ function render(){
       <td class="td-tempo">${fmtDt(o.criado_em)}</td>
       <td style="font-weight:600;color:var(--dark)">${o.cliente_nome||'—'}</td>
       <td><div class="td-device">${device}</div>${corHtml}</td>
-      <td class="td-val">${TOTAIS[o.id]>0?'R$ '+(TOTAIS[o.id]).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
       <td onclick="event.stopPropagation()">
         <span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status.replace(/'/g,"\\'")}')">
           ${o.status}
         </span>
       </td>
+      <td class="td-val">${TOTAIS[o.id]>0?'R$ '+(TOTAIS[o.id]).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
       <td class="td-tempo">${tempo(o.criado_em)}</td>
       <td onclick="event.stopPropagation()"><div class="td-acts">
         <button class="act act-ed" onclick="irOS('${o.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
