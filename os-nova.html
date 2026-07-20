@@ -796,7 +796,6 @@ async function salvar(){
     // aparelhos
     try{
       await db.from('os_aparelhos').delete().eq('os_id',osId);
-      console.log('APS a salvar:',APS);
       if(APS.length)await db.from('os_aparelhos').insert(APS.map((a,apIdx)=>({
         os_id:osId,ordem:apIdx+1,tipo_registro:a.tipo_registro||'dispositivo',
         tipo:(a.tipo||'').toUpperCase()||null,marca:(a.marca||'').toUpperCase()||null,
@@ -804,7 +803,6 @@ async function salvar(){
         imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,
         defeito:(a.defeito||'').toUpperCase()||null,laudo:(a.laudo||'').toUpperCase()||null,
         solucao:(a.solucao||'').toUpperCase()||null,anydesk_id:a.anydesk_id||null,
-        fotos:apIdx===0?GD_FOTOS:[],
       })));
     }catch(e){console.error('os_aparelhos erro:',e);toast('Erro ao salvar aparelhos: '+e.message,'err');}
     // itens
