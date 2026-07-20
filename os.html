@@ -378,10 +378,12 @@ async function load(){
   TODOS=os||[]; STATUS_CFG=sc||[];
   // mapa aparelho por os_id (primeiro aparelho)
   const AP_MAP={};
+  console.log('os_aparelhos retornados:', aps?.length, aps);
   // pega só o primeiro aparelho de cada OS (menor ordem)
   (aps||[]).forEach(a=>{
     if(!AP_MAP[a.os_id]||a.ordem<AP_MAP[a.os_id].ordem) AP_MAP[a.os_id]=a;
   });
+  console.log('AP_MAP:', AP_MAP);
   // enriquece TODOS com dados do primeiro aparelho
   TODOS.forEach(o=>{
     const ap=AP_MAP[o.id];
