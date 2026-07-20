@@ -184,19 +184,105 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
-<!-- MODAL NOVO CLIENTE -->
-<div class="overlay" id="ov-cl">
-  <div class="modal">
-    <div class="modal-head"><div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-user-plus"></i></div><div class="modal-title">Novo cliente</div><button class="modal-x" onclick="fechaModal('cl')"><i class="ti ti-x"></i></button></div>
-    <div class="modal-body">
-      <div class="field"><label>Nome completo</label><input type="text" id="ncl-nome" placeholder="Nome do cliente"/></div>
-      <div class="g2">
-        <div class="field"><label>WhatsApp</label><input type="text" id="ncl-tel" placeholder="(47) 99999-9999"/></div>
-        <div class="field"><label>CPF/CNPJ <span class="opt">(opcional)</span></label><input type="text" id="ncl-doc" placeholder="000.000.000-00"/></div>
+<!-- MODAL NOVO CLIENTE COMPLETO -->
+<div class="overlay" id="ov-cl" style="align-items:flex-start;padding:1rem;overflow-y:auto">
+  <div class="modal" style="max-width:600px;margin:auto">
+    <div class="modal-head"><div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-user-plus"></i></div><div class="modal-title">Cadastrar cliente</div><button class="modal-x" onclick="fechaModal('cl')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body" style="gap:0">
+
+      <!-- TIPO (Físico / Jurídico) -->
+      <div style="display:flex;gap:8px;margin-bottom:10px" id="ncl-tipo-wrap">
+        <div id="ncl-btn-cpf" onclick="nclSetTipo('CPF')" style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--cyan);border-radius:8px;cursor:pointer;background:var(--cbg)">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0"><i class="ti ti-user"></i></div>
+          <div><div style="font-size:12.5px;font-weight:700;color:var(--dark)">Pessoa Física</div><div style="font-size:10px;color:var(--sub)">CPF</div></div>
+        </div>
+        <div id="ncl-btn-cnpj" onclick="nclSetTipo('CNPJ')" style="flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--white)">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sub);flex-shrink:0"><i class="ti ti-building"></i></div>
+          <div><div style="font-size:12.5px;font-weight:700;color:var(--dark)">Pessoa Jurídica</div><div style="font-size:10px;color:var(--sub)">CNPJ</div></div>
+        </div>
       </div>
-      <div class="field"><label>E-mail <span class="opt">(opcional)</span></label><input type="text" id="ncl-email" placeholder="cliente@email.com"/></div>
+
+      <!-- DOCUMENTO + NOME -->
+      <div class="g2" style="margin-bottom:10px">
+        <div class="field"><label id="ncl-doc-label">CPF</label><input type="text" id="ncl-doc" placeholder="000.000.000-00" oninput="nclMaskDoc(this)" maxlength="18"/></div>
+        <div class="field"><label id="ncl-nome-label">Nome completo</label><input type="text" id="ncl-nome" placeholder="NOME DO CLIENTE"/></div>
+      </div>
+
+      <!-- NOME FANTASIA (só CNPJ) -->
+      <div class="field" id="ncl-fantasia-wrap" style="display:none;margin-bottom:10px">
+        <label>Nome fantasia <span class="opt">(opcional)</span></label>
+        <input type="text" id="ncl-fantasia" placeholder="NOME FANTASIA"/>
+      </div>
+
+      <!-- TELEFONE + CELULAR -->
+      <div class="g2" style="margin-bottom:10px">
+        <div class="field"><label>Telefone fixo <span class="opt">(opcional)</span></label><input type="text" id="ncl-fone" placeholder="(47) 3333-0000"/></div>
+        <div class="field"><label>Celular / WhatsApp</label><input type="text" id="ncl-cel" placeholder="(47) 99999-0000"/></div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="field" style="margin-bottom:10px">
+        <label>E-mail <span class="opt">(opcional)</span></label>
+        <input type="text" id="ncl-email" placeholder="cliente@email.com" style="text-transform:none"/>
+      </div>
+
+      <!-- CEP + ENDEREÇO -->
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div class="field" style="flex:0 0 120px"><label>CEP <span class="opt">(opcional)</span></label>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="ncl-cep" placeholder="00000-000" maxlength="9" oninput="nclMaskCep(this)" style="flex:1"/>
+            <button onclick="nclBuscaCep()" style="height:36px;padding:0 8px;border-radius:7px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;color:var(--sub);flex-shrink:0"><i class="ti ti-search"></i></button>
+          </div>
+        </div>
+        <div class="field" style="flex:2"><label>Logradouro</label><input type="text" id="ncl-rua" placeholder="RUA, AV..."/></div>
+        <div class="field" style="flex:0 0 72px"><label>Nº</label><input type="text" id="ncl-num" placeholder="123"/></div>
+      </div>
+      <div class="g2" style="margin-bottom:10px">
+        <div class="field"><label>Bairro</label><input type="text" id="ncl-bairro" placeholder="BAIRRO"/></div>
+        <div class="field"><label>Complemento <span class="opt">(opcional)</span></label><input type="text" id="ncl-comp" placeholder="APTO, SALA..."/></div>
+      </div>
+      <div class="g2" style="margin-bottom:10px">
+        <div class="field"><label>Cidade</label><input type="text" id="ncl-cidade" placeholder="CIDADE"/></div>
+        <div class="field"><label>UF</label>
+          <select id="ncl-uf">
+            <option value="">—</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option selected>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- OBSERVAÇÕES -->
+      <div class="field">
+        <label>Observações <span class="opt">(opcional)</span></label>
+        <textarea id="ncl-obs" style="height:60px;text-transform:none" placeholder="Anotações internas, preferências..."></textarea>
+      </div>
     </div>
-    <div class="modal-foot"><button class="btn-sec" onclick="fechaModal('cl')">Cancelar</button><button class="btn-pri" onclick="salvarNovoCliente()"><i class="ti ti-check"></i> Salvar</button></div>
+    <div class="modal-foot"><button class="btn-sec" onclick="fechaModal('cl')">Cancelar</button><button class="btn-pri" onclick="salvarNovoCliente()"><i class="ti ti-check"></i> Salvar cliente</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONTATO ADICIONAL -->
+<div class="overlay" id="ov-contato">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-phone-plus"></i></div>
+      <div class="modal-title">Contato adicional</div>
+      <button class="modal-x" onclick="fechaModal('contato')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Nome do contato</label><input type="text" id="cont-nome" placeholder="Ex: MARIA, MÃE DO CLIENTE..."/></div>
+      <div class="field"><label>Telefone / WhatsApp</label><input type="text" id="cont-tel" placeholder="(47) 99999-9999"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fechaModal('contato')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarContato()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
   </div>
 </div>
 
@@ -267,6 +353,12 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
         </div>
         <!-- whats -->
         <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" style="display:none"><i class="ti ti-brand-whatsapp"></i></a>
+        <button id="cl-contato-btn" onclick="abrirContato()" title="Contato adicional" style="display:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:15px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s" onmouseover="this.style.background='var(--abg)';this.style.color='var(--amber)';this.style.borderColor='var(--amber)'" onmouseout="this.style.background='var(--white)';this.style.color='var(--sub)';this.style.borderColor='var(--border)'">
+          <i class="ti ti-phone-plus"></i>
+        </button>
+        <div id="cl-contato-display" style="display:none;align-items:center;gap:5px;background:var(--abg);border-radius:7px;padding:4px 8px;font-size:11px;font-weight:600;color:var(--amber);flex-shrink:0;cursor:pointer" onclick="abrirContato()" title="Editar contato adicional">
+          <i class="ti ti-phone"></i><span id="cl-contato-txt"></span>
+        </div>
         <!-- status -->
         <select id="os-status" class="st-sel">
           <option value="ABERTA">ABERTA</option>
@@ -355,7 +447,7 @@ let _SALVANDO=false;
 
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fechaModal(id){document.getElementById('ov-'+id).classList.remove('open');}
-['cl','troca'].forEach(id=>document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
+['cl','troca','contato'].forEach(id=>document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
 
 // ── MÓDULOS ──────────────────────────────────────────
 const MODS=[
@@ -419,6 +511,9 @@ function mostrarCliente(p){
   document.getElementById('cl-display-wrap').style.display='flex';
   document.getElementById('cl-busca-wrap').style.display='none';
   document.getElementById('cl-drop').classList.remove('open');
+  // mostra botão de contato adicional
+  const cb=document.getElementById('cl-contato-btn');
+  if(cb)cb.style.display='flex';
 }
 function iniciarTrocaCliente(){
   document.getElementById('cl-display-wrap').style.display='none';
@@ -468,20 +563,97 @@ function selecionaCl(i){
   else mostrarCliente(p);
 }
 function confirmarTroca(){fechaModal('troca');if(CL_PENDENTE){mostrarCliente(CL_PENDENTE);CL_PENDENTE=null;}}
+let NCL_TIPO='CPF';
+function nclSetTipo(tipo){
+  NCL_TIPO=tipo;
+  const cpf=document.getElementById('ncl-btn-cpf');
+  const cnpj=document.getElementById('ncl-btn-cnpj');
+  const fw=document.getElementById('ncl-fantasia-wrap');
+  if(tipo==='CPF'){
+    cpf.style.cssText='flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--cyan);border-radius:8px;cursor:pointer;background:var(--cbg)';
+    cpf.querySelector('div:first-child').style.background='var(--cyan)';cpf.querySelector('div:first-child').style.color='#fff';
+    cnpj.style.cssText='flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--white)';
+    cnpj.querySelector('div:first-child').style.background='var(--bg)';cnpj.querySelector('div:first-child').style.color='var(--sub)';
+    document.getElementById('ncl-doc-label').textContent='CPF';
+    document.getElementById('ncl-nome-label').textContent='Nome completo';
+    document.getElementById('ncl-doc').placeholder='000.000.000-00';
+    document.getElementById('ncl-doc').maxLength=14;
+    fw.style.display='none';
+  } else {
+    cnpj.style.cssText='flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--cyan);border-radius:8px;cursor:pointer;background:var(--cbg)';
+    cnpj.querySelector('div:first-child').style.background='var(--cyan)';cnpj.querySelector('div:first-child').style.color='#fff';
+    cpf.style.cssText='flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--white)';
+    cpf.querySelector('div:first-child').style.background='var(--bg)';cpf.querySelector('div:first-child').style.color='var(--sub)';
+    document.getElementById('ncl-doc-label').textContent='CNPJ';
+    document.getElementById('ncl-nome-label').textContent='Razão social';
+    document.getElementById('ncl-doc').placeholder='00.000.000/0000-00';
+    document.getElementById('ncl-doc').maxLength=18;
+    fw.style.display='block';
+  }
+}
+function nclMaskDoc(el){
+  let v=el.value.replace(/\D/g,'');
+  if(NCL_TIPO==='CPF'&&v.length<=11) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4').replace(/-$/,'').replace(/\.$/,'');
+  else if(NCL_TIPO==='CNPJ'&&v.length<=14) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/,'$1.$2.$3/$4-$5').replace(/-$/,'').replace(/\/$/,'');
+  el.value=v;
+}
+function nclMaskCep(el){let v=el.value.replace(/\D/g,'');if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5,8);el.value=v;}
+async function nclBuscaCep(){
+  const cep=document.getElementById('ncl-cep').value.replace(/\D/g,'');
+  if(cep.length!==8){toast('CEP inválido.','err');return;}
+  try{
+    const d=await fetch('https://viacep.com.br/ws/'+cep+'/json/').then(r=>r.json());
+    if(d.erro){toast('CEP não encontrado.','err');return;}
+    document.getElementById('ncl-rua').value=(d.logradouro||'').toUpperCase();
+    document.getElementById('ncl-bairro').value=(d.bairro||'').toUpperCase();
+    document.getElementById('ncl-cidade').value=(d.localidade||'').toUpperCase();
+    document.getElementById('ncl-uf').value=d.uf||'';
+    document.getElementById('ncl-num').focus();
+  }catch{toast('Erro ao buscar CEP.','err');}
+}
+function nclLimpar(){
+  NCL_TIPO='CPF';
+  ['ncl-nome','ncl-doc','ncl-fantasia','ncl-fone','ncl-cel','ncl-email','ncl-cep','ncl-rua','ncl-num','ncl-bairro','ncl-comp','ncl-cidade','ncl-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ncl-uf').value='SC';
+  nclSetTipo('CPF');
+}
 function abrirNovoCliente(){
-  document.getElementById('ncl-nome').value=document.getElementById('cl-busca').value.trim().toUpperCase();
-  ['ncl-tel','ncl-doc','ncl-email'].forEach(id=>document.getElementById(id).value='');
+  nclLimpar();
+  const q=document.getElementById('cl-busca').value.trim();
+  document.getElementById('ncl-nome').value=q.toUpperCase();
   document.getElementById('cl-drop').classList.remove('open');
   document.getElementById('ov-cl').classList.add('open');
-  setTimeout(()=>document.getElementById('ncl-tel').focus(),60);
+  setTimeout(()=>document.getElementById('ncl-doc').focus(),60);
 }
 async function salvarNovoCliente(){
   const nome=document.getElementById('ncl-nome').value.trim();
-  if(!nome){toast('Informe o nome.','err');return;}
+  if(!nome){toast('Informe o nome.','err');document.getElementById('ncl-nome').focus();return;}
+  const doc=document.getElementById('ncl-doc').value.replace(/\D/g,'')||null;
+  const payload={
+    nome:nome.toUpperCase(),
+    tipo_doc:NCL_TIPO,
+    documento:doc,
+    nome_fantasia:document.getElementById('ncl-fantasia').value.trim().toUpperCase()||null,
+    telefone:document.getElementById('ncl-fone').value||null,
+    celular:document.getElementById('ncl-cel').value||null,
+    email:document.getElementById('ncl-email').value||null,
+    cep:document.getElementById('ncl-cep').value.replace(/\D/g,'')||null,
+    logradouro:document.getElementById('ncl-rua').value.trim().toUpperCase()||null,
+    numero:document.getElementById('ncl-num').value.trim()||null,
+    complemento:document.getElementById('ncl-comp').value.trim().toUpperCase()||null,
+    bairro:document.getElementById('ncl-bairro').value.trim().toUpperCase()||null,
+    cidade:document.getElementById('ncl-cidade').value.trim().toUpperCase()||null,
+    estado:document.getElementById('ncl-uf').value||null,
+    observacoes:document.getElementById('ncl-obs').value.trim()||null,
+    is_cliente:true,ativo:true,
+  };
   try{
-    const{data:np,error}=await db.from('pessoas').insert({nome:nome.toUpperCase(),celular:document.getElementById('ncl-tel').value||null,documento:document.getElementById('ncl-doc').value.replace(/\D/g,'')||null,email:document.getElementById('ncl-email').value||null,is_cliente:true,ativo:true}).select('id,nome,celular,documento,tipo_doc,email').single();
+    const{data:np,error}=await db.from('pessoas').insert(payload).select('id,nome,celular,documento,tipo_doc,email').single();
     if(error)throw error;
-    CL_CACHE=null;fechaModal('cl');mostrarCliente(np);toast('Cliente cadastrado!');
+    CL_CACHE=null;
+    fechaModal('cl');
+    mostrarCliente(np);
+    toast('Cliente cadastrado!');
   }catch(err){toast('Erro: '+err.message,'err');}
 }
 
@@ -792,6 +964,8 @@ async function salvar(){
       status,
       acessorios:(ap0.acessorios||'').toUpperCase()||null,
       observacoes:(document.getElementById('os-obs').value||'').toUpperCase()||null,
+      contato_nome:_contatoNome||null,
+      contato_tel:_contatoTel||null,
       atualizado_em:new Date().toISOString(),
     };
     let osId=OS_ID;
@@ -823,6 +997,33 @@ async function salvar(){
     btn.disabled=false;_SALVANDO=false;
     document.getElementById('btn-txt').textContent='Salvar';
   }
+}
+
+// ── CONTATO ADICIONAL ────────────────────────────────
+let _contatoNome='', _contatoTel='';
+function abrirContato(){
+  document.getElementById('cont-nome').value=_contatoNome;
+  document.getElementById('cont-tel').value=_contatoTel;
+  document.getElementById('ov-contato').classList.add('open');
+  setTimeout(()=>document.getElementById('cont-nome').focus(),60);
+}
+function salvarContato(){
+  _contatoNome=document.getElementById('cont-nome').value.trim().toUpperCase();
+  _contatoTel=document.getElementById('cont-tel').value.trim();
+  fechaModal('contato');
+  // exibe o contato salvo ao lado do botão
+  const disp=document.getElementById('cl-contato-display');
+  const txt=document.getElementById('cl-contato-txt');
+  const btn=document.getElementById('cl-contato-btn');
+  if(_contatoNome||_contatoTel){
+    txt.textContent=_contatoNome?_contatoNome+(_contatoTel?' · '+_contatoTel:''):_contatoTel;
+    disp.style.display='flex';
+    if(btn)btn.style.display='none';
+  } else {
+    disp.style.display='none';
+    if(btn)btn.style.display='flex';
+  }
+  toast('Contato salvo!');
 }
 
 // ── INIT ─────────────────────────────────────────────
