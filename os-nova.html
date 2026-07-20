@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>OS — Dottec</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2;--purple:#5B3FA6;--pbg:#EEEAF8}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column}
-/* MAIÚSCULO PADRÃO */
-input:not([type=date]):not([type=datetime-local]):not([type=number]):not([type=email]),textarea{text-transform:uppercase}
-input::placeholder,textarea::placeholder{text-transform:none}
+input:not([type=date]):not([type=number]),textarea{text-transform:uppercase}
+input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 
-/* TOPBAR COMPACTA */
+/* TOPBAR */
 .topbar{height:56px;background:var(--white);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 .tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
 .tb-circle{width:30px;height:30px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -31,25 +30,24 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .tb-page-ico{width:22px;height:22px;border-radius:6px;background:var(--cbg2);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:11px}
 .tb-page-name{font-family:'Lora',serif;font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap}
 .tb-page-num{font-size:10.5px;color:var(--sub);margin-left:2px}
-.tb-mods{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(36px,1fr));gap:2px;justify-items:center;align-items:center;min-width:0}
-.tb-ball{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:inherit;cursor:pointer;max-width:50px;width:100%}
-.tb-ball-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;position:relative;transition:transform .2s cubic-bezier(.34,1.5,.64,1)}
+.tb-mods{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(34px,1fr));gap:2px;justify-items:center;align-items:center;min-width:0}
+.tb-ball{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;cursor:pointer;max-width:48px;width:100%}
+.tb-ball-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;transition:transform .2s cubic-bezier(.34,1.5,.64,1)}
 .tb-ball:hover .tb-ball-icon{transform:translateY(-2px) scale(1.1)}
 .tb-ball.active .tb-ball-icon{box-shadow:0 0 0 2px var(--cyan)}
 .tb-ball-lbl{font-size:6.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap;width:100%;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
 .tb-ball.active .tb-ball-lbl{color:var(--cyan)}
 .tb-more-wrap{position:relative;flex-shrink:0}
-.tb-more{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer;transition:all .15s}
-.tb-more:hover{background:#E2DFD6}
+.tb-more{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer}
 .tb-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:500;min-width:160px}
 .tb-more-drop.open{display:block}
-.tb-more-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-decoration:none;transition:background .12s}
+.tb-more-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-decoration:none}
 .tb-more-item:hover{background:var(--bg)}
 .tb-more-item i{font-size:13px;width:16px;text-align:center}
 .tb-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.tb-back{height:28px;padding:0 9px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;text-decoration:none;transition:all .15s}
+.tb-back{height:28px;padding:0 9px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;text-decoration:none}
 .tb-back:hover{background:var(--bg)}
-.tb-save{height:28px;padding:0 11px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:background .15s}
+.tb-save{height:28px;padding:0 11px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
 .tb-save:hover{background:var(--cd)}
 .tb-save:disabled{opacity:.5;cursor:not-allowed}
 
@@ -61,44 +59,35 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .sec{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:visible;margin-bottom:10px}
 .sec-head{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
 .sec-ico{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
-.si-cyan{background:var(--cbg);color:var(--cd)}.si-amber{background:var(--abg);color:var(--amber)}
-.si-coral{background:var(--cbg2);color:var(--coral)}.si-green{background:var(--gbg);color:var(--green)}
-.si-purple{background:var(--pbg);color:var(--purple)}
+.si-cyan{background:var(--cbg);color:var(--cd)}.si-coral{background:var(--cbg2);color:var(--coral)}.si-green{background:var(--gbg);color:var(--green)}.si-purple{background:var(--pbg);color:var(--purple)}
 .sec-title{font-family:'Lora',serif;font-size:13px;font-weight:700;color:var(--dark)}
 .sec-body{padding:10px 14px}
 
 /* FIELDS */
-.field{position:relative}.field label{display:block;font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.field{position:relative}
+.field label{display:block;font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
 .opt{font-weight:400;text-transform:none;opacity:.8}
-.field input,.field select,.field textarea{width:100%;height:36px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:#FAFAF7;color:var(--dark);font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;text-transform:uppercase}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
-.field input::placeholder,.field textarea::placeholder{text-transform:none;color:#B5B2A8}
-.field textarea{height:72px;resize:vertical;padding:7px 9px}
+.field input,.field textarea{width:100%;height:36px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:#FAFAF7;color:var(--dark);font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s}
+.field input:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.field textarea{height:76px;resize:vertical;padding:7px 9px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
-.row{display:flex;gap:8px;align-items:flex-start}
-.row-inline{display:flex;gap:8px;align-items:flex-end}
+.g4{display:grid;grid-template-columns:1fr 1fr 1.2fr 1fr;gap:8px}
+
+/* STATUS SELECT moderno */
+.st-sel{height:34px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--dark);font-size:12px;font-family:inherit;font-weight:700;outline:none;cursor:pointer;text-transform:uppercase;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A887F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;transition:border-color .15s;flex-shrink:0;width:190px}
+.st-sel:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
 
 /* CLIENTE */
-.cl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cl-display{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.cl-display{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
 .cl-display:hover{border-color:var(--cyan);background:var(--cbg)}
 .cl-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--cd));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
-.cl-info{flex:1;min-width:0}
 .cl-name{font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-sub{font-size:10px;color:var(--sub)}
 .cl-whats{width:32px;height:32px;border-radius:8px;border:none;background:#25D366;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;transition:opacity .15s}
 .cl-whats:hover{opacity:.8}
-/* select de status moderno */
-.st-sel{flex:0 0 190px;height:34px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--dark);font-size:12px;font-family:inherit;font-weight:700;outline:none;cursor:pointer;text-transform:uppercase;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A887F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;transition:border-color .15s,box-shadow .15s}
-.st-sel:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background-color:var(--white)}
-/* status inline com cliente */
-.cl-status-row{display:flex;gap:8px;margin-top:8px}
-.cl-status-row .field{flex:0 0 220px}
 
 /* AUTOCOMPLETE */
-.ac-wrap{position:relative;flex:1}
+.ac-wrap{position:relative;flex:1;min-width:0}
 .ac-drop{display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.14);max-height:220px;overflow-y:auto;z-index:600}
 .ac-drop.open{display:block}
 .ac-item{padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #F5F4F0;transition:background .1s}
@@ -116,18 +105,18 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .ap-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .ap-lbl{font-size:9.5px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .ap-lbl.chamado{color:var(--cd)}
-.btn-rem{width:22px;height:22px;border-radius:5px;border:none;background:var(--cbg2);color:var(--coral);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-rem{width:22px;height:22px;border-radius:5px;border:none;background:var(--cbg2);color:var(--coral);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .btn-rem:hover{background:var(--coral);color:#fff}
 .btn-add-ap{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:7px;border:1.5px dashed var(--border);background:transparent;cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--sub);transition:all .15s;margin-top:4px}
 .btn-add-ap:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
 .btn-chamado{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:7px;border:1.5px solid rgba(41,184,194,.3);background:var(--cbg);cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--cd);transition:all .15s;margin-top:4px}
-.btn-chamado:hover{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.btn-chamado:hover{background:var(--cyan);color:#fff}
 .anydesk-row{display:flex;gap:6px;align-items:flex-end}
-.anydesk-row .field{flex:1;margin-bottom:0}
-.btn-copy-ad{height:36px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.anydesk-row .field{flex:1}
+.btn-copy-ad{height:36px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
 .btn-copy-ad:hover{background:var(--cbg);color:var(--cd);border-color:var(--cyan)}
 
-/* autocomplete modelo */
+/* modelo autocomplete */
 .mod-ac-wrap{position:relative}
 .mod-ac-drop{display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;z-index:500}
 .mod-ac-drop.open{display:block}
@@ -137,15 +126,9 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .mac-tag{font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:4px;flex-shrink:0}
 .mac-iphone{background:var(--cbg2);color:var(--coral)}.mac-other{background:var(--bg);color:var(--sub)}
 
-/* FOTOS */
-.foto-thumb{width:72px;height:72px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);cursor:pointer;transition:transform .15s}
-.foto-thumb:hover{transform:scale(1.06)}
-.foto-wrap{position:relative;width:72px;height:72px}
-.foto-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-
 /* PRODUTOS E SERVIÇOS */
 .item-search-wrap{position:relative;margin-bottom:8px}
-.item-search-wrap input{width:100%;height:36px;padding:0 9px 0 32px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;background:#FAFAF7;outline:none;transition:border-color .15s;text-transform:uppercase}
+.item-search-wrap input{width:100%;height:36px;padding:0 9px 0 32px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:12.5px;background:#FAFAF7;outline:none;text-transform:uppercase}
 .item-search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
 .item-search-wrap input::placeholder{text-transform:none;color:#B5B2A8}
 .item-search-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--sub);pointer-events:none}
@@ -161,27 +144,32 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .item-desc{flex:1;min-width:0}
 .item-nome{font-size:12px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-sub{font-size:9.5px;color:var(--sub)}
-.item-qty{width:46px;height:28px;border:1px solid var(--border);border-radius:5px;text-align:center;font-family:inherit;font-size:12px;background:var(--white);color:var(--dark);outline:none;padding:0}
+.item-qty{width:46px;height:28px;border:1px solid var(--border);border-radius:5px;text-align:center;font-family:inherit;font-size:12px;background:var(--white);color:var(--dark);outline:none}
 .item-price{font-size:12px;font-weight:700;color:var(--dark);white-space:nowrap;min-width:68px;text-align:right}
-.item-del{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--sub);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.item-del{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--sub);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .item-del:hover{background:var(--cbg2);color:var(--red)}
 .total-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0 0;border-top:1px solid var(--border);margin-top:4px}
 .total-lbl{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
 .total-val{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
 
+/* FOTOS */
+.foto-wrap{position:relative;width:70px;height:70px}
+.foto-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);cursor:pointer}
+.foto-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px}
+
 /* MODAIS */
 .overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
-.modal{background:var(--white);border-radius:13px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.modal{background:var(--white);border-radius:13px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
 .modal-head{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .mh-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .modal-title{font-family:'Lora',serif;font-size:13.5px;font-weight:700;color:var(--dark);flex:1}
 .modal-x{width:22px;height:22px;border-radius:5px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
-.modal-body{padding:.8rem 1rem}
+.modal-body{padding:.8rem 1rem;display:flex;flex-direction:column;gap:9px}
+.modal-body .field input{height:36px}
 .modal-foot{padding:.7rem 1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:6px}
-.modal-body .field{margin-bottom:9px}.modal-body .field:last-child{margin-bottom:0}
 .btn-sec{height:32px;padding:0 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn-pri{height:32px;padding:0 12px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:background .15s}
+.btn-pri{height:32px;padding:0 12px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
 .btn-pri:hover{background:var(--cd)}
 .btn-warn{height:32px;padding:0 12px;border-radius:7px;border:none;background:var(--amber);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
 
@@ -192,7 +180,6 @@ input::placeholder,textarea::placeholder{text-transform:none}
 .toast.ok{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
 .toast.err{background:var(--cbg2);color:#C94835;border:1px solid rgba(200,72,53,.2)}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
@@ -202,8 +189,8 @@ input::placeholder,textarea::placeholder{text-transform:none}
   <div class="modal">
     <div class="modal-head"><div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-user-plus"></i></div><div class="modal-title">Novo cliente</div><button class="modal-x" onclick="fechaModal('cl')"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
-      <div class="field" style="margin-bottom:9px"><label>Nome completo</label><input type="text" id="ncl-nome" placeholder="Nome do cliente"/></div>
-      <div class="g2" style="gap:8px;margin-bottom:9px">
+      <div class="field"><label>Nome completo</label><input type="text" id="ncl-nome" placeholder="Nome do cliente"/></div>
+      <div class="g2">
         <div class="field"><label>WhatsApp</label><input type="text" id="ncl-tel" placeholder="(47) 99999-9999"/></div>
         <div class="field"><label>CPF/CNPJ <span class="opt">(opcional)</span></label><input type="text" id="ncl-doc" placeholder="000.000.000-00"/></div>
       </div>
@@ -213,7 +200,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
   </div>
 </div>
 
-<!-- MODAL CONFIRMAR TROCA CLIENTE -->
+<!-- MODAL CONFIRMAR TROCA -->
 <div class="overlay" id="ov-troca">
   <div class="modal">
     <div class="modal-head"><div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-alert-triangle"></i></div><div class="modal-title">Alterar cliente?</div></div>
@@ -238,9 +225,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
     <span class="tb-page-num" id="tb-num"></span>
   </div>
   <div class="tb-sep"></div>
-  <div class="tb-mods" id="tb-mods">
-    <div style="color:var(--sub);grid-column:1/-1"><i class="ti ti-loader-2 spin"></i></div>
-  </div>
+  <div class="tb-mods" id="tb-mods"><div style="color:var(--sub);grid-column:1/-1"><i class="ti ti-loader-2 spin"></i></div></div>
   <div class="tb-more-wrap" id="tb-more-wrap" style="display:none">
     <div class="tb-more" onclick="toggleMore(event)"><i class="ti ti-dots"></i></div>
     <div class="tb-more-drop" id="tb-more-drop"></div>
@@ -256,7 +241,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
 <div class="body">
 <div class="content">
 
-  <!-- CLIENTE + STATUS na mesma seção -->
+  <!-- CLIENTE + STATUS -->
   <div class="sec">
     <div class="sec-head"><div class="sec-ico si-cyan"><i class="ti ti-user"></i></div><span class="sec-title">Cliente e Status</span></div>
     <div class="sec-body">
@@ -265,7 +250,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
         <div id="cl-display-wrap" style="display:none;flex:1;min-width:0">
           <div class="cl-display" onclick="iniciarTrocaCliente()">
             <div class="cl-av" id="cl-av">?</div>
-            <div class="cl-info">
+            <div style="flex:1;min-width:0">
               <div class="cl-name" id="cl-display-nome">—</div>
               <div class="cl-sub" id="cl-display-sub"></div>
             </div>
@@ -281,8 +266,8 @@ input::placeholder,textarea::placeholder{text-transform:none}
           </div>
         </div>
         <!-- whats -->
-        <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" title="WhatsApp" style="display:none"><i class="ti ti-brand-whatsapp"></i></a>
-        <!-- status único -->
+        <a class="cl-whats" id="cl-whats-btn" href="#" target="_blank" style="display:none"><i class="ti ti-brand-whatsapp"></i></a>
+        <!-- status -->
         <select id="os-status" class="st-sel">
           <option value="ABERTA">ABERTA</option>
         </select>
@@ -324,35 +309,33 @@ input::placeholder,textarea::placeholder{text-transform:none}
     </div>
   </div>
 
-  <!-- FOTOS (Google Drive) -->
+  <!-- FOTOS -->
   <div class="sec">
-    <div class="sec-head"><div class="sec-ico si-purple"><i class="ti ti-photo"></i></div><span class="sec-title">Fotos</span><span id="fotos-status" style="margin-left:auto;font-size:9.5px;color:var(--sub);font-weight:600"></span></div>
+    <div class="sec-head"><div class="sec-ico si-purple"><i class="ti ti-photo"></i></div><span class="sec-title">Fotos</span><span style="margin-left:auto;font-size:9.5px;color:var(--sub);font-weight:600" id="fotos-status"></span></div>
     <div class="sec-body">
-      <!-- não autenticado -->
-      <div id="fotos-login" style="text-align:center;padding:12px 0">
-        <div style="font-size:12px;color:var(--sub);margin-bottom:10px">Conecte ao Google Drive para fazer upload de fotos</div>
-        <button onclick="gdLogin()" style="height:36px;padding:0 16px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--dark);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s">
-          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <div id="fotos-login" style="text-align:center;padding:8px 0">
+        <div style="font-size:12px;color:var(--sub);margin-bottom:8px">Conecte ao Google Drive para fazer upload de fotos</div>
+        <button onclick="gdLogin()" style="height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--dark);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           Conectar ao Google Drive
         </button>
       </div>
-      <!-- autenticado -->
       <div id="fotos-area" style="display:none">
-        <div id="fotos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
-        <label style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;border:1.5px dashed var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--sub);transition:all .15s" id="fotos-upload-lbl">
+        <div id="fotos-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+        <label style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 11px;border-radius:7px;border:1.5px dashed var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--sub)">
           <i class="ti ti-plus"></i> Adicionar foto
           <input type="file" id="fotos-input" accept="image/*" multiple style="display:none" onchange="gdUpload(this.files)"/>
         </label>
-        <div id="fotos-upload-progress" style="display:none;margin-top:8px;font-size:12px;color:var(--sub)"><i class="ti ti-loader-2 spin"></i> Enviando...</div>
+        <div id="fotos-prog" style="display:none;font-size:12px;color:var(--sub);margin-top:6px"><i class="ti ti-loader-2 spin"></i> Enviando...</div>
       </div>
     </div>
   </div>
 
   <!-- OBSERVAÇÕES -->
   <div class="sec">
-    <div class="sec-head"><div class="sec-ico" style="background:#F0EDE7;color:var(--sub)"><i class="ti ti-notes"></i></div><span class="sec-title">Observações gerais</span></div>
+    <div class="sec-head"><div class="sec-ico" style="background:#F0EDE7;color:var(--sub)"><i class="ti ti-notes"></i></div><span class="sec-title">Observações</span></div>
     <div class="sec-body">
-      <div class="field"><label>Observações internas <span class="opt">(opcional)</span></label><textarea id="os-obs" placeholder="Informações para a equipe..."></textarea></div>
+      <div class="field"><textarea id="os-obs" placeholder="Informações para a equipe..."></textarea></div>
     </div>
   </div>
 
@@ -371,10 +354,10 @@ const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
 let _SALVANDO=false;
 
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
-function fechaModal(id){document.getElementById('ov-'+id)?.classList.remove('open');}
-['cl','troca'].forEach(id=>document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
+function fechaModal(id){document.getElementById('ov-'+id).classList.remove('open');}
+['cl','troca'].forEach(id=>document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
 
-// MÓDULOS
+// ── MÓDULOS ──────────────────────────────────────────
 const MODS=[
   {id:'os',lbl:'OS',ico:'ti-tool',href:'os.html',bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
   {id:'venda',lbl:'Venda',ico:'ti-shopping-cart',href:'venda.html',bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
@@ -393,7 +376,7 @@ async function loadMods(){
   const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
   const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
   document.getElementById('tb-mods').innerHTML=ativos.map(m=>`
-    <a class="tb-ball${m.id==='os'?' active':''}" href="${m.href}" title="${m.lbl}">
+    <a class="tb-ball${m.id==='os'?' active':''}" href="${m.href}">
       <div class="tb-ball-icon" style="background:${m.bg}"><i class="ti ${m.ico}" style="color:${m.c}"></i></div>
       <span class="tb-ball-lbl">${m.lbl}</span>
     </a>`).join('');
@@ -409,17 +392,16 @@ document.addEventListener('click',e=>{
   document.querySelectorAll('.mod-ac-drop').forEach(d=>{if(!e.target.closest('.mod-ac-wrap'))d.classList.remove('open');});
 });
 
-// STATUS
+// ── STATUS ───────────────────────────────────────────
 async function loadStatus(){
   let lista=[];
   try{const{data}=await db.from('status_config').select('nome').eq('modulo','OS').eq('ativo',true).order('ordem');lista=data||[];}catch{}
   if(!lista.length)lista=[{nome:'ABERTA'},{nome:'EM EXECUÇÃO'},{nome:'PASSAR ORÇAMENTO'},{nome:'AGUARDANDO APROVAÇÃO'},{nome:'AGUARDANDO PEÇA'},{nome:'PRONTA'},{nome:'ENTREGUE'},{nome:'CANCELADA'}];
   const cur=document.getElementById('os-status').value||'ABERTA';
-  const opts=lista.map(s=>`<option value="${s.nome}"${s.nome===cur?' selected':''}>${s.nome}</option>`).join('');
-  document.getElementById('os-status').innerHTML=opts;
+  document.getElementById('os-status').innerHTML=lista.map(s=>`<option value="${s.nome}"${s.nome===cur?' selected':''}>${s.nome}</option>`).join('');
 }
 
-// CLIENTE
+// ── CLIENTE ───────────────────────────────────────────
 let CL_CACHE=null,CL_LISTA=[],CL_IDX=-1,CL_TIMER,CL_PENDENTE=null;
 function mostrarCliente(p){
   document.getElementById('cl-id').value=p.id||'';
@@ -429,12 +411,12 @@ function mostrarCliente(p){
   document.getElementById('cl-email-h').value=p.email||'';
   document.getElementById('cl-av').textContent=(p.nome||'?')[0].toUpperCase();
   document.getElementById('cl-display-nome').textContent=(p.nome||'').toUpperCase();
+  document.getElementById('cl-display-sub').textContent=p.celular||'Sem contato';
   const tel=(p.celular||'').replace(/\D/g,'');
-  document.getElementById('cl-display-sub').textContent=[p.celular,p.documento?'Doc: '+p.documento:''].filter(Boolean).join(' · ')||'Sem contato';
   const wa=document.getElementById('cl-whats-btn');
   if(tel.length>=10){wa.href=`https://wa.me/55${tel}`;wa.style.display='flex';}
-  else{wa.style.display='none';}
-  document.getElementById('cl-display-wrap').style.display='block';
+  else wa.style.display='none';
+  document.getElementById('cl-display-wrap').style.display='flex';
   document.getElementById('cl-busca-wrap').style.display='none';
   document.getElementById('cl-drop').classList.remove('open');
 }
@@ -443,7 +425,7 @@ function iniciarTrocaCliente(){
   document.getElementById('cl-busca-wrap').style.display='block';
   const inp=document.getElementById('cl-busca');
   inp.value='';
-  setTimeout(()=>{inp.focus();inp.style.position='relative';inp.style.zIndex='601';},30);
+  setTimeout(()=>inp.focus(),30);
 }
 async function onBuscaCl(){
   const q=document.getElementById('cl-busca').value.trim();
@@ -466,12 +448,7 @@ async function onBuscaCl(){
 function onKeyCl(e){
   const drop=document.getElementById('cl-drop');
   const items=drop.querySelectorAll('.ac-item');
-  if(e.key==='Escape'){
-    document.getElementById('cl-busca').value='';
-    drop.classList.remove('open');CL_IDX=-1;
-    if(document.getElementById('cl-id').value){document.getElementById('cl-display-wrap').style.display='block';document.getElementById('cl-busca-wrap').style.display='none';}
-    return;
-  }
+  if(e.key==='Escape'){document.getElementById('cl-busca').value='';drop.classList.remove('open');CL_IDX=-1;if(document.getElementById('cl-id').value){document.getElementById('cl-display-wrap').style.display='flex';document.getElementById('cl-busca-wrap').style.display='none';}return;}
   if(!items.length)return;
   if(e.key==='ArrowDown'){e.preventDefault();CL_IDX=Math.min(CL_IDX+1,items.length-1);}
   else if(e.key==='ArrowUp'){e.preventDefault();CL_IDX=Math.max(CL_IDX-1,0);}
@@ -483,17 +460,13 @@ function onKeyCl(e){
 function selecionaCl(i){
   const p=CL_LISTA[i];
   const clAtual=document.getElementById('cl-id').value;
-  if(clAtual&&clAtual!==p.id){
-    CL_PENDENTE=p;
-    document.getElementById('troca-de').textContent=document.getElementById('cl-nome-h').value||'cliente atual';
-    document.getElementById('troca-para').textContent=p.nome.toUpperCase();
-    document.getElementById('ov-troca').classList.add('open');
-  } else mostrarCliente(p);
+  if(clAtual&&clAtual!==p.id){CL_PENDENTE=p;document.getElementById('troca-de').textContent=document.getElementById('cl-nome-h').value;document.getElementById('troca-para').textContent=p.nome.toUpperCase();document.getElementById('ov-troca').classList.add('open');}
+  else mostrarCliente(p);
 }
 function confirmarTroca(){fechaModal('troca');if(CL_PENDENTE){mostrarCliente(CL_PENDENTE);CL_PENDENTE=null;}}
 function abrirNovoCliente(){
   document.getElementById('ncl-nome').value=document.getElementById('cl-busca').value.trim().toUpperCase();
-  document.getElementById('ncl-tel').value='';document.getElementById('ncl-doc').value='';document.getElementById('ncl-email').value='';
+  ['ncl-tel','ncl-doc','ncl-email'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('cl-drop').classList.remove('open');
   document.getElementById('ov-cl').classList.add('open');
   setTimeout(()=>document.getElementById('ncl-tel').focus(),60);
@@ -508,9 +481,10 @@ async function salvarNovoCliente(){
   }catch(err){toast('Erro: '+err.message,'err');}
 }
 
-// APARELHOS
+// ── APARELHOS ─────────────────────────────────────────
 let APS=[],TIPOS=[],MARCAS=[],MODELOS_DB=[],CORES=[];
 const MOD_IDX={},MOD_LISTA={};
+
 async function loadOpcoesAp(){
   const safe=async p=>{try{return await p;}catch{return{data:[]};}};
   const[{data:t},{data:m},{data:md},{data:c}]=await Promise.all([
@@ -519,94 +493,93 @@ async function loadOpcoesAp(){
     safe(db.from('os_modelos').select('id,nome,prioritario').eq('ativo',true).order('prioritario',{ascending:false}).order('nome')),
     safe(db.from('os_cores').select('nome').eq('ativo',true).order('nome')),
   ]);
-  TIPOS=(t||[]).length?(t||[]).map(x=>x.nome):['Celular','Notebook','Tablet','Desktop/PC','TV','Smartwatch','Outro'];
-  MARCAS=(m||[]).length?(m||[]):[{id:'apple',nome:'Apple'},{id:'samsung',nome:'Samsung'},{id:'xiaomi',nome:'Xiaomi'},{id:'motorola',nome:'Motorola'},{id:'lenovo',nome:'Lenovo'},{id:'dell',nome:'Dell'},{id:'hp',nome:'HP'},{id:'outro',nome:'Outro'}];
+  TIPOS=(t&&t.length)?t.map(x=>x.nome):['Celular','Notebook','Tablet','Desktop/PC','TV','Smartwatch','Outro'];
+  MARCAS=(m&&m.length)?m:[{id:'apple',nome:'Apple'},{id:'samsung',nome:'Samsung'},{id:'xiaomi',nome:'Xiaomi'},{id:'motorola',nome:'Motorola'},{id:'lenovo',nome:'Lenovo'},{id:'dell',nome:'Dell'},{id:'hp',nome:'HP'},{id:'outro',nome:'Outro'}];
   MODELOS_DB=md||[];
-  CORES=(c||[]).length?(c||[]).map(x=>x.nome):['Preto','Branco','Grafite','Dourado','Prata','Azul','Verde','Vermelho','Rosa','Titânio','Amarelo','Roxo','Laranja','Outra'];
+  CORES=(c&&c.length)?c.map(x=>x.nome):['Preto','Branco','Grafite','Dourado','Prata','Azul','Verde','Vermelho','Rosa','Titânio','Amarelo','Roxo','Laranja','Outra'];
 }
-function addAp(tipo_registro){APS.push({tipo_registro,tipo:'',marca:'',modelo:'',cor:'',imei:'',senha:'',acessorios:'',defeito:'',laudo:'',solucao:'',anydesk_id:''});renderAps();}
+
+function addAp(tipo_registro){
+  APS.push({tipo_registro,tipo:'',marca:'',modelo:'',cor:'',imei:'',senha:'',acessorios:'',defeito:'',laudo:'',solucao:'',anydesk_id:''});
+  renderAps();
+}
 function remAp(i){if(APS.length<=1){toast('Mínimo 1 item.','err');return;}APS.splice(i,1);renderAps();}
-function apV(c,i,v){APS[i][c]=v;}
-function copiarAnydesk(i){const val=document.getElementById('ap-anydesk-'+i)?.value?.replace(/\D/g,'');if(!val){toast('ID AnyDesk vazio.','err');return;}navigator.clipboard.writeText(val).then(()=>toast('ID copiado: '+val)).catch(()=>toast('Não foi possível copiar.','err'));}
+function apV(c,i,v){if(APS[i])APS[i][c]=v;}
+function copiarAnydesk(i){const val=(document.getElementById('ap-anydesk-'+i)?.value||'').replace(/\D/g,'');if(!val){toast('ID AnyDesk vazio.','err');return;}navigator.clipboard.writeText(val).then(()=>toast('ID copiado: '+val)).catch(()=>toast('Não foi possível copiar.','err'));}
 
 function renderAps(){
   document.getElementById('ap-list').innerHTML=APS.map((ap,i)=>{
-    const isChamado=ap.tipo_registro==='chamado_tecnico';
-    if(isChamado) return `<div class="ap-card chamado">
+    if(ap.tipo_registro==='chamado_tecnico') return `<div class="ap-card chamado">
       <div class="ap-head">
         <span class="ap-lbl chamado"><i class="ti ti-headset"></i> Chamado Técnico${APS.length>1?' '+(i+1):''}</span>
         ${APS.length>1?`<button class="btn-rem" onclick="remAp(${i})"><i class="ti ti-x"></i></button>`:''}
       </div>
-      <div class="field" style="margin-bottom:8px"><label>Descrição do chamado</label><input type="text" id="ap-defeito-${i}" value="${ap.defeito}" placeholder="Descreva o problema relatado..." oninput="apV('defeito',${i},this.value)"/></div>
+      <div class="field" style="margin-bottom:8px"><label>Descrição</label><input type="text" id="ap-defeito-${i}" value="${ap.defeito||''}" placeholder="Descreva o problema..." oninput="apV('defeito',${i},this.value)"/></div>
       <div class="anydesk-row">
-        <div class="field"><label>ID AnyDesk <span class="opt">(opcional)</span></label><input type="text" id="ap-anydesk-${i}" value="${ap.anydesk_id}" placeholder="Ex: 123 456 789" oninput="apV('anydesk_id',${i},this.value)"/></div>
-        <button class="btn-copy-ad" onclick="copiarAnydesk(${i})"><i class="ti ti-copy"></i> Copiar ID</button>
+        <div class="field"><label>ID AnyDesk <span class="opt">(opcional)</span></label><input type="text" id="ap-anydesk-${i}" value="${ap.anydesk_id||''}" placeholder="123 456 789" oninput="apV('anydesk_id',${i},this.value)"/></div>
+        <button class="btn-copy-ad" onclick="copiarAnydesk(${i})"><i class="ti ti-copy"></i> Copiar</button>
       </div>
       <div class="g2" style="margin-top:8px">
-        <div class="field"><label>Laudo <span class="opt">(após atendimento)</span></label><textarea id="ap-laudo-${i}" placeholder="O que foi executado..." oninput="apV('laudo',${i},this.value)">${ap.laudo}</textarea></div>
-        <div class="field"><label>Solução <span class="opt">(opcional)</span></label><textarea id="ap-solucao-${i}" placeholder="Resultado obtido..." oninput="apV('solucao',${i},this.value)">${ap.solucao}</textarea></div>
+        <div class="field"><label>Laudo <span class="opt">(após atendimento)</span></label><textarea id="ap-laudo-${i}" oninput="apV('laudo',${i},this.value)">${ap.laudo||''}</textarea></div>
+        <div class="field"><label>Solução</label><textarea id="ap-solucao-${i}" oninput="apV('solucao',${i},this.value)">${ap.solucao||''}</textarea></div>
       </div>
     </div>`;
+
+    // monta datalist options
+    const tipoOpts=TIPOS.map(t=>`<option value="${t.toUpperCase()}"/>`).join('');
+    const marcaOpts=MARCAS.map(m=>`<option value="${m.nome.toUpperCase()}"/>`).join('');
+    const corOpts=CORES.map(c=>`<option value="${c.toUpperCase()}"/>`).join('');
 
     return `<div class="ap-card">
       <div class="ap-head">
         <span class="ap-lbl">${APS.length>1?'Dispositivo '+(i+1):'Dispositivo'}</span>
         ${APS.length>1?`<button class="btn-rem" onclick="remAp(${i})"><i class="ti ti-x"></i></button>`:''}
       </div>
-      <!-- Linha 1: tipo / marca / modelo / cor -->
       <div class="g4" style="margin-bottom:8px">
         <div class="field"><label>Tipo</label>
-          <select id="ap-tipo-${i}" onchange="apV('tipo',${i},this.value)">
-            <option value="">Tipo...</option>
-            ${TIPOS.map(t=>`<option value="${t}"${ap.tipo.toUpperCase()===t.toUpperCase()?' selected':''}>${t}</option>`).join('')}
-          </select>
+          <input type="text" id="ap-tipo-${i}" value="${ap.tipo||''}" list="dl-tipo-${i}" placeholder="Celular..." oninput="apV('tipo',${i},this.value)"/>
+          <datalist id="dl-tipo-${i}">${tipoOpts}</datalist>
         </div>
         <div class="field"><label>Marca</label>
-          <select id="ap-marca-${i}" onchange="apV('marca',${i},this.value);filtMod(${i})">
-            <option value="">Marca...</option>
-            ${MARCAS.map(m=>`<option value="${m.nome}"${ap.marca.toUpperCase()===m.nome.toUpperCase()?' selected':''}>${m.nome}</option>`).join('')}
-          </select>
+          <input type="text" id="ap-marca-${i}" value="${ap.marca||''}" list="dl-marca-${i}" placeholder="Apple..." oninput="apV('marca',${i},this.value);filtMod(${i})"/>
+          <datalist id="dl-marca-${i}">${marcaOpts}</datalist>
         </div>
         <div class="field"><label>Modelo</label>
           <div class="mod-ac-wrap">
-            <input type="text" id="ap-modelo-${i}" value="${ap.modelo}" placeholder="Ex: iPhone 15 Pro..." autocomplete="off" oninput="onMod(${i})" onkeydown="onKeyMod(${i},event)"/>
+            <input type="text" id="ap-modelo-${i}" value="${ap.modelo||''}" placeholder="iPhone 15 Pro..." autocomplete="off" oninput="onMod(${i})" onkeydown="onKeyMod(${i},event)"/>
             <div class="mod-ac-drop" id="mod-drop-${i}"></div>
           </div>
         </div>
         <div class="field"><label>Cor</label>
-          <select id="ap-cor-${i}" onchange="apV('cor',${i},this.value)">
-            <option value="">Cor...</option>
-            ${CORES.map(c=>`<option value="${c}"${ap.cor.toUpperCase()===c.toUpperCase()?' selected':''}>${c}</option>`).join('')}
-          </select>
+          <input type="text" id="ap-cor-${i}" value="${ap.cor||''}" list="dl-cor-${i}" placeholder="Preto..." oninput="apV('cor',${i},this.value)"/>
+          <datalist id="dl-cor-${i}">${corOpts}</datalist>
         </div>
       </div>
-      <!-- Linha 2: IMEI / senha / acessórios -->
-      <div class="row" style="gap:8px;margin-bottom:8px">
-        <div class="field" style="flex:1"><label>IMEI / Nº série <span class="opt">(opcional)</span></label><input type="text" id="ap-imei-${i}" value="${ap.imei}" placeholder="000000000000000" oninput="apV('imei',${i},this.value)"/></div>
-        <div class="field" style="flex:0 0 120px"><label>Senha <span class="opt">(opcional)</span></label><input type="text" id="ap-senha-${i}" value="${ap.senha}" placeholder="0000" oninput="apV('senha',${i},this.value)"/></div>
-        <div class="field" style="flex:2"><label>Acessórios entregues <span class="opt">(opcional)</span></label><input type="text" id="ap-acess-${i}" value="${ap.acessorios}" placeholder="Carregador, capinha, caixa..." oninput="apV('acessorios',${i},this.value)"/></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div class="field" style="flex:1"><label>IMEI / Nº série <span class="opt">(opcional)</span></label><input type="text" id="ap-imei-${i}" value="${ap.imei||''}" placeholder="000000000000000" oninput="apV('imei',${i},this.value)"/></div>
+        <div class="field" style="flex:0 0 100px"><label>Senha <span class="opt">(opcional)</span></label><input type="text" id="ap-senha-${i}" value="${ap.senha||''}" placeholder="0000" oninput="apV('senha',${i},this.value)"/></div>
+        <div class="field" style="flex:2"><label>Acessórios <span class="opt">(opcional)</span></label><input type="text" id="ap-acess-${i}" value="${ap.acessorios||''}" placeholder="Carregador, capinha..." oninput="apV('acessorios',${i},this.value)"/></div>
       </div>
-      <!-- Linha 3: defeito (largura toda) -->
-      <div class="field" style="margin-bottom:8px"><label>Defeito relatado</label><textarea id="ap-defeito-${i}" placeholder="O que o cliente descreveu..." oninput="apV('defeito',${i},this.value)">${ap.defeito}</textarea></div>
-      <!-- Linha 4: laudo + solução lado a lado -->
+      <div class="field" style="margin-bottom:8px"><label>Defeito relatado</label><textarea id="ap-defeito-${i}" oninput="apV('defeito',${i},this.value)">${ap.defeito||''}</textarea></div>
       <div class="g2">
-        <div class="field"><label>Laudo técnico <span class="opt">(após diagnóstico)</span></label><textarea id="ap-laudo-${i}" placeholder="O que foi encontrado..." oninput="apV('laudo',${i},this.value)">${ap.laudo}</textarea></div>
-        <div class="field"><label>Solução aplicada <span class="opt">(após reparo)</span></label><textarea id="ap-solucao-${i}" placeholder="O que foi feito..." oninput="apV('solucao',${i},this.value)">${ap.solucao}</textarea></div>
+        <div class="field"><label>Laudo técnico <span class="opt">(após diagnóstico)</span></label><textarea id="ap-laudo-${i}" oninput="apV('laudo',${i},this.value)">${ap.laudo||''}</textarea></div>
+        <div class="field"><label>Solução aplicada <span class="opt">(após reparo)</span></label><textarea id="ap-solucao-${i}" oninput="apV('solucao',${i},this.value)">${ap.solucao||''}</textarea></div>
       </div>
     </div>`;
   }).join('');
   document.getElementById('btn-add-ap').style.display=APS.length>=4?'none':'flex';
 }
 
+// modelo autocomplete
 function filtMod(i){
   MOD_IDX[i]=-1;
   const q=(document.getElementById('ap-modelo-'+i)?.value||'').trim().toUpperCase();
   const drop=document.getElementById('mod-drop-'+i);
-  if(!q){drop?.classList.remove('open');return;}
+  if(!q||!drop){drop&&drop.classList.remove('open');return;}
   const iphones=MODELOS_DB.filter(m=>m.nome.toUpperCase().includes('IPHONE')&&m.nome.toUpperCase().includes(q));
   const outros=MODELOS_DB.filter(m=>!m.nome.toUpperCase().includes('IPHONE')&&m.nome.toUpperCase().includes(q));
   MOD_LISTA[i]=[...iphones,...outros].slice(0,10);
-  if(!MOD_LISTA[i].length){drop?.classList.remove('open');return;}
+  if(!MOD_LISTA[i].length){drop.classList.remove('open');return;}
   drop.innerHTML=MOD_LISTA[i].map((m,idx)=>`
     <div class="mod-ac-item" onmousedown="selMod(${i},${idx})">
       <span class="mac-tag ${m.nome.toUpperCase().includes('IPHONE')?'mac-iphone':'mac-other'}">${m.nome.toUpperCase().includes('IPHONE')?'iPhone':'◦'}</span>
@@ -628,7 +601,7 @@ function onKeyMod(i,e){
 }
 function selMod(i,idx){const m=MOD_LISTA[i][idx];document.getElementById('ap-modelo-'+i).value=m.nome.toUpperCase();apV('modelo',i,m.nome);document.getElementById('mod-drop-'+i).classList.remove('open');}
 
-// PRODUTOS E SERVIÇOS
+// ── PRODUTOS E SERVIÇOS ──────────────────────────────
 let ITENS=[],PRODS_CACHE=null,SRVS_CACHE=null,ITEM_LISTA=[],ITEM_IDX=-1,ITEM_TIMER;
 function calcTotal(){document.getElementById('total-val').textContent=fmt(ITENS.reduce((s,it)=>s+(it.preco*it.qty),0));}
 function renderItens(){
@@ -637,7 +610,7 @@ function renderItens(){
   list.innerHTML=ITENS.map((it,i)=>`
     <div class="item-row">
       <div class="item-desc"><div class="item-nome">${it.nome.toUpperCase()}</div><div class="item-sub">${it.tipo==='srv'?'Serviço':'Produto'} · ${fmt(it.preco)} un.</div></div>
-      <input type="number" class="item-qty" value="${it.qty}" min="1" onchange="ITENS[${i}].qty=+this.value||1;calcTotal()" title="Qtd"/>
+      <input type="number" class="item-qty" value="${it.qty}" min="1" onchange="ITENS[${i}].qty=+this.value||1;calcTotal()"/>
       <div class="item-price">${fmt(it.preco*it.qty)}</div>
       <button class="item-del" onclick="ITENS.splice(${i},1);renderItens();calcTotal()"><i class="ti ti-x"></i></button>
     </div>`).join('');
@@ -648,22 +621,14 @@ async function onBuscaItem(){
   clearTimeout(ITEM_TIMER);ITEM_IDX=-1;
   if(q.length<2){drop.classList.remove('open');return;}
   ITEM_TIMER=setTimeout(async()=>{
-    // carrega serviços (tabela servicos com campo valor ou valor_padrao)
-    if(!SRVS_CACHE){
-      try{
-        const{data}=await db.from('servicos').select('id,nome,valor,valor_padrao').eq('ativo',true).order('nome');
-        SRVS_CACHE=(data||[]).map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||0)}));
-      }catch{SRVS_CACHE=[];}
-    }
-    if(!PRODS_CACHE){
-      try{const{data}=await db.from('produtos').select('id,nome,valor_venda,estoque_atual').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}
-    }
+    if(!SRVS_CACHE){try{const{data}=await db.from('servicos').select('id,nome,valor,valor_padrao').eq('ativo',true).order('nome');SRVS_CACHE=(data||[]).map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||0)}));}catch{SRVS_CACHE=[];}}
+    if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
     const srvs=(SRVS_CACHE||[]).filter(s=>(s.nome||'').toUpperCase().includes(q)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
     const prods=(PRODS_CACHE||[]).filter(p=>(p.nome||'').toUpperCase().includes(q)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
     ITEM_LISTA=[...srvs,...prods].slice(0,12);
     if(!ITEM_LISTA.length){drop.innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Sem resultados</div>';drop.classList.add('open');return;}
     drop.innerHTML=ITEM_LISTA.map((it,idx)=>`
-      <div class="item-add-opt${idx===ITEM_IDX?' foc':''}" data-idx="${idx}" onmousedown="addItem(${idx})">
+      <div class="item-add-opt${idx===ITEM_IDX?' foc':''}" onmousedown="addItem(${idx})">
         <span class="aio-tag ${it.tipo==='srv'?'aio-srv':'aio-prd'}">${it.tipo==='srv'?'Serv':'Prod'}</span>
         <span style="flex:1;text-transform:uppercase">${it.nome}</span>
         <span style="font-size:11px;color:var(--sub);font-weight:700">${fmt(it.preco)}</span>
@@ -691,7 +656,58 @@ function addItem(idx){
   ITEM_IDX=-1;
 }
 
-// LOAD OS
+// ── GOOGLE DRIVE ─────────────────────────────────────
+const GD_CLIENT_ID='682830430062-nrc3lp468a1cms3300fdc175bjm9cntj.apps.googleusercontent.com';
+const GD_SCOPE='https://www.googleapis.com/auth/drive.file';
+let GD_TOKEN=null,GD_FOLDER_ID=null,GD_FOTOS=[];
+let _gdClient=null;
+function gdLogin(){
+  if(!_gdClient){_gdClient=google.accounts.oauth2.initTokenClient({client_id:GD_CLIENT_ID,scope:GD_SCOPE,callback:async(resp)=>{if(resp.error){toast('Erro Google.','err');return;}GD_TOKEN=resp.access_token;sessionStorage.setItem('gd_token',GD_TOKEN);await gdInit();}});}
+  _gdClient.requestAccessToken({prompt:'select_account'});
+}
+async function gdInit(){
+  if(!GD_TOKEN)return;
+  document.getElementById('fotos-login').style.display='none';
+  document.getElementById('fotos-area').style.display='block';
+  document.getElementById('fotos-status').textContent='Drive conectado';
+  document.getElementById('fotos-status').style.color='var(--green)';
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name='Dottec_Fotos_OS'+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id)`,{headers:{Authorization:'Bearer '+GD_TOKEN}}).then(r=>r.json());
+    if(r.files?.length){GD_FOLDER_ID=r.files[0].id;}
+    else{const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({name:'Dottec_Fotos_OS',mimeType:'application/vnd.google-apps.folder'})}).then(r=>r.json());GD_FOLDER_ID=cr.id;}
+  }catch{}
+}
+async function gdUpload(files){
+  if(!GD_TOKEN||!files.length)return;
+  document.getElementById('fotos-prog').style.display='block';
+  for(const file of files){
+    try{
+      const meta={name:`OS_${OS_ID||'nova'}_${Date.now()}_${file.name}`,parents:[GD_FOLDER_ID]};
+      const form=new FormData();form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));form.append('file',file);
+      const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN},body:form}).then(r=>r.json());
+      await fetch(`https://www.googleapis.com/drive/v3/files/${res.id}/permissions`,{method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({role:'reader',type:'anyone'})});
+      GD_FOTOS.push({id:res.id,url:res.webViewLink,thumb:`https://drive.google.com/thumbnail?id=${res.id}&sz=w200`});
+      renderFotos();
+    }catch(e){toast('Erro upload: '+e.message,'err');}
+  }
+  document.getElementById('fotos-prog').style.display='none';
+  document.getElementById('fotos-input').value='';
+}
+function renderFotos(){
+  document.getElementById('fotos-grid').innerHTML=GD_FOTOS.map((f,i)=>`
+    <div class="foto-wrap">
+      <img class="foto-thumb" src="${f.thumb}" onclick="window.open('${f.url}')" title="Ver no Drive"/>
+      <button class="foto-del" onclick="delFoto(${i})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+async function delFoto(i){
+  try{await fetch(`https://www.googleapis.com/drive/v3/files/${GD_FOTOS[i].id}`,{method:'DELETE',headers:{Authorization:'Bearer '+GD_TOKEN}});}catch{}
+  GD_FOTOS.splice(i,1);renderFotos();
+}
+async function gdCarregarFotos(fotosJson){if(!fotosJson||!fotosJson.length)return;GD_FOTOS=fotosJson;renderFotos();}
+function gdCheckToken(){const t=sessionStorage.getItem('gd_token');if(t){GD_TOKEN=t;gdInit();}}
+
+// ── LOAD OS ──────────────────────────────────────────
 async function loadOS(){
   if(!OS_ID){addAp('dispositivo');return;}
   document.getElementById('tb-title').textContent='Editar OS';
@@ -700,52 +716,54 @@ async function loadOS(){
     const{data,error}=await db.from('ordens_servico').select('*').eq('id',OS_ID).single();
     if(error||!data){toast('OS não encontrada.','err');return;}
     document.getElementById('tb-num').textContent='· '+String(data.numero).padStart(4,'0');
-    if(data.cliente_nome){
-      mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome||'',celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
-    }
-    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,100);};
+    if(data.cliente_nome)mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome,celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
+    // status — aguarda options carregadas
+    const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,80);};
     setStDelay();
     document.getElementById('os-obs').value=data.observacoes||'';
     // aparelhos
     let aps=null;
-    try{const{data:_aps}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_aps;}catch{}
+    try{const{data:_a}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_a;}catch{}
     if(aps&&aps.length){
       APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
     } else {
-      APS=[{tipo_registro:'dispositivo',tipo:'',marca:'',modelo:data.aparelho||'',cor:'',imei:data.numero_serie||'',senha:data.senha||'',acessorios:data.acessorios||'',defeito:data.defeito||'',laudo:data.laudo||'',solucao:data.solucao||'',anydesk_id:''}];
+      // legado: tenta separar marca do modelo
+      const _ap=(data.aparelho||'').trim();
+      const _mk=MARCAS.find(m=>_ap.toUpperCase().startsWith(m.nome.toUpperCase()));
+      const _md=_mk?_ap.slice(_mk.nome.length).trim():_ap;
+      APS=[{tipo_registro:'dispositivo',tipo:'',marca:_mk?_mk.nome:'',modelo:_md,cor:'',imei:data.numero_serie||'',senha:data.senha||'',acessorios:data.acessorios||'',defeito:data.defeito||'',laudo:data.laudo||'',solucao:data.solucao||'',anydesk_id:''}];
     }
     renderAps();
     // itens
     try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1}));renderItens();calcTotal();}}catch{}
-    // fotos: carrega do primeiro aparelho
-    if(aps&&aps.length&&aps[0].fotos) gdCarregarFotos(aps[0].fotos);
+    // fotos
+    if(aps&&aps.length&&aps[0].fotos)gdCarregarFotos(aps[0].fotos);
   }catch(err){toast('Erro ao carregar: '+err.message,'err');}
 }
 
-// SALVAR
+// ── SALVAR ───────────────────────────────────────────
 async function salvar(){
   if(_SALVANDO)return;
   const nome=document.getElementById('cl-nome-h').value.trim();
   if(!nome){toast('Informe o cliente.','err');document.getElementById('cl-busca').focus();return;}
-  // captura valores dos inputs dos aparelhos
+  // sincroniza APS com os inputs atuais
   APS.forEach((ap,i)=>{
     if(ap.tipo_registro==='dispositivo'){
-      ap.tipo=document.getElementById('ap-tipo-'+i)?.value||'';
-      ap.marca=document.getElementById('ap-marca-'+i)?.value||'';
-      ap.modelo=document.getElementById('ap-modelo-'+i)?.value||'';
-      ap.cor=document.getElementById('ap-cor-'+i)?.value||'';
-      ap.imei=document.getElementById('ap-imei-'+i)?.value||'';
-      ap.senha=document.getElementById('ap-senha-'+i)?.value||'';
-      ap.acessorios=document.getElementById('ap-acess-'+i)?.value||'';
+      ap.tipo=(document.getElementById('ap-tipo-'+i)?.value||'').trim();
+      ap.marca=(document.getElementById('ap-marca-'+i)?.value||'').trim();
+      ap.modelo=(document.getElementById('ap-modelo-'+i)?.value||'').trim();
+      ap.cor=(document.getElementById('ap-cor-'+i)?.value||'').trim();
+      ap.imei=(document.getElementById('ap-imei-'+i)?.value||'').trim();
+      ap.senha=(document.getElementById('ap-senha-'+i)?.value||'').trim();
+      ap.acessorios=(document.getElementById('ap-acess-'+i)?.value||'').trim();
     }
-    ap.defeito=document.getElementById('ap-defeito-'+i)?.value||'';
-    ap.laudo=document.getElementById('ap-laudo-'+i)?.value||'';
-    ap.solucao=document.getElementById('ap-solucao-'+i)?.value||'';
-    if(ap.tipo_registro==='chamado_tecnico') ap.anydesk_id=document.getElementById('ap-anydesk-'+i)?.value||'';
+    ap.defeito=(document.getElementById('ap-defeito-'+i)?.value||'').trim();
+    ap.laudo=(document.getElementById('ap-laudo-'+i)?.value||'').trim();
+    ap.solucao=(document.getElementById('ap-solucao-'+i)?.value||'').trim();
+    if(ap.tipo_registro==='chamado_tecnico')ap.anydesk_id=(document.getElementById('ap-anydesk-'+i)?.value||'').trim();
   });
   _SALVANDO=true;
-  const btn=document.getElementById('btn-save');
-  btn.disabled=true;document.getElementById('btn-txt').textContent='Salvando...';
+  const btn=document.getElementById('btn-save');btn.disabled=true;document.getElementById('btn-txt').textContent='Salvando...';
   try{
     let pessoaId=document.getElementById('cl-id').value||null;
     if(!pessoaId){
@@ -775,30 +793,27 @@ async function salvar(){
     let osId=OS_ID;
     if(OS_ID){const{error}=await db.from('ordens_servico').update(payload).eq('id',OS_ID);if(error)throw new Error(error.message);}
     else{const{data:nova,error}=await db.from('ordens_servico').insert(payload).select('id').single();if(error)throw new Error(error.message);osId=nova.id;}
-    // aparelhos — salva todos de uma vez
+    // aparelhos
     try{
       await db.from('os_aparelhos').delete().eq('os_id',osId);
-      if(APS.length){
-        await db.from('os_aparelhos').insert(APS.map((a,apIdx)=>({
-          os_id:osId,ordem:apIdx+1,tipo_registro:a.tipo_registro||'dispositivo',
-          tipo:(a.tipo||'').toUpperCase()||null,marca:(a.marca||'').toUpperCase()||null,
-          modelo:(a.modelo||'').toUpperCase()||null,cor:(a.cor||'').toUpperCase()||null,
-          imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,fotos:apIdx===0?GD_FOTOS:[],
-          defeito:(a.defeito||'').toUpperCase()||null,laudo:(a.laudo||'').toUpperCase()||null,
-          solucao:(a.solucao||'').toUpperCase()||null,anydesk_id:a.anydesk_id||null,
-        })));
-      }
+      if(APS.length)await db.from('os_aparelhos').insert(APS.map((a,apIdx)=>({
+        os_id:osId,ordem:apIdx+1,tipo_registro:a.tipo_registro||'dispositivo',
+        tipo:(a.tipo||'').toUpperCase()||null,marca:(a.marca||'').toUpperCase()||null,
+        modelo:(a.modelo||'').toUpperCase()||null,cor:(a.cor||'').toUpperCase()||null,
+        imei:a.imei||null,senha:a.senha||null,acessorios:(a.acessorios||'').toUpperCase()||null,
+        defeito:(a.defeito||'').toUpperCase()||null,laudo:(a.laudo||'').toUpperCase()||null,
+        solucao:(a.solucao||'').toUpperCase()||null,anydesk_id:a.anydesk_id||null,
+        fotos:apIdx===0?GD_FOTOS:[],
+      })));
     }catch(e){console.warn('aparelhos:',e);}
     // itens
     try{
       await db.from('os_servicos').delete().eq('os_id',osId);
-      if(ITENS.length){
-        await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty})));
-      }
+      if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty})));
     }catch(e){console.warn('itens:',e);}
-    // histórico só na criação
     if(!OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
     toast(OS_ID?'OS atualizada!':'OS criada!');
+    _SALVANDO=false;
     setTimeout(()=>location.href='os.html',800);
   }catch(err){
     toast('Erro: '+err.message,'err');
@@ -807,113 +822,7 @@ async function salvar(){
   }
 }
 
-
-// ── GOOGLE DRIVE FOTOS ───────────────────────────────
-const GD_CLIENT_ID='682830430062-nrc3lp468a1cms3300fdc175bjm9cntj.apps.googleusercontent.com';
-const GD_SCOPE='https://www.googleapis.com/auth/drive.file';
-const GD_FOLDER_NAME='Dottec_Fotos_OS';
-let GD_TOKEN=null, GD_FOLDER_ID=null, GD_FOTOS=[];
-
-// cliente OAuth criado uma vez
-let _gdClient=null;
-function gdLogin(){
-  if(!_gdClient){
-    _gdClient=google.accounts.oauth2.initTokenClient({
-      client_id:GD_CLIENT_ID,
-      scope:GD_SCOPE,
-      callback:async(resp)=>{
-        if(resp.error){toast('Erro ao conectar ao Google.','err');return;}
-        GD_TOKEN=resp.access_token;
-        sessionStorage.setItem('gd_token',GD_TOKEN);
-        await gdInit();
-      }
-    });
-  }
-  // requestAccessToken DEVE ser chamado diretamente no click — sem await antes
-  _gdClient.requestAccessToken({prompt:'select_account'});
-}
-
-async function gdInit(){
-  if(!GD_TOKEN)return;
-  document.getElementById('fotos-login').style.display='none';
-  document.getElementById('fotos-area').style.display='block';
-  document.getElementById('fotos-status').textContent='Drive conectado';
-  document.getElementById('fotos-status').style.color='var(--green)';
-  // garante pasta
-  GD_FOLDER_ID=await gdGetOrCreateFolder();
-}
-
-async function gdGetOrCreateFolder(){
-  const search=await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=name='${GD_FOLDER_NAME}'+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&fields=files(id)`,
-    {headers:{Authorization:'Bearer '+GD_TOKEN}}
-  ).then(r=>r.json());
-  if(search.files?.length) return search.files[0].id;
-  const created=await fetch('https://www.googleapis.com/drive/v3/files',{
-    method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},
-    body:JSON.stringify({name:GD_FOLDER_NAME,mimeType:'application/vnd.google-apps.folder'})
-  }).then(r=>r.json());
-  return created.id;
-}
-
-async function gdUpload(files){
-  if(!GD_TOKEN||!files.length) return;
-  const prog=document.getElementById('fotos-upload-progress');
-  prog.style.display='block';
-  for(const file of files){
-    try{
-      const meta={name:`OS_${OS_ID||'nova'}_${Date.now()}_${file.name}`,parents:[GD_FOLDER_ID]};
-      const form=new FormData();
-      form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
-      form.append('file',file);
-      const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,thumbnailLink',{
-        method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN},body:form
-      }).then(r=>r.json());
-      // torna público (compartilha como link)
-      await fetch(`https://www.googleapis.com/drive/v3/files/${res.id}/permissions`,{
-        method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},
-        body:JSON.stringify({role:'reader',type:'anyone'})
-      });
-      const thumb=`https://drive.google.com/thumbnail?id=${res.id}&sz=w200`;
-      GD_FOTOS.push({id:res.id,url:res.webViewLink,thumb});
-      renderFotos();
-    }catch(e){toast('Erro no upload: '+e.message,'err');}
-  }
-  prog.style.display='none';
-  document.getElementById('fotos-input').value='';
-}
-
-function renderFotos(){
-  const grid=document.getElementById('fotos-grid');
-  grid.innerHTML=GD_FOTOS.map((f,i)=>`
-    <div class="foto-wrap">
-      <img class="foto-thumb" src="${f.thumb}" onclick="window.open('${f.url}')" title="Ver no Drive"/>
-      <button class="foto-del" onclick="delFoto(${i})"><i class="ti ti-x"></i></button>
-    </div>`).join('');
-}
-
-async function delFoto(i){
-  const f=GD_FOTOS[i];
-  try{
-    await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}`,{method:'DELETE',headers:{Authorization:'Bearer '+GD_TOKEN}});
-    GD_FOTOS.splice(i,1);renderFotos();
-  }catch{GD_FOTOS.splice(i,1);renderFotos();}
-}
-
-// ao carregar OS existente, carrega fotos salvas
-async function gdCarregarFotos(fotosJson){
-  if(!fotosJson||!fotosJson.length) return;
-  GD_FOTOS=fotosJson;
-  renderFotos();
-}
-
-// verifica token salvo
-function gdCheckToken(){
-  const t=sessionStorage.getItem('gd_token');
-  if(t){GD_TOKEN=t;gdInit();}
-}
-
-// INIT
+// ── INIT ─────────────────────────────────────────────
 gdCheckToken();
 Promise.all([loadMods(),loadStatus(),loadOpcoesAp()]).then(()=>loadOS());
 </script>
