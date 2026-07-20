@@ -436,12 +436,16 @@ async function onBuscaCl(){
     if(!CL_CACHE){try{const{data}=await db.from('pessoas').select('id,nome,celular,documento,tipo_doc,email').eq('ativo',true).eq('is_cliente',true).order('nome').limit(300);CL_CACHE=data||[];}catch{CL_CACHE=[];}}
     const t=q.toUpperCase();
     CL_LISTA=CL_CACHE.filter(p=>p.nome.toUpperCase().includes(t)||(p.celular||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))).slice(0,8);
+    if(!CL_LISTA.length){
+      drop.innerHTML=`<div class="ac-novo" onmousedown="abrirNovoCliente()" style="background:var(--cbg);padding:12px 14px"><i class="ti ti-user-plus"></i> Cadastrar <strong>${q}</strong> como novo cliente</div>`;
+      drop.classList.add('open');return;
+    }
     drop.innerHTML=CL_LISTA.map((p,i)=>`
       <div class="ac-item" data-i="${i}" onmousedown="selecionaCl(${i})">
         <div class="ac-name">${p.nome.toUpperCase()}</div>
         <div class="ac-info"><span>${p.celular||''}</span>${p.documento?`<span>${p.tipo_doc||'Doc'}: ${p.documento}</span>`:''}</div>
       </div>`).join('')+
-      `<div class="ac-novo" onmousedown="abrirNovoCliente()"><i class="ti ti-user-plus"></i> Cadastrar novo cliente</div>`;
+      `<div class="ac-novo" onmousedown="abrirNovoCliente()" style="background:var(--cbg)"><i class="ti ti-user-plus"></i> Cadastrar "<strong>${q}</strong>" como novo cliente</div>`;
     drop.classList.add('open');
   },200);
 }
@@ -709,7 +713,7 @@ function gdCheckToken(){const t=sessionStorage.getItem('gd_token');if(t){GD_TOKE
 
 // ── LOAD OS ──────────────────────────────────────────
 async function loadOS(){
-  if(!OS_ID){addAp('dispositivo');return;}
+  if(!OS_ID){addAp('dispositivo');setTimeout(()=>document.getElementById('cl-busca').focus(),300);return;}
   document.getElementById('tb-title').textContent='Editar OS';
   document.getElementById('btn-txt').textContent='Salvar';
   try{
