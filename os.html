@@ -373,12 +373,15 @@ async function load(){
   const[{data:os},{data:sc},{data:aps}]=await Promise.all([
     db.from('ordens_servico').select('id,numero,cliente_nome,cliente_celular,cliente_doc,cliente_email,pessoa_id,aparelho,defeito,status,criado_em').order('criado_em',{ascending:false}).limit(300),
     db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('ativo',true).order('ordem'),
-    safe(db.from('os_aparelhos').select('os_id,modelo,cor,marca').eq('ordem',1)),
+    safe(db.from('os_aparelhos').select('os_id,modelo,cor,marca,ordem').order('ordem')),
   ]);
   TODOS=os||[]; STATUS_CFG=sc||[];
   // mapa aparelho por os_id (primeiro aparelho)
   const AP_MAP={};
-  (aps||[]).forEach(a=>{AP_MAP[a.os_id]=a;});
+  // pega só o primeiro aparelho de cada OS (menor ordem)
+  (aps||[]).forEach(a=>{
+    if(!AP_MAP[a.os_id]||a.ordem<AP_MAP[a.os_id].ordem) AP_MAP[a.os_id]=a;
+  });
   // enriquece TODOS com dados do primeiro aparelho
   TODOS.forEach(o=>{
     const ap=AP_MAP[o.id];
@@ -431,7 +434,10 @@ function render(){
   const isAdmin=USR.perfil==='ADMIN';
   document.getElementById('tbody').innerHTML=lista.map(o=>{
     // dispositivo: usa dado do os_aparelhos se existir, senão campo legado
-    const device=o._modelo?[o._marca,o._modelo].filter(Boolean).join(' '):(o.aparelho||'—');
+    // monta dispositivo: prefere dados do os_aparelhos, fallback no campo legado
+    const device=o._modelo
+      ? [o._marca,o._modelo].filter(Boolean).join(' ')
+      : (o.aparelho||'—');
     const corUp=(o._cor||'').toUpperCase();
     const hex=COR_HEX[corUp]||null;
     const corHtml=o._cor?`<div class="td-cor">${hex?`<span class="cor-dot" style="background:${hex}"></span>`:''}<span>${o._cor}</span></div>`:'';
