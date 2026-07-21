@@ -809,13 +809,12 @@ function renderAps(){
       </div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <div class="field" style="flex:1"><label>IMEI / Nº série <span class="opt">(opcional)</span></label><input type="text" id="ap-imei-${i}" value="${ap.imei||''}" placeholder="000000000000000" oninput="apV('imei',${i},this.value)"/></div>
-        <div class="field" style="flex:0 0 100px" id="ap-senha-wrap-${i}">
-          <label style="display:flex;align-items:center;justify-content:space-between">
-            Senha <span class="opt">(opcional)</span>
-            <span id="ap-pattern-btn-${i}" style="font-size:9px;color:var(--cd);cursor:pointer;font-weight:700;display:none" onclick="togglePatternMode(${i})">🔳 PADRÃO</span>
-          </label>
-          <input type="text" id="ap-senha-${i}" value="${ap.senha||''}" placeholder="0000" oninput="apV('senha',${i},this.value)"/>
-
+        <div class="field" style="flex:0 0 140px">
+          <label>Senha <span class="opt">(opcional)</span></label>
+          <div style="display:flex;gap:4px">
+            <input type="text" id="ap-senha-${i}" value="${ap.senha||''}" placeholder="0000" oninput="apV('senha',${i},this.value)" style="flex:1;min-width:0"/>
+            <button type="button" id="ap-pattern-btn-${i}" onclick="togglePatternMode(${i})" title="Padrão de desbloqueio Android" style="display:none;width:36px;height:36px;flex-shrink:0;border:1.5px solid var(--cyan);border-radius:7px;background:var(--cbg);cursor:pointer;font-size:18px;color:var(--cd);line-height:1">⠿</button>
+          </div>
         </div>
         <div class="field" style="flex:2"><label>Acessórios <span class="opt">(opcional)</span></label><input type="text" id="ap-acess-${i}" value="${ap.acessorios||''}" placeholder="Carregador, capinha..." oninput="apV('acessorios',${i},this.value)"/></div>
       </div>
@@ -874,7 +873,7 @@ function selMod(i,idx){const m=MOD_LISTA[i][idx];document.getElementById('ap-mod
 // ── PRODUTOS E SERVIÇOS ──────────────────────────────
 let ITENS=[],PRODS_CACHE=null,SRVS_CACHE=null,ITEM_LISTA=[],ITEM_IDX=-1,ITEM_TIMER;
 function calcTotal(){
-  const sub=ITENS.reduce((s,it)=>s+(it.preco*it.qty),0);
+  const sub=ITENS.reduce((s,it)=>Math.max(0,(it.preco*it.qty)-(it.desconto||0)),0);
   const desc=parseFloat(document.getElementById('os-desconto')?.value||0)||0;
   const total=Math.max(0,sub-desc);
   document.getElementById('total-val').textContent=fmt(total);
@@ -882,13 +881,26 @@ function calcTotal(){
 function renderItens(){
   const list=document.getElementById('itens-list');
   if(!ITENS.length){list.innerHTML='';return;}
-  list.innerHTML=ITENS.map((it,i)=>`
-    <div class="item-row">
-      <div class="item-desc"><div class="item-nome">${it.nome.toUpperCase()}</div><div class="item-sub">${it.tipo==='srv'?'Serviço':'Produto'} · ${fmt(it.preco)} un.</div></div>
-      <input type="number" class="item-qty" value="${it.qty}" min="1" onchange="ITENS[${i}].qty=+this.value||1;calcTotal()"/>
-      <div class="item-price">${fmt(it.preco*it.qty)}</div>
+  list.innerHTML=ITENS.map((it,i)=>{
+    const sub=it.preco*it.qty;
+    const desc=it.desconto||0;
+    const total=Math.max(0,sub-desc);
+    return`<div class="item-row">
+      <div class="item-desc">
+        <div class="item-nome">${it.nome.toUpperCase()}</div>
+        <div class="item-sub">${it.tipo==='srv'?'Serviço':'Produto'} · ${fmt(it.preco)} un.</div>
+      </div>
+      <input type="number" class="item-qty" value="${it.qty}" min="1" title="Qtd" onchange="ITENS[${i}].qty=+this.value||1;calcTotal();renderItens()"/>
+      <div style="display:flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:0 5px;height:28px">
+        <span style="font-size:10px;color:var(--sub)">-R$</span>
+        <input type="number" min="0" step="0.01" value="${desc||''}" placeholder="0" title="Desconto"
+          onchange="ITENS[${i}].desconto=+this.value||0;calcTotal();renderItens()"
+          style="width:46px;border:none;background:transparent;font-size:11.5px;color:var(--dark);outline:none;text-transform:none"/>
+      </div>
+      <div class="item-price">${fmt(total)}</div>
       <button class="item-del" onclick="ITENS.splice(${i},1);renderItens();calcTotal()"><i class="ti ti-x"></i></button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 async function onBuscaItem(){
   const q=document.getElementById('item-busca').value.trim().toUpperCase();
@@ -925,7 +937,7 @@ function onKeyItem(e){
 }
 function addItem(idx){
   const it=ITEM_LISTA[idx];
-  ITENS.push({id:it.id,nome:it.nome,tipo:it.tipo,preco:it.preco,qty:1});
+  ITENS.push({id:it.id,nome:it.nome,tipo:it.tipo,preco:it.preco,qty:1,desconto:0});
   renderItens();calcTotal();
   document.getElementById('item-busca').value='';
   document.getElementById('item-drop').classList.remove('open');
@@ -1012,7 +1024,7 @@ async function loadOS(){
     }
     renderAps();
     // itens
-    try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1}));renderItens();calcTotal();}}catch{}
+    try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1,desconto:it.desconto||0}));renderItens();calcTotal();}}catch{}
     // fotos
     if(aps&&aps.length&&aps[0].fotos)gdCarregarFotos(aps[0].fotos);
   }catch(err){toast('Erro ao carregar: '+err.message,'err');}
@@ -1088,7 +1100,7 @@ async function salvar(){
     // itens
     try{
       await db.from('os_servicos').delete().eq('os_id',osId);
-      if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty})));
+      if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty,desconto:it.desconto||0})));
     }catch(e){console.warn('itens:',e);}
     if(!OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
     // se status = AGUARDANDO PEÇA, adiciona na lista de compras
