@@ -159,18 +159,15 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 .hist-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:10.5px;font-weight:600;color:var(--sub);cursor:pointer;transition:all .15s;white-space:nowrap}
 .hist-chip:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
 .hist-chip i{font-size:11px}
-/* grade de senha Android */
-.pattern-wrap{padding:10px 0}
-.pattern-label{font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
-.pattern-clear{font-size:10px;color:var(--cd);cursor:pointer;font-weight:600;text-transform:none}
-.pattern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:140px;position:relative;user-select:none}
-.pattern-point{width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
-.pattern-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border);background:var(--white);transition:all .15s}
-.pattern-point.sel .pattern-dot{border-color:var(--cyan);background:var(--cyan);box-shadow:0 0 0 4px rgba(41,184,194,.2)}
-.pattern-num{position:absolute;top:3px;right:5px;font-size:8px;font-weight:800;color:var(--cyan);display:none}
+/* grade de senha Android — modal */
+.pattern-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;user-select:none}
+.pattern-point{width:60px;height:60px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.pattern-dot{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--border);background:var(--white);transition:all .15s}
+.pattern-point:hover .pattern-dot{border-color:var(--cyan)}
+.pattern-point.sel .pattern-dot{border-color:var(--cyan);background:var(--cyan);box-shadow:0 0 0 6px rgba(41,184,194,.15)}
+.pattern-num{position:absolute;top:4px;right:6px;font-size:9px;font-weight:800;color:var(--cyan);display:none}
 .pattern-point.sel .pattern-num{display:block}
 .pattern-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-.pattern-result{font-size:11px;color:var(--sub);margin-top:4px;font-family:var(--font-mono)}
 
 /* MODAIS */
 .overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
@@ -301,6 +298,32 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
   </div>
 </div>
 
+<!-- MODAL PADRÃO ANDROID -->
+<div class="overlay" id="ov-pattern">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-lock-open"></i></div>
+      <div class="modal-title">Padrão de desbloqueio</div>
+      <button class="modal-x" onclick="fechaModal('pattern')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" style="align-items:center;padding:1rem">
+      <div style="font-size:11px;color:var(--sub);margin-bottom:10px;text-align:center">Clique nos pontos na sequência do padrão</div>
+      <div class="pattern-grid" id="pattern-grid-modal" style="width:180px;margin:0 auto">
+        <svg class="pattern-svg" id="psvg-modal" viewBox="0 0 180 180" preserveAspectRatio="none"></svg>
+        <!-- pontos gerados por JS -->
+      </div>
+      <div id="pattern-result-modal" style="font-size:12px;color:var(--sub);margin-top:10px;text-align:center;min-height:18px"></div>
+    </div>
+    <div class="modal-foot" style="justify-content:space-between">
+      <button class="btn-sec" onclick="clearPatternModal()"><i class="ti ti-refresh"></i> Limpar</button>
+      <div style="display:flex;gap:7px">
+        <button class="btn-sec" onclick="fechaModal('pattern')">Cancelar</button>
+        <button class="btn-pri" onclick="confirmarPattern()"><i class="ti ti-check"></i> Usar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CONFIRMAR TROCA -->
 <div class="overlay" id="ov-troca">
   <div class="modal">
@@ -400,7 +423,7 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
           <span style="font-size:11.5px;font-weight:600;color:var(--cd);flex:1">Este cliente já trouxe aparelhos antes</span>
           <div class="ac-wrap" style="flex:0 0 280px;position:relative">
             <input type="text" id="hist-busca" placeholder="Buscar dispositivo anterior..." autocomplete="off"
-              oninput="filtrarHistDisp(this.value)" onfocus="mostrarHistDrop()"
+              oninput="filtrarHistDisp(this.value)" onfocus="ativarHistoricoBanner()"
               style="width:100%;height:32px;padding:0 9px;border:1px solid rgba(41,184,194,.4);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:var(--white)"/>
             <div id="hist-drop" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;z-index:400"></div>
           </div>
@@ -424,9 +447,20 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
         <div class="item-add-drop" id="item-drop"></div>
       </div>
       <div class="itens-list" id="itens-list"></div>
-      <div class="total-row">
-        <span class="total-lbl">Total estimado</span>
-        <span class="total-val" id="total-val">R$ 0,00</span>
+      <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--border);margin-top:4px">
+        <div style="display:flex;align-items:center;gap:7px;flex:1">
+          <span style="font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Desconto</span>
+          <div style="display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0 8px;height:30px">
+            <span style="font-size:12px;color:var(--sub)">R$</span>
+            <input type="number" id="os-desconto" min="0" step="0.01" placeholder="0,00"
+              oninput="calcTotal()"
+              style="width:70px;border:none;background:transparent;font-size:12.5px;font-weight:600;color:var(--dark);outline:none;text-transform:none"/>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9.5px;color:var(--sub);text-transform:uppercase;font-weight:700;letter-spacing:.05em">Total</div>
+          <div style="font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark)" id="total-val">R$ 0,00</div>
+        </div>
       </div>
     </div>
   </div>
@@ -464,6 +498,13 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 </div>
 </div>
 
+<!-- BOTÃO FLUTUANTE SALVAR -->
+<button onclick="salvar()" style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:700;width:52px;height:52px;border-radius:50%;border:none;background:var(--cyan);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(41,184,194,.4);transition:all .2s cubic-bezier(.34,1.5,.64,1)" 
+  onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
+  title="Salvar OS">
+  <i class="ti ti-device-floppy"></i>
+</button>
+
 <script>
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
@@ -477,7 +518,7 @@ let _SALVANDO=false;
 
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fechaModal(id){document.getElementById('ov-'+id).classList.remove('open');}
-['cl','troca','contato'].forEach(id=>document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
+['cl','troca','contato','pattern'].forEach(id=>document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fechaModal(id);}));
 
 // ── MÓDULOS ──────────────────────────────────────────
 const MODS=[
@@ -545,7 +586,11 @@ function mostrarCliente(p){
   const cb=document.getElementById('cl-contato-btn');
   if(cb)cb.style.display='flex';
   // busca dispositivos anteriores do cliente
-  if(p.id) carregarHistDispositivos(p.id);
+  _histCarregado=false;
+  _clienteIdParaHist=p.id||null;
+  // mostra banner mas NÃO carrega ainda — só ao clicar
+  const hb=document.getElementById('hist-banner');
+  if(hb&&p.id)hb.style.display='block';
 }
 function iniciarTrocaCliente(){
   document.getElementById('cl-display-wrap').style.display='none';
@@ -771,16 +816,7 @@ function renderAps(){
             <span id="ap-pattern-btn-${i}" style="font-size:9px;color:var(--cd);cursor:pointer;font-weight:700;display:none" onclick="togglePatternMode(${i})">🔳 PADRÃO</span>
           </label>
           <input type="text" id="ap-senha-${i}" value="${ap.senha||''}" placeholder="0000" oninput="apV('senha',${i},this.value)"/>
-          <div id="ap-pattern-${i}" style="display:none">
-            <div class="pattern-wrap">
-              <div class="pattern-label">Padrão de desbloqueio<span class="pattern-clear" onclick="clearPattern(${i})">Limpar</span></div>
-              <div class="pattern-grid" id="pg-${i}">
-                ${[1,2,3,4,5,6,7,8,9].map(n=>`<div class="pattern-point" id="pp-${i}-${n}" onclick="tapPattern(${i},${n})"><div class="pattern-dot"></div><span class="pattern-num">${n}</span></div>`).join('')}
-                <svg class="pattern-svg" id="psvg-${i}" viewBox="0 0 140 140" preserveAspectRatio="none"></svg>
-              </div>
-              <div class="pattern-result" id="pr-${i}"></div>
-            </div>
-          </div>
+
         </div>
         <div class="field" style="flex:2"><label>Acessórios <span class="opt">(opcional)</span></label><input type="text" id="ap-acess-${i}" value="${ap.acessorios||''}" placeholder="Carregador, capinha..." oninput="apV('acessorios',${i},this.value)"/></div>
       </div>
@@ -838,7 +874,12 @@ function selMod(i,idx){const m=MOD_LISTA[i][idx];document.getElementById('ap-mod
 
 // ── PRODUTOS E SERVIÇOS ──────────────────────────────
 let ITENS=[],PRODS_CACHE=null,SRVS_CACHE=null,ITEM_LISTA=[],ITEM_IDX=-1,ITEM_TIMER;
-function calcTotal(){document.getElementById('total-val').textContent=fmt(ITENS.reduce((s,it)=>s+(it.preco*it.qty),0));}
+function calcTotal(){
+  const sub=ITENS.reduce((s,it)=>s+(it.preco*it.qty),0);
+  const desc=parseFloat(document.getElementById('os-desconto')?.value||0)||0;
+  const total=Math.max(0,sub-desc);
+  document.getElementById('total-val').textContent=fmt(total);
+}
 function renderItens(){
   const list=document.getElementById('itens-list');
   if(!ITENS.length){list.innerHTML='';return;}
@@ -856,7 +897,7 @@ async function onBuscaItem(){
   clearTimeout(ITEM_TIMER);ITEM_IDX=-1;
   if(q.length<2){drop.classList.remove('open');return;}
   ITEM_TIMER=setTimeout(async()=>{
-    if(!SRVS_CACHE){try{const{data}=await db.from('servicos').select('id,nome,valor,valor_padrao').eq('ativo',true).order('nome');SRVS_CACHE=(data||[]).map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||0)}));}catch{SRVS_CACHE=[];}}
+    if(!SRVS_CACHE){try{const{data}=await db.from('servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');SRVS_CACHE=(data||[]).map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||s.preco||0)}));}catch{SRVS_CACHE=[];}}
     if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
     const srvs=(SRVS_CACHE||[]).filter(s=>(s.nome||'').toUpperCase().includes(q)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
     const prods=(PRODS_CACHE||[]).filter(p=>(p.nome||'').toUpperCase().includes(q)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
@@ -956,6 +997,7 @@ async function loadOS(){
     const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,80);};
     setStDelay();
     document.getElementById('os-obs').value=data.observacoes||'';
+    if(data.desconto)document.getElementById('os-desconto').value=data.desconto;
     // aparelhos
     let aps=null;
     try{const{data:_a}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_a;}catch{}
@@ -1023,6 +1065,7 @@ async function salvar(){
       status,
       acessorios:(ap0.acessorios||'').toUpperCase()||null,
       observacoes:(document.getElementById('os-obs').value||'').toUpperCase()||null,
+      desconto:parseFloat(document.getElementById('os-desconto')?.value||0)||0,
       contato_nome:_contatoNome||null,
       contato_tel:_contatoTel||null,
       atualizado_em:new Date().toISOString(),
@@ -1048,9 +1091,15 @@ async function salvar(){
       if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty})));
     }catch(e){console.warn('itens:',e);}
     if(!OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
-    toast(OS_ID?'OS atualizada!':'OS criada!');
+    toast(OS_ID?'OS atualizada! ✓':'OS criada! ✓');
     _SALVANDO=false;
-    setTimeout(()=>location.href='os.html',800);
+    // atualiza o título/número se for nova OS
+    if(!OS_ID&&osId){
+      history.replaceState(null,'','os-nova.html?id='+osId);
+      document.getElementById('tb-title').textContent='Editar OS';
+    }
+    btn.disabled=false;
+    document.getElementById('btn-txt').textContent='Salvar';
   }catch(err){
     toast('Erro: '+err.message,'err');
     btn.disabled=false;_SALVANDO=false;
@@ -1132,6 +1181,19 @@ function clearPattern(i){
 
 // ── HISTÓRICO DE DISPOSITIVOS DO CLIENTE ─────────────
 let HIST_DISPS=[];
+let _clienteIdParaHist=null;
+let _histCarregado=false;
+
+// Banner clicável que carrega histórico sob demanda
+async function ativarHistoricoBanner(){
+  if(!_clienteIdParaHist)return;
+  if(!_histCarregado){
+    await carregarHistDispositivos(_clienteIdParaHist);
+    _histCarregado=true;
+  }
+  mostrarHistDrop();
+}
+
 async function carregarHistDispositivos(pessoaId){
   try{
     // busca OS anteriores do cliente e os aparelhos
@@ -1212,22 +1274,20 @@ function nclFocusInput(el){
 }
 function nclBlurInput(el,campo,idx){
   setTimeout(()=>{
-    if(!el.value&&el._prev){
-      el.value=el._prev;
-      if(APS[idx])APS[idx][campo]=el._prev;
-      return;
-    }
-    // ao sair, tenta completar com a primeira opção que começa com o digitado
+    // só completa se o usuário digitou algo (não apagou)
     if(el.value&&el.list){
       const q=el.value.toUpperCase();
       const opts=Array.from(el.list.options).map(o=>o.value);
       const exact=opts.find(o=>o.toUpperCase()===q);
       const starts=opts.find(o=>o.toUpperCase().startsWith(q));
       const match=exact||starts;
-      if(match&&match.toUpperCase()!==q){
+      if(match){
         el.value=match;
         if(APS[idx])APS[idx][campo]=match;
       }
+    } else if(!el.value){
+      // campo apagado — limpa o APS também
+      if(APS[idx])APS[idx][campo]='';
     }
   },150);
 }

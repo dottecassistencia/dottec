@@ -567,6 +567,22 @@ async function salvarClienteEdit(){
 /* ── INIT ── */
 loadMods();
 load();
+// refresh automático a cada 30s
+let _refreshTimer=setInterval(()=>{load();},30000);
+// botão de refresh no footer da tabela
+document.addEventListener('DOMContentLoaded',()=>{
+  const tf=document.querySelector('.tf');
+  if(tf){
+    const btn=document.createElement('button');
+    btn.innerHTML='<i class="ti ti-refresh"></i>';
+    btn.title='Atualizar lista';
+    btn.style.cssText='height:22px;padding:0 8px;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:4px;transition:all .15s';
+    btn.onmouseover=()=>{btn.style.background='var(--cbg)';btn.style.color='var(--cd)';};
+    btn.onmouseout=()=>{btn.style.background='var(--white)';btn.style.color='var(--sub)';};
+    btn.onclick=()=>{load();clearInterval(_refreshTimer);_refreshTimer=setInterval(()=>load(),30000);};
+    tf.appendChild(btn);
+  }
+});
 </script>
 </body>
 </html>
