@@ -27,7 +27,7 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 .header{
   height:62px;background:var(--white);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 20px;gap:14px;
-  flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.05);
+  flex-shrink:0;
 }
 .h-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .h-logo-circle{
@@ -62,8 +62,8 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 /* ── BOLINHAS ─────────────────────────────────────────── */
 .mod-bar{
-  background:var(--white);border:1px solid var(--border);border-radius:14px;
-  padding:12px 16px;margin-bottom:12px;
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:8px 20px;margin:0;
   display:flex;align-items:center;gap:10px;
 }
 /* grid responsivo: preenche a largura disponível, centraliza quando sobra espaço */
@@ -278,6 +278,12 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 @media(max-width:1000px){.metrics{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.panels{grid-template-columns:1fr}.mods-grid{grid-template-columns:repeat(4,1fr)}}
+
+
+/* Header e bolinhas fixos — conteúdo rola embaixo */
+.header{position:fixed;top:0;left:0;right:0;z-index:901;box-shadow:none}
+.mod-bar{position:fixed;top:62px;left:0;right:0;z-index:900;border-radius:0;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.body{padding-top:130px !important}
 </style>
 </head>
 <body>

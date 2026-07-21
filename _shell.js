@@ -34,8 +34,8 @@
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* Shell fixo no topo */
-#_dottec_shell{position:fixed;top:0;left:0;right:0;z-index:900}
-#_dottec_shell .header{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+#_dottec_shell{position:fixed;top:0;left:0;right:0;z-index:900;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+#_dottec_shell .header{border-bottom:1px solid var(--border)}
 .header{
   height:62px;background:var(--white);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 20px;gap:14px;
@@ -69,8 +69,8 @@
 }
 .h-perfil:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
 .mod-bar{
-  background:var(--white);border:1px solid var(--border);border-radius:14px;
-  padding:12px 16px;margin-bottom:12px;
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:8px 20px;margin:0;
   display:flex;align-items:center;gap:10px;
 }
 .mods-grid{
