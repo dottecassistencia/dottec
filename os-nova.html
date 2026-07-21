@@ -144,7 +144,8 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 .item-desc{flex:1;min-width:0}
 .item-nome{font-size:12px;font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-sub{font-size:9.5px;color:var(--sub)}
-.item-qty{width:46px;height:28px;border:1px solid var(--border);border-radius:5px;text-align:center;font-family:inherit;font-size:12px;background:var(--white);color:var(--dark);outline:none}
+.item-qty{width:36px;height:26px;border:1px solid var(--border);border-radius:5px;text-align:center;font-family:inherit;font-size:12px;background:var(--white);color:var(--dark);outline:none}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .item-price{font-size:12px;font-weight:700;color:var(--dark);white-space:nowrap;min-width:68px;text-align:right}
 .item-del{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--sub);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .item-del:hover{background:var(--cbg2);color:var(--red)}
@@ -885,19 +886,26 @@ function renderItens(){
     const sub=it.preco*it.qty;
     const desc=it.desconto||0;
     const total=Math.max(0,sub-desc);
+    const totalFmt=(total).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     return`<div class="item-row">
       <div class="item-desc">
         <div class="item-nome">${it.nome.toUpperCase()}</div>
-        <div class="item-sub">${it.tipo==='srv'?'Serviço':'Produto'} · ${fmt(it.preco)} un.</div>
+        <div class="item-sub">${it.tipo==='srv'?'Serviço':'Produto'} · ${fmt(it.preco)}</div>
       </div>
-      <input type="number" class="item-qty" value="${it.qty}" min="1" title="Qtd" onchange="ITENS[${i}].qty=+this.value||1;calcTotal();renderItens()"/>
-      <div style="display:flex;align-items:center;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:5px;padding:0 5px;height:26px;flex-shrink:0">
-        <span style="font-size:9px;color:var(--sub);white-space:nowrap">-R$</span>
-        <input type="number" min="0" step="0.01" value="${desc||''}" placeholder="0" title="Desconto por item"
-          onchange="ITENS[${i}].desconto=+this.value||0;calcTotal()"
-          style="width:42px;border:none;background:transparent;font-size:11.5px;color:var(--red);outline:none;text-transform:none;font-weight:700"/>
+      <input type="text" inputmode="numeric" class="item-qty" value="${it.qty}" title="Qtd"
+        style="width:36px;-moz-appearance:textfield;text-align:center"
+        onchange="ITENS[${i}].qty=Math.max(1,+this.value.replace(',','.')||1);calcTotal();renderItens()"/>
+      <div style="display:flex;align-items:center;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:5px;padding:0 5px;height:26px;flex-shrink:0" title="Desconto">
+        <span style="font-size:9px;color:var(--sub)">-R$</span>
+        <input type="text" inputmode="decimal" value="${desc||''}" placeholder="0"
+          onchange="ITENS[${i}].desconto=parseFloat(this.value.replace(',','.'))||0;calcTotal()"
+          style="width:40px;border:none;background:transparent;font-size:11.5px;color:var(--red);outline:none;text-transform:none;-moz-appearance:textfield"/>
       </div>
-      <div class="item-price">${fmt(total)}</div>
+      <input type="text" inputmode="decimal" value="${totalFmt}" title="Total (editável)"
+        onchange="const v=parseFloat(this.value.replace(',','.'))||0;ITENS[${i}].desconto=Math.max(0,(it.preco*(ITENS[${i}].qty||1))-v);calcTotal()"
+        style="width:72px;font-size:12px;font-weight:700;color:var(--dark);border:1px solid transparent;border-radius:5px;padding:0 4px;text-align:right;background:transparent;outline:none;-moz-appearance:textfield"
+        onfocus="this.style.border='1px solid var(--cyan)';this.style.background='var(--white)'"
+        onblur="this.style.border='1px solid transparent';this.style.background='transparent'"/>
       <button class="item-del" onclick="ITENS.splice(${i},1);renderItens();calcTotal()"><i class="ti ti-x"></i></button>
     </div>`;
   }).join('');
@@ -911,8 +919,10 @@ async function onBuscaItem(){
     if(!SRVS_CACHE){try{// tenta as tabelas 'servicos' e 'tabela_servicos'
     const{data:s1}=await db.from('servicos').select('id,nome,valor_padrao').eq('ativo',true).order('nome');SRVS_CACHE=(s1||[]).map(s=>({id:s.id,nome:s.nome,valor:parseFloat(s.valor_padrao||0)}));}catch{SRVS_CACHE=[];}}
     if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
-    const srvs=(SRVS_CACHE||[]).filter(s=>(s.nome||'').toUpperCase().includes(q)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
-    const prods=(PRODS_CACHE||[]).filter(p=>(p.nome||'').toUpperCase().includes(q)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
+    const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+    const qn=norm(q);
+    const srvs=(SRVS_CACHE||[]).filter(s=>norm(s.nome||'').includes(qn)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
+    const prods=(PRODS_CACHE||[]).filter(p=>norm(p.nome||'').includes(qn)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
     ITEM_LISTA=[...srvs,...prods].slice(0,12);
     if(!ITEM_LISTA.length){drop.innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Sem resultados</div>';drop.classList.add('open');return;}
     drop.innerHTML=ITEM_LISTA.map((it,idx)=>`
@@ -1164,6 +1174,52 @@ function togglePatternMode(i){
 }
 
 
+// posições na grade 180x180
+const PT_POS_M=[[30,30],[90,30],[150,30],[30,90],[90,90],[150,90],[30,150],[90,150],[150,150]];
+let _patternApIdx=0, _patternSeq=[];
+
+function tapPatternModal(n){
+  if(_patternSeq.includes(n)){
+    // desfaz a partir deste ponto
+    const idx=_patternSeq.indexOf(n);
+    _patternSeq.slice(idx).forEach(p=>{const el=document.getElementById('ppm-'+p);if(el)el.classList.remove('sel');});
+    _patternSeq=_patternSeq.slice(0,idx);
+  } else {
+    _patternSeq.push(n);
+    const el=document.getElementById('ppm-'+n);
+    if(el)el.classList.add('sel');
+  }
+  drawPatternModal();
+  document.getElementById('pattern-result-modal').textContent=_patternSeq.length?'Sequência: '+_patternSeq.join(' → '):'';
+}
+
+function drawPatternModal(){
+  const svg=document.getElementById('psvg-modal');
+  if(!svg||_patternSeq.length<2){if(svg)svg.innerHTML='';return;}
+  svg.innerHTML=_patternSeq.slice(0,-1).map((_,j)=>{
+    const a=PT_POS_M[_patternSeq[j]-1],b=PT_POS_M[_patternSeq[j+1]-1];
+    return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--cyan)" stroke-width="3" stroke-opacity="0.7" stroke-linecap="round"/>`;
+  }).join('');
+}
+
+function clearPatternModal(){
+  _patternSeq=[];
+  [1,2,3,4,5,6,7,8,9].forEach(n=>{const el=document.getElementById('ppm-'+n);if(el)el.classList.remove('sel');});
+  const svg=document.getElementById('psvg-modal');if(svg)svg.innerHTML='';
+  document.getElementById('pattern-result-modal').textContent='';
+}
+
+function confirmarPattern(){
+  if(!_patternSeq.length){toast('Desenhe o padrão primeiro.','err');return;}
+  const senha=_patternSeq.join('-');
+  apV('senha',_patternApIdx,senha);
+  const inp=document.getElementById('ap-senha-'+_patternApIdx);
+  if(inp)inp.value=senha;
+  fechaModal('pattern');
+}
+
+
+
 function tapPattern(i,n){
   if(!PATTERN_SEQ[i])PATTERN_SEQ[i]=[];
   const seq=PATTERN_SEQ[i];
@@ -1307,11 +1363,14 @@ function usarHistDisp(apIdx,histIdx){
   if(banner){
     const d2=HIST_DISPS[histIdx];
     const label=[d2.marca,d2.modelo].filter(Boolean).join(' ');
-    banner.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--gbg);border-radius:8px;border:1px solid rgba(59,109,17,.2)">
-      <i class="ti ti-circle-check" style="color:var(--green);font-size:14px;flex-shrink:0"></i>
-      <span style="font-size:12px;font-weight:600;color:var(--green);flex:1">Dispositivo carregado: ${label}</span>
-      <button onclick="resetHistBanner()" style="font-size:10px;color:var(--sub);background:none;border:none;cursor:pointer;padding:0">Trocar</button>
-    </div>`;
+    const inp=banner.querySelector('#hist-busca');
+    if(inp){
+      inp.value=label.toUpperCase();
+      inp.style.background='var(--cbg)';
+      inp.style.borderColor='var(--cyan)';
+      inp.style.fontWeight='600';
+    }
+    document.getElementById('hist-drop').style.display='none';
   }
   // foca no campo acessórios
   setTimeout(()=>{
@@ -1320,21 +1379,6 @@ function usarHistDisp(apIdx,histIdx){
   },80);
 }
 
-function resetHistBanner(){
-  const banner=document.getElementById('hist-banner');
-  if(!banner)return;
-  // restaura o banner original
-  banner.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cbg);border-radius:8px;border:1px solid rgba(41,184,194,.3)">
-    <i class="ti ti-history" style="color:var(--cd);font-size:14px;flex-shrink:0"></i>
-    <span style="font-size:11.5px;font-weight:600;color:var(--cd);flex:1">Este cliente já trouxe aparelhos antes</span>
-    <div class="ac-wrap" style="flex:0 0 280px;position:relative">
-      <input type="text" id="hist-busca" placeholder="Buscar dispositivo anterior..." autocomplete="off"
-        oninput="filtrarHistDisp(this.value)" onfocus="ativarHistoricoBanner()"
-        style="width:100%;height:32px;padding:0 9px;border:1px solid rgba(41,184,194,.4);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:var(--white)"/>
-      <div id="hist-drop" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;z-index:400"></div>
-    </div>
-  </div>`;
-}
 
 // ── DATALIST AUTOCOMPLETE INTELIGENTE ───────────────
 function nclFocusInput(el){
