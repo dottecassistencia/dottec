@@ -394,6 +394,18 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
   <div class="sec">
     <div class="sec-head"><div class="sec-ico si-coral"><i class="ti ti-device-mobile"></i></div><span class="sec-title">Dispositivos e Serviços</span></div>
     <div class="sec-body">
+      <div id="hist-banner" style="display:none;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cbg);border-radius:8px;border:1px solid rgba(41,184,194,.3)">
+          <i class="ti ti-history" style="color:var(--cd);font-size:14px;flex-shrink:0"></i>
+          <span style="font-size:11.5px;font-weight:600;color:var(--cd);flex:1">Este cliente já trouxe aparelhos antes</span>
+          <div class="ac-wrap" style="flex:0 0 280px;position:relative">
+            <input type="text" id="hist-busca" placeholder="Buscar dispositivo anterior..." autocomplete="off"
+              oninput="filtrarHistDisp(this.value)" onfocus="mostrarHistDrop()"
+              style="width:100%;height:32px;padding:0 9px;border:1px solid rgba(41,184,194,.4);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:var(--white)"/>
+            <div id="hist-drop" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;z-index:400"></div>
+          </div>
+        </div>
+      </div>
       <div id="ap-list"></div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn-add-ap" onclick="addAp('dispositivo')" id="btn-add-ap"><i class="ti ti-plus"></i> Adicionar dispositivo</button>
@@ -500,6 +512,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.ac-wrap'))document.getElementById('cl-drop').classList.remove('open');
   if(!e.target.closest('.item-search-wrap'))document.getElementById('item-drop').classList.remove('open');
   document.querySelectorAll('.mod-ac-drop').forEach(d=>{if(!e.target.closest('.mod-ac-wrap'))d.classList.remove('open');});
+  if(!e.target.closest('#hist-banner')){const hd=document.getElementById('hist-drop');if(hd)hd.style.display='none';}
 });
 
 // ── STATUS ───────────────────────────────────────────
@@ -728,18 +741,15 @@ function renderAps(){
     return `<div class="ap-card">
       <div class="ap-head">
         <span class="ap-lbl">${APS.length>1?'Dispositivo '+(i+1):'Dispositivo'}</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div id="hist-disp-${i}" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-          ${APS.length>1?`<button class="btn-rem" onclick="remAp(${i})"><i class="ti ti-x"></i></button>`:''}
-        </div>
+        ${APS.length>1?`<button class="btn-rem" onclick="remAp(${i})"><i class="ti ti-x"></i></button>`:''}
       </div>
       <div class="g4" style="margin-bottom:8px">
         <div class="field"><label>Tipo</label>
-          <input type="text" id="ap-tipo-${i}" value="${ap.tipo||''}" list="dl-tipo-${i}" placeholder="Celular..." oninput="apV('tipo',${i},this.value)" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'tipo',${i})"/>
+          <input type="text" id="ap-tipo-${i}" value="${ap.tipo||''}" list="dl-tipo-${i}" placeholder="Celular..." oninput="nclInputAuto(this,'tipo',${i});checkPatternBtn(${i})" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'tipo',${i});checkPatternBtn(${i})"/>
           <datalist id="dl-tipo-${i}">${tipoOpts}</datalist>
         </div>
         <div class="field"><label>Marca</label>
-          <input type="text" id="ap-marca-${i}" value="${ap.marca||''}" list="dl-marca-${i}" placeholder="Apple..." oninput="apV('marca',${i},this.value);filtMod(${i})" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'marca',${i})"/>
+          <input type="text" id="ap-marca-${i}" value="${ap.marca||''}" list="dl-marca-${i}" placeholder="Apple..." oninput="nclInputAuto(this,'marca',${i});filtMod(${i});checkPatternBtn(${i})" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'marca',${i});checkPatternBtn(${i})"/>
           <datalist id="dl-marca-${i}">${marcaOpts}</datalist>
         </div>
         <div class="field"><label>Modelo</label>
@@ -749,7 +759,7 @@ function renderAps(){
           </div>
         </div>
         <div class="field"><label>Cor</label>
-          <input type="text" id="ap-cor-${i}" value="${ap.cor||''}" list="dl-cor-${i}" placeholder="Preto..." oninput="apV('cor',${i},this.value)" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'cor',${i})"/>
+          <input type="text" id="ap-cor-${i}" value="${ap.cor||''}" list="dl-cor-${i}" placeholder="Preto..." oninput="nclInputAuto(this,'cor',${i})" onfocus="nclFocusInput(this)" onblur="nclBlurInput(this,'cor',${i})"/>
           <datalist id="dl-cor-${i}">${corOpts}</datalist>
         </div>
       </div>
@@ -758,12 +768,7 @@ function renderAps(){
         <div class="field" style="flex:0 0 100px" id="ap-senha-wrap-${i}">
           <label style="display:flex;align-items:center;justify-content:space-between">
             Senha <span class="opt">(opcional)</span>
-            ${(() => {
-              const m=((APS[i]&&APS[i].marca)||'').toUpperCase();
-              const t=((APS[i]&&APS[i].tipo)||'').toUpperCase();
-              const isAndroid=!m.includes('APPLE')&&(t.includes('CELULAR')||t.includes('TABLET')||t.includes('SMARTPHONE'));
-              return isAndroid?`<span style="font-size:9px;color:var(--cd);cursor:pointer;font-weight:700" onclick="togglePatternMode(${i})">🔳 PADRÃO</span>`:'';
-            })()}
+            <span id="ap-pattern-btn-${i}" style="font-size:9px;color:var(--cd);cursor:pointer;font-weight:700;display:none" onclick="togglePatternMode(${i})">🔳 PADRÃO</span>
           </label>
           <input type="text" id="ap-senha-${i}" value="${ap.senha||''}" placeholder="0000" oninput="apV('senha',${i},this.value)"/>
           <div id="ap-pattern-${i}" style="display:none">
@@ -787,9 +792,20 @@ function renderAps(){
     </div>`;
   }).join('');
   document.getElementById('btn-add-ap').style.display=APS.length>=4?'none':'flex';
+  // checa botão de padrão para cada aparelho já renderizado
+  setTimeout(()=>APS.forEach((_,i)=>checkPatternBtn(i)),50);
 }
 
 // modelo autocomplete
+function checkPatternBtn(i){
+  const m=(document.getElementById('ap-marca-'+i)?.value||APS[i]?.marca||'').toUpperCase();
+  const t=(document.getElementById('ap-tipo-'+i)?.value||APS[i]?.tipo||'').toUpperCase();
+  const btn=document.getElementById('ap-pattern-btn-'+i);
+  if(!btn)return;
+  const isAndroid=m&&!m.includes('APPLE')&&(t.includes('CELULAR')||t.includes('TABLET')||t.includes('SMARTPHONE')||!t);
+  btn.style.display=isAndroid?'inline':'none';
+}
+
 function filtMod(i){
   MOD_IDX[i]=-1;
   const q=(document.getElementById('ap-modelo-'+i)?.value||'').trim().toUpperCase();
@@ -1135,43 +1151,99 @@ async function carregarHistDispositivos(pessoaId){
   }catch{}
 }
 function renderHistDispositivos(){
-  // mostra chips em todos os cards de aparelho
-  APS.forEach((_,i)=>{
-    const el=document.getElementById('hist-disp-'+i);
-    if(!el)return;
-    if(!HIST_DISPS.length){el.innerHTML='';return;}
-    el.innerHTML=HIST_DISPS.map((d,di)=>`
-      <button class="hist-chip" onclick="usarHistDisp(${i},${di})" title="Usar este dispositivo">
-        <i class="ti ti-history"></i>${[d.marca,d.modelo].filter(Boolean).join(' ')||'Dispositivo'}${d.cor?' · '+d.cor:''}
-      </button>`).join('');
-  });
+  const banner=document.getElementById('hist-banner');
+  if(!banner)return;
+  if(!HIST_DISPS.length){banner.style.display='none';return;}
+  banner.style.display='block';
+  mostrarHistDrop();
+}
+function filtrarHistDisp(q){
+  const t=(q||'').toUpperCase();
+  const lista=t?HIST_DISPS.filter(d=>
+    (d.modelo||'').toUpperCase().includes(t)||
+    (d.marca||'').toUpperCase().includes(t)||
+    (d.imei||'').includes(t)
+  ):HIST_DISPS;
+  renderHistDrop(lista);
+}
+function mostrarHistDrop(){
+  renderHistDrop(HIST_DISPS);
+}
+function renderHistDrop(lista){
+  const drop=document.getElementById('hist-drop');
+  if(!drop)return;
+  if(!lista.length){drop.innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Nenhum resultado</div>';drop.style.display='block';return;}
+  drop.innerHTML=lista.map((d,di)=>`
+    <div onmousedown="usarHistDisp(0,HIST_DISPS.indexOf(HIST_DISPS.find(x=>x===${JSON.stringify(d)})))" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #F5F4F0;display:flex;align-items:center;gap:8px;font-size:12px;transition:background .1s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <i class="ti ti-device-mobile" style="color:var(--sub);font-size:13px;flex-shrink:0"></i>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${[d.marca,d.modelo].filter(Boolean).join(' ')||'Dispositivo'}</div>
+        <div style="font-size:10.5px;color:var(--sub)">${[d.cor,d.imei?'IMEI: '+d.imei:''].filter(Boolean).join(' · ')||'Sem detalhes'}</div>
+      </div>
+      <span style="font-size:10px;color:var(--cd);font-weight:700;flex-shrink:0">Usar →</span>
+    </div>`).join('');
+  drop.style.display='block';
 }
 function usarHistDisp(apIdx,histIdx){
   const d=HIST_DISPS[histIdx];
-  if(!d||!APS[apIdx])return;
-  APS[apIdx].tipo=d.tipo||'';
-  APS[apIdx].marca=d.marca||'';
-  APS[apIdx].modelo=d.modelo||'';
-  APS[apIdx].cor=d.cor||'';
-  APS[apIdx].imei=d.imei||'';
-  APS[apIdx].senha=d.senha||'';
+  if(!d)return;
+  // encontra o próximo card vazio ou usa o primeiro
+  const targetIdx=APS.findIndex(a=>!a.modelo&&!a.marca)||0;
+  const idx=targetIdx>=0?targetIdx:0;
+  if(!APS[idx])return;
+  APS[idx].tipo=d.tipo||'';
+  APS[idx].marca=d.marca||'';
+  APS[idx].modelo=d.modelo||'';
+  APS[idx].cor=d.cor||'';
+  APS[idx].imei=d.imei||'';
+  APS[idx].senha=d.senha||'';
   renderAps();
-  // re-renderiza histórico nos novos cards
-  setTimeout(()=>renderHistDispositivos(),50);
+  document.getElementById('hist-drop').style.display='none';
+  document.getElementById('hist-busca').value='';
   toast('Dispositivo carregado!');
+  setTimeout(()=>renderHistDispositivos(),80);
 }
 
-// ── DATALIST FOCUS HELPER ────────────────────────────
-// Ao focar num input com datalist, limpa para mostrar todas as opções
+// ── DATALIST AUTOCOMPLETE INTELIGENTE ───────────────
 function nclFocusInput(el){
   el._prev=el.value;
+  // limpa para mostrar opções no foco
   if(el.value){el.value='';el.dispatchEvent(new Event('input'));}
 }
 function nclBlurInput(el,campo,idx){
-  // se ficou vazio e tinha valor antes, restaura
   setTimeout(()=>{
-    if(!el.value&&el._prev){el.value=el._prev;if(APS[idx])APS[idx][campo]=el._prev;}
-  },200);
+    if(!el.value&&el._prev){
+      el.value=el._prev;
+      if(APS[idx])APS[idx][campo]=el._prev;
+      return;
+    }
+    // ao sair, tenta completar com a primeira opção que começa com o digitado
+    if(el.value&&el.list){
+      const q=el.value.toUpperCase();
+      const opts=Array.from(el.list.options).map(o=>o.value);
+      const exact=opts.find(o=>o.toUpperCase()===q);
+      const starts=opts.find(o=>o.toUpperCase().startsWith(q));
+      const match=exact||starts;
+      if(match&&match.toUpperCase()!==q){
+        el.value=match;
+        if(APS[idx])APS[idx][campo]=match;
+      }
+    }
+  },150);
+}
+// autocomplete ao digitar: se só 1 match, completa o resto e seleciona
+function nclInputAuto(el,campo,idx){
+  const q=el.value.toUpperCase();
+  apV(campo,idx,el.value);
+  if(!q||!el.list)return;
+  const opts=Array.from(el.list.options).map(o=>o.value);
+  const matches=opts.filter(o=>o.toUpperCase().startsWith(q));
+  if(matches.length===1&&matches[0].toUpperCase()!==q){
+    const full=matches[0];
+    el.value=full;
+    el.setSelectionRange(q.length,full.length);
+    if(APS[idx])APS[idx][campo]=full;
+  }
 }
 
 // ── CONTATO ADICIONAL ────────────────────────────────
