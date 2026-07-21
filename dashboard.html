@@ -798,7 +798,7 @@ async function salvarOsSt(){
 }
 
 // ── INIT ───────────────────────────────────────────
-Promise.all([loadMods(),loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas()]).catch(console.error);
+Promise.all([loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas()]).catch(console.error);
 setInterval(loadAlertas,60000);
 </script>
 </body>
