@@ -33,6 +33,9 @@
   style.textContent = `
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* Shell fixo no topo */
+#_dottec_shell{position:fixed;top:0;left:0;right:0;z-index:900}
+#_dottec_shell .header{box-shadow:0 2px 8px rgba(0,0,0,.07)}
 .header{
   height:62px;background:var(--white);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 20px;gap:14px;
@@ -113,6 +116,10 @@
 .mod-more-item i{font-size:16px;width:20px;text-align:center}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite;display:inline-block}
+
+/* Transição suave de página */
+body > *:not(#_dottec_shell):not(#_shell_spacer){animation:_shell_fadein .18s ease}
+@keyframes _shell_fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
   `;
   document.head.insertBefore(style, document.head.firstChild);
 
@@ -163,10 +170,21 @@
 
   function injectShell() {
     document.body.insertBefore(shell, document.body.firstChild);
-    // body precisa de flex column para o shell ficar no topo
+    // body flex column
     document.body.style.display = 'flex';
     document.body.style.flexDirection = 'column';
     document.body.style.height = '100%';
+    // padding-top para compensar header fixo (header 62px + mod-bar ~78px = 140px)
+    // Calcula após render
+    requestAnimationFrame(()=>{
+      const h = shell.offsetHeight || 140;
+      // adiciona elemento espaçador
+      const spacer = document.createElement('div');
+      spacer.id = '_shell_spacer';
+      spacer.style.height = h + 'px';
+      spacer.style.flexShrink = '0';
+      document.body.insertBefore(spacer, shell.nextSibling);
+    });
     initShell();
   }
 

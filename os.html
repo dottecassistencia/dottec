@@ -62,10 +62,10 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 
 /* ══ FILTROS ══ */
-.filter-bar{background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0}
-.search-row{padding:7px 20px;border-bottom:1px solid var(--border)}
-.search-box{display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;height:40px;transition:border-color .2s,box-shadow .2s}
-.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
+.filter-bar{background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:100}
+.search-row{padding:5px 16px;border-bottom:1px solid var(--border)}
+.search-box{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:0 14px;height:38px;transition:border-color .2s,box-shadow .2s}
+.search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
 .search-box i{font-size:16px;color:var(--sub);flex-shrink:0}
 .search-box input{flex:1;border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--dark);background:transparent;text-transform:uppercase;caret-color:var(--cyan)}
 .search-box input::placeholder{text-transform:none;color:#B5B2A8}
@@ -422,21 +422,23 @@ async function confirmarStatus(){
   const{error}=await db.from('ordens_servico').update({status:novoStatus,atualizado_em:new Date().toISOString()}).eq('id',ST_OS_ID);
   if(error){toast('Erro ao atualizar.','err');return;}
   try{await db.from('os_historico').insert({os_id:ST_OS_ID,status:novoStatus,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}
-  // alerta lista_pecas se novo status = AGUARDANDO PEÇA
+  // AGUARDANDO PEÇA → lista de compras
   if(novoStatus.includes('AGUARDANDO PE')){
     try{
       const os=TODOS.find(o=>o.id===ST_OS_ID);
-      const{data:exist}=await db.from('lista_pecas').select('id').eq('os_id',ST_OS_ID).eq('status','PENDENTE').maybeSingle().catch(()=>({data:null}));
+      const disp=(os?.(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||''):'').toUpperCase();
+      // adiciona em lista_compras
+      const{data:exist}=await db.from('lista_compras').select('id').eq('os_id',ST_OS_ID).maybeSingle().catch(()=>({data:null}));
       if(!exist&&os){
-        await db.from('lista_pecas').insert({
+        await db.from('lista_compras').insert({
           os_id:ST_OS_ID,
-          descricao:'PEÇA NECESSÁRIA',
-          dispositivo:(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||'').toUpperCase()||null,
-          cliente_nome:(os.cliente_nome||'').toUpperCase(),
-          status:'PENDENTE',prioridade:'NORMAL',
-        });
+          descricao:('PEÇA — '+disp).trim(),
+          observacao:(os.cliente_nome||'').toUpperCase(),
+          status:'PENDENTE',
+          criado_em:new Date().toISOString()
+        }).catch(()=>{});
       }
-    }catch(e){console.warn('lista_pecas:',e);}
+    }catch(e){console.warn('lista_compras:',e);}
   }
   fecha('status');
   toast('Status atualizado!');

@@ -874,10 +874,11 @@ function selMod(i,idx){const m=MOD_LISTA[i][idx];document.getElementById('ap-mod
 // ── PRODUTOS E SERVIÇOS ──────────────────────────────
 let ITENS=[],PRODS_CACHE=null,SRVS_CACHE=null,ITEM_LISTA=[],ITEM_IDX=-1,ITEM_TIMER;
 function calcTotal(){
-  const sub=ITENS.reduce((s,it)=>Math.max(0,(it.preco*it.qty)-(it.desconto||0)),0);
+  const sub=ITENS.reduce((s,it)=>s+Math.max(0,(it.preco*it.qty)-(it.desconto||0)),0);
   const desc=parseFloat(document.getElementById('os-desconto')?.value||0)||0;
   const total=Math.max(0,sub-desc);
-  document.getElementById('total-val').textContent=fmt(total);
+  const el=document.getElementById('total-val');
+  if(el)el.textContent=fmt(total);
 }
 function renderItens(){
   const list=document.getElementById('itens-list');
@@ -1186,10 +1187,13 @@ let _patternApIdx=0, _patternSeq=[];
 
 function tapPatternModal(n){
   if(_patternSeq.includes(n)){
-    // desfaz a partir deste ponto
-    const idx=_patternSeq.indexOf(n);
-    _patternSeq.slice(idx).forEach(p=>{const el=document.getElementById('ppm-'+p);if(el)el.classList.remove('sel');});
-    _patternSeq=_patternSeq.slice(0,idx);
+    // só desfaz se for o ÚLTIMO ponto (undo do último clique)
+    if(_patternSeq[_patternSeq.length-1]===n){
+      _patternSeq.pop();
+      const el=document.getElementById('ppm-'+n);
+      if(el)el.classList.remove('sel');
+    }
+    // se é um ponto do meio, ignora (no Android real o dedo passa por cima)
   } else {
     _patternSeq.push(n);
     const el=document.getElementById('ppm-'+n);
