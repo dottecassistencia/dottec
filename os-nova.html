@@ -447,19 +447,18 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
         <div class="item-add-drop" id="item-drop"></div>
       </div>
       <div class="itens-list" id="itens-list"></div>
-      <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--border);margin-top:4px">
-        <div style="display:flex;align-items:center;gap:7px;flex:1">
-          <span style="font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Desconto</span>
-          <div style="display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0 8px;height:30px">
-            <span style="font-size:12px;color:var(--sub)">R$</span>
-            <input type="number" id="os-desconto" min="0" step="0.01" placeholder="0,00"
-              oninput="calcTotal()"
-              style="width:70px;border:none;background:transparent;font-size:12.5px;font-weight:600;color:var(--dark);outline:none;text-transform:none"/>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 0;border-top:1px solid var(--border);margin-top:4px;gap:12px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Desconto</span>
+          <div style="display:flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0 7px;height:28px">
+            <span style="font-size:11px;color:var(--sub)">R$</span>
+            <input type="number" id="os-desconto" min="0" step="0.01" placeholder="0,00" oninput="calcTotal()"
+              style="width:60px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--dark);outline:none;text-transform:none"/>
           </div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:9.5px;color:var(--sub);text-transform:uppercase;font-weight:700;letter-spacing:.05em">Total</div>
-          <div style="font-family:'Lora',serif;font-size:16px;font-weight:700;color:var(--dark)" id="total-val">R$ 0,00</div>
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em">Total</span>
+          <span style="font-family:'Lora',serif;font-size:17px;font-weight:700;color:var(--dark)" id="total-val">R$ 0,00</span>
         </div>
       </div>
     </div>
@@ -898,11 +897,7 @@ async function onBuscaItem(){
   if(q.length<2){drop.classList.remove('open');return;}
   ITEM_TIMER=setTimeout(async()=>{
     if(!SRVS_CACHE){try{// tenta as tabelas 'servicos' e 'tabela_servicos'
-    let srvData=[];
-    try{const{data:s1}=await db.from('servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');if(s1?.length)srvData=s1;}catch{}
-    if(!srvData.length){try{const{data:s2}=await db.from('tabela_servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');if(s2?.length)srvData=s2;}catch{}}
-    SRVS_CACHE=srvData.map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||s.preco||0)}));
-    console.log('Serviços carregados:',SRVS_CACHE.length, SRVS_CACHE.slice(0,2));}catch{SRVS_CACHE=[];}}
+    const{data:s1}=await db.from('servicos').select('id,nome,valor_padrao').eq('ativo',true).order('nome');SRVS_CACHE=(s1||[]).map(s=>({id:s.id,nome:s.nome,valor:parseFloat(s.valor_padrao||0)}));}catch{SRVS_CACHE=[];}}
     if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
     const srvs=(SRVS_CACHE||[]).filter(s=>(s.nome||'').toUpperCase().includes(q)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
     const prods=(PRODS_CACHE||[]).filter(p=>(p.nome||'').toUpperCase().includes(q)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
@@ -1276,9 +1271,7 @@ function renderHistDrop(lista){
 function usarHistDisp(apIdx,histIdx){
   const d=HIST_DISPS[histIdx];
   if(!d)return;
-  // encontra o próximo card vazio ou usa o primeiro
-  const targetIdx=APS.findIndex(a=>!a.modelo&&!a.marca)||0;
-  const idx=targetIdx>=0?targetIdx:0;
+  const idx=0;
   if(!APS[idx])return;
   APS[idx].tipo=d.tipo||'';
   APS[idx].marca=d.marca||'';
@@ -1286,11 +1279,16 @@ function usarHistDisp(apIdx,histIdx){
   APS[idx].cor=d.cor||'';
   APS[idx].imei=d.imei||'';
   APS[idx].senha=d.senha||'';
+  APS[idx].acessorios='';
   renderAps();
   document.getElementById('hist-drop').style.display='none';
   document.getElementById('hist-busca').value='';
-  toast('Dispositivo carregado!');
-  setTimeout(()=>renderHistDispositivos(),80);
+  // foca no campo acessórios
+  setTimeout(()=>{
+    const el=document.getElementById('ap-acess-0');
+    if(el){el.focus();el.scrollIntoView({behavior:'smooth',block:'center'});}
+    renderHistDispositivos();
+  },80);
 }
 
 // ── DATALIST AUTOCOMPLETE INTELIGENTE ───────────────
