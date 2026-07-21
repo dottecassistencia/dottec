@@ -426,7 +426,7 @@ async function confirmarStatus(){
   if(novoStatus.includes('AGUARDANDO PE')){
     try{
       const os=TODOS.find(o=>o.id===ST_OS_ID);
-      const disp=(os?.(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||''):'').toUpperCase();
+      const disp=(os?(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||''):'').toUpperCase();
       // adiciona em lista_compras
       const{data:exist}=await db.from('lista_compras').select('id').eq('os_id',ST_OS_ID).maybeSingle().catch(()=>({data:null}));
       if(!exist&&os){
