@@ -170,21 +170,35 @@ body > *:not(#_dottec_shell):not(#_shell_spacer){animation:_shell_fadein .18s ea
 
   function injectShell() {
     document.body.insertBefore(shell, document.body.firstChild);
-    // body flex column
-    document.body.style.display = 'flex';
-    document.body.style.flexDirection = 'column';
-    document.body.style.height = '100%';
+    // body flex column (só se não tiver ainda)
+    if(getComputedStyle(document.body).display !== 'flex'){
+      document.body.style.display = 'flex';
+      document.body.style.flexDirection = 'column';
+    }
+    document.body.style.overflowY = 'hidden';
     // padding-top para compensar header fixo (header 62px + mod-bar ~78px = 140px)
     // Calcula após render
-    requestAnimationFrame(()=>{
-      const h = shell.offsetHeight || 140;
-      // adiciona elemento espaçador
-      const spacer = document.createElement('div');
-      spacer.id = '_shell_spacer';
-      spacer.style.height = h + 'px';
-      spacer.style.flexShrink = '0';
-      document.body.insertBefore(spacer, shell.nextSibling);
-    });
+    // move .filter-bar para dentro do shell (fica fixo junto ao cabeçalho)
+    const moveFilterBar = () => {
+      const fb = document.querySelector('.filter-bar');
+      if(fb && !shell.contains(fb)){
+        shell.appendChild(fb);
+      }
+    };
+    // spacer = altura do shell (incluindo filter-bar se movida)
+    const makespacer = () => {
+      moveFilterBar();
+      let existing = document.getElementById('_shell_spacer');
+      if(!existing){
+        existing = document.createElement('div');
+        existing.id = '_shell_spacer';
+        existing.style.flexShrink = '0';
+        document.body.insertBefore(existing, shell.nextSibling);
+      }
+      const h = shell.offsetHeight;
+      existing.style.height = (h || 118) + 'px';
+    };
+    requestAnimationFrame(()=>{ makespacer(); requestAnimationFrame(makespacer); });
     initShell();
   }
 

@@ -62,8 +62,8 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 
 /* ══ FILTROS ══ */
-.filter-bar{background:var(--white);border-bottom:2px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:100}
-.search-row{padding:5px 16px;border-bottom:1px solid var(--border)}
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.search-row{padding:3px 12px;background:var(--white)}
 .search-box{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:0 14px;height:38px;transition:border-color .2s,box-shadow .2s}
 .search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
 .search-box i{font-size:16px;color:var(--sub);flex-shrink:0}
@@ -427,18 +427,16 @@ async function confirmarStatus(){
     try{
       const os=TODOS.find(o=>o.id===ST_OS_ID);
       const disp=(os?(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||''):'').toUpperCase();
-      // adiciona em lista_compras
-      const{data:exist}=await db.from('lista_compras').select('id').eq('os_id',ST_OS_ID).maybeSingle().catch(()=>({data:null}));
-      if(!exist&&os){
-        await db.from('lista_compras').insert({
-          os_id:ST_OS_ID,
-          descricao:('PEÇA — '+disp).trim(),
-          observacao:(os.cliente_nome||'').toUpperCase(),
-          status:'PENDENTE',
-          criado_em:new Date().toISOString()
-        }).catch(()=>{});
+      const {data:exist,error:eEx}=await db.from('lista_compras').select('id').eq('os_id',ST_OS_ID).maybeSingle();
+      if(eEx) console.warn('check exist:',eEx);
+      if(!exist){
+        const row={os_id:ST_OS_ID,descricao:('PEÇA — '+disp).trim()||'PEÇA NECESSÁRIA',status:'PENDENTE'};
+        if(os)row.observacao=(os.cliente_nome||'').toUpperCase();
+        const{error:eIns}=await db.from('lista_compras').insert(row);
+        if(eIns){console.error('lista_compras insert:',eIns);toast('Erro lista compras: '+eIns.message,'err');}
+        else toast('Adicionado à lista de compras!');
       }
-    }catch(e){console.warn('lista_compras:',e);}
+    }catch(e){console.error('lista_compras:',e);toast('Erro: '+e.message,'err');}
   }
   fecha('status');
   toast('Status atualizado!');
