@@ -567,6 +567,26 @@ async function salvarClienteEdit(){
 /* ── INIT ── */
 loadMods();
 load();
+
+// ── PULL TO REFRESH (mobile) ─────────────────────────
+(function(){
+  let startY=0,pulling=false;
+  const threshold=70;
+  document.addEventListener('touchstart',e=>{if(window.scrollY===0)startY=e.touches[0].clientY;},{ passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!startY)return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>10&&window.scrollY===0)pulling=true;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(pulling){
+      const dy=e.changedTouches[0].clientY-startY;
+      if(dy>threshold){load();toast('Lista atualizada!');}
+    }
+    startY=0;pulling=false;
+  });
+})();
+
 // refresh automático a cada 30s
 let _refreshTimer=setInterval(()=>{load();},30000);
 // botão de refresh no footer da tabela

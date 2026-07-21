@@ -499,10 +499,10 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 </div>
 
 <!-- BOTÃO FLUTUANTE SALVAR -->
-<button onclick="salvar()" style="position:fixed;bottom:1.25rem;right:1.25rem;z-index:700;width:52px;height:52px;border-radius:50%;border:none;background:var(--cyan);color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(41,184,194,.4);transition:all .2s cubic-bezier(.34,1.5,.64,1)" 
-  onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
-  title="Salvar OS">
-  <i class="ti ti-device-floppy"></i>
+<button onclick="salvar()" style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;height:40px;padding:0 24px;border-radius:20px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(41,184,194,.4);transition:opacity .2s;font-family:inherit" 
+  onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"
+  title="Salvar OS" id="fab-save">
+  <i class="ti ti-device-floppy"></i> Salvar OS
 </button>
 
 <script>
@@ -897,7 +897,12 @@ async function onBuscaItem(){
   clearTimeout(ITEM_TIMER);ITEM_IDX=-1;
   if(q.length<2){drop.classList.remove('open');return;}
   ITEM_TIMER=setTimeout(async()=>{
-    if(!SRVS_CACHE){try{const{data}=await db.from('servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');SRVS_CACHE=(data||[]).map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||s.preco||0)}));}catch{SRVS_CACHE=[];}}
+    if(!SRVS_CACHE){try{// tenta as tabelas 'servicos' e 'tabela_servicos'
+    let srvData=[];
+    try{const{data:s1}=await db.from('servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');if(s1?.length)srvData=s1;}catch{}
+    if(!srvData.length){try{const{data:s2}=await db.from('tabela_servicos').select('id,nome,valor,valor_padrao,preco').eq('ativo',true).order('nome');if(s2?.length)srvData=s2;}catch{}}
+    SRVS_CACHE=srvData.map(s=>({...s,valor:parseFloat(s.valor||s.valor_padrao||s.preco||0)}));
+    console.log('Serviços carregados:',SRVS_CACHE.length, SRVS_CACHE.slice(0,2));}catch{SRVS_CACHE=[];}}
     if(!PRODS_CACHE){try{const{data}=await db.from('produtos').select('id,nome,valor_venda').eq('ativo',true).order('nome').limit(200);PRODS_CACHE=data||[];}catch{PRODS_CACHE=[];}}
     const srvs=(SRVS_CACHE||[]).filter(s=>(s.nome||'').toUpperCase().includes(q)).map(s=>({id:s.id,nome:s.nome,tipo:'srv',preco:s.valor||0}));
     const prods=(PRODS_CACHE||[]).filter(p=>(p.nome||'').toUpperCase().includes(q)).map(p=>({id:p.id,nome:p.nome,tipo:'prd',preco:p.valor_venda||0}));
@@ -1091,6 +1096,24 @@ async function salvar(){
       if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty})));
     }catch(e){console.warn('itens:',e);}
     if(!OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
+    // se status = AGUARDANDO PEÇA, adiciona na lista de compras
+    if(status==='AGUARDANDO PEÇA'||status==='AGUARDANDO PECA'){
+      try{
+        const ap0atual=APS.find(a=>a.tipo_registro==='dispositivo')||APS[0]||{};
+        const obsCompra=[ap0atual.marca,ap0atual.modelo,ap0atual.defeito].filter(Boolean).join(' — ');
+        const existente=await db.from('lista_compras').select('id').eq('os_id',osId).maybeSingle();
+        if(!existente.data){
+          await db.from('lista_compras').insert({
+            os_id:osId,
+            descricao:('PEÇA — '+obsCompra).toUpperCase().slice(0,200),
+            observacao:('OS '+String(payload.cliente_nome||'').slice(0,50)).toUpperCase(),
+            status:'PENDENTE',
+            criado_em:new Date().toISOString()
+          });
+          toast('Item adicionado à lista de compras!');
+        }
+      }catch(e){console.warn('lista_compras:',e);}
+    }
     toast(OS_ID?'OS atualizada! ✓':'OS criada! ✓');
     _SALVANDO=false;
     // atualiza o título/número se for nova OS
@@ -1235,15 +1258,19 @@ function renderHistDrop(lista){
   const drop=document.getElementById('hist-drop');
   if(!drop)return;
   if(!lista.length){drop.innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Nenhum resultado</div>';drop.style.display='block';return;}
-  drop.innerHTML=lista.map((d,di)=>`
-    <div onmousedown="usarHistDisp(0,HIST_DISPS.indexOf(HIST_DISPS.find(x=>x===${JSON.stringify(d)})))" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #F5F4F0;display:flex;align-items:center;gap:8px;font-size:12px;transition:background .1s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+  drop.innerHTML=lista.map((d,di)=>{
+    const realIdx=HIST_DISPS.indexOf(d);
+    const label=[d.marca,d.modelo].filter(Boolean).join(' ')||'Dispositivo';
+    const sub=[d.cor,d.imei?'IMEI: '+d.imei:''].filter(Boolean).join(' · ')||'Sem detalhes';
+    return `<div onmousedown="usarHistDisp(0,${realIdx})" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #F5F4F0;display:flex;align-items:center;gap:8px;font-size:12px" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
       <i class="ti ti-device-mobile" style="color:var(--sub);font-size:13px;flex-shrink:0"></i>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${[d.marca,d.modelo].filter(Boolean).join(' ')||'Dispositivo'}</div>
-        <div style="font-size:10.5px;color:var(--sub)">${[d.cor,d.imei?'IMEI: '+d.imei:''].filter(Boolean).join(' · ')||'Sem detalhes'}</div>
+        <div style="font-weight:600;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</div>
+        <div style="font-size:10.5px;color:var(--sub)">${sub}</div>
       </div>
       <span style="font-size:10px;color:var(--cd);font-weight:700;flex-shrink:0">Usar →</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   drop.style.display='block';
 }
 function usarHistDisp(apIdx,histIdx){
