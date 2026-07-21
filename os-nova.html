@@ -1114,23 +1114,26 @@ async function salvar(){
       if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty,desconto:it.desconto||0})));
     }catch(e){console.warn('itens:',e);}
     if(!_OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
-    // se status = AGUARDANDO PEÇA, adiciona na lista de compras
-    if(status==='AGUARDANDO PEÇA'||status==='AGUARDANDO PECA'){
+    // se status = AGUARDANDO PEÇA → alerta na lista de peças
+    if(status==='AGUARDANDO PEÇA'||status==='AGUARDANDO PECA'||status==='AGUARDANDO PEÇAS'){
       try{
         const ap0atual=APS.find(a=>a.tipo_registro==='dispositivo')||APS[0]||{};
-        const obsCompra=[ap0atual.marca,ap0atual.modelo,ap0atual.defeito].filter(Boolean).join(' — ');
-        const existente=await db.from('lista_compras').select('id').eq('os_id',osId).maybeSingle();
-        if(!existente.data){
-          await db.from('lista_compras').insert({
+        const disp=[ap0atual.marca,ap0atual.modelo].filter(Boolean).join(' ');
+        const defeito=(ap0atual.defeito||'').toUpperCase();
+        // verifica se já existe alerta para essa OS
+        const{data:exist}=await db.from('lista_pecas').select('id').eq('os_id',osId).eq('status','PENDENTE').maybeSingle().catch(()=>({data:null}));
+        if(!exist){
+          await db.from('lista_pecas').insert({
             os_id:osId,
-            descricao:('PEÇA — '+obsCompra).toUpperCase().slice(0,200),
-            observacao:('OS '+String(payload.cliente_nome||'').slice(0,50)).toUpperCase(),
+            descricao:defeito||'PEÇA NECESSÁRIA',
+            dispositivo:disp.toUpperCase()||null,
+            cliente_nome:(payload.cliente_nome||'').toUpperCase(),
             status:'PENDENTE',
-            criado_em:new Date().toISOString()
+            prioridade:'NORMAL',
           });
-          toast('Item adicionado à lista de compras!');
+          toast('Alerta de peça criado!');
         }
-      }catch(e){console.warn('lista_compras:',e);}
+      }catch(e){console.warn('lista_pecas:',e);}
     }
     toast(_OS_ID?'OS atualizada! ✓':'OS criada! ✓');
     _SALVANDO=false;

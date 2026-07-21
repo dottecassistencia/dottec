@@ -180,7 +180,7 @@ tbody tr:hover{background:#FAFAF7}
   <div class="modal modal-sm">
     <div class="modal-head"><div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-trash"></i></div><div class="modal-title">Excluir OS</div></div>
     <div class="modal-body" style="font-size:13.5px;color:var(--text);line-height:1.5">Tem certeza que deseja excluir a <strong id="del-num" style="color:var(--dark)"></strong>?</div>
-    <div class="modal-foot"><button class="btn-sec" onclick="fecha('del')">Cancelar</button><button class="btn-red" onclick="confirmarDel()"><i class="ti ti-trash"></i> Excluir</button></div>
+    <div class="modal-foot"><button class="btn-sec" onclick="fecha('del')">Cancelar</button><button class="btn-red" id="btn-confirmar-del" onclick="confirmarDel()"><i class="ti ti-trash"></i> Excluir</button></div>
   </div>
 </div>
 
@@ -483,7 +483,20 @@ function toast(msg,t='ok'){const el=document.getElementById('toast');document.ge
 function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
 ['del','can','status','cl-edit'].forEach(id=>document.getElementById('ov-'+id)?.addEventListener('click',function(e){if(e.target===this)fecha(id);}));
 
-function abrirDel(id,num){OS_ACT=id;document.getElementById('del-num').textContent=num;document.getElementById('ov-del').classList.add('open');}
+function abrirDel(id,num){
+  OS_ACT=id;
+  document.getElementById('del-num').textContent=num;
+  document.getElementById('ov-del').classList.add('open');
+  setTimeout(()=>document.getElementById('btn-confirmar-del').focus(),80);
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('ov-del').classList.contains('open')){
+    e.preventDefault();confirmarDel();
+  }
+  if(e.key==='Escape'&&document.getElementById('ov-del').classList.contains('open')){
+    fecha('del');
+  }
+});
 async function confirmarDel(){const{error}=await db.from('ordens_servico').delete().eq('id',OS_ACT);fecha('del');if(error){toast('Erro ao excluir.','err');return;}toast('OS excluída.');TODOS=TODOS.filter(o=>o.id!==OS_ACT);buildStatusRow();render();}
 function abrirCan(id,num){OS_ACT=id;document.getElementById('can-num').textContent=num;document.getElementById('ov-can').classList.add('open');}
 async function confirmarCan(){const{error}=await db.from('ordens_servico').update({status:'CANCELADA'}).eq('id',OS_ACT);fecha('can');if(error){toast('Erro.','err');return;}toast('OS cancelada.');const o=TODOS.find(x=>x.id===OS_ACT);if(o)o.status='CANCELADA';buildStatusRow();render();}
@@ -516,6 +529,22 @@ async function confirmarStatus(){
   const{error}=await db.from('ordens_servico').update({status:novoStatus,atualizado_em:new Date().toISOString()}).eq('id',ST_OS_ID);
   if(error){toast('Erro ao atualizar.','err');return;}
   try{await db.from('os_historico').insert({os_id:ST_OS_ID,status:novoStatus,observacao:obs.toUpperCase()||null,usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}
+  // alerta lista_pecas se novo status = AGUARDANDO PEÇA
+  if(novoStatus.includes('AGUARDANDO PE')){
+    try{
+      const os=TODOS.find(o=>o.id===ST_OS_ID);
+      const{data:exist}=await db.from('lista_pecas').select('id').eq('os_id',ST_OS_ID).eq('status','PENDENTE').maybeSingle().catch(()=>({data:null}));
+      if(!exist&&os){
+        await db.from('lista_pecas').insert({
+          os_id:ST_OS_ID,
+          descricao:'PEÇA NECESSÁRIA',
+          dispositivo:(os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||'').toUpperCase()||null,
+          cliente_nome:(os.cliente_nome||'').toUpperCase(),
+          status:'PENDENTE',prioridade:'NORMAL',
+        });
+      }
+    }catch(e){console.warn('lista_pecas:',e);}
+  }
   fecha('status');
   toast('Status atualizado!');
   const o=TODOS.find(x=>x.id===ST_OS_ID);if(o)o.status=novoStatus;
