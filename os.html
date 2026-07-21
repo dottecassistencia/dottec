@@ -161,6 +161,10 @@ tbody tr:hover{background:#FAFAF7}
 
 
 
+
+.btn-nova-os{display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:8px;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:background .15s}
+.btn-nova-os:hover{background:var(--cd)}
+.btn-nova-os i{font-size:14px}
 </style>
 </head>
 <body>
@@ -263,12 +267,16 @@ tbody tr:hover{background:#FAFAF7}
 
 <!-- ══ FILTROS ══ -->
 <div class="filter-bar">
-  <div class="search-row">
-    <div class="search-box">
+  <div class="search-row" style="display:flex;align-items:center;gap:8px">
+    <div class="search-box" style="flex:1">
       <i class="ti ti-search"></i>
-      <input type="text" id="busca" placeholder="Buscar por Nº, cliente, dispositivo ou cor..." autocomplete="off" oninput="filtrar()"/>
+      <input type="text" id="busca" placeholder="Buscar OS..." autocomplete="off" oninput="filtrar()"/>
       <span class="search-cnt" id="s-cnt"></span>
     </div>
+    <a href="os-nova.html" class="btn-nova-os">
+      <i class="ti ti-plus"></i>
+      <span>Nova OS</span>
+    </a>
   </div>
   <div class="status-row" id="status-row"></div>
 </div>

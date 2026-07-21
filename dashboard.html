@@ -395,45 +395,10 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 </div>
 
 <!-- HEADER -->
-<header class="header">
-  <a class="h-logo" href="dashboard.html">
-    <div class="h-logo-circle">
-      <img src="logo.png" alt="Dottec" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center"><i class="ti ti-device-laptop"></i></span>
-    </div>
-    <div class="h-logo-text">
-      <div class="h-logo-nome">Dottec</div>
-      <div class="h-logo-sub">Assistência Inteligente</div>
-    </div>
-  </a>
-  <div class="h-saud">
-    <div class="h-saud-top" id="h-saud-top">—</div>
-    <div class="h-saud-nome" id="h-saud-nome">—</div>
-  </div>
-  <div class="h-right">
-    <div class="h-dt">
-      <div class="h-hora" id="h-hora">—</div>
-      <div class="h-data" id="h-data">—</div>
-    </div>
-    <a class="h-perfil" href="#" title="Meu perfil"><i class="ti ti-id-badge-2"></i></a>
-  </div>
-</header>
+
 
 <!-- BODY SCROLLÁVEL -->
-  <!-- BOLINHAS -->
-  <div class="mod-bar">
-    <div class="mods-grid" id="mods-grid">
-      <div style="color:var(--sub)"><i class="ti ti-loader-2 spin"></i></div>
-    </div>
-    <div class="mod-more-wrap" id="more-wrap" style="display:none">
-      <div class="mod-more-btn" onclick="toggleMore(event)">
-        <div class="mod-more"><i class="ti ti-dots"></i></div>
-        <span class="mod-more-lbl">mais</span>
-      </div>
-      <div class="mod-more-drop" id="more-drop"></div>
-    </div>
-    <div class="mod-cfg" onclick="abrirCfgMods()" title="Personalizar"><i class="ti ti-layout-grid"></i></div>
-  </div>
+
 <div class="body">
 
 
@@ -562,16 +527,6 @@ const safe=async p=>{try{return await p;}catch{return{data:[],count:0};}};
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 
-// ── RELÓGIO ───────────────────────────────────────
-function tick(){
-  const n=new Date(),h=n.getHours();
-  document.getElementById('h-saud-top').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
-  document.getElementById('h-saud-nome').textContent=USR.nome;
-  document.getElementById('h-hora').textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('h-data').textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
-}
-tick();setInterval(tick,10000);
-
 // ── TOAST ─────────────────────────────────────────
 function toast(msg,t='ok'){
   const el=document.getElementById('toast');
@@ -594,19 +549,6 @@ function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
 });
 
 // ── MÓDULOS ───────────────────────────────────────
-const MODS=[
-  {id:'os',         lbl:'OS',         ico:'ti-tool',            href:'os.html',           bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
-  {id:'venda',      lbl:'Venda',      ico:'ti-shopping-cart',   href:'venda.html',         bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
-  {id:'caixa',      lbl:'Caixa',      ico:'ti-wallet',          href:'caixa.html',         bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
-  {id:'financeiro', lbl:'Financeiro', ico:'ti-currency-dollar', href:'financeiro.html',    bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
-  {id:'orcamentos', lbl:'Orçamentos', ico:'ti-calculator',      href:'orcamentos.html',    bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',c:'#0E7490'},
-  {id:'cadastro',   lbl:'Cadastro',   ico:'ti-users',           href:'pessoas.html',       bg:'linear-gradient(135deg,#E3F4F5,#B8EDF0)',c:'#1E9099'},
-  {id:'produtos',   lbl:'Produtos',   ico:'ti-package',         href:'produtos.html',      bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
-  {id:'compras',    lbl:'Compras',    ico:'ti-truck-delivery',  href:'compras.html',       bg:'linear-gradient(135deg,#EEF0F5,#D4D9E8)',c:'#3A4A6B'},
-  {id:'fiscal',     lbl:'Fiscal',     ico:'ti-file-invoice',    href:'fiscal.html',        bg:'linear-gradient(135deg,#EEEAF8,#D8D0F4)',c:'#5B3FA6'},
-  {id:'config',     lbl:'Config.',    ico:'ti-settings',        href:'configuracoes.html', bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
-];
-let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
 let ATIVOS_TMP=[];
 
 async function loadMods(){
@@ -636,9 +578,6 @@ function renderMods(){
   } else mw.style.display='none';
   checkOsBdg();
 }
-
-function toggleMore(e){e.stopPropagation();document.getElementById('more-drop').classList.toggle('open');}
-document.addEventListener('click',()=>document.getElementById('more-drop')?.classList.remove('open'));
 
 async function checkOsBdg(){
   try{
