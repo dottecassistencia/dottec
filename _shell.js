@@ -59,15 +59,15 @@
 .sh-right{display:flex;align-items:center;gap:10px;margin-left:auto}
 .sh-hora{font-size:20px;font-weight:700;color:var(--dark);line-height:1}
 .sh-data{font-size:10px;color:var(--sub);text-align:right}
-.sh-modbar{border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:2px}
+.sh-modbar{border-bottom:1px solid var(--border);padding:10px 20px 8px;display:flex;align-items:center;gap:0}
 .sh-mods{flex:1;display:flex;align-items:center;gap:2px;overflow-x:auto}
 .sh-mods::-webkit-scrollbar{display:none}
-.sh-ball{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;padding:6px 8px;border-radius:12px;min-width:60px;transition:background .15s,transform .15s;flex-shrink:0}
-.sh-ball:hover{background:var(--bg);transform:translateY(-1px)}
+.sh-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 10px;border-radius:14px;min-width:68px;transition:background .15s,transform .2s cubic-bezier(.34,1.5,.64,1);flex-shrink:0}
+.sh-ball:hover{background:var(--bg);transform:translateY(-3px) scale(1.05)}
 .sh-ball.active{background:var(--cbg)}
-.sh-ball-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;transition:box-shadow .15s}
-.sh-ball.active .sh-ball-icon{box-shadow:0 0 0 2.5px var(--cyan)}
-.sh-ball-lbl{font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
+.sh-ball-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;transition:box-shadow .15s}
+.sh-ball.active .sh-ball-icon{box-shadow:0 0 0 3px var(--cyan)}
+.sh-ball-lbl{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
 .sh-ball.active .sh-ball-lbl{color:var(--cyan)}
 .sh-ball-bdg{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--coral);color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--white)}
 .sh-more-wrap{position:relative;flex-shrink:0}
