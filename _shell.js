@@ -70,6 +70,18 @@
 .sh-ball-lbl{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
 .sh-ball.active .sh-ball-lbl{color:var(--cyan)}
 .sh-ball-bdg{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--coral);color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--white)}
+@media(max-width:600px){
+  .sh-ball{min-width:48px;padding:4px 6px}
+  .sh-ball-icon{width:38px;height:38px;font-size:16px}
+  .sh-ball-lbl{font-size:8.5px}
+  .sh-modbar{padding:6px 10px 4px}
+  .sh-topbar{padding:0 12px;height:54px}
+  .sh-hora{font-size:16px}
+}
+@media(min-width:601px) and (max-width:900px){
+  .sh-ball{min-width:56px;padding:5px 8px}
+  .sh-ball-icon{width:44px;height:44px;font-size:19px}
+}
 .sh-more-wrap{position:relative;flex-shrink:0}
 .sh-more{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer}
 .sh-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:9001;min-width:160px}
