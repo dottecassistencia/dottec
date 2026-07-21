@@ -62,7 +62,7 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 
 /* ══ FILTROS ══ */
-.filter-bar{background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;margin:0}
 .search-row{padding:3px 12px;background:var(--white)}
 .search-box{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:9px;padding:0 14px;height:38px;transition:border-color .2s,box-shadow .2s}
 .search-box:focus-within{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1)}
@@ -155,10 +155,64 @@ tbody tr:hover{background:#FAFAF7}
 .field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.1);background:var(--white)}
 
 
+
+/* Shell sem gap entre mod-bar e filter-bar */
+#_dottec_shell .filter-bar{margin:0!important}
+#_dottec_shell .mod-bar{border-bottom:none}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL LISTA COMPRAS -->
+<div class="overlay" id="ov-compra">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-shopping-cart"></i></div>
+      <div class="modal-title">Lista de Compras</div>
+      <button class="modal-x" onclick="fecha('compra')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" style="gap:10px">
+      <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+        <div style="font-size:9px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Dispositivo / Cliente</div>
+        <div style="font-size:13px;font-weight:700;color:var(--dark)" id="cp-disp">—</div>
+        <div style="font-size:11.5px;color:var(--sub)" id="cp-cliente"></div>
+      </div>
+      <div class="field">
+        <label>Laudo técnico <span class="opt">(diagnóstico da OS)</span></label>
+        <textarea id="cp-laudo" style="height:60px;background:var(--bg);resize:none" readonly></textarea>
+      </div>
+      <div class="field">
+        <label>Observação <span class="opt">(opcional)</span></label>
+        <textarea id="cp-obs" style="height:60px" placeholder="Ex: cor específica, código, link do fornecedor..."></textarea>
+      </div>
+      <div class="field">
+        <label>Link do produto <span class="opt">(opcional)</span></label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="cp-link" placeholder="https://..." style="flex:1;text-transform:none"/>
+          <a id="cp-link-btn" href="#" target="_blank" style="display:none;width:36px;height:36px;border-radius:7px;background:var(--cbg);border:1px solid var(--border);align-items:center;justify-content:center;color:var(--cd);text-decoration:none;flex-shrink:0">
+            <i class="ti ti-external-link"></i>
+          </a>
+        </div>
+      </div>
+      <div id="cp-admin-section" style="display:none;padding-top:6px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Ação do administrador</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="marcarComprado()" style="flex:1;height:34px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+            <i class="ti ti-check"></i> Marcar como comprado
+          </button>
+          <button onclick="removerCompra()" style="height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+            <i class="ti ti-trash"></i> Remover
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fecha('compra')">Fechar</button>
+      <button class="btn-pri" onclick="salvarCompra()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL EXCLUIR -->
 <div class="overlay" id="ov-del">
@@ -351,9 +405,14 @@ function render(){
       <td style="font-weight:600;color:var(--dark)">${o.cliente_nome||'—'}</td>
       <td><div class="td-device">${device}</div>${corHtml}</td>
       <td onclick="event.stopPropagation()" style="text-align:center">
-        <span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status.replace(/'/g,"\\'")}')">
-          ${o.status}
-        </span>
+        ${o.status&&o.status.includes('AGUARDANDO PE')
+          ? `<span class="sb ${SB_CLS[o.status]||''}" onclick="event.stopPropagation();abrirCompra('${o.id}')" title="Ver lista de compras" style="cursor:pointer">
+              <i class="ti ti-shopping-cart" style="font-size:10px;margin-right:3px"></i>${o.status}
+             </span>`
+          : `<span class="sb ${SB_CLS[o.status]||''}" onclick="abrirStatus('${o.id}','#${String(o.numero).padStart(4,'0')}','${o.status.replace(/'/g,"\\'")}')">
+              ${o.status}
+             </span>`
+        }
       </td>
       <td class="td-val">${TOTAIS[o.id]>0?'R$ '+(TOTAIS[o.id]).toLocaleString('pt-BR',{minimumFractionDigits:2}):'—'}</td>
       <td class="td-tempo">${tempo(o.criado_em)}</td>
@@ -486,6 +545,73 @@ async function salvarClienteEdit(){
   render();
 }
 
+/* ── LISTA COMPRAS ── */
+let CP_ID=null; // id da linha em lista_compras
+
+async function abrirCompra(osId){
+  // busca ou cria item em lista_compras para essa OS
+  const os=TODOS.find(o=>o.id===osId);
+  if(!os)return;
+  // preenche info da OS
+  const disp=os._modelo?[os._marca,os._modelo].filter(Boolean).join(' '):os.aparelho||'—';
+  document.getElementById('cp-disp').textContent=disp.toUpperCase();
+  document.getElementById('cp-cliente').textContent=os.cliente_nome||'';
+  // busca laudo na OS
+  try{
+    const{data:apData}=await db.from('os_aparelhos').select('laudo').eq('os_id',osId).eq('ordem',1).maybeSingle();
+    document.getElementById('cp-laudo').value=(apData?.laudo||'').toUpperCase();
+  }catch{document.getElementById('cp-laudo').value='';}
+  // busca item existente na lista_compras
+  const{data:row}=await db.from('lista_compras').select('*').eq('os_id',osId).maybeSingle().catch(()=>({data:null}));
+  CP_ID=row?.id||null;
+  document.getElementById('cp-obs').value=row?.observacao||'';
+  const link=row?.link||'';
+  document.getElementById('cp-link').value=link;
+  const lb=document.getElementById('cp-link-btn');
+  if(link){lb.href=link;lb.style.display='flex';}else lb.style.display='none';
+  // mostra seção admin somente para ADMIN
+  document.getElementById('cp-admin-section').style.display=USR.perfil==='ADMIN'?'block':'none';
+  document.getElementById('ov-compra').classList.add('open');
+}
+
+async function salvarCompra(){
+  const obs=document.getElementById('cp-obs').value.trim();
+  const link=document.getElementById('cp-link').value.trim();
+  const lb=document.getElementById('cp-link-btn');
+  if(link){lb.href=link;lb.style.display='flex';}else lb.style.display='none';
+  try{
+    if(CP_ID){
+      await db.from('lista_compras').update({observacao:obs||null,link:link||null}).eq('id',CP_ID);
+    }
+    toast('Salvo!');
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+async function marcarComprado(){
+  if(!CP_ID){toast('Nenhum item encontrado.','err');return;}
+  try{
+    await db.from('lista_compras').update({
+      status:'COMPRADO',
+      comprado_em:new Date().toISOString(),
+      comprado_por:USR.nome
+    }).eq('id',CP_ID);
+    fecha('compra');
+    // atualiza status da OS para PRONTA ou AGUARDANDO APROVAÇÃO
+    toast('Marcado como comprado!');
+    load();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+async function removerCompra(){
+  if(!CP_ID){toast('Nenhum item.','err');return;}
+  if(USR.perfil!=='ADMIN'){toast('Somente administradores podem remover.','err');return;}
+  try{
+    await db.from('lista_compras').delete().eq('id',CP_ID);
+    fecha('compra');toast('Removido da lista de compras!');load();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+document.getElementById('ov-compra').addEventListener('click',function(e){if(e.target===this)fecha('compra');});
 /* ── INIT ── */
 load();
 

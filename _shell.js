@@ -182,6 +182,8 @@ body > *:not(#_dottec_shell):not(#_shell_spacer){animation:_shell_fadein .18s ea
     const moveFilterBar = () => {
       const fb = document.querySelector('.filter-bar');
       if(fb && !shell.contains(fb)){
+        fb.style.margin = '0';
+        fb.style.borderTop = 'none';
         shell.appendChild(fb);
       }
     };
