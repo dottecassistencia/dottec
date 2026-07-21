@@ -510,7 +510,7 @@ const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
 if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
 const db=window._dottecDb;
-const OS_ID=new URLSearchParams(location.search).get('id');
+let _OS_ID=new URLSearchParams(location.search).get('id');
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
@@ -902,7 +902,7 @@ function renderItens(){
           style="width:40px;border:none;background:transparent;font-size:11.5px;color:var(--red);outline:none;text-transform:none;-moz-appearance:textfield"/>
       </div>
       <input type="text" inputmode="decimal" value="${totalFmt}" title="Total (editável)"
-        onchange="const v=parseFloat(this.value.replace(',','.'))||0;ITENS[${i}].desconto=Math.max(0,(it.preco*(ITENS[${i}].qty||1))-v);calcTotal()"
+        onchange="const v=parseFloat(this.value.replace(',','.'))||0;ITENS[${i}].desconto=Math.max(0,(ITENS[${i}].preco*(ITENS[${i}].qty||1))-v);calcTotal();this.style.border='1px solid transparent';this.style.background='transparent'"
         style="width:72px;font-size:12px;font-weight:700;color:var(--dark);border:1px solid transparent;border-radius:5px;padding:0 4px;text-align:right;background:transparent;outline:none;-moz-appearance:textfield"
         onfocus="this.style.border='1px solid var(--cyan)';this.style.background='var(--white)'"
         onblur="this.style.border='1px solid transparent';this.style.background='transparent'"/>
@@ -980,7 +980,7 @@ async function gdUpload(files){
   document.getElementById('fotos-prog').style.display='block';
   for(const file of files){
     try{
-      const meta={name:`OS_${OS_ID||'nova'}_${Date.now()}_${file.name}`,parents:[GD_FOLDER_ID]};
+      const meta={name:`OS_${_OS_ID||'nova'}_${Date.now()}_${file.name}`,parents:[GD_FOLDER_ID]};
       const form=new FormData();form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));form.append('file',file);
       const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN},body:form}).then(r=>r.json());
       await fetch(`https://www.googleapis.com/drive/v3/files/${res.id}/permissions`,{method:'POST',headers:{Authorization:'Bearer '+GD_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({role:'reader',type:'anyone'})});
@@ -1007,11 +1007,11 @@ function gdCheckToken(){const t=sessionStorage.getItem('gd_token');if(t){GD_TOKE
 
 // ── LOAD OS ──────────────────────────────────────────
 async function loadOS(){
-  if(!OS_ID){addAp('dispositivo');setTimeout(()=>document.getElementById('cl-busca').focus(),300);return;}
+  if(!_OS_ID){addAp('dispositivo');setTimeout(()=>document.getElementById('cl-busca').focus(),300);return;}
   document.getElementById('tb-title').textContent='Editar OS';
   document.getElementById('btn-txt').textContent='Salvar';
   try{
-    const{data,error}=await db.from('ordens_servico').select('*').eq('id',OS_ID).single();
+    const{data,error}=await db.from('ordens_servico').select('*').eq('id',_OS_ID).single();
     if(error||!data){toast('OS não encontrada.','err');return;}
     document.getElementById('tb-num').textContent='· '+String(data.numero).padStart(4,'0');
     if(data.cliente_nome)mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome,celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
@@ -1022,7 +1022,7 @@ async function loadOS(){
     if(data.desconto)document.getElementById('os-desconto').value=data.desconto;
     // aparelhos
     let aps=null;
-    try{const{data:_a}=await db.from('os_aparelhos').select('*').eq('os_id',OS_ID).order('ordem');aps=_a;}catch{}
+    try{const{data:_a}=await db.from('os_aparelhos').select('*').eq('os_id',_OS_ID).order('ordem');aps=_a;}catch{}
     if(aps&&aps.length){
       APS=aps.map(a=>({tipo_registro:a.tipo_registro||'dispositivo',tipo:a.tipo||'',marca:a.marca||'',modelo:a.modelo||'',cor:a.cor||'',imei:a.imei||'',senha:a.senha||'',acessorios:a.acessorios||'',defeito:a.defeito||'',laudo:a.laudo||'',solucao:a.solucao||'',anydesk_id:a.anydesk_id||''}));
     } else {
@@ -1034,7 +1034,7 @@ async function loadOS(){
     }
     renderAps();
     // itens
-    try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1,desconto:it.desconto||0}));renderItens();calcTotal();}}catch{}
+    try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',_OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1,desconto:it.desconto||0}));renderItens();calcTotal();}}catch{}
     // fotos
     if(aps&&aps.length&&aps[0].fotos)gdCarregarFotos(aps[0].fotos);
   }catch(err){toast('Erro ao carregar: '+err.message,'err');}
@@ -1062,6 +1062,7 @@ async function salvar(){
     if(ap.tipo_registro==='chamado_tecnico')ap.anydesk_id=(document.getElementById('ap-anydesk-'+i)?.value||'').trim();
   });
   _SALVANDO=true;
+  let data_numero=null;
   const btn=document.getElementById('btn-save');btn.disabled=true;document.getElementById('btn-txt').textContent='Salvando...';
   try{
     let pessoaId=document.getElementById('cl-id').value||null;
@@ -1092,9 +1093,9 @@ async function salvar(){
       contato_tel:_contatoTel||null,
       atualizado_em:new Date().toISOString(),
     };
-    let osId=OS_ID;
-    if(OS_ID){const{error}=await db.from('ordens_servico').update(payload).eq('id',OS_ID);if(error)throw new Error(error.message);}
-    else{const{data:nova,error}=await db.from('ordens_servico').insert(payload).select('id').single();if(error)throw new Error(error.message);osId=nova.id;}
+    let osId=_OS_ID;
+    if(_OS_ID){const{error}=await db.from('ordens_servico').update(payload).eq('id',_OS_ID);if(error)throw new Error(error.message);}
+    else{const{data:nova,error}=await db.from('ordens_servico').insert(payload).select('id,numero').single();if(error)throw new Error(error.message);osId=nova.id;data_numero=nova.numero;}
     // aparelhos
     try{
       await db.from('os_aparelhos').delete().eq('os_id',osId);
@@ -1112,7 +1113,7 @@ async function salvar(){
       await db.from('os_servicos').delete().eq('os_id',osId);
       if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty,desconto:it.desconto||0})));
     }catch(e){console.warn('itens:',e);}
-    if(!OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
+    if(!_OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
     // se status = AGUARDANDO PEÇA, adiciona na lista de compras
     if(status==='AGUARDANDO PEÇA'||status==='AGUARDANDO PECA'){
       try{
@@ -1131,12 +1132,14 @@ async function salvar(){
         }
       }catch(e){console.warn('lista_compras:',e);}
     }
-    toast(OS_ID?'OS atualizada! ✓':'OS criada! ✓');
+    toast(_OS_ID?'OS atualizada! ✓':'OS criada! ✓');
     _SALVANDO=false;
     // atualiza o título/número se for nova OS
-    if(!OS_ID&&osId){
+    if(!_OS_ID&&osId){
+      _OS_ID=osId;
       history.replaceState(null,'','os-nova.html?id='+osId);
       document.getElementById('tb-title').textContent='Editar OS';
+      document.getElementById('tb-num').textContent='· '+String(data_numero||'').padStart(4,'0');
     }
     btn.disabled=false;
     document.getElementById('btn-txt').textContent='Salvar';
