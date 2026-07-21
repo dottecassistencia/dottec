@@ -46,23 +46,10 @@
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 #_dottec_shell{position:fixed;top:0;left:0;right:0;z-index:9000;background:var(--white)}
-.sh-topbar{height:62px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px}
-.sh-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.sh-logo-circle{width:32px;height:32px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sh-logo-circle img{width:100%;height:100%;object-fit:cover}
-.sh-logo-circle i{font-size:15px;color:#fff}
-.sh-logo-nome{font-size:13px;font-weight:700;color:var(--dark);line-height:1.1}
-.sh-logo-sub{font-size:9px;color:var(--sub)}
-.sh-saud{display:flex;flex-direction:column;gap:1px}
-.sh-saud-top{font-size:10px;color:var(--sub)}
-.sh-saud-nome{font-size:13px;font-weight:700;color:var(--dark)}
-.sh-right{display:flex;align-items:center;gap:10px;margin-left:auto}
-.sh-hora{font-size:20px;font-weight:700;color:var(--dark);line-height:1}
-.sh-data{font-size:10px;color:var(--sub);text-align:right}
-.sh-modbar{border-bottom:1px solid var(--border);padding:10px 20px 8px;display:flex;align-items:center;gap:0}
-.sh-mods{flex:1;display:flex;align-items:center;gap:2px;overflow-x:auto}
+.sh-modbar{border-bottom:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06);padding:8px 16px;display:flex;align-items:center;gap:0;background:var(--white)}
+.sh-mods{flex:1;display:flex;align-items:center;justify-content:space-evenly;overflow-x:auto}
 .sh-mods::-webkit-scrollbar{display:none}
-.sh-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 10px;border-radius:14px;min-width:68px;transition:background .15s,transform .2s cubic-bezier(.34,1.5,.64,1);flex-shrink:0}
+.sh-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 10px;border-radius:14px;flex:1;min-width:0;transition:background .15s,transform .2s cubic-bezier(.34,1.5,.64,1);flex-shrink:0}
 .sh-ball:hover{background:var(--bg);transform:translateY(-3px) scale(1.05)}
 .sh-ball.active{background:var(--cbg)}
 .sh-ball-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;transition:box-shadow .15s}
@@ -71,16 +58,16 @@
 .sh-ball.active .sh-ball-lbl{color:var(--cyan)}
 .sh-ball-bdg{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:var(--coral);color:#fff;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--white)}
 @media(max-width:600px){
-  .sh-ball{min-width:48px;padding:4px 6px}
-  .sh-ball-icon{width:38px;height:38px;font-size:16px}
-  .sh-ball-lbl{font-size:8.5px}
-  .sh-modbar{padding:6px 10px 4px}
-  .sh-topbar{padding:0 12px;height:54px}
-  .sh-hora{font-size:16px}
+  .sh-ball{min-width:0;flex:1;padding:4px 2px}
+  .sh-ball-icon{width:36px;height:36px;font-size:15px}
+  .sh-ball-lbl{font-size:8px}
+  .sh-modbar{padding:6px 8px}
+  .sh-sep{margin:0 2px}
 }
 @media(min-width:601px) and (max-width:900px){
-  .sh-ball{min-width:56px;padding:5px 8px}
-  .sh-ball-icon{width:44px;height:44px;font-size:19px}
+  .sh-ball{min-width:0;flex:1;padding:5px 4px}
+  .sh-ball-icon{width:42px;height:42px;font-size:18px}
+  .sh-ball-lbl{font-size:9px}
 }
 .sh-more-wrap{position:relative;flex-shrink:0}
 .sh-more{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer}
@@ -97,26 +84,16 @@
   const shell=document.createElement('div');
   shell.id='_dottec_shell';
   shell.innerHTML=`
-<div class="sh-topbar">
-  <a class="sh-logo" href="dashboard.html">
-    <div class="sh-logo-circle">
-      <img src="logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <i class="ti ti-device-laptop" style="display:none"></i>
-    </div>
-    <div><div class="sh-logo-nome">Dottec</div><div class="sh-logo-sub">Assistência</div></div>
-  </a>
-  <div class="sh-saud">
-    <div class="sh-saud-top" id="sh-saud-top">Bom dia,</div>
-    <div class="sh-saud-nome" id="sh-saud-nome">${USR.nome}</div>
-  </div>
-  <div class="sh-right">
-    <div style="text-align:right">
-      <div class="sh-hora" id="sh-hora">--:--</div>
-      <div class="sh-data" id="sh-data"></div>
-    </div>
-  </div>
-</div>
+
 <div class="sh-modbar">
+  <a class="sh-ball sh-logo-ball" href="dashboard.html" title="Dashboard">
+    <div class="sh-ball-icon sh-logo-icon">
+      <img src="logo.png" alt="Logo" id="sh-logo-img" onerror="this.style.display='none';document.getElementById('sh-logo-fb').style.display='flex'"/>
+      <span id="sh-logo-fb" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:22px;color:var(--cyan)"><i class="ti ti-device-laptop"></i></span>
+    </div>
+    <span class="sh-ball-lbl">Início</span>
+  </a>
+  <div class="sh-sep"></div>
   <div class="sh-mods" id="sh-mods"><i class="ti ti-loader-2" style="animation:spin .7s linear infinite;color:var(--sub)"></i></div>
   <div class="sh-more-wrap" id="sh-more-wrap" style="display:none">
     <div class="sh-more" onclick="toggleShMore(event)"><i class="ti ti-dots"></i></div>
@@ -159,17 +136,7 @@
     requestAnimationFrame(applySpacerHeight);
     window.addEventListener('load',applySpacerHeight);
 
-    // Relógio
-    function tick(){
-      const n=new Date(),h=n.getHours();
-      const top=document.getElementById('sh-saud-top');
-      const hora=document.getElementById('sh-hora');
-      const data=document.getElementById('sh-data');
-      if(top)top.textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
-      if(hora)hora.textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      if(data)data.textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
-    }
-    tick();setInterval(tick,10000);
+
 
     // Módulos
     loadShMods();

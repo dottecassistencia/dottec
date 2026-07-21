@@ -359,6 +359,18 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 
 
 
+  <!-- SAUDAÇÃO -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <div style="font-size:11px;color:var(--sub)" id="d-saud-top">Bom dia,</div>
+      <div style="font-size:20px;font-weight:700;color:var(--dark);font-family:'Lora',serif" id="d-saud-nome">Gaza</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:28px;font-weight:700;color:var(--dark);line-height:1" id="d-hora">--:--</div>
+      <div style="font-size:11px;color:var(--sub)" id="d-data"></div>
+    </div>
+  </div>
+
   <!-- MÉTRICAS -->
   <div class="metrics">
     <a class="mc mc-os" href="os.html" style="text-decoration:none">
@@ -576,7 +588,21 @@ async function loadMetricas(){
   const iniSem=new Date(agora);iniSem.setDate(agora.getDate()-agora.getDay());iniSem.setHours(0,0,0,0);
   const iniMes=new Date(agora.getFullYear(),agora.getMonth(),1);
 
-  const[osHj,osTot,vdHj,vdSem]=await Promise.all([
+  const[osHj,osTot,vdHj,vdSem]=await 
+// Relógio e saudação
+function d_tick(){
+  const n=new Date(),h=n.getHours();
+  const top=document.getElementById('d-saud-top');
+  const nome=document.getElementById('d-saud-nome');
+  const hora=document.getElementById('d-hora');
+  const data=document.getElementById('d-data');
+  if(top)top.textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
+  if(nome)nome.textContent=USR.nome||'Gaza';
+  if(hora)hora.textContent=n.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  if(data)data.textContent=n.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+}
+d_tick();setInterval(d_tick,10000);
+Promise.all([
     safe(db.from('ordens_servico').select('id',{count:'exact',head:true}).gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
     safe(db.from('ordens_servico').select('id',{count:'exact',head:true}).not('status','in','("ENTREGUE","CANCELADA")')),
     safe(db.from('vendas').select('id',{count:'exact',head:true}).gte('criado_em',hoje+'T00:00:00').lte('criado_em',hoje+'T23:59:59')),
