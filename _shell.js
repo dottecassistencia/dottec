@@ -178,29 +178,20 @@ body > *:not(#_dottec_shell):not(#_shell_spacer){animation:_shell_fadein .18s ea
     document.body.style.overflowY = 'hidden';
     // padding-top para compensar header fixo (header 62px + mod-bar ~78px = 140px)
     // Calcula após render
-    // move .filter-bar para dentro do shell (fica fixo junto ao cabeçalho)
-    const moveFilterBar = () => {
-      const fb = document.querySelector('.filter-bar');
-      if(fb && !shell.contains(fb)){
-        fb.style.margin = '0';
-        fb.style.borderTop = 'none';
-        shell.appendChild(fb);
+    // calcula spacer baseado na altura real do shell
+    const applyLayout = () => {
+      const shellH = shell.offsetHeight || 142;
+      let spacer = document.getElementById('_shell_spacer');
+      if(!spacer){
+        spacer = document.createElement('div');
+        spacer.id = '_shell_spacer';
+        spacer.style.flexShrink = '0';
+        document.body.insertBefore(spacer, shell.nextSibling);
       }
+      // filter-bar é fixo via CSS com top:142px — spacer só cobre o shell
+      spacer.style.height = shellH + 'px';
     };
-    // spacer = altura do shell (incluindo filter-bar se movida)
-    const makespacer = () => {
-      moveFilterBar();
-      let existing = document.getElementById('_shell_spacer');
-      if(!existing){
-        existing = document.createElement('div');
-        existing.id = '_shell_spacer';
-        existing.style.flexShrink = '0';
-        document.body.insertBefore(existing, shell.nextSibling);
-      }
-      const h = shell.offsetHeight;
-      existing.style.height = (h || 118) + 'px';
-    };
-    requestAnimationFrame(()=>{ makespacer(); requestAnimationFrame(makespacer); });
+    requestAnimationFrame(()=>{ applyLayout(); requestAnimationFrame(applyLayout); });
     initShell();
   }
 
