@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
 <style>
   :root{
     --cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;
@@ -172,115 +173,15 @@ const BREADCRUMB = [];
 
 <main class="content">
 
-  <!-- CADASTROS AUXILIARES -->
+  <!-- GRUPO: ORDENS DE SERVIÇO -->
   <div class="section">
-    <div class="section-label">Cadastros auxiliares</div>
+    <div class="section-label">Ordens de serviço</div>
     <div class="cards-grid">
 
-      <a class="cfg-card cyan" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-map-pin"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Localidades</div>
-          <div class="card-desc">Cidades, estados e tabela de CEPs para autocomplete no cadastro de pessoas.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card amber" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-category"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Grupos de produtos</div>
-          <div class="card-desc">Categorias para organizar o catálogo de produtos (pelicula, cabo, carcaça...).</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count" id="cnt-grupos"><div class="card-dot"></div> Carregando...</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card green" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-tools"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Tipos de serviço</div>
-          <div class="card-desc">Categorias de serviços usadas nas ordens de serviço (troca de tela, bateria...).</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card slate" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-flag"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Status de OS</div>
-          <div class="card-desc">Etapas personalizadas para o fluxo das ordens de serviço.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card coral" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-forms"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Campos personalizados</div>
-          <div class="card-desc">Adicione campos extras ao cadastro de clientes, produtos ou OS.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card purple" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-tags"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Condições de pagamento</div>
-          <div class="card-desc">Prazos e formas de pagamento padrão para vendas e compras.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card cyan" href="servicos.html">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-tool"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Tabela de serviços</div>
-          <div class="card-desc">Serviços com valor padrão e garantia — usados nas ordens de serviço.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count" id="cnt-srvs"><div class="card-dot ok"></div> OS</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
       <a class="cfg-card cyan" href="servicos-dispositivos.html">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-device-mobile-cog"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-device-mobile-cog"></i></div></div>
         <div class="card-body">
-          <div class="card-name">Serviços e Dispositivos</div>
+          <div class="card-name">Dispositivos</div>
           <div class="card-desc">Tipos, marcas, modelos e cores de aparelhos — usados nas ordens de serviço.</div>
         </div>
         <div class="card-footer">
@@ -290,12 +191,10 @@ const BREADCRUMB = [];
       </a>
 
       <a class="cfg-card coral" href="status-config.html">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-list-check"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-list-check"></i></div></div>
         <div class="card-body">
           <div class="card-name">Status configuráveis</div>
-          <div class="card-desc">OS, contas a pagar e receber — defina quais status geram alerta no dashboard.</div>
+          <div class="card-desc">OS, contas a pagar e receber — defina quais status geram alerta e para qual perfil.</div>
         </div>
         <div class="card-footer">
           <div class="card-count" id="cnt-status"><div class="card-dot ok"></div> OS + Contas</div>
@@ -303,10 +202,48 @@ const BREADCRUMB = [];
         </div>
       </a>
 
-      <a class="cfg-card cyan" href="formas-pagamento.html">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-credit-card"></i></div>
+    </div>
+  </div>
+
+  <!-- GRUPO: PRODUTOS E SERVIÇOS -->
+  <div class="section">
+    <div class="section-label">Produtos e serviços</div>
+    <div class="cards-grid">
+
+      <a class="cfg-card cyan" href="servicos.html">
+        <div class="card-top"><div class="card-icon"><i class="ti ti-tool"></i></div></div>
+        <div class="card-body">
+          <div class="card-name">Tabela de serviços</div>
+          <div class="card-desc">Serviços com valor padrão e garantia — usados nas ordens de serviço.</div>
         </div>
+        <div class="card-footer">
+          <div class="card-count" id="cnt-srvs"><div class="card-dot ok"></div> Serviços</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+      <a class="cfg-card amber" href="#">
+        <div class="card-top"><div class="card-icon"><i class="ti ti-category"></i></div></div>
+        <div class="card-body">
+          <div class="card-name">Grupos de produtos</div>
+          <div class="card-desc">Categorias para organizar o catálogo (película, cabo, carcaça...).</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-count" id="cnt-grupos"><div class="card-dot"></div> Em breve</div>
+          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- GRUPO: FINANCEIRO -->
+  <div class="section">
+    <div class="section-label">Financeiro</div>
+    <div class="cards-grid">
+
+      <a class="cfg-card cyan" href="formas-pagamento.html">
+        <div class="card-top"><div class="card-icon"><i class="ti ti-credit-card"></i></div></div>
         <div class="card-body">
           <div class="card-name">Formas de pagamento</div>
           <div class="card-desc">Cadastre as formas de pagamento e defina se cada uma movimenta o caixa físico.</div>
@@ -320,15 +257,13 @@ const BREADCRUMB = [];
     </div>
   </div>
 
-  <!-- SISTEMA -->
+  <!-- GRUPO: SISTEMA -->
   <div class="section">
     <div class="section-label">Sistema</div>
     <div class="cards-grid">
 
       <a class="cfg-card dark" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-building"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-building"></i></div></div>
         <div class="card-body">
           <div class="card-name">Dados da empresa</div>
           <div class="card-desc">CNPJ, razão social, endereço e logotipo usados em documentos e notas.</div>
@@ -340,9 +275,7 @@ const BREADCRUMB = [];
       </a>
 
       <a class="cfg-card rose" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-user-cog"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-user-cog"></i></div></div>
         <div class="card-body">
           <div class="card-name">Usuários e permissões</div>
           <div class="card-desc">Gerencie quem acessa o sistema e o que cada usuário pode fazer.</div>
@@ -354,11 +287,9 @@ const BREADCRUMB = [];
       </a>
 
       <a class="cfg-card slate" href="certificado.html">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-certificate"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-certificate"></i></div></div>
         <div class="card-body">
-          <div class="card-name">Certificado Digital</div>
+          <div class="card-name">Certificado digital</div>
           <div class="card-desc">Upload do A1 (.pfx), senha, ambiente SEFAZ e série da NF-e/NFC-e.</div>
         </div>
         <div class="card-footer">
@@ -370,32 +301,16 @@ const BREADCRUMB = [];
     </div>
   </div>
 
-  <!-- IMPRESSÃO E DOCUMENTOS -->
+  <!-- GRUPO: IMPRESSÃO -->
   <div class="section">
     <div class="section-label">Impressão e documentos</div>
     <div class="cards-grid cols2">
 
       <a class="cfg-card amber" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-barcode"></i></div>
-        </div>
+        <div class="card-top"><div class="card-icon"><i class="ti ti-barcode"></i></div></div>
         <div class="card-body">
           <div class="card-name">Etiquetas</div>
           <div class="card-desc">Modelo, tamanho e campos exibidos nas etiquetas de produtos.</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-count"><div class="card-dot"></div> Em breve</div>
-          <div class="card-arrow"><i class="ti ti-arrow-right"></i></div>
-        </div>
-      </a>
-
-      <a class="cfg-card green" href="#">
-        <div class="card-top">
-          <div class="card-icon"><i class="ti ti-printer"></i></div>
-        </div>
-        <div class="card-body">
-          <div class="card-name">Modelo de OS</div>
-          <div class="card-desc">Layout e campos impressos na ordem de serviço entregue ao cliente.</div>
         </div>
         <div class="card-footer">
           <div class="card-count"><div class="card-dot"></div> Em breve</div>

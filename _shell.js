@@ -90,7 +90,7 @@ input::placeholder,textarea::placeholder{text-transform:none}
 }
 .sh-more-wrap{position:relative;flex-shrink:0}
 .sh-more{width:32px;height:32px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer}
-.sh-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:9001;min-width:160px}
+.sh-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:99999;min-width:160px}
 .sh-more-drop.open{display:block}
 .sh-more-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-decoration:none}
 .sh-more-item:hover{background:var(--bg)}
