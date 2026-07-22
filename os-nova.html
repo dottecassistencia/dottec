@@ -20,35 +20,35 @@ input::placeholder,textarea::placeholder{text-transform:none;color:#B5B2A8}
 
 /* TOPBAR */
 .topbar{height:56px;background:var(--white);border-bottom:1.5px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.06)}
-.tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.tb-circle{width:30px;height:30px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#29B8C2,#1E9099);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+
 .tb-circle img{width:100%;height:100%;object-fit:cover;display:block}
 .tb-circle i{font-size:14px;color:#fff}
-.tb-nome{font-family:'Lora',serif;font-size:12.5px;font-weight:700;color:var(--dark);line-height:1.1}
-.tb-sub{font-size:8px;color:var(--sub)}
-.tb-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
-.tb-page{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.tb-page-ico{width:22px;height:22px;border-radius:6px;background:var(--cbg2);color:var(--coral);display:flex;align-items:center;justify-content:center;font-size:11px}
-.tb-page-name{font-family:'Lora',serif;font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap}
-.tb-page-num{font-size:10.5px;color:var(--sub);margin-left:2px}
-.tb-mods{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(34px,1fr));gap:2px;justify-items:center;align-items:center;min-width:0}
-.tb-ball{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;cursor:pointer;max-width:48px;width:100%}
-.tb-ball-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;transition:transform .2s cubic-bezier(.34,1.5,.64,1)}
-.tb-ball:hover .tb-ball-icon{transform:translateY(-2px) scale(1.1)}
-.tb-ball.active .tb-ball-icon{box-shadow:0 0 0 2px var(--cyan)}
-.tb-ball-lbl{font-size:6.5px;font-weight:700;color:var(--sub);text-align:center;white-space:nowrap;width:100%;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
-.tb-ball.active .tb-ball-lbl{color:var(--cyan)}
-.tb-more-wrap{position:relative;flex-shrink:0}
-.tb-more{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);cursor:pointer}
-.tb-more-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.12);padding:6px;z-index:500;min-width:160px}
+
+
+
+
+
+
+
+
+
+
+.tb-ball:hover 
+.tb-ball.active 
+
+.tb-ball.active 
+
+
+
 .tb-more-drop.open{display:block}
-.tb-more-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);text-decoration:none}
+
 .tb-more-item:hover{background:var(--bg)}
 .tb-more-item i{font-size:13px;width:16px;text-align:center}
-.tb-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.tb-back{height:28px;padding:0 9px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;text-decoration:none}
+
+
 .tb-back:hover{background:var(--bg)}
-.tb-save{height:28px;padding:0 11px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
+
 .tb-save:hover{background:var(--cd)}
 .tb-save:disabled{opacity:.5;cursor:not-allowed}
 
@@ -335,34 +335,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <a class="tb-logo" href="dashboard.html">
-    <div class="tb-circle">
-      <img src="logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <span style="display:none;width:100%;height:100%;align-items:center;justify-content:center"><i class="ti ti-device-laptop"></i></span>
-    </div>
-    <div><div class="tb-nome">Dottec</div><div class="tb-sub">Assistência</div></div>
-  </a>
-  <div class="tb-sep"></div>
-  <div class="tb-page">
-    <div class="tb-page-ico"><i class="ti ti-tool"></i></div>
-    <span class="tb-page-name" id="tb-title">Nova OS</span>
-    <span class="tb-page-num" id="tb-num"></span>
-  </div>
-  <div class="tb-sep"></div>
-  <div class="tb-mods" id="tb-mods"><div style="color:var(--sub);grid-column:1/-1"><i class="ti ti-loader-2 spin"></i></div></div>
-  <div class="tb-more-wrap" id="tb-more-wrap" style="display:none">
-    <div class="tb-more" onclick="toggleMore(event)"><i class="ti ti-dots"></i></div>
-    <div class="tb-more-drop" id="tb-more-drop"></div>
-  </div>
-  <div class="tb-sep"></div>
-  <div class="tb-actions">
-    <a class="tb-back" href="os.html"><i class="ti ti-arrow-left"></i> Voltar</a>
-    <button class="tb-save" id="btn-save" onclick="salvar()"><i class="ti ti-device-floppy"></i> <span id="btn-txt">Salvar</span></button>
-  </div>
-</div>
-
 <!-- BODY -->
 <div class="body">
 <div class="content">
@@ -535,20 +507,6 @@ const MODS=[
   {id:'config',lbl:'Config.',ico:'ti-settings',href:'configuracoes.html',bg:'linear-gradient(135deg,#F0EDE7,#DDD9D0)',c:'#5A5855'},
 ];
 let ATIVOS=['os','venda','caixa','financeiro','orcamentos','cadastro','produtos','compras'];
-async function loadMods(){
-  if(USR.id){try{const{data}=await db.from('configuracoes_sistema').select('valor').eq('chave','mods_u_'+USR.id).maybeSingle();if(data?.valor)ATIVOS=JSON.parse(data.valor);}catch{}}
-  const ativos=ATIVOS.slice(0,8).map(id=>MODS.find(m=>m.id===id)).filter(Boolean);
-  const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
-  document.getElementById('tb-mods').innerHTML=ativos.map(m=>`
-    <a class="tb-ball${m.id==='os'?' active':''}" href="${m.href}">
-      <div class="tb-ball-icon" style="background:${m.bg}"><i class="ti ${m.ico}" style="color:${m.c}"></i></div>
-      <span class="tb-ball-lbl">${m.lbl}</span>
-    </a>`).join('');
-  const mw=document.getElementById('tb-more-wrap');
-  if(resto.length){mw.style.display='block';document.getElementById('tb-more-drop').innerHTML=resto.map(m=>`<a class="tb-more-item" href="${m.href}"><i class="ti ${m.ico}" style="color:${m.c}"></i>${m.lbl}</a>`).join('');}
-  else mw.style.display='none';
-}
-function toggleMore(e){e.stopPropagation();document.getElementById('tb-more-drop').classList.toggle('open');}
 document.addEventListener('click',e=>{
   document.getElementById('tb-more-drop')?.classList.remove('open');
   if(!e.target.closest('.ac-wrap'))document.getElementById('cl-drop').classList.remove('open');
@@ -1463,7 +1421,7 @@ function salvarContato(){
 
 // ── INIT ─────────────────────────────────────────────
 gdCheckToken();
-Promise.all([loadMods(),loadStatus(),loadOpcoesAp()]).then(()=>loadOS());
+Promise.all([loadStatus(),loadOpcoesAp()]).then(()=>loadOS());
 </script>
 </body>
 </html>

@@ -100,6 +100,15 @@ tbody tr:hover{background:#FAFAF7}
 .act{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;flex-shrink:0}
 .act-ed{background:var(--bg);color:var(--sub)}.act-ed:hover{background:var(--cbg);color:var(--cd)}
 .act-del{background:var(--bg);color:var(--sub)}.act-del:hover{background:var(--rbg);color:var(--red)}
+.act-more-wrap{position:relative}
+.act-more-btn{background:var(--bg);color:var(--sub)}.act-more-btn:hover{background:var(--cbg);color:var(--cd)}
+.act-more-drop{display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:190px;z-index:9998;padding:4px}
+.act-more-drop.open{display:block}
+.amd-item{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:100%;border:none;background:transparent;font-family:inherit;text-align:left;transition:background .1s}
+.amd-item:hover{background:var(--bg)}
+.amd-item i{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.amd-item.disabled{opacity:.4;cursor:not-allowed}
+.amd-sep{height:1px;background:var(--border);margin:3px 6px}
 .act-can{background:var(--bg);color:var(--sub)}.act-can:hover{background:var(--abg);color:var(--amber)}
 .tf{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--sub);display:flex;align-items:center;justify-content:space-between}
 .empty{padding:3rem;text-align:center;color:var(--sub)}.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.2}
@@ -231,6 +240,78 @@ tbody tr:hover{background:#FAFAF7}
     <div class="modal-foot">
       <button class="btn-sec" onclick="fecha('compra')">Fechar</button>
       <button class="btn-pri" onclick="salvarCompra()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECEBIMENTO FINANCEIRO -->
+<div class="overlay" id="ov-rec">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--gbg);color:var(--green)"><i class="ti ti-cash"></i></div>
+      <div class="modal-title" id="rec-title">Receber OS #0000</div>
+      <button class="modal-x" onclick="fecha('rec')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" style="gap:10px">
+      <div style="background:var(--bg);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--sub)">
+        <div style="font-weight:700;color:var(--dark)" id="rec-cliente"></div>
+        <div id="rec-total-info"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field">
+          <label>Valor recebido</label>
+          <div style="display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:7px;background:#FAFAF7;padding:0 9px;height:36px">
+            <span style="font-size:12px;color:var(--sub)">R$</span>
+            <input type="number" id="rec-valor" min="0" step="0.01" placeholder="0,00"
+              style="border:none;background:transparent;font-size:13px;font-weight:700;color:var(--dark);outline:none;width:100%;text-transform:none"
+              oninput="recCalcSaldo()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Data da compensação</label>
+          <input type="date" id="rec-data"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Forma de recebimento</label>
+        <select id="rec-forma">
+          <option>DINHEIRO</option>
+          <option>PIX</option>
+          <option>CARTÃO DÉBITO</option>
+          <option>CARTÃO CRÉDITO</option>
+          <option>CARTÃO CRÉDITO 2X</option>
+          <option>CARTÃO CRÉDITO 3X</option>
+          <option>TRANSFERÊNCIA</option>
+          <option>DUPLICATA</option>
+          <option>CHEQUE</option>
+          <option>PERMUTA</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Observação <span class="opt">(opcional)</span></label>
+        <textarea id="rec-obs" style="height:60px" placeholder="Observações sobre este pagamento..."></textarea>
+      </div>
+      <!-- Saldo restante -->
+      <div id="rec-saldo-wrap" style="display:none;background:var(--abg);border-radius:8px;padding:10px 12px;border:1px solid rgba(154,96,0,.2)">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Saldo restante</div>
+        <div style="font-size:13px;color:var(--text)">Faltam <strong id="rec-saldo-val" style="color:var(--amber)">R$ 0,00</strong> para quitar. Deseja criar uma parcela pendente?</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <div class="field" style="flex:1">
+            <label>Forma do saldo</label>
+            <select id="rec-saldo-forma">
+              <option>DUPLICATA</option>
+              <option>DINHEIRO</option>
+              <option>PIX</option>
+              <option>CARTÃO CRÉDITO</option>
+              <option>CHEQUE</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fecha('rec')">Cancelar</button>
+      <button class="btn-pri" onclick="confirmarRecebimento()" style="background:var(--green)"><i class="ti ti-check"></i> Confirmar recebimento</button>
     </div>
   </div>
 </div>
@@ -448,6 +529,10 @@ function render(){
             ?`<button class="act act-can" onclick="abrirCan('${o.id}','#${String(o.numero).padStart(4,'0')}')" title="Cancelar"><i class="ti ti-ban"></i></button>`
             :''
         }
+        <div class="act-more-wrap">
+          <button class="act act-more-btn" onclick="toggleActMenu(event,'${o.id}','${o.numero}','${o.cliente_nome}','${(o._tel||'').replace(/\D/g,'')}','${o.status}')" title="Mais ações"><i class="ti ti-dots-vertical"></i></button>
+          <div class="act-more-drop" id="amd-${o.id}"></div>
+        </div>
       </div></td>
     </tr>`;
   }).join('');
@@ -636,6 +721,140 @@ async function removerCompra(){
 }
 
 document.getElementById('ov-compra').addEventListener('click',function(e){if(e.target===this)fecha('compra');});
+/* ── MENU DE AÇÕES POR OS ── */
+let _actOsId=null,_actOsNum=null,_actCliente=null,_actTel=null,_actStatus=null;
+let _recOsId=null,_recTotal=0;
+
+function toggleActMenu(e,osId,num,cliente,tel,status){
+  e.stopPropagation();
+  // fecha todos os outros
+  document.querySelectorAll('.act-more-drop.open').forEach(d=>{if(d.id!=='amd-'+osId)d.classList.remove('open');});
+  const drop=document.getElementById('amd-'+osId);
+  if(!drop)return;
+  if(drop.classList.contains('open')){drop.classList.remove('open');return;}
+  // define permissões
+  const podeReceber=(USR.perfil==='ADMIN'||USR.perfil==='COMERCIAL');
+  const statusRetirada=status.toUpperCase().includes('RETIRADA')||status.toUpperCase().includes('PRONTA');
+  const totalOS=TOTAIS[osId]||0;
+  const numFmt=String(num).padStart(4,'0');
+  const telNum=(tel||'').replace(/\D/g,'');
+  drop.innerHTML=`
+    <button class="amd-item" onclick="imprimirOS('${osId}')">
+      <i class="ti ti-printer" style="color:var(--sub)"></i> Imprimir OS
+    </button>
+    <button class="amd-item" onclick="enviarWhats('${osId}','${numFmt}','${cliente}','${telNum}','${status}')">
+      <i class="ti ti-brand-whatsapp" style="color:#25D366"></i> Enviar WhatsApp
+    </button>
+    <div class="amd-sep"></div>
+    <button class="amd-item${podeReceber&&statusRetirada?'':' disabled'}" onclick="${podeReceber&&statusRetirada?`abrirRecebimento('${osId}','${numFmt}','${cliente}',${totalOS})`:''}" ${podeReceber&&statusRetirada?'':'disabled'}>
+      <i class="ti ti-cash" style="color:var(--green)"></i> Receber pagamento
+      ${!statusRetirada?'<span style="font-size:10px;color:var(--sub);margin-left:auto">Aguardando retirada</span>':''}
+    </button>
+    <button class="amd-item" onclick="verFinanceiro('${osId}')">
+      <i class="ti ti-currency-dollar" style="color:var(--cd)"></i> Ver financeiro
+    </button>
+  `;
+  drop.classList.add('open');
+  // posiciona
+  const rect=e.currentTarget.getBoundingClientRect();
+  if(rect.left > window.innerWidth/2) drop.style.right='0';
+}
+
+document.addEventListener('click',()=>document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open')));
+
+// ── AÇÕES ──────────────────────────────────────────
+function imprimirOS(osId){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  window.open('os-nova.html?id='+osId+'&print=1','_blank');
+}
+
+function enviarWhats(osId,num,cliente,tel,status){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  if(!tel||tel.length<10){toast('Cliente sem WhatsApp cadastrado.','err');return;}
+  const msg=encodeURIComponent(
+    `Olá ${cliente}, tudo bem?
+
+Passando para informar sobre sua OS #${num}.
+Status atual: *${status}*
+
+Dottec Assistência Inteligente`
+  );
+  window.open('https://wa.me/55'+tel+'?text='+msg,'_blank');
+}
+
+function verFinanceiro(osId){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  window.open('contas.html?os_id='+osId,'_blank');
+}
+
+// ── RECEBIMENTO FINANCEIRO ──────────────────────────
+function abrirRecebimento(osId,num,cliente,total){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  if(USR.perfil!=='ADMIN'&&USR.perfil!=='COMERCIAL'){toast('Sem permissão para receber pagamentos.','err');return;}
+  _recOsId=osId; _recTotal=total;
+  document.getElementById('rec-title').textContent='Receber OS #'+num;
+  document.getElementById('rec-cliente').textContent=cliente;
+  document.getElementById('rec-total-info').textContent='Total da OS: '+(total>0?'R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:2}):'A definir');
+  document.getElementById('rec-valor').value=total>0?total.toFixed(2):'';
+  document.getElementById('rec-data').value=new Date().toISOString().slice(0,10);
+  document.getElementById('rec-forma').value='DINHEIRO';
+  document.getElementById('rec-obs').value='';
+  document.getElementById('rec-saldo-wrap').style.display='none';
+  document.getElementById('ov-rec').classList.add('open');
+  setTimeout(()=>document.getElementById('rec-valor').focus(),80);
+}
+
+function recCalcSaldo(){
+  const val=parseFloat(document.getElementById('rec-valor').value)||0;
+  const saldo=_recTotal-val;
+  const wrap=document.getElementById('rec-saldo-wrap');
+  if(_recTotal>0&&saldo>0.01){
+    document.getElementById('rec-saldo-val').textContent='R$ '+saldo.toLocaleString('pt-BR',{minimumFractionDigits:2});
+    wrap.style.display='block';
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+async function confirmarRecebimento(){
+  const val=parseFloat(document.getElementById('rec-valor').value)||0;
+  const data=document.getElementById('rec-data').value;
+  const forma=document.getElementById('rec-forma').value;
+  const obs=document.getElementById('rec-obs').value.trim();
+  if(!val||val<=0){toast('Informe o valor recebido.','err');return;}
+  if(!data){toast('Informe a data.','err');return;}
+  try{
+    // salva o recebimento na tabela de contas_receber ou movimentacoes
+    const row={
+      os_id:_recOsId,
+      tipo:'RECEITA',
+      descricao:'RECEBIMENTO OS',
+      valor:val,
+      data_compensacao:data,
+      forma_pagamento:forma,
+      observacao:obs.toUpperCase()||null,
+      status:'PAGO',
+      criado_em:new Date().toISOString(),
+    };
+    const{error}=await db.from('contas_receber').insert(row);
+    if(error)throw error;
+    // se tem saldo, cria parcela pendente
+    const saldo=_recTotal-val;
+    if(saldo>0.01){
+      const saldoForma=document.getElementById('rec-saldo-forma').value;
+      await db.from('contas_receber').insert({
+        os_id:_recOsId,tipo:'RECEITA',
+        descricao:'SALDO OS (PARCELA PENDENTE)',
+        valor:saldo,forma_pagamento:saldoForma,
+        status:'PENDENTE',criado_em:new Date().toISOString(),
+      }).catch(e=>console.warn('saldo:',e));
+    }
+    fecha('rec');
+    toast('Recebimento registrado!');
+    load();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
 /* ── INIT ── */
 load();
 
