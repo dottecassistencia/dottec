@@ -185,7 +185,16 @@ html{scroll-behavior:smooth}
     tick();setInterval(tick,10000);
 
     // Módulos
-    loadShMods().then(()=>_showPage()).catch(()=>_showPage());
+    loadShMods().then(()=>{
+      _showPage();
+      // move o dropdown para body para evitar conflito de z-index
+      const drop=document.getElementById('sh-more-drop');
+      if(drop&&drop.parentNode!==document.body){
+        document.body.appendChild(drop);
+        drop.style.position='fixed';
+        drop.style.zIndex='99999';
+      }
+    }).catch(()=>_showPage());
     // Garante que a página aparece mesmo se loadShMods demorar
     setTimeout(_showPage, 300);
   }
@@ -232,9 +241,24 @@ html{scroll-behavior:smooth}
 
   window.toggleShMore=function(e){
     e.stopPropagation();
-    document.getElementById('sh-more-drop').classList.toggle('open');
+    const drop=document.getElementById('sh-more-drop');
+    const isOpen=drop.classList.contains('open');
+    
+    // fecha se já estava aberto
+    if(isOpen){drop.classList.remove('open');return;}
+    
+    // posiciona o dropdown com fixed baseado no botão clicado
+    const btn=document.getElementById('sh-more-wrap');
+    if(btn){
+      const r=btn.getBoundingClientRect();
+      drop.style.cssText=`position:fixed;top:${r.bottom+4}px;right:${window.innerWidth-r.right}px;z-index:99999;display:block`;
+      drop.classList.add('open');
+    }
   };
-  document.addEventListener('click',()=>document.getElementById('sh-more-drop')?.classList.remove('open'));
+  document.addEventListener('click',()=>{
+    const drop=document.getElementById('sh-more-drop');
+    if(drop){drop.classList.remove('open');drop.style.display='';}
+  });
 
   // Esconde o conteúdo imediatamente para evitar flash
   const _hideStyle = document.createElement('style');
@@ -246,6 +270,17 @@ html{scroll-behavior:smooth}
     setTimeout(()=>_hideStyle.remove(), 200);
   }
 
+  // Garante z-index correto independente do CSS da página
+  const _forceZ = () => {
+    const s = document.getElementById('_dottec_shell');
+    if(s) s.style.zIndex = '900';
+    const d = document.getElementById('sh-more-drop');
+    if(d) { d.style.zIndex = '99999'; d.style.position = 'absolute'; }
+    const fb = document.querySelector('.filter-bar');
+    if(fb) fb.style.zIndex = '8999';
+  };
+
   if(document.body)init();
   else document.addEventListener('DOMContentLoaded',init);
+  window.addEventListener('load', _forceZ);
 })();
