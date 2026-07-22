@@ -91,6 +91,8 @@
 .sh-more-item:hover{background:var(--bg)}
 .sh-more-item i{font-size:13px;width:16px;text-align:center}
 @keyframes _sh_fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* Previne flash de conteúdo não estilizado */
+html{scroll-behavior:smooth}
 `;
   document.head.insertBefore(style,document.head.firstChild);
 
@@ -161,7 +163,7 @@
       }
     }
     requestAnimationFrame(applySpacerHeight);
-    window.addEventListener('load',applySpacerHeight);
+    window.addEventListener('load',()=>{applySpacerHeight();_showPage();});
 
 
 
@@ -178,7 +180,9 @@
     tick();setInterval(tick,10000);
 
     // Módulos
-    loadShMods();
+    loadShMods().then(()=>_showPage()).catch(()=>_showPage());
+    // Garante que a página aparece mesmo se loadShMods demorar
+    setTimeout(_showPage, 300);
   }
 
   async function loadShMods(){
@@ -226,6 +230,16 @@
     document.getElementById('sh-more-drop').classList.toggle('open');
   };
   document.addEventListener('click',()=>document.getElementById('sh-more-drop')?.classList.remove('open'));
+
+  // Esconde o conteúdo imediatamente para evitar flash
+  const _hideStyle = document.createElement('style');
+  _hideStyle.textContent = 'body{opacity:0}';
+  document.head.appendChild(_hideStyle);
+
+  function _showPage(){
+    _hideStyle.textContent = 'body{opacity:1;transition:opacity .15s ease}';
+    setTimeout(()=>_hideStyle.remove(), 200);
+  }
 
   if(document.body)init();
   else document.addEventListener('DOMContentLoaded',init);
