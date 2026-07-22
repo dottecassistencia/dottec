@@ -626,17 +626,26 @@ Promise.all([
 
 // ── ALERTAS OS ─────────────────────────────────────
 async function loadAlertas(){
-  const{data:sc}=await db.from('status_config').select('nome,alerta_prioridade').eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
+  // busca status que geram alerta para o perfil do usuário
+  const{data:scAll}=await db.from('status_config').select('nome,alerta_prioridade,alerta_perfis').eq('modulo','OS').eq('gera_alerta',true).eq('ativo',true);
+  // filtra por perfil: se alerta_perfis vazio = todos; senão só os que incluem o perfil
+  const sc=(scAll||[]).filter(s=>{
+    const perfis=s.alerta_perfis||[];
+    if(!perfis.length)return true;
+    return perfis.includes(USR.perfil);
+  });
+  // exclui status de "AGUARDANDO PEÇA" dos alertas — vai para lista de compras
+  const scFiltrado=sc.filter(s=>!s.nome.toUpperCase().includes('AGUARDANDO PE'));
   const body=document.getElementById('al-body');
-  if(!sc?.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';return;}
-  const{data:os}=await db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status,atualizado_em').in('status',sc.map(s=>s.nome)).order('atualizado_em',{ascending:true}).limit(15);
+  if(!scFiltrado?.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';return;}
+  const{data:os}=await db.from('ordens_servico').select('id,numero,cliente_nome,aparelho,status,atualizado_em').in('status',scFiltrado.map(s=>s.nome)).order('atualizado_em',{ascending:true}).limit(15);
   const lista=os||[];
   const badge=document.getElementById('al-cnt');
   if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Tudo em dia</div>';badge.style.display='none';return;}
   badge.style.display='inline';badge.textContent=lista.length;
   const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
   body.innerHTML=lista.map(o=>{
-    const s=sc.find(x=>x.nome===o.status)||{alerta_prioridade:'NORMAL'};
+    const s=scFiltrado.find(x=>x.nome===o.status)||{alerta_prioridade:'NORMAL'};
     const p=s.alerta_prioridade.toLowerCase();
     const cls=p==='critica'?'crit':p==='alta'?'alta':'norm';
     const tag=p==='critica'?'CRÍTICO':p==='alta'?'ALTA':'NORMAL';
@@ -722,22 +731,43 @@ async function salvarAgenda(){
 
 // ── COMPRAS ────────────────────────────────────────
 async function loadCompras(){
-  const{data}=await db.from('lista_compras').select('*').eq('concluido',false).order('criado_em',{ascending:false}).limit(20);
-  const lista=data||[];
-  document.getElementById('lc-cnt').textContent=lista.length;
+  // busca itens manuais da lista_compras
+  const{data:lc}=await db.from('lista_compras').select('*').eq('status','PENDENTE').order('criado_em',{ascending:false}).limit(30);
+  // busca OS com status AGUARDANDO PEÇA que ainda não estão concluídas na lista
+  const{data:osAg}=await db.from('ordens_servico')
+    .select('id,numero,cliente_nome,aparelho,status,atualizado_em')
+    .ilike('status','AGUARDANDO PE%')
+    .order('atualizado_em',{ascending:true}).limit(20);
+  const isAdmin=USR.perfil==='ADMIN';
   const body=document.getElementById('lc-body');
-  if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-shopping-bag"></i>Lista vazia</div>';return;}
-  body.innerHTML=lista.map(c=>`
-    <div class="lc-row">
-      <div class="lc-chk" onclick="concluirC('${c.id}')"></div>
-      <div class="lc-info">
-        <div class="lc-prod">${c.produto}${c.urgencia==='URGENTE'?'<span class="lc-urg U">URGENTE</span>':''}</div>
-        <div class="lc-forn">${c.fornecedor||'Fornecedor a definir'}${c.observacao?' · '+c.observacao:''}</div>
+  const totalCnt=(lc||[]).length+(osAg||[]).length;
+  document.getElementById('lc-cnt').textContent=totalCnt||'';
+  document.getElementById('lc-cnt').style.display=totalCnt?'inline':'none';
+  if(!totalCnt){body.innerHTML='<div class="p-empty"><i class="ti ti-shopping-bag"></i>Lista vazia</div>';return;}
+  const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
+  // OS aguardando peça
+  const osRows=(osAg||[]).map(o=>`
+    <div class="lc-row" style="border-left:3px solid var(--amber);cursor:pointer" onclick="irOS('${o.id}')">
+      <div class="lc-info" style="flex:1">
+        <div class="lc-prod">OS #${String(o.numero).padStart(4,'0')} — ${o.aparelho||o.cliente_nome||''}
+          <span class="lc-urg" style="background:var(--abg);color:var(--amber);margin-left:6px">AGUARD. PEÇA</span>
+        </div>
+        <div class="lc-forn">${o.cliente_nome}${o.aparelho?' · '+o.aparelho:''} · ${tempo(o.atualizado_em)}</div>
       </div>
-      <span class="lc-qty">${c.quantidade}x</span>
-      <button class="lc-del" onclick="delC('${c.id}')"><i class="ti ti-x"></i></button>
     </div>`).join('');
+  // itens manuais
+  const lcRows=(lc||[]).map(c=>`
+    <div class="lc-row">
+      ${isAdmin?`<div class="lc-chk" onclick="concluirC('${c.id}')" title="Marcar como comprado"></div>`:'<div style="width:18px;flex-shrink:0"></div>'}
+      <div class="lc-info">
+        <div class="lc-prod">${c.descricao||c.produto||''}${c.urgencia==='URGENTE'?'<span class="lc-urg U">URGENTE</span>':''}</div>
+        <div class="lc-forn">${c.observacao||c.fornecedor||'Fornecedor a definir'}</div>
+      </div>
+      ${isAdmin?`<button class="lc-del" onclick="delC('${c.id}')" title="Remover"><i class="ti ti-x"></i></button>`:''}
+    </div>`).join('');
+  body.innerHTML=osRows+lcRows;
 }
+function irOS(id){location.href='os-nova.html?id='+id;}
 async function salvarCompra(){
   const prod=document.getElementById('lc-produto').value.trim();
   if(!prod){toast('Informe o produto.','err');return;}
@@ -748,8 +778,21 @@ async function salvarCompra(){
   document.getElementById('lc-qtd').value=1;
   loadCompras();
 }
-async function concluirC(id){await db.from('lista_compras').update({concluido:true}).eq('id',id);toast('Comprado!');loadCompras();}
-async function delC(id){await db.from('lista_compras').delete().eq('id',id);loadCompras();}
+async function concluirC(id){
+  if(USR.perfil!=='ADMIN'){toast('Somente o administrador pode confirmar compras.','err');return;}
+  const{error}=await db.from('lista_compras').update({
+    status:'COMPRADO',
+    comprado_em:new Date().toISOString(),
+    comprado_por:USR.nome
+  }).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Marcado como comprado!');loadCompras();
+}
+async function delC(id){
+  if(USR.perfil!=='ADMIN'){toast('Somente o administrador pode remover itens.','err');return;}
+  await db.from('lista_compras').delete().eq('id',id);
+  toast('Item removido.');loadCompras();
+}
 
 
 // ── MODAL STATUS (painel alertas) ─────────────────────
