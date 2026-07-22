@@ -60,9 +60,9 @@
 .sh-hora{font-size:22px;font-weight:700;color:var(--dark);line-height:1}
 .sh-data{font-size:10px;color:var(--sub);text-align:right}
 .sh-modbar{border-bottom:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06);padding:6px 12px;display:flex;align-items:center;gap:0;background:var(--white)}
-.sh-mods{flex:1;display:flex;align-items:center;justify-content:space-evenly;overflow-x:auto}
+.sh-mods{flex:1;display:flex;align-items:stretch;overflow-x:auto}
 .sh-mods::-webkit-scrollbar{display:none}
-.sh-ball{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:6px 10px;border-radius:14px;flex:1;min-width:0;transition:background .15s,transform .2s cubic-bezier(.34,1.5,.64,1);flex-shrink:0}
+.sh-ball{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;padding:6px 4px;border-radius:14px;flex:1;min-width:0;transition:background .15s,transform .2s cubic-bezier(.34,1.5,.64,1)}
 .sh-ball:hover{background:var(--bg);transform:translateY(-3px) scale(1.05)}
 .sh-ball.active{background:var(--cbg)}
 .sh-ball-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;transition:box-shadow .15s}
@@ -77,8 +77,7 @@
   .sh-ball-icon{width:36px;height:36px;font-size:15px}
   .sh-ball-lbl{font-size:8px}
   .sh-modbar{padding:4px 8px}
-  .sh-sep{margin:0 2px}
-}
+  }
 @media(min-width:601px) and (max-width:900px){
   .sh-ball{min-width:0;flex:1;padding:5px 4px}
   .sh-ball-icon{width:44px;height:44px;font-size:18px}
@@ -122,14 +121,6 @@
   </div>
 </div>
 <div class="sh-modbar">
-  <a class="sh-ball sh-logo-ball" href="dashboard.html">
-    <div class="sh-ball-icon sh-logo-icon">
-      <img src="logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-      <i class="ti ti-layout-dashboard" style="display:none;color:var(--cyan)"></i>
-    </div>
-    <span class="sh-ball-lbl">Início</span>
-  </a>
-  <div class="sh-sep"></div>
   <div class="sh-mods" id="sh-mods"><i class="ti ti-loader-2" style="animation:spin .7s linear infinite;color:var(--sub)"></i></div>
   <div class="sh-more-wrap" id="sh-more-wrap" style="display:none">
     <div class="sh-more" onclick="toggleShMore(event)"><i class="ti ti-dots"></i></div>
@@ -206,7 +197,14 @@
     const resto=MODS.filter(m=>!ATIVOS.slice(0,8).includes(m.id));
     const grid=document.getElementById('sh-mods');
     if(grid){
-      grid.innerHTML=ativos.map(m=>`
+      const logoBall=`<a class="sh-ball" href="dashboard.html">
+        <div class="sh-ball-icon" style="background:var(--bg);border:1.5px solid var(--border);overflow:hidden;border-radius:50%">
+          <img src="logo.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <i class="ti ti-layout-dashboard" style="display:none;color:var(--cyan);font-size:inherit"></i>
+        </div>
+        <span class="sh-ball-lbl" style="color:${_page==='dashboard'?'var(--cyan)':''}">Início</span>
+      </a>`;
+      grid.innerHTML=logoBall+ativos.map(m=>`
         <a class="sh-ball${m.id===_page?' active':''}" href="${m.href}">
           <div class="sh-ball-icon" style="background:${m.bg}">
             <i class="ti ${m.ico}" style="color:${m.c}"></i>
