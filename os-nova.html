@@ -1130,7 +1130,7 @@ async function salvar(){
             descricao:defeito||'PEÇA NECESSÁRIA',
             dispositivo:disp.toUpperCase()||null,
             cliente_nome:(payload.cliente_nome||'').toUpperCase(),
-            status:'PENDENTE',
+            concluido:false,
             prioridade:'NORMAL',
           });
           toast('Alerta de peça criado!');

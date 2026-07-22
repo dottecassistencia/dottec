@@ -732,7 +732,7 @@ async function salvarAgenda(){
 // ── COMPRAS ────────────────────────────────────────
 async function loadCompras(){
   // busca itens manuais da lista_compras
-  const{data:lc}=await db.from('lista_compras').select('*').eq('status','PENDENTE').order('criado_em',{ascending:false}).limit(30);
+  const{data:lc}=await db.from('lista_compras').select('*').eq('concluido',false).order('criado_em',{ascending:false}).limit(30);
   // busca OS com status AGUARDANDO PEÇA que ainda não estão concluídas na lista
   const{data:osAg}=await db.from('ordens_servico')
     .select('id,numero,cliente_nome,aparelho,status,atualizado_em')
@@ -780,11 +780,7 @@ async function salvarCompra(){
 }
 async function concluirC(id){
   if(USR.perfil!=='ADMIN'){toast('Somente o administrador pode confirmar compras.','err');return;}
-  const{error}=await db.from('lista_compras').update({
-    status:'COMPRADO',
-    comprado_em:new Date().toISOString(),
-    comprado_por:USR.nome
-  }).eq('id',id);
+  const{error}=await db.from('lista_compras').update({concluido:true}).eq('id',id);
   if(error){toast('Erro: '+error.message,'err');return;}
   toast('Marcado como comprado!');loadCompras();
 }
