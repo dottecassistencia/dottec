@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2;--purple:#5B3FA6;--pbg:#EEEAF8}
@@ -171,7 +172,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .pattern-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 
 /* MODAIS */
-.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:800;align-items:center;justify-content:center;padding:1rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
 .modal{background:var(--white);border-radius:13px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.18)}
 .modal-head{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
