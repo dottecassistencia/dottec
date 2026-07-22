@@ -739,19 +739,40 @@ function toggleActMenu(e,osId,num,cliente,tel,status){
   const numFmt=String(num).padStart(4,'0');
   const telNum=(tel||'').replace(/\D/g,'');
   drop.innerHTML=`
+    <div style="padding:4px 10px 2px;font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">OS</div>
     <button class="amd-item" onclick="imprimirOS('${osId}')">
       <i class="ti ti-printer" style="color:var(--sub)"></i> Imprimir OS
     </button>
     <button class="amd-item" onclick="enviarWhats('${osId}','${numFmt}','${cliente}','${telNum}','${status}')">
       <i class="ti ti-brand-whatsapp" style="color:#25D366"></i> Enviar WhatsApp
     </button>
+    <button class="amd-item" onclick="enviarEmail('${osId}','${numFmt}','${cliente}')">
+      <i class="ti ti-mail" style="color:var(--cd)"></i> Enviar e-mail
+    </button>
+
     <div class="amd-sep"></div>
+    <div style="padding:4px 10px 2px;font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Financeiro</div>
     <button class="amd-item${podeReceber&&statusRetirada?'':' disabled'}" onclick="${podeReceber&&statusRetirada?`abrirRecebimento('${osId}','${numFmt}','${cliente}',${totalOS})`:''}" ${podeReceber&&statusRetirada?'':'disabled'}>
       <i class="ti ti-cash" style="color:var(--green)"></i> Receber pagamento
-      ${!statusRetirada?'<span style="font-size:10px;color:var(--sub);margin-left:auto">Aguardando retirada</span>':''}
+      ${!statusRetirada?'<span style="font-size:10px;color:var(--sub);margin-left:auto">Aguard. retirada</span>':''}
     </button>
     <button class="amd-item" onclick="verFinanceiro('${osId}')">
       <i class="ti ti-currency-dollar" style="color:var(--cd)"></i> Ver financeiro
+    </button>
+
+    <div class="amd-sep"></div>
+    <div style="padding:4px 10px 2px;font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Fiscal</div>
+    <button class="amd-item" onclick="imprimirCupom('${osId}','${numFmt}')">
+      <i class="ti ti-receipt" style="color:var(--sub)"></i> Imprimir cupom fiscal
+      <span style="font-size:10px;color:var(--sub);margin-left:auto">Epson</span>
+    </button>
+    <button class="amd-item" onclick="emitirNFSe('${osId}','${numFmt}')">
+      <i class="ti ti-file-check" style="color:var(--purple)"></i> Emitir NFS-e
+      <span style="font-size:10px;color:var(--sub);margin-left:auto">Prefeitura</span>
+    </button>
+    <button class="amd-item" onclick="emitirNFe('${osId}','${numFmt}')">
+      <i class="ti ti-file-invoice" style="color:var(--amber)"></i> Emitir NF-e
+      <span style="font-size:10px;color:var(--sub);margin-left:auto">A3</span>
     </button>
   `;
   drop.classList.add('open');
@@ -785,6 +806,33 @@ Dottec Assistência Inteligente`
 function verFinanceiro(osId){
   document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
   window.open('contas.html?os_id='+osId,'_blank');
+}
+
+function enviarEmail(osId,num,cliente){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  // Abre modal de e-mail ou usa mailto — implementar depois com dados do cliente
+  toast('Funcionalidade de e-mail em breve.','err');
+}
+
+function imprimirCupom(osId,num){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  // Impressão térmica Epson — implementar quando informar o modelo
+  toast('Aguardando modelo da impressora Epson.','err');
+}
+
+async function emitirNFSe(osId,num){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  // Abre o site da prefeitura de Rio dos Cedros em nova aba
+  // Ajuste a URL conforme o portal da prefeitura local
+  const url='https://www.riocedroso.sc.gov.br/nfse';
+  window.open(url,'_blank');
+  toast('Abrindo portal NFS-e da prefeitura...');
+}
+
+async function emitirNFe(osId,num){
+  document.querySelectorAll('.act-more-drop').forEach(d=>d.classList.remove('open'));
+  // Emissão de NF-e com certificado A3 — implementar na seção fiscal
+  window.open('nfe-nova.html?os_id='+osId,'_blank');
 }
 
 // ── RECEBIMENTO FINANCEIRO ──────────────────────────
