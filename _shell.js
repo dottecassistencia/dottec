@@ -45,6 +45,10 @@
   style.textContent=`
 :root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+input:not([type=date]):not([type=number]):not([type=email]):not([type=url]),
+textarea,
+select{text-transform:uppercase}
+input::placeholder,textarea::placeholder{text-transform:none}
 #_dottec_shell{position:fixed;top:0;left:0;right:0;z-index:9000;background:var(--white)}
 .sh-topbar{height:62px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;background:var(--white)}
 .sh-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
