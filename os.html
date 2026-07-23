@@ -511,6 +511,15 @@ async function load(){
     o._email=o.cliente_email||'';
     o._pessoa_id=o.pessoa_id||'';
   });
+  // busca totais por OS (soma os_servicos)
+  const{data:srvs}=await db.from('os_servicos')
+    .select('os_id,valor,quantidade,desconto')
+    .in('os_id', (os||[]).map(o=>o.id));
+  TOTAIS={};
+  (srvs||[]).forEach(i=>{
+    const t=(i.valor||0)*(i.quantidade||1)-(i.desconto||0);
+    TOTAIS[i.os_id]=(TOTAIS[i.os_id]||0)+t;
+  });
   buildStatusRow();
   render();
 }
