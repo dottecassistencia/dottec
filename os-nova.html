@@ -1000,7 +1000,7 @@ async function loadOS(){
       else if(its?.length){
         ITENS=its.map(it=>({
           id:it.servico_id||null,
-          nome:it.descricao||'',
+          nome:it.nome||it.descricao||'',
           tipo:'srv',
           preco:it.valor||0,
           qty:1,
@@ -1090,8 +1090,8 @@ async function salvar(){
       if(ITENS.length){
         const itensPayload=ITENS.map(it=>({
           os_id:osId,
-          servico_id:it.id||null,
-          descricao:(it.nome||'').toUpperCase(),
+          nome:(it.nome||'ITEM').toUpperCase(),
+          servico_id:it.tipo==='srv'?it.id:null,
           valor:it.preco||0,
           desconto:it.desconto||0
         }));
