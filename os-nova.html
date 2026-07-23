@@ -1093,7 +1093,11 @@ async function salvar(){
           nome:(it.nome||'ITEM').toUpperCase(),
           descricao:(it.nome||'ITEM').toUpperCase(),
           servico_id:it.tipo==='srv'?it.id:null,
+          produto_id:it.tipo==='prd'?it.id:null,
+          tipo:it.tipo||'srv',
           valor:it.preco||0,
+          quantidade:it.qty||1,
+          garantia_dias:0,
           desconto:it.desconto||0
         }));
         const{error:eIt}=await db.from('os_servicos').insert(itensPayload);
