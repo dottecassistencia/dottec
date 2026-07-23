@@ -971,11 +971,12 @@ function gdCheckToken(){const t=sessionStorage.getItem('gd_token');if(t){GD_TOKE
 // ── LOAD OS ──────────────────────────────────────────
 async function loadOS(){
   if(!_OS_ID){addAp('dispositivo');setTimeout(()=>document.getElementById('cl-busca').focus(),300);return;}
-  setText('tb-title','Editar OS');
-  setText('btn-txt','Salvar');
+  try{setText('tb-title','Editar OS');}catch{}
+  try{setText('btn-txt','Salvar');}catch{}
   try{
     const{data,error}=await db.from('ordens_servico').select('*').eq('id',_OS_ID).single();
-    if(error||!data){toast('OS não encontrada.','err');return;}
+    if(error){toast('Erro ao buscar OS: '+error.message,'err');console.error('loadOS error:',error);return;}
+    if(!data){toast('OS #'+_OS_ID+' não encontrada.','err');return;}
     setText('tb-num','· '+String(data.numero).padStart(4,'0'));
     if(data.cliente_nome)mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome,celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
     // status — aguarda options carregadas
