@@ -1091,6 +1091,7 @@ async function salvar(){
         const itensPayload=ITENS.map(it=>({
           os_id:osId,
           nome:(it.nome||'ITEM').toUpperCase(),
+          descricao:(it.nome||'ITEM').toUpperCase(),
           servico_id:it.tipo==='srv'?it.id:null,
           valor:it.preco||0,
           desconto:it.desconto||0
