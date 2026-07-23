@@ -999,11 +999,11 @@ async function loadOS(){
       if(eIts){console.error('os_servicos load:',eIts);}
       else if(its?.length){
         ITENS=its.map(it=>({
-          id:it.servico_id||it.produto_id,
-          nome:it.nome||'',
-          tipo:it.tipo||'srv',
+          id:it.servico_id||null,
+          nome:it.descricao||'',
+          tipo:'srv',
           preco:it.valor||0,
-          qty:it.quantidade||1,
+          qty:1,
           desconto:it.desconto||0
         }));
         renderItens();
@@ -1090,12 +1090,9 @@ async function salvar(){
       if(ITENS.length){
         const itensPayload=ITENS.map(it=>({
           os_id:osId,
-          nome:(it.nome||'').toUpperCase(),
-          tipo:it.tipo||'srv',
-          servico_id:it.tipo==='srv'?it.id:null,
-          produto_id:it.tipo==='prd'?it.id:null,
+          servico_id:it.id||null,
+          descricao:(it.nome||'').toUpperCase(),
           valor:it.preco||0,
-          quantidade:it.qty||1,
           desconto:it.desconto||0
         }));
         const{error:eIt}=await db.from('os_servicos').insert(itensPayload);
