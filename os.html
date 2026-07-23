@@ -492,10 +492,13 @@ function buildStatusRow(){
     return dias>=80;
   }).length;
   if(cnt80>0){
-    html+='<button class="sf sf-warn'+(FILTRO==='__80DIAS__'?' active':'')+'" onclick="setFiltro('__80DIAS__')" title="OS aguardando retirada há 80 dias ou mais — prazo legal SC">';
-    html+='⚠ +80 dias <span class="sf-cnt err">'+cnt80+'</span></button>';
+    const ativo80=FILTRO==='_80D'?' active':'';
+    html+='<button class="sf sf-warn'+ativo80+'" data-f80="1" title="OS aguardando retirada há 80 dias ou mais">⚠ +80 dias <span class="sf-cnt err">'+cnt80+'</span></button>';
   }
   document.getElementById('status-row').innerHTML=html;
+  // listener no botão 80 dias (evita conflito de aspas no onclick)
+  const btn80=document.querySelector('[data-f80]');
+  if(btn80)btn80.onclick=function(){setFiltro('_80D');};
 }
 function setFiltro(s){FILTRO=s;buildStatusRow();render();}
 function filtrar(){render();}
