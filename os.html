@@ -891,10 +891,10 @@ async function emitirNFe(osId,num){
 
 async function imprimirFolhaOS(e,osId,num){
   e.stopPropagation();
-  const{data:os}=await db.from('ordens_servico').select('*').eq('id',osId).single().catch(()=>({data:null}));
+  let os=null;try{const{data:_os}=await db.from('ordens_servico').select('*').eq('id',osId).single();os=_os;}catch{}
   if(!os){toast('OS não encontrada.','err');return;}
-  const{data:aps}=await db.from('os_aparelhos').select('*').eq('os_id',osId).order('ordem').catch(()=>({data:[]}));
-  const{data:its}=await db.from('os_servicos').select('*').eq('os_id',osId).catch(()=>({data:[]}));
+  let aps=[];try{const{data:_aps}=await db.from('os_aparelhos').select('*').eq('os_id',osId).order('ordem');aps=_aps||[];}catch{}
+  let its=[];try{const{data:_its}=await db.from('os_servicos').select('*').eq('os_id',osId);its=_its||[];}catch{}
   const ap=(aps&&aps[0])||{};
   const total=(its||[]).reduce((s,i)=>s+((i.valor||0)*(i.quantidade||1)-(i.desconto||0)),0);
   const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
