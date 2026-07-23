@@ -687,7 +687,7 @@ async function salvarClienteEdit(){
     await db.from('pessoas').update({
       nome,celular:tel||null,
       documento:doc||null,email:email||null
-    }).eq('id',_clEditPessoaId).catch(()=>{});
+    }).eq('id',_clEditPessoaId);
   }
   fecha('cl-edit');
   toast('Cliente atualizado!');
@@ -902,7 +902,7 @@ async function imprimirFolhaOS(e,osId,num){
   const numFmt=String(num).padStart(4,'0');
 
   // Marca como impresso
-  await db.from('ordens_servico').update({impresso_em:new Date().toISOString()}).eq('id',osId).catch(()=>{});
+  try{await db.from('ordens_servico').update({impresso_em:new Date().toISOString()}).eq('id',osId);}catch{}
   const btn=e.currentTarget;
   if(btn){btn.className=btn.className.replace('act-print-pend','act-print-ok');btn.title='Reimprimir';}
   const oIdx=TODOS.findIndex(o=>o.id===osId);
@@ -975,11 +975,12 @@ async function imprimirFolhaOS(e,osId,num){
     +'</div>'
     +'</body></html>';
 
-  const win=window.open('','_blank','width=800,height=600');
-  win.document.write(pageHTML);
-  win.document.close();
-  win.focus();
-  setTimeout(function(){win.print();},400);
+  // Usa Blob URL para evitar bloqueio de popup
+  const blob=new Blob([pageHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){toast('Popup bloqueado. Permita popups para este site.','err');URL.revokeObjectURL(url);return;}
+  setTimeout(function(){URL.revokeObjectURL(url);},60000);
 }
 
 async function imprimirGuiaDia(){
@@ -1035,11 +1036,11 @@ async function imprimirGuiaDia(){
     +'<table><tr><th>OS</th><th>Cliente</th><th>Dispositivo</th><th>Status</th><th>Impresso</th></tr>'+allRows+'</table>'
     +'</body></html>';
 
-  const win=window.open('','_blank','width=800,height=600');
-  win.document.write(pageHTML);
-  win.document.close();
-  win.focus();
-  setTimeout(function(){win.print();},400);
+  const blob2=new Blob([pageHTML],{type:'text/html'});
+  const url2=URL.createObjectURL(blob2);
+  const win2=window.open(url2,'_blank');
+  if(!win2){toast('Popup bloqueado. Permita popups para este site.','err');URL.revokeObjectURL(url2);return;}
+  setTimeout(function(){URL.revokeObjectURL(url2);},60000);
 }
 
 
