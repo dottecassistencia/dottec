@@ -1075,8 +1075,21 @@ async function salvar(){
     // itens
     try{
       await db.from('os_servicos').delete().eq('os_id',osId);
-      if(ITENS.length)await db.from('os_servicos').insert(ITENS.map(it=>({os_id:osId,nome:it.nome.toUpperCase(),tipo:it.tipo,servico_id:it.tipo==='srv'?it.id:null,produto_id:it.tipo==='prd'?it.id:null,valor:it.preco,quantidade:it.qty,desconto:it.desconto||0})));
-    }catch(e){console.warn('itens:',e);}
+      if(ITENS.length){
+        const itensPayload=ITENS.map(it=>({
+          os_id:osId,
+          nome:(it.nome||'').toUpperCase(),
+          tipo:it.tipo||'srv',
+          servico_id:it.tipo==='srv'?it.id:null,
+          produto_id:it.tipo==='prd'?it.id:null,
+          valor:it.preco||0,
+          quantidade:it.qty||1,
+          desconto:it.desconto||0
+        }));
+        const{error:eIt}=await db.from('os_servicos').insert(itensPayload);
+        if(eIt){console.error('os_servicos insert:',eIt);toast('Erro ao salvar itens: '+eIt.message,'err');}
+      }
+    }catch(e){console.error('itens catch:',e);toast('Erro itens: '+e.message,'err');}
     if(!_OS_ID){try{await db.from('os_historico').insert({os_id:osId,status,observacao:'OS CRIADA',usuario_id:USR.id||null,usuario_nome:USR.nome});}catch{}}
     // se status = AGUARDANDO PEÇA → alerta na lista de peças
     if(status==='AGUARDANDO PEÇA'||status==='AGUARDANDO PECA'||status==='AGUARDANDO PEÇAS'){
