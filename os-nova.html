@@ -472,11 +472,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 
 <!-- BOTÃO FLUTUANTE SALVAR -->
-<button onclick="salvar()" style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;height:40px;padding:0 24px;border-radius:20px;border:none;background:var(--cyan);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(41,184,194,.4);transition:opacity .2s;font-family:inherit" 
-  onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'"
-  title="Salvar OS" id="fab-save">
-  <i class="ti ti-device-floppy"></i> Salvar OS
-</button>
+
 
 <script>
 // Helper seguro para setar textContent sem erro se elemento não existe
@@ -998,7 +994,23 @@ async function loadOS(){
     }
     renderAps();
     // itens
-    try{const{data:its}=await db.from('os_servicos').select('*').eq('os_id',_OS_ID);if(its?.length){ITENS=its.map(it=>({id:it.servico_id||it.produto_id,nome:it.nome||'',tipo:it.tipo||'srv',preco:it.valor||0,qty:it.quantidade||1,desconto:it.desconto||0}));renderItens();calcTotal();}}catch{}
+    try{
+      const{data:its,error:eIts}=await db.from('os_servicos').select('*').eq('os_id',_OS_ID);
+      if(eIts){console.error('os_servicos load:',eIts);}
+      else if(its?.length){
+        ITENS=its.map(it=>({
+          id:it.servico_id||it.produto_id,
+          nome:it.nome||'',
+          tipo:it.tipo||'srv',
+          preco:it.valor||0,
+          qty:it.quantidade||1,
+          desconto:it.desconto||0
+        }));
+        renderItens();
+        calcTotal();
+        console.log('Itens carregados:',ITENS.length);
+      }
+    }catch(eItsC){console.error('itens catch:',eItsC);}
     // fotos
     if(aps&&aps.length&&aps[0].fotos)gdCarregarFotos(aps[0].fotos);
   }catch(err){toast('Erro ao carregar: '+err.message,'err');}
@@ -1440,5 +1452,16 @@ function salvarContato(){
 gdCheckToken();
 Promise.all([loadStatus(),loadOpcoesAp()]).then(()=>loadOS());
 </script>
+
+<!-- BOTÕES FLUTUANTES -->
+<div style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;display:flex;align-items:center;gap:8px;pointer-events:all">
+  <a href="os.html" style="height:38px;padding:0 16px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:background .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--white)'">
+    <i class="ti ti-arrow-left"></i> Voltar
+  </a>
+  <button onclick="salvar()" id="fab-save" style="height:38px;padding:0 20px;border-radius:20px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(41,184,194,.35);transition:background .15s" onmouseover="this.style.background='var(--cd)'" onmouseout="this.style.background='var(--cyan)'">
+    <i class="ti ti-device-floppy"></i> <span id="btn-txt">Salvar OS</span>
+  </button>
+</div>
+
 </body>
 </html>
