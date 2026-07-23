@@ -479,6 +479,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </button>
 
 <script>
+// Helper seguro para setar textContent sem erro se elemento não existe
+const setText=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
 if(!window._dottecDb) window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
@@ -968,12 +971,12 @@ function gdCheckToken(){const t=sessionStorage.getItem('gd_token');if(t){GD_TOKE
 // ── LOAD OS ──────────────────────────────────────────
 async function loadOS(){
   if(!_OS_ID){addAp('dispositivo');setTimeout(()=>document.getElementById('cl-busca').focus(),300);return;}
-  document.getElementById('tb-title').textContent='Editar OS';
-  document.getElementById('btn-txt').textContent='Salvar';
+  setText('tb-title','Editar OS');
+  setText('btn-txt','Salvar');
   try{
     const{data,error}=await db.from('ordens_servico').select('*').eq('id',_OS_ID).single();
     if(error||!data){toast('OS não encontrada.','err');return;}
-    document.getElementById('tb-num').textContent='· '+String(data.numero).padStart(4,'0');
+    setText('tb-num','· '+String(data.numero).padStart(4,'0'));
     if(data.cliente_nome)mostrarCliente({id:data.pessoa_id||'',nome:data.cliente_nome,celular:data.cliente_celular||'',documento:data.cliente_doc||'',tipo_doc:'CPF',email:data.cliente_email||''});
     // status — aguarda options carregadas
     const setStDelay=()=>{const sel=document.getElementById('os-status');if(sel.options.length>1){sel.value=data.status||'ABERTA';}else setTimeout(setStDelay,80);};
@@ -1023,7 +1026,7 @@ async function salvar(){
   });
   _SALVANDO=true;
   let data_numero=null;
-  const btn=document.getElementById('btn-save');btn.disabled=true;document.getElementById('btn-txt').textContent='Salvando...';
+  const btn=document.getElementById('btn-save');if(btn)btn.disabled=true;setText('btn-txt','Salvando...');
   try{
     let pessoaId=document.getElementById('cl-id').value||null;
     if(!pessoaId){
@@ -1101,15 +1104,15 @@ async function salvar(){
     if(!_OS_ID&&osId){
       _OS_ID=osId;
       history.replaceState(null,'','os-nova.html?id='+osId);
-      document.getElementById('tb-title').textContent='Editar OS';
-      document.getElementById('tb-num').textContent='· '+String(data_numero||'').padStart(4,'0');
+      setText('tb-title','Editar OS');
+      setText('tb-num','· '+String(data_numero||'').padStart(4,'0'));
     }
-    btn.disabled=false;
-    document.getElementById('btn-txt').textContent='Salvar';
+    if(btn)btn.disabled=false;
+    setText('btn-txt','Salvar');
   }catch(err){
     toast('Erro: '+err.message,'err');
-    btn.disabled=false;_SALVANDO=false;
-    document.getElementById('btn-txt').textContent='Salvar';
+    if(btn)btn.disabled=false;_SALVANDO=false;
+    setText('btn-txt','Salvar');
   }
 }
 
