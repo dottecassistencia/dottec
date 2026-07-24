@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nova Venda — Dottec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
+<style>
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;text-transform:uppercase;padding-bottom:80px}
+/* TOAST */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;background:var(--dark);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok i{color:#4ade80}.toast.err i{color:#f87171}
+/* LAYOUT */
+.content{max-width:760px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px;width:100%}
+/* SEÇÕES */
+.section{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.section-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.sh-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sh-title{font-size:13px;font-weight:700;color:var(--dark)}
+.section-body{padding:16px}
+/* CAMPOS */
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.field label .opt{font-weight:400;text-transform:none}
+.field input,.field select,.field textarea{height:36px;border:1.5px solid var(--border);border-radius:7px;padding:0 10px;font-family:inherit;font-size:13px;color:var(--dark);background:#FAFAF7;outline:none;transition:border-color .2s;text-transform:uppercase;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);background:var(--white)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* CLIENTE */
+.cl-wrap{position:relative}
+.cl-sugs{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:200px;overflow-y:auto;display:none}
+.cl-sugs.open{display:block}
+.cl-sug{padding:9px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.cl-sug:last-child{border-bottom:none}
+.cl-sug:hover{background:var(--bg)}
+.cl-sug-nome{font-weight:700;color:var(--dark)}
+.cl-sug-doc{font-size:10.5px;color:var(--sub)}
+/* ITENS */
+.item-busca-wrap{position:relative;margin-bottom:10px}
+.item-sugs{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;max-height:220px;overflow-y:auto;display:none}
+.item-sugs.open{display:block}
+.item-sug{padding:9px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item-sug:last-child{border-bottom:none}
+.item-sug:hover{background:var(--bg)}
+.item-sug-nome{font-weight:700;color:var(--dark);flex:1}
+.item-sug-preco{font-size:12px;font-weight:700;color:var(--cd);flex-shrink:0}
+.item-sug-tipo{font-size:9px;color:var(--sub);background:var(--bg);padding:1px 5px;border-radius:4px}
+.itens-list{display:flex;flex-direction:column;gap:4px}
+.item-row{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.item-row-nome{flex:1;font-size:12.5px;font-weight:600;color:var(--dark);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-row-qty{width:60px;height:28px;border:1px solid var(--border);border-radius:6px;text-align:center;font-family:inherit;font-size:12px;font-weight:700;background:var(--white);outline:none;color:var(--dark)}
+.item-row-preco{width:90px;height:28px;border:1px solid var(--border);border-radius:6px;padding:0 6px;font-family:inherit;font-size:12px;font-weight:700;background:var(--white);outline:none;color:var(--dark);text-align:right;text-transform:none}
+.item-row-del{width:26px;height:26px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--sub);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.item-row-del:hover{background:var(--rbg);color:var(--red)}
+.itens-subtotal{display:flex;justify-content:flex-end;padding:8px 0 0;font-size:13px;font-weight:700;color:var(--dark)}
+/* PAGAMENTOS */
+.pags-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.pag-row{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.pag-row select{flex:1;height:32px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;background:var(--white);color:var(--dark);padding:0 8px;outline:none;text-transform:uppercase}
+.pag-row input{width:110px;height:32px;border:1px solid var(--border);border-radius:6px;padding:0 8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--dark);background:var(--white);outline:none;text-transform:none;text-align:right}
+.pag-caixa{font-size:10px;color:var(--sub);display:flex;align-items:center;gap:3px;white-space:nowrap;flex-shrink:0}
+.pag-caixa.sim{color:var(--green)}
+.pag-row-del{width:26px;height:26px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--sub);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pag-row-del:hover{background:var(--rbg);color:var(--red)}
+.btn-add{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px;border-radius:7px;border:1.5px dashed var(--border);background:transparent;color:var(--sub);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-add:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
+/* TOTALIZADOR */
+.total-bar{background:var(--dark);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.total-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em}
+.total-val{font-size:22px;font-weight:800;color:#fff;line-height:1}
+.total-troco{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+.total-saldo{font-size:12px;font-weight:700}
+.total-saldo.ok{color:#4ade80}
+.total-saldo.falta{color:#f87171}
+/* OVERLAY/MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.18);overflow:hidden}
+.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mh-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.modal-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+.modal-x{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.btn-pri{height:36px;padding:0 16px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+@page{size:A4 portrait;margin:10mm}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL NOVO CLIENTE RÁPIDO -->
+<div class="overlay" id="ov-ncl">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-user-plus"></i></div>
+      <div class="modal-title">Novo cliente</div>
+      <button class="modal-x" onclick="fecha('ncl')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Nome completo</label><input type="text" id="ncl-nome" placeholder="Nome do cliente"/></div>
+      <div class="row2">
+        <div class="field"><label>WhatsApp</label><input type="text" id="ncl-tel" placeholder="(47) 99999-9999"/></div>
+        <div class="field"><label>CPF / CNPJ <span class="opt">(opcional)</span></label><input type="text" id="ncl-doc" placeholder="000.000.000-00"/></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fecha('ncl')">Cancelar</button>
+      <button class="btn-pri" onclick="salvarNovoCliente()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- CLIENTE -->
+  <div class="section">
+    <div class="section-head">
+      <div class="sh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-user"></i></div>
+      <div class="sh-title">Cliente</div>
+      <button onclick="abrirNovoCliente()" style="margin-left:auto;height:26px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--sub);display:flex;align-items:center;gap:4px">
+        <i class="ti ti-plus"></i> Novo
+      </button>
+    </div>
+    <div class="section-body">
+      <div class="cl-wrap">
+        <div class="field">
+          <label>Buscar cliente</label>
+          <input type="text" id="cl-busca" placeholder="Nome, CPF ou WhatsApp — deixe vazio para consumidor final" autocomplete="off" oninput="buscarCliente()" onfocus="buscarCliente()"/>
+        </div>
+        <div class="cl-sugs" id="cl-sugs"></div>
+      </div>
+      <div id="cl-info" style="display:none;margin-top:8px;background:var(--cbg);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:12.5px;font-weight:700;color:var(--dark)" id="cl-info-nome"></div>
+          <div style="font-size:11px;color:var(--sub)" id="cl-info-sub"></div>
+        </div>
+        <button onclick="limparCliente()" style="border:none;background:transparent;cursor:pointer;color:var(--sub);font-size:13px"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITENS -->
+  <div class="section">
+    <div class="section-head">
+      <div class="sh-ico" style="background:var(--gbg);color:var(--green)"><i class="ti ti-package"></i></div>
+      <div class="sh-title">Produtos e serviços</div>
+    </div>
+    <div class="section-body">
+      <div class="item-busca-wrap">
+        <div class="field">
+          <label>Adicionar item</label>
+          <input type="text" id="item-busca" placeholder="Buscar produto ou serviço..." autocomplete="off" oninput="buscarItem()"/>
+        </div>
+        <div class="item-sugs" id="item-sugs"></div>
+      </div>
+      <div class="itens-list" id="itens-list"></div>
+      <div class="itens-subtotal" id="itens-subtotal" style="display:none">
+        Subtotal: <span id="subtotal-val" style="color:var(--cd);margin-left:6px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGAMENTOS -->
+  <div class="section">
+    <div class="section-head">
+      <div class="sh-ico" style="background:var(--gbg);color:var(--green)"><i class="ti ti-credit-card"></i></div>
+      <div class="sh-title">Formas de pagamento</div>
+    </div>
+    <div class="section-body">
+      <div class="pags-list" id="pags-list"></div>
+      <button class="btn-add" onclick="addPagamento()"><i class="ti ti-plus"></i> Adicionar forma de pagamento</button>
+    </div>
+  </div>
+
+  <!-- TOTALIZADOR -->
+  <div class="total-bar">
+    <div>
+      <div class="total-label">Total da venda</div>
+      <div class="total-val" id="total-val">R$ 0,00</div>
+    </div>
+    <div style="text-align:right">
+      <div class="total-saldo" id="total-saldo"></div>
+      <div class="total-troco" id="total-troco" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- OBSERVAÇÃO -->
+  <div class="section">
+    <div class="section-head">
+      <div class="sh-ico" style="background:var(--bg);color:var(--sub)"><i class="ti ti-notes"></i></div>
+      <div class="sh-title">Observação <span style="font-size:10px;font-weight:400;color:var(--sub)">(opcional)</span></div>
+    </div>
+    <div class="section-body">
+      <textarea id="obs" style="width:100%;height:70px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;resize:none;background:#FAFAF7;outline:none;color:var(--dark)" placeholder="Observações sobre a venda..."></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTÕES FLUTUANTES -->
+<div style="position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;display:flex;align-items:center;gap:8px">
+  <a href="vendas.html" style="height:38px;padding:0 16px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+    <i class="ti ti-arrow-left"></i> Voltar
+  </a>
+  <button onclick="salvar()" id="fab-save" style="height:38px;padding:0 20px;border-radius:20px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(41,184,194,.35)">
+    <i class="ti ti-device-floppy"></i> <span id="btn-txt">Salvar Venda</span>
+  </button>
+</div>
+
+<script>
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SB_URL,SB_KEY);
+let USR={nome:'Gaza',perfil:'ADMIN',id:null};
+try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
+
+const _VID=new URLSearchParams(location.search).get('id');
+const setText=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+const fmtVal=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+// ── ESTADO ──────────────────────────────────────────
+let CLIENTE={id:null,nome:'CONSUMIDOR FINAL',tel:'',doc:''};
+let ITENS=[]; // {id, nome, tipo, preco, qty, estoque_id}
+let PAGS=[]; // {forma_id, forma_nome, valor, movimenta_caixa}
+let FORMAS=[]; // formas de pagamento do banco
+let _SALVANDO=false;
+
+// ── FORMAS DE PAGAMENTO ──────────────────────────────
+async function loadFormas(){
+  const{data}=await db.from('formas_pagamento').select('id,nome,movimenta_caixa').eq('ativo',true).order('nome');
+  FORMAS=data||[];
+  // adiciona pagamento inicial se novo
+  if(!_VID&&!PAGS.length)addPagamento();
+}
+
+// ── CLIENTE ──────────────────────────────────────────
+let _clTimer=null;
+async function buscarCliente(){
+  const q=document.getElementById('cl-busca').value.trim();
+  const sugs=document.getElementById('cl-sugs');
+  clearTimeout(_clTimer);
+  if(!q){sugs.classList.remove('open');return;}
+  _clTimer=setTimeout(async()=>{
+    const{data}=await db.from('pessoas').select('id,nome,celular,documento')
+      .or(`nome.ilike.%${q}%,celular.ilike.%${q}%,documento.ilike.%${q}%`)
+      .limit(8);
+    if(!data?.length){sugs.innerHTML='<div class="cl-sug" style="color:var(--sub)">Nenhum cliente encontrado</div>';sugs.classList.add('open');return;}
+    sugs.innerHTML=data.map(p=>`<div class="cl-sug" onclick="selecionarCliente('${p.id}','${(p.nome||'').replace(/'/g,"\\'")}','${p.celular||''}','${p.documento||''}')">
+      <div class="cl-sug-nome">${p.nome}</div>
+      <div class="cl-sug-doc">${[p.celular,p.documento].filter(Boolean).join(' · ')||'Sem contato'}</div>
+    </div>`).join('');
+    sugs.classList.add('open');
+  },300);
+}
+
+function selecionarCliente(id,nome,tel,doc){
+  CLIENTE={id,nome:nome.toUpperCase(),tel,doc};
+  document.getElementById('cl-busca').value='';
+  document.getElementById('cl-sugs').classList.remove('open');
+  const info=document.getElementById('cl-info');
+  document.getElementById('cl-info-nome').textContent=nome.toUpperCase();
+  document.getElementById('cl-info-sub').textContent=[tel,doc].filter(Boolean).join(' · ')||'Sem contato';
+  info.style.display='flex';
+}
+
+function limparCliente(){
+  CLIENTE={id:null,nome:'CONSUMIDOR FINAL',tel:'',doc:''};
+  document.getElementById('cl-info').style.display='none';
+  document.getElementById('cl-busca').value='';
+}
+
+function abrirNovoCliente(){document.getElementById('ov-ncl').classList.add('open');setTimeout(()=>document.getElementById('ncl-nome').focus(),80);}
+async function salvarNovoCliente(){
+  const nome=document.getElementById('ncl-nome').value.trim().toUpperCase();
+  const tel=document.getElementById('ncl-tel').value.trim();
+  const doc=document.getElementById('ncl-doc').value.replace(/\D/g,'');
+  if(!nome){toast('Informe o nome.','err');return;}
+  const{data,error}=await db.from('pessoas').insert({nome,celular:tel||null,documento:doc||null,tipo:'PF'}).select().single();
+  if(error){toast('Erro: '+error.message,'err');return;}
+  fecha('ncl');
+  selecionarCliente(data.id,data.nome,data.celular||'',data.documento||'');
+  toast('Cliente cadastrado!');
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.cl-wrap'))document.getElementById('cl-sugs').classList.remove('open');
+  if(!e.target.closest('.item-busca-wrap'))document.getElementById('item-sugs').classList.remove('open');
+});
+
+// ── ITENS ────────────────────────────────────────────
+let _itemTimer=null;
+async function buscarItem(){
+  const q=document.getElementById('item-busca').value.trim();
+  const sugs=document.getElementById('item-sugs');
+  clearTimeout(_itemTimer);
+  if(q.length<2){sugs.classList.remove('open');return;}
+  _itemTimer=setTimeout(async()=>{
+    const[{data:prods},{data:srvs}]=await Promise.all([
+      db.from('produtos').select('id,nome,preco_venda,estoque').ilike('nome','%'+q+'%').eq('ativo',true).limit(6),
+      db.from('servicos').select('id,nome,valor').ilike('nome','%'+q+'%').eq('ativo',true).limit(4),
+    ]);
+    const res=[
+      ...(prods||[]).map(p=>({id:p.id,nome:p.nome,preco:p.preco_venda||0,tipo:'produto',estoque:p.estoque||0})),
+      ...(srvs||[]).map(s=>({id:s.id,nome:s.nome,preco:s.valor||0,tipo:'servico',estoque:null})),
+    ];
+    if(!res.length){sugs.innerHTML='<div class="item-sug" style="color:var(--sub)">Nenhum resultado</div>';sugs.classList.add('open');return;}
+    sugs.innerHTML=res.map(r=>`<div class="item-sug" onclick="addItem('${r.id}','${(r.nome||'').replace(/'/g,"\\'")}',${r.preco},'${r.tipo}',${r.estoque===null?'null':r.estoque})">
+      <div class="item-sug-nome">${r.nome}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="item-sug-tipo">${r.tipo==='produto'?'PRODUTO':'SERVIÇO'}</span>
+        ${r.tipo==='produto'?'<span style="font-size:10px;color:var(--sub)">Estq: '+r.estoque+'</span>':''}
+        <span class="item-sug-preco">${fmtVal(r.preco)}</span>
+      </div>
+    </div>`).join('');
+    sugs.classList.add('open');
+  },250);
+}
+
+function addItem(id,nome,preco,tipo,estoque){
+  document.getElementById('item-busca').value='';
+  document.getElementById('item-sugs').classList.remove('open');
+  // se já existe, incrementa qty
+  const ex=ITENS.find(i=>i.id===id);
+  if(ex){ex.qty++;renderItens();calcTotal();return;}
+  ITENS.push({id,nome:nome.toUpperCase(),preco,tipo,estoque,qty:1,desconto:0});
+  renderItens();calcTotal();
+}
+
+function removeItem(idx){ITENS.splice(idx,1);renderItens();calcTotal();}
+
+function renderItens(){
+  const list=document.getElementById('itens-list');
+  const sub=document.getElementById('itens-subtotal');
+  if(!ITENS.length){list.innerHTML='<div style="font-size:12px;color:var(--sub);padding:4px 0">Nenhum item adicionado</div>';sub.style.display='none';return;}
+  list.innerHTML=ITENS.map((it,i)=>`
+    <div class="item-row">
+      <div class="item-row-nome">${it.nome}</div>
+      <input type="number" class="item-row-qty" value="${it.qty}" min="1" onchange="updateQty(${i},this.value)" title="Quantidade"/>
+      <input type="number" class="item-row-preco" value="${it.preco.toFixed(2)}" min="0" step="0.01" onchange="updatePreco(${i},this.value)" title="Preço unitário" style="text-transform:none"/>
+      <button class="item-row-del" onclick="removeItem(${i})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+  sub.style.display='flex';
+  calcTotal();
+}
+
+function updateQty(i,v){ITENS[i].qty=Math.max(1,parseInt(v)||1);calcTotal();}
+function updatePreco(i,v){ITENS[i].preco=parseFloat(v)||0;calcTotal();}
+
+// ── PAGAMENTOS ───────────────────────────────────────
+function addPagamento(){
+  const forma=FORMAS[0]||{id:null,nome:'DINHEIRO',movimenta_caixa:true};
+  PAGS.push({forma_id:forma.id,forma_nome:forma.nome,valor:0,movimenta_caixa:forma.movimenta_caixa});
+  renderPags();
+  calcTotal();
+}
+
+function removePag(i){PAGS.splice(i,1);renderPags();calcTotal();}
+
+function renderPags(){
+  const list=document.getElementById('pags-list');
+  if(!PAGS.length){list.innerHTML='';return;}
+  list.innerHTML=PAGS.map((p,i)=>{
+    const opts=FORMAS.map(f=>`<option value="${f.id}" ${f.id===p.forma_id?'selected':''}>${f.nome}</option>`).join('');
+    return `<div class="pag-row">
+      <select onchange="updatePagForma(${i},this.value)">${opts}</select>
+      <input type="number" value="${p.valor>0?p.valor.toFixed(2):''}" min="0" step="0.01" placeholder="0,00" onchange="updatePagVal(${i},this.value)" title="Valor"/>
+      <span class="pag-caixa ${p.movimenta_caixa?'sim':''}">
+        <i class="ti ti-${p.movimenta_caixa?'check':'minus'}"></i>
+        ${p.movimenta_caixa?'Caixa':'Sem caixa'}
+      </span>
+      <button class="pag-row-del" onclick="removePag(${i})"><i class="ti ti-x"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function updatePagForma(i,formaId){
+  const f=FORMAS.find(x=>x.id===formaId)||FORMAS[0];
+  if(!f)return;
+  PAGS[i].forma_id=f.id;
+  PAGS[i].forma_nome=f.nome;
+  PAGS[i].movimenta_caixa=f.movimenta_caixa;
+  renderPags();calcTotal();
+}
+function updatePagVal(i,v){PAGS[i].valor=parseFloat(v)||0;calcTotal();}
+
+// ── TOTAIS ───────────────────────────────────────────
+function calcTotal(){
+  const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty),0);
+  const totalPago=PAGS.reduce((s,p)=>s+p.valor,0);
+  const diff=totalPago-totalItens;
+
+  setText('total-val',fmtVal(totalItens));
+  setText('subtotal-val',fmtVal(totalItens));
+
+  const saldoEl=document.getElementById('total-saldo');
+  const trocoEl=document.getElementById('total-troco');
+
+  if(PAGS.length===0||totalItens===0){
+    saldoEl.textContent='';trocoEl.style.display='none';
+  } else if(Math.abs(diff)<0.01){
+    saldoEl.textContent='✓ Pagamento completo';saldoEl.className='total-saldo ok';trocoEl.style.display='none';
+  } else if(diff>0.01){
+    saldoEl.textContent='Troco: '+fmtVal(diff);saldoEl.className='total-saldo ok';
+    trocoEl.style.display='block';trocoEl.textContent='';
+  } else {
+    saldoEl.textContent='Falta: '+fmtVal(Math.abs(diff));saldoEl.className='total-saldo falta';trocoEl.style.display='none';
+  }
+}
+
+// ── SALVAR ───────────────────────────────────────────
+async function salvar(){
+  if(_SALVANDO)return;
+  if(!ITENS.length){toast('Adicione ao menos 1 item.','err');return;}
+
+  const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty),0);
+  const totalPago=PAGS.reduce((s,p)=>s+p.valor,0);
+
+  if(PAGS.length&&totalPago<totalItens-0.01){
+    toast('Pagamento incompleto. Falta '+fmtVal(totalItens-totalPago),'err');return;
+  }
+
+  // Verifica estoque
+  for(const it of ITENS){
+    if(it.tipo==='produto'&&it.estoque!==null&&it.qty>it.estoque){
+      toast('Estoque insuficiente: '+it.nome+' (disponível: '+it.estoque+')','err');return;
+    }
+  }
+
+  _SALVANDO=true;
+  setText('btn-txt','Salvando...');
+  document.getElementById('fab-save').disabled=true;
+
+  try{
+    // 1. Cria a venda
+    const{data:venda,error:eV}=await db.from('vendas').insert({
+      tipo:'RAPIDA',
+      pessoa_id:CLIENTE.id||null,
+      nome_cliente:CLIENTE.id?CLIENTE.nome:'CONSUMIDOR FINAL',
+      subtotal:totalItens,
+      desconto:0,
+      total:totalItens,
+      status:PAGS.length?'CONCLUIDA':'ABERTA',
+      observacoes:document.getElementById('obs').value.trim().toUpperCase()||null,
+      caixa_sessao_id:await getSessaoAtiva(),
+    }).select().single();
+    if(eV)throw eV;
+
+    // 2. Insere itens
+    const{error:eIt}=await db.from('venda_itens').insert(ITENS.map(it=>({
+      venda_id:venda.id,
+      produto_id:it.tipo==='produto'?it.id:null,
+      nome:it.nome,
+      quantidade:it.qty,
+      valor_unit:it.preco,
+      total:it.preco*it.qty,
+      desconto:0,
+    })));
+    if(eIt)throw eIt;
+
+    // 3. Deduz estoque dos produtos
+    for(const it of ITENS){
+      if(it.tipo==='produto'&&it.id){
+        await db.from('produtos').update({estoque:Math.max(0,(it.estoque||0)-it.qty)}).eq('id',it.id).catch(()=>{});
+      }
+    }
+
+    // 4. Insere pagamentos e lança no caixa (se movimenta_caixa)
+    if(PAGS.length){
+      await db.from('pagamentos_venda').insert(PAGS.map(p=>({
+        venda_id:venda.id,
+        forma_pagamento_id:p.forma_id,
+        forma_pagamento_nome:p.forma_nome,
+        valor:p.valor,
+        movimenta_caixa:p.movimenta_caixa,
+      }))).catch(()=>{});
+
+      // Lança no caixa apenas os que movimentam
+      const sessaoId=venda.caixa_sessao_id;
+      if(sessaoId){
+        const caixaRows=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>({
+          sessao_id:sessaoId,
+          tipo:'ENTRADA',
+          descricao:'VENDA #'+String(venda.numero||'').padStart(4,'0'),
+          valor:p.valor,
+          forma_pagamento:p.forma_nome,
+          referencia:'venda:'+venda.id,
+          pessoa_id:CLIENTE.id||null,
+        }));
+        if(caixaRows.length){
+          await db.from('caixa_movimentos').insert(caixaRows).catch(e=>console.warn('caixa:',e));
+        }
+      }
+    }
+
+    toast('Venda salva!');
+    setTimeout(()=>location.href='vendas.html',800);
+
+  }catch(e){
+    toast('Erro: '+e.message,'err');
+    _SALVANDO=false;
+    setText('btn-txt','Salvar Venda');
+    document.getElementById('fab-save').disabled=false;
+  }
+}
+
+// ── SESSÃO ATIVA ─────────────────────────────────────
+async function getSessaoAtiva(){
+  try{
+    const{data}=await db.from('caixa_sessoes')
+      .select('id').eq('status','ABERTA').order('aberta_em',{ascending:false}).limit(1).single();
+    return data?.id||null;
+  }catch{return null;}
+}
+
+// ── UTILS ────────────────────────────────────────────
+function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+
+// ── INIT ─────────────────────────────────────────────
+loadFormas();
+renderItens();
+</script>
+</body>
+</html>

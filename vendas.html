@@ -1,294 +1,280 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vendas — Dottec Assistência</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vendas — Dottec</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
 <style>
-  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE}
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:radial-gradient(circle at 12% -8%,rgba(41,184,194,.10),transparent 42%),var(--bg)}
-  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem}
-  .crumb{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:14px}
-  .back-btn{width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s}
-  .back-btn:hover{background:#E2DFD6}
-  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
-  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
-  .content{max-width:1200px;margin:0 auto;padding:2rem}
-
-  .totais{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
-  .total-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem}
-  .total-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-  .total-value{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--dark)}
-  .total-value.green{color:var(--green)}.total-value.cyan{color:var(--cyan-dark)}
-
-  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
-  .btn{height:40px;padding:0 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:background .15s;text-decoration:none}
-  .btn-cyan{background:var(--cyan);color:#fff}.btn-cyan:hover{background:var(--cyan-dark)}
-  .filters{display:flex;gap:6px}
-  .filter-btn{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Figtree',sans-serif;display:flex;align-items:center;gap:5px}
-  .filter-btn.active{background:var(--cyan-bg);color:var(--cyan-dark);border-color:rgba(41,184,194,.4)}
-  .filter-btn:hover{border-color:var(--cyan);color:var(--cyan-dark)}
-
-  /* datas */
-  .date-range{display:flex;align-items:center;gap:6px}
-  .date-range input{height:34px;padding:0 10px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s}
-  .date-range input:focus{border-color:var(--cyan)}
-  .date-range span{font-size:12px;color:var(--sub)}
-
-  .search-wrap{position:relative;margin-left:auto}
-  .search-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:16px}
-  .search-wrap input{width:220px;height:40px;padding:0 14px 0 38px;border-radius:10px;border:1px solid var(--border);background:#fff;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:uppercase}
-  .search-wrap input::placeholder{text-transform:none}
-  .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(41,184,194,.13)}
-
-  .table-card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-  table{width:100%;border-collapse:collapse}
-  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sub);padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAF7}
-  thead th.right{text-align:right}
-  tbody td{padding:12px 16px;font-size:13.5px;color:var(--text);border-bottom:1px solid #F2F0EA}
-  tbody tr:last-child td{border-bottom:none}
-  tbody tr{transition:background .12s;cursor:pointer}
-  tbody tr:hover{background:#FAFAF7}
-
-  .num-badge{font-size:11px;font-weight:800;color:var(--sub);background:var(--bg);padding:2px 8px;border-radius:6px}
-  .tipo-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px}
-  .tipo-pill.RAPIDA{background:var(--cyan-bg);color:var(--cyan-dark)}
-  .tipo-pill.NORMAL{background:var(--amber-bg);color:var(--amber)}
-
-  .status-pill{display:inline-flex;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
-  .status-pill.CONCLUIDA{background:var(--green-bg);color:var(--green)}
-  .status-pill.CANCELADA{background:#F0EFEA;color:var(--sub)}
-  .status-pill.ABERTA{background:var(--cyan-bg);color:var(--cyan-dark)}
-
-  .forma-icon{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--sub)}
-  .td-total{text-align:right;font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--dark)}
-  .td-data{font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums}
-
-  .act-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s}
-  .act-view{background:var(--cyan-bg);color:var(--cyan-dark)}.act-view:hover{background:var(--cyan);color:#fff}
-  .act-cancel{background:var(--coral-bg);color:var(--coral)}.act-cancel:hover{background:var(--coral);color:#fff}
-
-  .empty-row td{padding:3rem 1rem;text-align:center;color:var(--sub)}
-  .empty-row i{font-size:32px;display:block;margin-bottom:10px;opacity:.35}
-  .table-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--border);font-size:12.5px;color:var(--sub)}
-
-  /* MODAL DETALHE */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
-  .modal-overlay.open{display:flex}
-  .modal{background:#fff;border-radius:20px;width:100%;max-width:560px;box-shadow:0 24px 64px rgba(0,0,0,.18);margin:auto}
-  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
-  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
-  .modal-body{padding:1.5rem}
-  .detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F2F0EA}
-  .detail-row:last-child{border-bottom:none}
-  .detail-label{font-size:12.5px;color:var(--sub)}
-  .detail-value{font-size:13.5px;font-weight:600;color:var(--dark)}
-  .detail-total{font-family:'Lora',serif;font-size:22px;font-weight:800;color:var(--green)}
-  .itens-list{background:var(--bg);border-radius:12px;padding:1rem;margin:1rem 0}
-  .item-det{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
-  .item-det:not(:last-child){border-bottom:1px solid var(--border)}
-  .item-det-nome{color:var(--dark);font-weight:600;flex:1}
-  .item-det-info{color:var(--sub);font-size:11.5px;margin-top:2px}
-  .item-det-val{font-weight:700;color:var(--dark)}
-
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  @media(max-width:900px){.totais{grid-template-columns:1fr 1fr}.content{padding:1.25rem}}
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2;--purple:#5B3FA6;--pbg:#EEEAF8}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;text-transform:uppercase}
+/* FILTER BAR */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
+.fb-top{display:flex;align-items:center;gap:10px;padding:8px 16px}
+.btn-nova{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 14px;border-radius:8px;background:var(--cyan);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:background .15s}
+.btn-nova:hover{background:var(--cd)}
+.btn-nova i{font-size:13px}
+.search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:0 12px;height:34px;transition:border-color .2s}
+.search-box:focus-within{border-color:var(--cyan);background:var(--white)}
+.search-box input{flex:1;border:none;background:transparent;font-family:inherit;font-size:12.5px;color:var(--dark);outline:none;text-transform:uppercase}
+.search-box i{color:var(--sub);font-size:13px;flex-shrink:0}
+.search-cnt{font-size:10px;color:var(--sub);white-space:nowrap}
+.status-row{display:flex;align-items:center;overflow-x:auto;padding:0 16px;border-top:1px solid var(--border)}
+.status-row::-webkit-scrollbar{display:none}
+.sf{height:36px;padding:0 12px;border:none;background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;transition:color .15s,border-color .15s;flex-shrink:0}
+.sf.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.sf:hover{color:var(--dark)}
+.sf-cnt{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--bg)}
+/* BODY + TABELA */
+.body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.table-wrap{flex:1;overflow-y:auto}
+table{border-collapse:collapse;width:100%}
+thead{position:sticky;top:0;z-index:10;background:var(--white);box-shadow:0 1px 0 var(--border)}
+thead th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--sub);padding:10px 14px;border-bottom:1px solid var(--border);background:#FAFAF7;white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+tbody tr:hover{background:#FAFAF5}
+td{padding:10px 14px;font-size:12.5px;color:var(--text);vertical-align:middle}
+.td-num{font-size:11px;font-weight:800;color:var(--sub);background:var(--bg);padding:2px 6px;border-radius:5px}
+.td-val{font-weight:700;color:var(--dark)}
+.td-tempo{font-size:11px;color:var(--sub)}
+.td-acts{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.act{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;flex-shrink:0}
+.act-ed{background:var(--bg);color:var(--sub)}.act-ed:hover{background:var(--cbg);color:var(--cd)}
+.act-del{background:var(--bg);color:var(--sub)}.act-del:hover{background:var(--rbg);color:var(--red)}
+/* STATUS BADGE */
+.sb{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;text-transform:uppercase}
+.sb-conc{background:var(--gbg);color:var(--green)}
+.sb-canc{background:var(--rbg);color:var(--red)}
+.sb-aber{background:var(--cbg);color:var(--cd)}
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--sub);font-size:13px}
+.empty i{font-size:32px;opacity:.4}
+/* TOAST */
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;background:var(--dark);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok i{color:#4ade80}.toast.err i{color:#f87171}
+/* TF */
+.tf{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;font-size:11px;color:var(--sub);border-top:1px solid var(--border);background:var(--white)}
+/* OVERLAY/MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);overflow:hidden}
+.modal-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mh-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.modal-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+.modal-x{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.btn-pri{height:34px;padding:0 16px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-sec{height:34px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{height:36px;border:1.5px solid var(--border);border-radius:7px;padding:0 10px;font-family:inherit;font-size:13px;color:var(--dark);background:#FAFAF7;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--cyan);background:var(--white)}
+/* PRINT */
+@page{size:A4 portrait;margin:10mm}
+@media print{.filter-bar,.tf,#_dottec_shell{display:none!important}}
 </style>
 </head>
 <body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
-<!-- MODAL DETALHE -->
-<div class="modal-overlay" id="modal-det" onclick="if(event.target===this)fecharDet()">
-  <div class="modal">
+<!-- MODAL EXCLUIR -->
+<div class="overlay" id="ov-del">
+  <div class="modal" style="max-width:400px">
     <div class="modal-head">
-      <div class="modal-title" id="det-num">Venda —</div>
-      <button class="modal-close" onclick="fecharDet()"><i class="ti ti-x"></i></button>
+      <div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-trash"></i></div>
+      <div class="modal-title">Excluir venda <span id="del-num"></span>?</div>
+      <button class="modal-x" onclick="fecha('del')"><i class="ti ti-x"></i></button>
     </div>
-    <div class="modal-body" id="det-body">Carregando...</div>
+    <div class="modal-body"><p style="font-size:13px;color:var(--sub)">Essa ação não pode ser desfeita. Os lançamentos no caixa relacionados também serão removidos.</p></div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="fecha('del')">Cancelar</button>
+      <button class="btn-pri" style="background:var(--red)" onclick="confirmarDel()" id="btn-confirmar-del"><i class="ti ti-trash"></i> Excluir</button>
+    </div>
   </div>
 </div>
 
-<header class="topbar">
-  <div class="crumb">
-    <a class="back-btn" href="venda.html"><i class="ti ti-arrow-left"></i></a>
-    <div><div class="crumb-title">Histórico de Vendas</div><div class="crumb-sub">Todas as vendas realizadas</div></div>
-  </div>
-</header>
-
-<main class="content">
-  <div class="totais">
-    <div class="total-card"><div class="total-label">Vendas hoje</div><div class="total-value cyan" id="t-hoje">—</div></div>
-    <div class="total-card"><div class="total-label">Total hoje</div><div class="total-value green" id="t-total-hoje">R$ —</div></div>
-    <div class="total-card"><div class="total-label">Vendas este mês</div><div class="total-value" id="t-mes">—</div></div>
-    <div class="total-card"><div class="total-label">Total este mês</div><div class="total-value green" id="t-total-mes">R$ —</div></div>
-  </div>
-
-  <div class="toolbar">
-    <a class="btn btn-cyan" href="venda-rapida.html"><i class="ti ti-bolt"></i> Nova venda rápida</a>
-
-    <div class="filters">
-      <button class="filter-btn active" id="ft-todos" onclick="setFiltro('TODOS')">Todas</button>
-      <button class="filter-btn" id="ft-rapida" onclick="setFiltro('RAPIDA')"><i class="ti ti-bolt"></i> Rápida</button>
-      <button class="filter-btn" id="ft-normal" onclick="setFiltro('NORMAL')"><i class="ti ti-receipt"></i> Normal</button>
-    </div>
-
-    <div class="date-range">
-      <input type="date" id="data-de" oninput="load()"/>
-      <span>até</span>
-      <input type="date" id="data-ate" oninput="load()"/>
-    </div>
-
-    <div class="search-wrap">
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="fb-top">
+    <a href="venda-nova.html" class="btn-nova"><i class="ti ti-plus"></i> Nova Venda</a>
+    <div class="search-box">
       <i class="ti ti-search"></i>
-      <input type="text" id="busca" placeholder="Buscar..." oninput="filtrar()"/>
+      <input type="text" id="busca" placeholder="Buscar por Nº, cliente ou produto..." autocomplete="off" oninput="filtrar()"/>
+      <span class="search-cnt" id="s-cnt"></span>
     </div>
   </div>
+  <div class="status-row" id="status-row"></div>
+</div>
 
-  <div class="table-card">
+<!-- BODY -->
+<div class="body">
+  <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th style="width:80px">#</th>
-          <th style="width:90px">Tipo</th>
+          <th style="width:64px">Nº</th>
+          <th style="width:90px">Data</th>
           <th>Cliente</th>
-          <th style="width:120px">Forma</th>
-          <th style="width:90px">Status</th>
-          <th style="width:100px">Data</th>
-          <th style="width:120px" class="right">Total</th>
-          <th style="width:80px;text-align:right">Ações</th>
+          <th>Itens</th>
+          <th style="width:110px;text-align:center">Status</th>
+          <th style="width:100px">Total</th>
+          <th style="width:80px">Tempo</th>
+          <th style="width:90px;text-align:right">Ações</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr class="empty-row"><td colspan="8"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i>Carregando...</td></tr>
+        <tr><td colspan="8"><div class="empty"><i class="ti ti-loader-2"></i>Carregando...</div></td></tr>
       </tbody>
     </table>
-    <div class="table-footer"><span id="count">—</span><span>Dottec Assistência</span></div>
   </div>
-</main>
+  <div class="tf">
+    <span id="tf-cnt"></span>
+    <span>Dottec · Vendas</span>
+  </div>
+</div>
 
 <script>
-  const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
-  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-  const db=supabase.createClient(SUPA_URL,SUPA_KEY);
-  const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
-  const fmtDt=d=>new Date(d).toLocaleDateString('pt-BR');
-  const fmtHr=d=>new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const hoje=new Date().toISOString().slice(0,10);
-  const mesInicio=hoje.slice(0,8)+'01';
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SB_URL,SB_KEY);
+let USR={nome:'Gaza',perfil:'ADMIN',id:null};
+try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
 
-  let TODOS=[], FILTRO_TIPO='TODOS';
+let TODOS=[], FILTRO='', DEL_ID=null;
 
-  // datas padrão
-  document.getElementById('data-de').value=mesInicio;
-  document.getElementById('data-ate').value=hoje;
+const SB_CLS={'CONCLUIDA':'sb-conc','CANCELADA':'sb-canc','ABERTA':'sb-aber'};
+const fmtDt=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
+const fmtVal=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
 
-  function setFiltro(t){
-    FILTRO_TIPO=t;
-    ['todos','rapida','normal'].forEach(x=>document.getElementById('ft-'+x).classList.toggle('active',t===x.toUpperCase()||t==='TODOS'&&x==='todos'));
-    filtrar();
+async function load(){
+  const{data:vs}=await db.from('vendas')
+    .select('id,numero,nome_cliente,status,total,criado_em,atualizado_em')
+    .order('criado_em',{ascending:false}).limit(300);
+  TODOS=vs||[];
+
+  // Busca resumo de itens por venda
+  const ids=TODOS.map(v=>v.id);
+  let ITENS_MAP={};
+  if(ids.length){
+    const{data:its}=await db.from('venda_itens')
+      .select('venda_id,nome,quantidade')
+      .in('venda_id',ids);
+    (its||[]).forEach(i=>{
+      if(!ITENS_MAP[i.venda_id])ITENS_MAP[i.venda_id]=[];
+      ITENS_MAP[i.venda_id].push(i);
+    });
   }
+  TODOS.forEach(v=>v._itens=ITENS_MAP[v.id]||[]);
 
-  function filtrar(){
-    const q=document.getElementById('busca').value.trim().toUpperCase();
-    let lista=TODOS;
-    if(FILTRO_TIPO!=='TODOS') lista=lista.filter(v=>v.tipo===FILTRO_TIPO);
-    if(q) lista=lista.filter(v=>String(v.numero).includes(q)||(v.nome_cliente||'').toUpperCase().includes(q)||(v.forma_pagamento||'').toUpperCase().includes(q));
-    renderTable(lista);
+  buildStatusRow();
+  render();
+}
+
+function buildStatusRow(){
+  const cnts={};
+  TODOS.forEach(v=>cnts[v.status]=(cnts[v.status]||0)+1);
+  const total=TODOS.length;
+  let html=`<button class="sf${FILTRO===''?' active':''}" onclick="setFiltro('')">Todos <span class="sf-cnt">${total}</span></button>`;
+  ['ABERTA','CONCLUIDA','CANCELADA'].forEach(s=>{
+    const cnt=cnts[s]||0;
+    if(!cnt)return;
+    html+=`<button class="sf${FILTRO===s?' active':''}" onclick="setFiltro('${s}')">${s} <span class="sf-cnt">${cnt}</span></button>`;
+  });
+  document.getElementById('status-row').innerHTML=html;
+}
+
+function setFiltro(s){FILTRO=s;buildStatusRow();render();}
+
+function filtrar(){
+  const q=document.getElementById('busca').value.trim().toUpperCase();
+  let lista=TODOS;
+  if(FILTRO)lista=lista.filter(v=>v.status===FILTRO);
+  if(q)lista=lista.filter(v=>
+    String(v.numero||'').padStart(4,'0').includes(q)||
+    (v.nome_cliente||'').toUpperCase().includes(q)||
+    (v._itens||[]).some(i=>(i.nome||'').toUpperCase().includes(q))
+  );
+  document.getElementById('s-cnt').textContent=q?lista.length+' resultado'+(lista.length!==1?'s':''):'';
+  renderLista(lista);
+}
+
+function render(){
+  const q=document.getElementById('busca').value.trim().toUpperCase();
+  let lista=TODOS;
+  if(FILTRO)lista=lista.filter(v=>v.status===FILTRO);
+  if(q)lista=lista.filter(v=>
+    String(v.numero||'').padStart(4,'0').includes(q)||
+    (v.nome_cliente||'').toUpperCase().includes(q)||
+    (v._itens||[]).some(i=>(i.nome||'').toUpperCase().includes(q))
+  );
+  document.getElementById('tf-cnt').textContent=lista.length+' venda'+(lista.length!==1?'s':'');
+  renderLista(lista);
+}
+
+function renderLista(lista){
+  const isAdmin=USR.perfil==='ADMIN';
+  if(!lista.length){
+    document.getElementById('tbody').innerHTML='<tr><td colspan="8"><div class="empty"><i class="ti ti-shopping-off"></i>Nenhuma venda encontrada</div></td></tr>';
+    return;
   }
+  document.getElementById('tbody').innerHTML=lista.map(v=>{
+    const numFmt=String(v.numero||'').padStart(4,'0');
+    const cls=SB_CLS[v.status]||'sb-aber';
+    const itensRes=v._itens.length
+      ?v._itens.slice(0,2).map(i=>i.nome+(i.quantidade>1?' ×'+i.quantidade:'')).join(', ')+(v._itens.length>2?' +'+( v._itens.length-2):'')
+      :'—';
+    return `<tr onclick="irVenda('${v.id}',event)">
+      <td><span class="td-num">${numFmt}</span></td>
+      <td class="td-tempo">${fmtDt(v.criado_em)}</td>
+      <td style="font-weight:600;color:var(--dark)">${v.nome_cliente||'CONSUMIDOR FINAL'}</td>
+      <td style="font-size:11.5px;color:var(--sub);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itensRes}</td>
+      <td style="text-align:center"><span class="sb ${cls}">${v.status}</span></td>
+      <td class="td-val">${fmtVal(v.total)}</td>
+      <td class="td-tempo">${tempo(v.criado_em)}</td>
+      <td onclick="event.stopPropagation()"><div class="td-acts">
+        <button class="act act-ed" onclick="irVenda('${v.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
+        ${isAdmin?`<button class="act act-del" onclick="abrirDel('${v.id}','#${numFmt}')" title="Excluir"><i class="ti ti-trash"></i></button>`:''}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
 
-  function renderTable(lista){
-    const tb=document.getElementById('tbody');
-    if(!lista.length){
-      tb.innerHTML=`<tr class="empty-row"><td colspan="8"><i class="ti ti-receipt-off"></i>Nenhuma venda encontrada.</td></tr>`;
-      document.getElementById('count').textContent='0 vendas';
-      return;
-    }
-    const formaIcon={'DINHEIRO':'ti-cash','PIX':'ti-qrcode','DEBITO':'ti-credit-card','CREDITO':'ti-credit-card','BOLETO':'ti-file-text'};
-    tb.innerHTML=lista.map(v=>`
-      <tr onclick="verDetalhe('${v.id}')">
-        <td><span class="num-badge">#${String(v.numero).padStart(4,'0')}</span></td>
-        <td><span class="tipo-pill ${v.tipo}">${v.tipo==='RAPIDA'?'RÁPIDA':'NORMAL'}</span></td>
-        <td style="color:var(--sub);font-size:12.5px">${v.nome_cliente||v.pessoas?.nome||'— BALCÃO'}</td>
-        <td><span class="forma-icon"><i class="ti ${formaIcon[v.forma_pagamento]||'ti-credit-card'}"></i>${v.forma_pagamento||'—'}</span></td>
-        <td><span class="status-pill ${v.status}">${v.status}</span></td>
-        <td class="td-data">${fmtDt(v.criado_em)}<br>${fmtHr(v.criado_em)}</td>
-        <td class="td-total">${fmt(v.total)}</td>
-        <td>
-          <div style="display:flex;gap:5px;justify-content:flex-end">
-            <button class="act-btn act-view" onclick="event.stopPropagation();verDetalhe('${v.id}')" title="Detalhes"><i class="ti ti-eye"></i></button>
-            ${v.status==='CONCLUIDA'?`<button class="act-btn act-cancel" onclick="event.stopPropagation();cancelarVenda('${v.id}','${String(v.numero).padStart(4,'0')}')" title="Cancelar"><i class="ti ti-x"></i></button>`:''}
-          </div>
-        </td>
-      </tr>`).join('');
-    document.getElementById('count').textContent=lista.length+' venda(s)';
-  }
+function irVenda(id,e){if(e&&e.target.closest('.act'))return;location.href='venda-nova.html?id='+id;}
 
-  async function load(){
-    const de=document.getElementById('data-de').value;
-    const ate=document.getElementById('data-ate').value;
-    let q=db.from('vendas').select('*,pessoas(nome)').order('criado_em',{ascending:false});
-    if(de) q=q.gte('criado_em',de+'T00:00:00');
-    if(ate) q=q.lte('criado_em',ate+'T23:59:59');
-    const{data}=await q;
-    TODOS=data||[];
+// EXCLUIR
+function abrirDel(id,num){
+  DEL_ID=id;
+  document.getElementById('del-num').textContent=num;
+  document.getElementById('ov-del').classList.add('open');
+}
+async function confirmarDel(){
+  if(!DEL_ID)return;
+  // remove itens, pagamentos, lançamentos e a venda
+  await db.from('venda_itens').delete().eq('venda_id',DEL_ID).catch(()=>{});
+  await db.from('caixa_movimentos').delete().eq('referencia','venda:'+DEL_ID).catch(()=>{});
+  const{error}=await db.from('vendas').delete().eq('id',DEL_ID);
+  if(error){toast('Erro ao excluir: '+error.message,'err');return;}
+  fecha('del');
+  toast('Venda excluída.');
+  TODOS=TODOS.filter(v=>v.id!==DEL_ID);
+  buildStatusRow();render();
+}
 
-    // totalizadores
-    const vendHoje=TODOS.filter(v=>v.criado_em.slice(0,10)===hoje&&v.status==='CONCLUIDA');
-    const vendMes=TODOS.filter(v=>v.status==='CONCLUIDA');
-    document.getElementById('t-hoje').textContent=vendHoje.length;
-    document.getElementById('t-total-hoje').textContent=fmt(vendHoje.reduce((s,v)=>s+Number(v.total),0));
-    document.getElementById('t-mes').textContent=vendMes.length;
-    document.getElementById('t-total-mes').textContent=fmt(vendMes.reduce((s,v)=>s+Number(v.total),0));
-    filtrar();
-  }
+// UTILS
+function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fecha('del');});
 
-  async function verDetalhe(id){
-    const venda=TODOS.find(v=>v.id===id);
-    if(!venda) return;
-    document.getElementById('det-num').textContent='Venda #'+String(venda.numero).padStart(4,'0');
-    document.getElementById('det-body').innerHTML='<div style="text-align:center;padding:2rem;color:var(--sub)"><i class="ti ti-loader-2" style="font-size:28px;animation:spin .8s linear infinite"></i></div>';
-    document.getElementById('modal-det').classList.add('open');
-
-    const{data:itens}=await db.from('venda_itens').select('*').eq('venda_id',id);
-
-    const li=(itens||[]).map(it=>`
-      <div class="item-det">
-        <div>
-          <div class="item-det-nome">${it.nome}</div>
-          <div class="item-det-info">${it.quantidade}x ${fmt(it.valor_unit)}</div>
-        </div>
-        <div class="item-det-val">${fmt(it.total)}</div>
-      </div>`).join('');
-
-    document.getElementById('det-body').innerHTML=`
-      <div class="detail-row"><span class="detail-label">Tipo</span><span class="detail-value">${venda.tipo==='RAPIDA'?'VENDA RÁPIDA (BALCÃO)':'VENDA NORMAL'}</span></div>
-      <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${venda.status}</span></div>
-      <div class="detail-row"><span class="detail-label">Data / Hora</span><span class="detail-value">${fmtDt(venda.criado_em)} às ${fmtHr(venda.criado_em)}</span></div>
-      <div class="detail-row"><span class="detail-label">Cliente</span><span class="detail-value">${venda.nome_cliente||venda.pessoas?.nome||'— BALCÃO'}</span></div>
-      <div class="detail-row"><span class="detail-label">Forma de pagamento</span><span class="detail-value">${venda.forma_pagamento||'—'}</span></div>
-      ${venda.troco>0?`<div class="detail-row"><span class="detail-label">Troco</span><span class="detail-value">${fmt(venda.troco)}</span></div>`:''}
-      <div class="itens-list">${li||'<div style="color:var(--sub);text-align:center;font-size:13px">Sem itens registrados</div>'}</div>
-      <div class="detail-row"><span class="detail-label">Subtotal</span><span class="detail-value">${fmt(venda.subtotal)}</span></div>
-      ${venda.desconto>0?`<div class="detail-row"><span class="detail-label">Desconto</span><span class="detail-value">- ${fmt(venda.desconto)}</span></div>`:''}
-      <div class="detail-row" style="margin-top:8px"><span class="detail-label" style="font-size:15px;font-weight:700;color:var(--dark)">Total</span><span class="detail-total">${fmt(venda.total)}</span></div>`;
-  }
-
-  function fecharDet(){document.getElementById('modal-det').classList.remove('open')}
-
-  async function cancelarVenda(id,num){
-    if(!confirm('Cancelar a venda #'+num+'? Essa ação não pode ser desfeita.')) return;
-    const{error}=await db.from('vendas').update({status:'CANCELADA'}).eq('id',id);
-    if(error){alert('Erro: '+error.message);return;}
-    load();
-  }
-
-  load();
+// INIT
+load();
 </script>
 </body>
 </html>
