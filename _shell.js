@@ -28,7 +28,7 @@
 
   window.MODS=[
     {id:'os',lbl:'OS',ico:'ti-tool',href:'os.html',bg:'linear-gradient(135deg,#FBE9E5,#FFD5CC)',c:'#C94835'},
-    {id:'venda',lbl:'Venda',ico:'ti-shopping-cart',href:'venda.html',bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
+    {id:'venda',lbl:'Venda',ico:'ti-shopping-cart',href:'vendas.html',bg:'linear-gradient(135deg,#FCE7F3,#FBC8E4)',c:'#BE185D'},
     {id:'caixa',lbl:'Caixa',ico:'ti-wallet',href:'caixa.html',bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
     {id:'financeiro',lbl:'Financeiro',ico:'ti-currency-dollar',href:'financeiro.html',bg:'linear-gradient(135deg,#EAF3DE,#C8E89E)',c:'#3B6D11'},
     {id:'orcamentos',lbl:'Orçamentos',ico:'ti-calculator',href:'orcamentos.html',bg:'linear-gradient(135deg,#CFFAFE,#A5F0F9)',c:'#0E7490'},
