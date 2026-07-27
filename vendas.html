@@ -611,6 +611,32 @@ async function confImprimir(){
   toast('Impressão gerada para '+ids.length+' venda'+(ids.length>1?'s':'')+'!');
 }
 
+// fecha ao clicar fora
+document.getElementById('ov-conf').addEventListener('click',function(e){if(e.target===this)fecha('conf');});
+document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fecha('del');});
+
+function abrirDel(id,num){
+  DEL_ID=id;
+  document.getElementById('del-num').textContent=num;
+  document.getElementById('ov-del').classList.add('open');
+}
+async function confirmarDel(){
+  if(!DEL_ID)return;
+  try{await db.from('venda_itens').delete().eq('venda_id',DEL_ID);}catch{}
+  try{await db.from('caixa_movimentos').delete().eq('referencia','venda:'+DEL_ID);}catch{}
+  const{error}=await db.from('vendas').delete().eq('id',DEL_ID);
+  if(error){toast('Erro ao excluir: '+error.message,'err');return;}
+  fecha('del');
+  toast('Venda excluída.');
+  TODOS=TODOS.filter(v=>v.id!==DEL_ID);
+  DEL_ID=null;
+  buildStatusRow();render();
+}
+function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+function toast(msg,t){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='err'?'ti-alert-circle':'ti-check');document.getElementById('tm').textContent=msg;el.className='toast '+(t||'ok')+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+document.getElementById('ov-conf').addEventListener('click',function(e){if(e.target===this)fecha('conf');});
+document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fecha('del');});
+
 // INIT
 load();
 </script>
