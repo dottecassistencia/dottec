@@ -79,10 +79,56 @@ td{padding:10px 14px;font-size:12.5px;color:var(--text);vertical-align:middle}
 /* PRINT */
 @page{size:A4 portrait;margin:10mm}
 @media print{.filter-bar,.tf,#_dottec_shell{display:none!important}}
+.act-more-wrap{position:relative}
+.act-more-btn{background:var(--bg);color:var(--sub)}.act-more-btn:hover{background:var(--cbg);color:var(--cd)}
+.act-more-drop{display:none;position:fixed;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:200px;z-index:99999;padding:4px}
+.act-more-drop.open{display:block}
+.amd-item{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;width:100%;border:none;background:transparent;font-family:inherit;text-align:left;transition:background .1s}
+.amd-item:hover{background:var(--bg)}
+.amd-item i{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.amd-sep{height:1px;background:var(--border);margin:3px 6px}
+.amd-label{font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;padding:5px 11px 2px}
+.act-print-pend{background:var(--rbg);color:var(--red)}.act-print-pend:hover{background:var(--red);color:#fff}
+.act-print-ok{background:var(--gbg);color:var(--green)}.act-print-ok:hover{background:var(--green);color:#fff}
+.btn-conf{display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;font-family:inherit}
+.btn-conf:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
+.conf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.conf-row:hover{background:var(--bg)}.conf-row.sel{background:var(--cbg)}
+.conf-chk{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:10px;color:transparent}
+.conf-row.sel .conf-chk{background:var(--cyan);border-color:var(--cyan);color:#fff}
+.conf-info{flex:1;min-width:0}
+.conf-nome{font-size:12px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conf-sub{font-size:10.5px;color:var(--sub)}
+.conf-val{font-size:12px;font-weight:700;color:var(--cd);flex-shrink:0}
+.conf-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;flex-shrink:0}
+.conf-pend-hdr{padding:8px 16px 4px;font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.06em;background:var(--rbg);border-bottom:1px solid rgba(220,38,38,.1)}
+.conf-ok-hdr{padding:8px 16px 4px;font-size:10px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.06em;background:var(--gbg);border-bottom:1px solid rgba(59,109,17,.1)}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL CONFERÊNCIA -->
+<div class="overlay" id="ov-conf">
+  <div class="modal" style="max-width:580px;display:flex;flex-direction:column;max-height:88vh">
+    <div class="modal-head" style="flex-shrink:0">
+      <div class="mh-ico" style="background:var(--cbg);color:var(--cd)"><i class="ti ti-clipboard-check"></i></div>
+      <div class="modal-title">Conferência de impressão</div>
+      <button class="modal-x" onclick="fecha('conf')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="conf-list" style="flex:1;overflow-y:auto"></div>
+    <div class="modal-foot" style="flex-shrink:0;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="confSelTodos()" style="height:28px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">Selec. todos</button>
+        <span id="conf-cnt" style="font-size:11px;color:var(--sub)">0 selecionadas</span>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn-sec" onclick="fecha('conf')">Fechar</button>
+        <button class="btn-pri" onclick="confImprimir('interno')"><i class="ti ti-printer"></i> Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL EXCLUIR -->
 <div class="overlay" id="ov-del">
@@ -104,6 +150,7 @@ td{padding:10px 14px;font-size:12.5px;color:var(--text);vertical-align:middle}
 <div class="filter-bar">
   <div class="fb-top">
     <a href="venda-nova.html" class="btn-nova"><i class="ti ti-plus"></i> Nova Venda</a>
+    <button onclick="abrirConferencia()" class="btn-conf"><i class="ti ti-clipboard-check"></i> Conferência</button>
     <div class="search-box">
       <i class="ti ti-search"></i>
       <input type="text" id="busca" placeholder="Buscar por Nº, cliente ou produto..." autocomplete="off" oninput="filtrar()"/>
@@ -115,6 +162,14 @@ td{padding:10px 14px;font-size:12.5px;color:var(--text);vertical-align:middle}
 
 <!-- BODY -->
 <div class="body">
+  <!-- Badge pendências -->
+  <div id="pend-bar" style="display:none;padding:6px 20px;background:var(--rbg);border-bottom:1px solid rgba(220,38,38,.15);align-items:center;gap:8px;font-size:11.5px;color:var(--red);font-weight:600">
+    <i class="ti ti-alert-circle"></i>
+    <span id="pend-txt"></span>
+    <button onclick="abrirConferencia()" style="margin-left:auto;height:24px;padding:0 10px;border-radius:6px;border:1px solid var(--red);background:transparent;color:var(--red);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">
+      Ver conferência
+    </button>
+  </div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -126,6 +181,7 @@ td{padding:10px 14px;font-size:12.5px;color:var(--text);vertical-align:middle}
           <th style="width:110px;text-align:center">Status</th>
           <th style="width:100px">Total</th>
           <th style="width:80px">Tempo</th>
+          <th style="width:32px"></th>
           <th style="width:90px;text-align:right">Ações</th>
         </tr>
       </thead>
@@ -156,7 +212,7 @@ const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)retur
 
 async function load(){
   const{data:vs}=await db.from('vendas')
-    .select('id,numero,nome_cliente,status,total,criado_em,atualizado_em')
+    .select('id,numero,nome_cliente,status,total,criado_em,atualizado_em,impresso_em,impresso_tipo,pessoa_id')
     .order('criado_em',{ascending:false}).limit(300);
   TODOS=vs||[];
 
@@ -222,28 +278,53 @@ function render(){
 function renderLista(lista){
   const isAdmin=USR.perfil==='ADMIN';
   if(!lista.length){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="8"><div class="empty"><i class="ti ti-shopping-off"></i>Nenhuma venda encontrada</div></td></tr>';
+    document.getElementById('tbody').innerHTML='<tr><td colspan="9"><div class="empty"><i class="ti ti-shopping-off"></i>Nenhuma venda encontrada</div></td></tr>';
     return;
+  }
+  const precisa=v=>v.status==='CONCLUIDA'||v.status==='AGUARDANDO RETIRADA';
+  // atualiza badge de pendências
+  const pends=TODOS.filter(v=>precisa(v)&&!v.impresso_em);
+  const pb=document.getElementById('pend-bar');
+  const pt=document.getElementById('pend-txt');
+  if(pb){
+    if(pends.length){
+      pt.textContent=pends.length+' venda'+(pends.length>1?'s':'')+' sem impressão';
+      pb.style.display='flex';
+    } else pb.style.display='none';
   }
   document.getElementById('tbody').innerHTML=lista.map(v=>{
     const numFmt=String(v.numero||'').padStart(4,'0');
     const cls=SB_CLS[v.status]||'sb-aber';
     const itensRes=v._itens.length
-      ?v._itens.slice(0,2).map(i=>i.nome+(i.quantidade>1?' ×'+i.quantidade:'')).join(', ')+(v._itens.length>2?' +'+( v._itens.length-2):'')
+      ?v._itens.slice(0,2).map(i=>i.nome+(i.quantidade>1?' ×'+i.quantidade:'')).join(', ')+(v._itens.length>2?' +'+(v._itens.length-2):'')
       :'—';
-    return `<tr onclick="irVenda('${v.id}',event)">
-      <td><span class="td-num">${numFmt}</span></td>
-      <td class="td-tempo">${fmtDt(v.criado_em)}</td>
-      <td style="font-weight:600;color:var(--dark)">${v.nome_cliente||'CONSUMIDOR FINAL'}</td>
-      <td style="font-size:11.5px;color:var(--sub);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itensRes}</td>
-      <td style="text-align:center"><span class="sb ${cls}">${v.status}</span></td>
-      <td class="td-val">${fmtVal(v.total)}</td>
-      <td class="td-tempo">${tempo(v.criado_em)}</td>
-      <td onclick="event.stopPropagation()"><div class="td-acts">
-        <button class="act act-ed" onclick="irVenda('${v.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
-        ${isAdmin?`<button class="act act-del" onclick="abrirDel('${v.id}','#${numFmt}')" title="Excluir"><i class="ti ti-trash"></i></button>`:''}
-      </div></td>
-    </tr>`;
+    const impOk=!!v.impresso_em;
+    const pend=precisa(v)&&!impOk;
+    const printCls=pend?'act act-print-pend':impOk?'act act-print-ok':'act act-ed';
+    const printTip=impOk?'Reimprimir ('+fmtDt(v.impresso_em)+')':pend?'Imprimir — PENDENTE':'Imprimir';
+    const nomeSafe=(v.nome_cliente||'CONSUMIDOR FINAL').replace(/'/g,"\'");
+    return '<tr onclick="irVenda(''+v.id+'',event)">'
+      +'<td><span class="td-num">'+numFmt+'</span></td>'
+      +'<td class="td-tempo">'+fmtDt(v.criado_em)+'</td>'
+      +'<td style="font-weight:600;color:var(--dark)">'+( v.nome_cliente||'CONSUMIDOR FINAL')+'</td>'
+      +'<td style="font-size:11.5px;color:var(--sub);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+itensRes+'</td>'
+      +'<td style="text-align:center"><span class="sb '+cls+'">'+v.status+'</span></td>'
+      +'<td class="td-val">'+fmtVal(v.total)+'</td>'
+      +'<td class="td-tempo">'+tempo(v.criado_em)+'</td>'
+      +'<td onclick="event.stopPropagation()">'
+        +'<button class="'+printCls+'" onclick="imprimirVenda(event,''+v.id+'',''+numFmt+'',''+nomeSafe+'','+v.total+','interno')" title="'+printTip+'">'
+          +'<i class="ti ti-'+(impOk?'printer-check':'printer')+'"></i>'
+        +'</button>'
+      +'</td>'
+      +'<td onclick="event.stopPropagation()"><div class="td-acts">'
+        +'<button class="act act-ed" onclick="irVenda(''+v.id+'')" title="Editar"><i class="ti ti-pencil"></i></button>'
+        +'<div class="act-more-wrap">'
+          +'<button class="act act-more-btn" onclick="abrirMenu(event,''+v.id+'',''+numFmt+'',''+nomeSafe+'',''+v.status+'','+v.total+','+impOk+')" title="Mais ações"><i class="ti ti-dots-vertical"></i></button>'
+          +'<div class="act-more-drop" id="vmd-'+v.id+'"></div>'
+        +'</div>'
+        +(isAdmin?'<button class="act act-del" onclick="abrirDel(''+v.id+'','#'+numFmt+'')" title="Excluir"><i class="ti ti-trash"></i></button>':'')
+      +'</div></td>'
+    +'</tr>';
   }).join('');
 }
 
@@ -272,6 +353,266 @@ async function confirmarDel(){
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
 document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fecha('del');});
+
+// ── MENU DE AÇÕES
+let _menuDrop=null;
+function abrirMenu(e,vid,num,cliente,status,total,impOk){
+  e.stopPropagation();
+  document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open'));
+  const drop=document.getElementById('vmd-'+vid);
+  if(!drop||drop.classList.contains('open')){if(drop)drop.classList.remove('open');return;}
+  const nomeSafe=cliente.replace(/'/g,"\'");
+  drop.innerHTML=
+    '<div class="amd-label">Venda</div>'
+    +'<button class="amd-item" onclick="imprimirVenda(event,''+vid+'',''+num+'',''+nomeSafe+'','+total+','interno')"><i class="ti ti-printer" style="color:var(--sub)"></i> Imprimir (interno)</button>'
+    +'<button class="amd-item" onclick="imprimirVenda(event,''+vid+'',''+num+'',''+nomeSafe+'','+total+','cliente')"><i class="ti ti-file-invoice" style="color:var(--cd)"></i> Imprimir para cliente</button>'
+    +'<button class="amd-item" onclick="enviarWhatsVenda(''+vid+'',''+num+'',''+nomeSafe+'','+total+',''+status+'')"><i class="ti ti-brand-whatsapp" style="color:#25D366"></i> Enviar WhatsApp</button>'
+    +'<div class="amd-sep"></div>'
+    +'<div class="amd-label">Fiscal</div>'
+    +'<button class="amd-item" onclick="emitirNFeVenda(''+vid+'',''+num+'')"><i class="ti ti-file-invoice" style="color:var(--amber)"></i> Emitir NF-e<span style="font-size:10px;color:var(--sub);margin-left:auto">A3</span></button>';
+  // posiciona com fixed
+  const btn=e.currentTarget;
+  const r=btn.getBoundingClientRect();
+  drop.style.cssText='position:fixed;top:'+(r.bottom+4)+'px;right:'+(window.innerWidth-r.right)+'px;z-index:99999;display:block';
+  drop.classList.add('open');
+}
+document.addEventListener('click',()=>document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open')));
+
+// ── IMPRESSÃO
+async function imprimirVenda(e,vid,num,cliente,total,tipo){
+  e.stopPropagation();
+  document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open'));
+  // busca dados
+  const[{data:v},{data:its},{data:pags}]=await Promise.all([
+    db.from('vendas').select('*').eq('id',vid).single(),
+    db.from('venda_itens').select('*').eq('venda_id',vid),
+    db.from('pagamentos_venda').select('*').eq('venda_id',vid),
+  ]);
+  const fmtV=n=>'R$ '+(+n||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
+  const numFmt=String(num).padStart(4,'0');
+  const itsList=(its||[]).map(i=>'<tr><td>'+i.nome+'</td><td style="text-align:center">'+i.quantidade+'x</td><td style="text-align:right">'+fmtV(i.total)+'</td></tr>').join('');
+  const pagsList=(pags||[]).map(p=>'<tr><td>'+p.forma_pagamento_nome+'</td><td style="text-align:right">'+fmtV(p.valor)+'</td></tr>').join('');
+
+  let pageHTML;
+  if(tipo==='interno'){
+    pageHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'
+      +'<style>@page{size:A4 portrait;margin:10mm}*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{font-size:10px;color:#111}'
+      +'.hdr{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:5px;margin-bottom:8px}'
+      +'.num{font-size:18px;font-weight:bold}table{width:100%;border-collapse:collapse;margin-bottom:8px}'
+      +'th{font-size:8px;text-align:left;padding:2px 4px;border-bottom:1px solid #ccc;color:#555}'
+      +'td{padding:2px 4px;border-bottom:1px solid #eee;font-size:9px}'
+      +'.tot td{font-weight:bold;border-top:2px solid #111;border-bottom:none}'
+      +'@media print{body{-webkit-print-color-adjust:exact}}</style></head><body>'
+      +'<div class="hdr"><div><div style="font-size:13px;font-weight:bold">DOTTEC</div><div style="font-size:9px;color:#555">Assistência Inteligente</div></div>'
+      +'<div style="text-align:right"><div class="num">VENDA #'+numFmt+'</div><div style="font-size:9px;color:#555">'+fmtD(v?.criado_em)+'</div></div></div>'
+      +'<div style="margin-bottom:6px"><strong>'+( v?.nome_cliente||'CONSUMIDOR FINAL')+'</strong></div>'
+      +'<table><tr><th>Item</th><th>Qtd</th><th>Total</th></tr>'+itsList
+      +'<tr class="tot"><td colspan="2">TOTAL</td><td style="text-align:right">'+fmtV(v?.total)+'</td></tr></table>'
+      +(pagsList?'<table><tr><th>Pagamento</th><th>Valor</th></tr>'+pagsList+'</table>':'')
+      +'</body></html>';
+  } else {
+    // Para cliente — com cabeçalho completo da loja
+    pageHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'
+      +'<style>@page{size:A4 portrait;margin:12mm}*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{font-size:11px;color:#111}'
+      +'.hdr{text-align:center;border-bottom:3px solid #111;padding-bottom:10px;margin-bottom:12px}'
+      +'.logo{font-size:22px;font-weight:bold;letter-spacing:2px}.sub{font-size:9px;color:#555;margin-top:2px}'
+      +'.info{font-size:9px;color:#555}.divider{border:none;border-top:1px solid #ddd;margin:8px 0}'
+      +'.num{font-size:16px;font-weight:bold;margin-bottom:4px}'
+      +'table{width:100%;border-collapse:collapse;margin-bottom:10px}'
+      +'th{font-size:9px;text-align:left;padding:3px 5px;border-bottom:1.5px solid #111;color:#555;text-transform:uppercase}'
+      +'td{padding:3px 5px;border-bottom:1px solid #eee;font-size:10px}'
+      +'.tot td{font-weight:bold;font-size:11px;border-top:2px solid #111;border-bottom:none}'
+      +'.footer{margin-top:16px;text-align:center;font-size:8.5px;color:#777;border-top:1px solid #ddd;padding-top:8px}'
+      +'@media print{body{-webkit-print-color-adjust:exact}}</style></head><body>'
+      +'<div class="hdr">'
+        +'<div class="logo">DOTTEC</div>'
+        +'<div class="sub">Assistência Inteligente</div>'
+        +'<div class="info" style="margin-top:4px">Rio dos Cedros · SC</div>'
+      +'</div>'
+      +'<div style="margin-bottom:8px">'
+        +'<div class="num">VENDA #'+numFmt+'</div>'
+        +'<div style="font-size:10px;color:#555">Data: '+fmtD(v?.criado_em)+'</div>'
+        +'<div style="font-size:11px;font-weight:bold;margin-top:4px">'+( v?.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+      +'</div>'
+      +'<hr class="divider"/>'
+      +'<table><tr><th>Descrição</th><th>Qtd</th><th>Total</th></tr>'+itsList
+      +'<tr class="tot"><td colspan="2">TOTAL</td><td style="text-align:right">'+fmtV(v?.total)+'</td></tr></table>'
+      +(pagsList?'<hr class="divider"/><table><tr><th>Forma de pagamento</th><th>Valor</th></tr>'+pagsList+'</table>':'')
+      +(v?.observacoes?'<div style="margin-top:8px;font-size:9px;color:#555">Obs: '+v.observacoes+'</div>':'')
+      +'<div class="footer">Obrigado pela preferência! · Dottec Assistência Inteligente</div>'
+      +'</body></html>';
+  }
+
+  // Abre e marca como impresso
+  const blob=new Blob([pageHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){toast('Popup bloqueado. Permita popups para este site.','err');URL.revokeObjectURL(url);return;}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+
+  // Marca impresso no banco
+  const agora=new Date().toISOString();
+  const tiposAnt=v?.impresso_tipo?v.impresso_tipo.split(','):[];
+  if(!tiposAnt.includes(tipo.toUpperCase()))tiposAnt.push(tipo.toUpperCase());
+  await db.from('vendas').update({impresso_em:agora,impresso_tipo:tiposAnt.join(',')}).eq('id',vid).catch(()=>{});
+
+  // Atualiza local sem recarregar
+  const idx=TODOS.findIndex(x=>x.id===vid);
+  if(idx>=0){TODOS[idx].impresso_em=agora;TODOS[idx].impresso_tipo=tiposAnt.join(',');}
+  render();
+  toast('Impressão gerada!');
+}
+
+function enviarWhatsVenda(vid,num,cliente,total,status){
+  document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open'));
+  // busca celular do cliente
+  const v=TODOS.find(x=>x.id===vid);
+  if(!v?.pessoa_id){toast('Cliente sem WhatsApp cadastrado.','err');return;}
+  db.from('pessoas').select('celular').eq('id',v.pessoa_id).single().then(({data})=>{
+    const tel=(data?.celular||'').replace(/\D/g,'');
+    if(tel.length<10){toast('Cliente sem WhatsApp cadastrado.','err');return;}
+    const msg='Olá '+cliente+'!
+
+Sua compra #'+String(num).padStart(4,'0')+' está '+(status==='AGUARDANDO RETIRADA'?'pronta para retirada':'concluída')+'.
+Total: R$ '+Number(total).toLocaleString('pt-BR',{minimumFractionDigits:2})+'
+
+Dottec Assistência Inteligente';
+    window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  });
+}
+
+function emitirNFeVenda(vid,num){
+  document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open'));
+  window.open('nfe-nova.html?venda_id='+vid,'_blank');
+}
+
+// ── CONFERÊNCIA
+let CONF_SEL=new Set();
+async function abrirConferencia(){
+  CONF_SEL=new Set();
+  document.getElementById('ov-conf').classList.add('open');
+  const body=document.getElementById('conf-list');
+  body.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--sub)"><i class="ti ti-loader-2"></i></div>';
+  const{data}=await db.from('vendas')
+    .select('id,numero,nome_cliente,status,total,criado_em,impresso_em')
+    .in('status',['CONCLUIDA','AGUARDANDO RETIRADA'])
+    .order('criado_em',{ascending:false}).limit(100);
+  const lista=data||[];
+  const pends=lista.filter(v=>!v.impresso_em);
+  const impressos=lista.filter(v=>!!v.impresso_em);
+  const fmtV=n=>'R$ '+(+n||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
+  const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
+  let html='';
+  if(pends.length){
+    html+='<div class="conf-pend-hdr">⚠ '+pends.length+' pendente'+(pends.length>1?'s':'')+' de impressão</div>';
+    html+=pends.map(v=>{
+      const num=String(v.numero||'').padStart(4,'0');
+      const dias=Math.floor((new Date()-new Date(v.criado_em))/86400000);
+      const urgente=dias>=2;
+      return '<div class="conf-row" id="crow-'+v.id+'" onclick="confToggle(''+v.id+'')">'
+        +'<div class="conf-chk" id="cchk-'+v.id+'"><i class="ti ti-check"></i></div>'
+        +'<div class="conf-info">'
+          +'<div class="conf-nome">VENDA #'+num+' — '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+          +'<div class="conf-sub">'+v.status+' · '+tempo(v.criado_em)+'</div>'
+        +'</div>'
+        +'<div class="conf-val">'+fmtV(v.total)+'</div>'
+        +(urgente?'<span class="conf-badge" style="background:var(--rbg);color:var(--red)">'+dias+'d</span>':'')
+      +'</div>';
+    }).join('');
+  }
+  if(impressos.length){
+    html+='<div class="conf-ok-hdr">✓ Já impressos ('+impressos.length+')</div>';
+    html+=impressos.map(v=>{
+      const num=String(v.numero||'').padStart(4,'0');
+      return '<div class="conf-row" style="opacity:.6;cursor:default">'
+        +'<div class="conf-chk" style="background:var(--green);border-color:var(--green);color:#fff"><i class="ti ti-check"></i></div>'
+        +'<div class="conf-info"><div class="conf-nome">VENDA #'+num+' — '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+          +'<div class="conf-sub">Impresso em '+fmtD(v.impresso_em)+'</div></div>'
+        +'<div class="conf-val">'+fmtV(v.total)+'</div>'
+      +'</div>';
+    }).join('');
+  }
+  if(!lista.length)html='<div style="padding:2rem;text-align:center;color:var(--sub)"><i class="ti ti-circle-check" style="font-size:24px;color:var(--green)"></i><br><br>Tudo impresso!</div>';
+  body.innerHTML=html;
+  confAtualizaCnt();
+}
+function confToggle(id){
+  const row=document.getElementById('crow-'+id);
+  if(CONF_SEL.has(id)){CONF_SEL.delete(id);row?.classList.remove('sel');}
+  else{CONF_SEL.add(id);row?.classList.add('sel');}
+  confAtualizaCnt();
+}
+function confSelTodos(){
+  const rows=document.querySelectorAll('.conf-row[id^="crow-"]');
+  const all=CONF_SEL.size===rows.length;
+  if(all){CONF_SEL.clear();rows.forEach(r=>r.classList.remove('sel'));}
+  else{rows.forEach(r=>{const id=r.id.replace('crow-','');CONF_SEL.add(id);r.classList.add('sel');});}
+  confAtualizaCnt();
+}
+function confAtualizaCnt(){
+  const el=document.getElementById('conf-cnt');
+  if(el)el.textContent=CONF_SEL.size+' selecionada'+(CONF_SEL.size!==1?'s':'');
+}
+async function confImprimir(){
+  if(!CONF_SEL.size){toast('Selecione ao menos 1 venda.','err');return;}
+  const ids=Array.from(CONF_SEL);
+  const[{data:vendas},{data:allIts}]=await Promise.all([
+    db.from('vendas').select('*').in('id',ids),
+    db.from('venda_itens').select('*').in('venda_id',ids),
+  ]);
+  const fmtV=n=>'R$ '+(+n||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
+
+  function blocoVenda(v){
+    const its=(allIts||[]).filter(i=>i.venda_id===v.id);
+    const numFmt=String(v.numero||'').padStart(4,'0');
+    const rows=its.map(i=>'<tr><td>'+i.nome+'</td><td style="text-align:center">'+i.quantidade+'x</td><td style="text-align:right">'+fmtV(i.total)+'</td></tr>').join('');
+    return '<div class="bloco">'
+      +'<div class="hdr"><div><div class="logo">DOTTEC</div><div class="sub">Assistência</div></div>'
+        +'<div style="text-align:right"><div class="num">VENDA #'+numFmt+'</div><div class="sub">'+fmtD(v.criado_em)+'</div></div></div>'
+      +'<div style="font-size:10px;font-weight:bold;margin-bottom:4px">'+( v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+      +'<table><tr><th>Item</th><th>Qtd</th><th>Total</th></tr>'+rows
+        +'<tr class="tot"><td colspan="2">TOTAL</td><td style="text-align:right">'+fmtV(v.total)+'</td></tr></table>'
+      +'<div style="font-size:9px;color:#555">Status: '+v.status+'</div>'
+    +'</div>';
+  }
+
+  const blocos=(vendas||[]).map(blocoVenda);
+  const folhas=[];
+  for(let i=0;i<blocos.length;i+=2){
+    folhas.push('<div class="folha">'+blocos[i]+(blocos[i+1]?'<div class="div"></div>'+blocos[i+1]:'')+'</div>');
+  }
+
+  const pageHTML='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'
+    +'<style>@page{size:A4 portrait;margin:8mm}*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}body{font-size:9px;color:#111}'
+    +'.folha{display:block;page-break-after:always;break-after:page}'
+    +'.bloco{padding:6px 0;break-inside:avoid}'
+    +'.div{height:1px;background:#ccc;margin:8px 0}'
+    +'.hdr{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:4px}'
+    +'.logo{font-size:13px;font-weight:bold}.sub{font-size:8px;color:#555}.num{font-size:16px;font-weight:bold}'
+    +'table{width:100%;border-collapse:collapse;margin-bottom:4px}'
+    +'th{font-size:7.5px;text-align:left;padding:1px 3px;border-bottom:1px solid #ccc;color:#555}'
+    +'td{padding:1px 3px;border-bottom:1px solid #eee;font-size:8.5px}'
+    +'.tot td{font-weight:bold;border-top:2px solid #111;border-bottom:none}'
+    +'@media print{body{-webkit-print-color-adjust:exact}.folha:last-child{page-break-after:avoid}}</style></head>'
+    +'<body>'+folhas.join('')+'</body></html>';
+
+  const blob=new Blob([pageHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){toast('Popup bloqueado.','err');URL.revokeObjectURL(url);return;}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+
+  // Marca todas como impressas
+  const agora=new Date().toISOString();
+  await db.from('vendas').update({impresso_em:agora,impresso_tipo:'INTERNO'}).in('id',ids).catch(()=>{});
+  ids.forEach(id=>{const v=TODOS.find(x=>x.id===id);if(v){v.impresso_em=agora;v.impresso_tipo='INTERNO';}});
+  fecha('conf');
+  render();
+  toast('Impressão gerada para '+ids.length+' venda'+(ids.length>1?'s':'')+'!');
+}
 
 // INIT
 load();
