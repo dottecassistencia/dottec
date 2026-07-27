@@ -256,6 +256,7 @@ let ITENS=[];
 let PAGS=[];
 let FORMAS=[];
 let _SALVANDO=false;
+let _SALVANDO_VENDA_ID=null;
 
 // ── FORMAS
 async function loadFormas(){
@@ -499,26 +500,33 @@ function calcTotal(){
 async function getSessaoAtiva(){
   try{
     const{data}=await db.from('caixa_sessoes').select('id')
-      .is('data_fechamento',null).order('data_abertura',{ascending:false}).limit(1).single();
-    return data?.id||null;
+      .is('data_fechamento',null).order('data_abertura',{ascending:false}).limit(1);
+    return data?.[0]?.id||null;
   }catch{return null;}
 }
 
 // ── SALVAR
 async function salvar(){
   if(_SALVANDO)return;
-  if(!ITENS.length){toast('Adicione ao menos 1 item.','err');return;}
+  _SALVANDO=true;
+  document.getElementById('fab-save').disabled=true;
+  document.getElementById('btn-txt').textContent='Salvando...';
+  if(!ITENS.length){
+    toast('Adicione ao menos 1 item.','err');
+    _SALVANDO=false;
+    document.getElementById('fab-save').disabled=false;
+    document.getElementById('btn-txt').textContent='Salvar Venda';
+    return;
+  }
   // validações
+  const resetBtn=()=>{_SALVANDO=false;document.getElementById('fab-save').disabled=false;document.getElementById('btn-txt').textContent='Salvar Venda';};
   for(const it of ITENS){
-    if(it.tipo==='produto'&&it.estoque!==null&&it.qty>it.estoque){toast('Estoque insuficiente: '+it.nome,'err');return;}
-    if(it.desconto>it.preco*it.qty){toast('Desconto inválido: '+it.nome,'err');return;}
+    if(it.tipo==='produto'&&it.estoque!==null&&it.qty>it.estoque){toast('Estoque insuficiente: '+it.nome,'err');resetBtn();return;}
+    if(it.desconto>it.preco*it.qty){toast('Desconto inválido: '+it.nome,'err');resetBtn();return;}
   }
   const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty)-it.desconto,0);
   const totalPago=PAGS.reduce((s,p)=>s+p.valor,0);
-  if(PAGS.length&&totalPago<totalItens-0.01){toast('Pagamento incompleto. Falta '+fmtV(totalItens-totalPago),'err');return;}
-  _SALVANDO=true;
-  document.getElementById('btn-txt').textContent='Salvando...';
-  document.getElementById('fab-save').disabled=true;
+  if(PAGS.length&&totalPago<totalItens-0.01){toast('Pagamento incompleto. Falta '+fmtV(totalItens-totalPago),'err');resetBtn();return;}
   try{
     const sessaoId=await getSessaoAtiva();
     const{data:venda,error:eV}=await db.from('vendas').insert({
@@ -530,6 +538,7 @@ async function salvar(){
       caixa_sessao_id:sessaoId||null,
     }).select().single();
     if(eV)throw eV;
+    _SALVANDO_VENDA_ID=venda.id; // marca que venda foi criada — bloqueia re-envio
 
     const{error:eIt}=await db.from('venda_itens').insert(ITENS.map(it=>({
       venda_id:venda.id,produto_id:it.tipo==='produto'?it.id:null,
@@ -561,10 +570,17 @@ async function salvar(){
     toast('Venda salva!');
     setTimeout(()=>location.href='vendas.html',700);
   }catch(e){
-    toast('Erro: '+e.message,'err');
-    _SALVANDO=false;
-    document.getElementById('btn-txt').textContent='Salvar Venda';
-    document.getElementById('fab-save').disabled=false;
+    // Só reseta se a venda ainda não foi criada (erro antes do INSERT)
+    if(!_SALVANDO_VENDA_ID){
+      toast('Erro: '+e.message,'err');
+      _SALVANDO=false;
+      document.getElementById('btn-txt').textContent='Salvar Venda';
+      document.getElementById('fab-save').disabled=false;
+    } else {
+      // Venda criada mas erro nos itens/pagamentos — avisa mas não permite re-salvar
+      toast('Venda criada mas erro nos detalhes: '+e.message,'err');
+      setTimeout(()=>location.href='vendas.html',2000);
+    }
   }
 }
 
