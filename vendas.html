@@ -258,8 +258,8 @@ function abrirDel(id,num){
 async function confirmarDel(){
   if(!DEL_ID)return;
   // remove itens, pagamentos, lançamentos e a venda
-  await db.from('venda_itens').delete().eq('venda_id',DEL_ID).catch(()=>{});
-  await db.from('caixa_movimentos').delete().eq('referencia','venda:'+DEL_ID).catch(()=>{});
+  try{await db.from('venda_itens').delete().eq('venda_id',DEL_ID);}catch{}
+  try{await db.from('caixa_movimentos').delete().eq('referencia','venda:'+DEL_ID);}catch{}
   const{error}=await db.from('vendas').delete().eq('id',DEL_ID);
   if(error){toast('Erro ao excluir: '+error.message,'err');return;}
   fecha('del');
