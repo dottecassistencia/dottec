@@ -275,6 +275,11 @@ function render(){
   renderLista(lista);
 }
 
+function irV(e){
+  if(e.target.closest('.act,.act-more-wrap'))return;
+  const id=e.currentTarget.dataset.vid;
+  if(id)irVenda(id);
+}
 function renderLista(lista){
   const isAdmin=USR.perfil==='ADMIN';
   if(!lista.length){
@@ -282,77 +287,54 @@ function renderLista(lista){
     return;
   }
   const precisa=v=>v.status==='CONCLUIDA'||v.status==='AGUARDANDO RETIRADA';
-  // atualiza badge de pendências
   const pends=TODOS.filter(v=>precisa(v)&&!v.impresso_em);
   const pb=document.getElementById('pend-bar');
   const pt=document.getElementById('pend-txt');
   if(pb){
-    if(pends.length){
-      pt.textContent=pends.length+' venda'+(pends.length>1?'s':'')+' sem impressão';
-      pb.style.display='flex';
-    } else pb.style.display='none';
+    if(pends.length){pt.textContent=pends.length+' venda'+(pends.length>1?'s':'')+' sem impresso';pb.style.display='flex';}
+    else pb.style.display='none';
   }
-  document.getElementById('tbody').innerHTML=lista.map(v=>{
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  lista.forEach(v=>{
     const numFmt=String(v.numero||'').padStart(4,'0');
     const cls=SB_CLS[v.status]||'sb-aber';
     const itensRes=v._itens.length
-      ?v._itens.slice(0,2).map(i=>i.nome+(i.quantidade>1?' ×'+i.quantidade:'')).join(', ')+(v._itens.length>2?' +'+(v._itens.length-2):'')
+      ?v._itens.slice(0,2).map(i=>i.nome+(i.quantidade>1?' x'+i.quantidade:'')).join(', ')+(v._itens.length>2?' +'+(v._itens.length-2):'')
       :'—';
     const impOk=!!v.impresso_em;
     const pend=precisa(v)&&!impOk;
     const printCls=pend?'act act-print-pend':impOk?'act act-print-ok':'act act-ed';
-    const printTip=impOk?'Reimprimir ('+fmtDt(v.impresso_em)+')':pend?'Imprimir — PENDENTE':'Imprimir';
-    const nomeSafe=(v.nome_cliente||'CONSUMIDOR FINAL').replace(/'/g,"\'");
-    return '<tr onclick="irVenda(''+v.id+'',event)">'
-      +'<td><span class="td-num">'+numFmt+'</span></td>'
+
+    const tr=document.createElement('tr');
+    tr.dataset.vid=v.id;
+    tr.onclick=irV;
+    tr.innerHTML=(
+      '<td><span class="td-num">'+numFmt+'</span></td>'
       +'<td class="td-tempo">'+fmtDt(v.criado_em)+'</td>'
-      +'<td style="font-weight:600;color:var(--dark)">'+( v.nome_cliente||'CONSUMIDOR FINAL')+'</td>'
+      +'<td style="font-weight:600;color:var(--dark)">'+(v.nome_cliente||'CONSUMIDOR FINAL')+'</td>'
       +'<td style="font-size:11.5px;color:var(--sub);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+itensRes+'</td>'
       +'<td style="text-align:center"><span class="sb '+cls+'">'+v.status+'</span></td>'
       +'<td class="td-val">'+fmtVal(v.total)+'</td>'
       +'<td class="td-tempo">'+tempo(v.criado_em)+'</td>'
-      +'<td onclick="event.stopPropagation()">'
-        +'<button class="'+printCls+'" onclick="imprimirVenda(event,''+v.id+'',''+numFmt+'',''+nomeSafe+'','+v.total+','interno')" title="'+printTip+'">'
-          +'<i class="ti ti-'+(impOk?'printer-check':'printer')+'"></i>'
-        +'</button>'
-      +'</td>'
-      +'<td onclick="event.stopPropagation()"><div class="td-acts">'
-        +'<button class="act act-ed" onclick="irVenda(''+v.id+'')" title="Editar"><i class="ti ti-pencil"></i></button>'
-        +'<div class="act-more-wrap">'
-          +'<button class="act act-more-btn" onclick="abrirMenu(event,''+v.id+'',''+numFmt+'',''+nomeSafe+'',''+v.status+'','+v.total+','+impOk+')" title="Mais ações"><i class="ti ti-dots-vertical"></i></button>'
-          +'<div class="act-more-drop" id="vmd-'+v.id+'"></div>'
-        +'</div>'
-        +(isAdmin?'<button class="act act-del" onclick="abrirDel(''+v.id+'','#'+numFmt+'')" title="Excluir"><i class="ti ti-trash"></i></button>':'')
+      +'<td><button class="'+printCls+'" title="'+(impOk?'Reimprimir':pend?'Imprimir — PENDENTE':'Imprimir')+'"><i class="ti ti-'+(impOk?'printer-check':'printer')+'"></i></button></td>'
+      +'<td><div class="td-acts">'
+        +'<button class="act act-ed" title="Editar"><i class="ti ti-pencil"></i></button>'
+        +'<div class="act-more-wrap"><button class="act act-more-btn" title="Mais ações"><i class="ti ti-dots-vertical"></i></button>'
+        +'<div class="act-more-drop" id="vmd-'+v.id+'"></div></div>'
+        +(isAdmin?'<button class="act act-del" title="Excluir"><i class="ti ti-trash"></i></button>':'')
       +'</div></td>'
-    +'</tr>';
-  }).join('');
+    );
+    // bind eventos nos botões (sem onclick inline)
+    const btns=tr.querySelectorAll('button');
+    const [btnPrint,btnEd,btnMore,...rest]=btns;
+    if(btnPrint)btnPrint.onclick=e=>{e.stopPropagation();imprimirVenda(e,v.id,numFmt,v.nome_cliente||'CONSUMIDOR FINAL',v.total,'interno');};
+    if(btnEd)btnEd.onclick=e=>{e.stopPropagation();irVenda(v.id);};
+    if(btnMore)btnMore.onclick=e=>{e.stopPropagation();abrirMenu(e,v.id,numFmt,v.nome_cliente||'CONSUMIDOR FINAL',v.status,v.total,impOk);};
+    if(rest[0]&&isAdmin)rest[0].onclick=e=>{e.stopPropagation();abrirDel(v.id,'#'+numFmt);};
+    tbody.appendChild(tr);
+  });
 }
-
-function irVenda(id,e){if(e&&e.target.closest('.act'))return;location.href='venda-nova.html?id='+id;}
-
-// EXCLUIR
-function abrirDel(id,num){
-  DEL_ID=id;
-  document.getElementById('del-num').textContent=num;
-  document.getElementById('ov-del').classList.add('open');
-}
-async function confirmarDel(){
-  if(!DEL_ID)return;
-  // remove itens, pagamentos, lançamentos e a venda
-  try{await db.from('venda_itens').delete().eq('venda_id',DEL_ID);}catch{}
-  try{await db.from('caixa_movimentos').delete().eq('referencia','venda:'+DEL_ID);}catch{}
-  const{error}=await db.from('vendas').delete().eq('id',DEL_ID);
-  if(error){toast('Erro ao excluir: '+error.message,'err');return;}
-  fecha('del');
-  toast('Venda excluída.');
-  TODOS=TODOS.filter(v=>v.id!==DEL_ID);
-  buildStatusRow();render();
-}
-
-// UTILS
-function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
-function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
-document.getElementById('ov-del').addEventListener('click',function(e){if(e.target===this)fecha('del');});
 
 // ── MENU DE AÇÕES
 let _menuDrop=null;
@@ -361,21 +343,32 @@ function abrirMenu(e,vid,num,cliente,status,total,impOk){
   document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open'));
   const drop=document.getElementById('vmd-'+vid);
   if(!drop||drop.classList.contains('open')){if(drop)drop.classList.remove('open');return;}
-  const nomeSafe=cliente.replace(/'/g,"\'");
-  drop.innerHTML=
-    '<div class="amd-label">Venda</div>'
-    +'<button class="amd-item" onclick="imprimirVenda(event,''+vid+'',''+num+'',''+nomeSafe+'','+total+','interno')"><i class="ti ti-printer" style="color:var(--sub)"></i> Imprimir (interno)</button>'
-    +'<button class="amd-item" onclick="imprimirVenda(event,''+vid+'',''+num+'',''+nomeSafe+'','+total+','cliente')"><i class="ti ti-file-invoice" style="color:var(--cd)"></i> Imprimir para cliente</button>'
-    +'<button class="amd-item" onclick="enviarWhatsVenda(''+vid+'',''+num+'',''+nomeSafe+'','+total+',''+status+'')"><i class="ti ti-brand-whatsapp" style="color:#25D366"></i> Enviar WhatsApp</button>'
-    +'<div class="amd-sep"></div>'
-    +'<div class="amd-label">Fiscal</div>'
-    +'<button class="amd-item" onclick="emitirNFeVenda(''+vid+'',''+num+'')"><i class="ti ti-file-invoice" style="color:var(--amber)"></i> Emitir NF-e<span style="font-size:10px;color:var(--sub);margin-left:auto">A3</span></button>';
-  // posiciona com fixed
+  drop.innerHTML='';
+
+  const mkItem=(ico,cor,txt,fn)=>{
+    const b=document.createElement('button');
+    b.className='amd-item';
+    b.innerHTML='<i class="ti '+ico+'" style="color:'+cor+'"></i> '+txt;
+    b.onclick=fn;
+    return b;
+  };
+  const mkLabel=txt=>{const d=document.createElement('div');d.className='amd-label';d.textContent=txt;return d;};
+  const mkSep=()=>{const d=document.createElement('div');d.className='amd-sep';return d;};
+
+  drop.appendChild(mkLabel('Venda'));
+  drop.appendChild(mkItem('ti-printer','var(--sub)','Imprimir (interno)',e2=>{e2.stopPropagation();imprimirVenda(e2,vid,num,cliente,total,'interno');}));
+  drop.appendChild(mkItem('ti-file-invoice','var(--cd)','Imprimir para cliente',e2=>{e2.stopPropagation();imprimirVenda(e2,vid,num,cliente,total,'cliente');}));
+  drop.appendChild(mkItem('ti-brand-whatsapp','#25D366','Enviar WhatsApp',e2=>{e2.stopPropagation();enviarWhatsVenda(vid,num,cliente,total,status);}));
+  drop.appendChild(mkSep());
+  drop.appendChild(mkLabel('Fiscal'));
+  drop.appendChild(mkItem('ti-file-invoice','var(--amber)','Emitir NF-e',e2=>{e2.stopPropagation();emitirNFeVenda(vid,num);}));
+
   const btn=e.currentTarget;
   const r=btn.getBoundingClientRect();
   drop.style.cssText='position:fixed;top:'+(r.bottom+4)+'px;right:'+(window.innerWidth-r.right)+'px;z-index:99999;display:block';
   drop.classList.add('open');
 }
+
 document.addEventListener('click',()=>document.querySelectorAll('.act-more-drop.open').forEach(d=>d.classList.remove('open')));
 
 // ── IMPRESSÃO
@@ -472,13 +465,8 @@ function enviarWhatsVenda(vid,num,cliente,total,status){
   db.from('pessoas').select('celular').eq('id',v.pessoa_id).single().then(({data})=>{
     const tel=(data?.celular||'').replace(/\D/g,'');
     if(tel.length<10){toast('Cliente sem WhatsApp cadastrado.','err');return;}
-    const msg='Olá '+cliente+'!
-
-Sua compra #'+String(num).padStart(4,'0')+' está '+(status==='AGUARDANDO RETIRADA'?'pronta para retirada':'concluída')+'.
-Total: R$ '+Number(total).toLocaleString('pt-BR',{minimumFractionDigits:2})+'
-
-Dottec Assistência Inteligente';
-    window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+    const msg='Ol\u00e1 '+cliente+'!\n\nSua compra #'+String(num).padStart(4,'0')+'\u00a0est\u00e1 '+(status==='AGUARDANDO RETIRADA'?'pronta para retirada':'conclu\u00edda')+'.\nTotal: R$ '+Number(total).toLocaleString('pt-BR',{minimumFractionDigits:2})+'\n\nDottec Assist\u00eancia Inteligente';
+window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
   });
 }
 
@@ -502,42 +490,51 @@ async function abrirConferencia(){
   const pends=lista.filter(v=>!v.impresso_em);
   const impressos=lista.filter(v=>!!v.impresso_em);
   const fmtV=n=>'R$ '+(+n||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
-  const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
-  const tempo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
-  let html='';
+  const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'--';
+  const tpo=d=>{const m=Math.floor((new Date()-new Date(d))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
+
+  body.innerHTML='';
+
+  if(!lista.length){
+    body.innerHTML='<div style="padding:2rem;text-align:center;color:var(--sub)">Tudo impresso!</div>';
+    confAtualizaCnt(); return;
+  }
+
+  const mkHdr=(txt,cls)=>{const d=document.createElement('div');d.className=cls;d.textContent=txt;return d;};
+
   if(pends.length){
-    html+='<div class="conf-pend-hdr">⚠ '+pends.length+' pendente'+(pends.length>1?'s':'')+' de impressão</div>';
-    html+=pends.map(v=>{
+    body.appendChild(mkHdr('Pendentes de impressao ('+pends.length+')','conf-pend-hdr'));
+    pends.forEach(v=>{
       const num=String(v.numero||'').padStart(4,'0');
       const dias=Math.floor((new Date()-new Date(v.criado_em))/86400000);
-      const urgente=dias>=2;
-      return '<div class="conf-row" id="crow-'+v.id+'" onclick="confToggle(''+v.id+'')">'
-        +'<div class="conf-chk" id="cchk-'+v.id+'"><i class="ti ti-check"></i></div>'
-        +'<div class="conf-info">'
-          +'<div class="conf-nome">VENDA #'+num+' — '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
-          +'<div class="conf-sub">'+v.status+' · '+tempo(v.criado_em)+'</div>'
-        +'</div>'
+      const row=document.createElement('div');
+      row.className='conf-row'; row.id='crow-'+v.id;
+      row.innerHTML='<div class="conf-chk" id="cchk-'+v.id+'"><i class="ti ti-check"></i></div>'
+        +'<div class="conf-info"><div class="conf-nome">VENDA #'+num+' -- '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+        +'<div class="conf-sub">'+v.status+' . '+tpo(v.criado_em)+'</div></div>'
         +'<div class="conf-val">'+fmtV(v.total)+'</div>'
-        +(urgente?'<span class="conf-badge" style="background:var(--rbg);color:var(--red)">'+dias+'d</span>':'')
-      +'</div>';
-    }).join('');
+        +(dias>=2?'<span class="conf-badge" style="background:var(--rbg);color:var(--red)">'+dias+'d</span>':'');
+      row.onclick=()=>confToggle(v.id);
+      body.appendChild(row);
+    });
   }
+
   if(impressos.length){
-    html+='<div class="conf-ok-hdr">✓ Já impressos ('+impressos.length+')</div>';
-    html+=impressos.map(v=>{
+    body.appendChild(mkHdr('Ja impressos ('+impressos.length+')','conf-ok-hdr'));
+    impressos.forEach(v=>{
       const num=String(v.numero||'').padStart(4,'0');
-      return '<div class="conf-row" style="opacity:.6;cursor:default">'
-        +'<div class="conf-chk" style="background:var(--green);border-color:var(--green);color:#fff"><i class="ti ti-check"></i></div>'
-        +'<div class="conf-info"><div class="conf-nome">VENDA #'+num+' — '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
-          +'<div class="conf-sub">Impresso em '+fmtD(v.impresso_em)+'</div></div>'
-        +'<div class="conf-val">'+fmtV(v.total)+'</div>'
-      +'</div>';
-    }).join('');
+      const row=document.createElement('div');
+      row.className='conf-row'; row.style.opacity='.6'; row.style.cursor='default';
+      row.innerHTML='<div class="conf-chk" style="background:var(--green);border-color:var(--green);color:#fff"><i class="ti ti-check"></i></div>'
+        +'<div class="conf-info"><div class="conf-nome">VENDA #'+num+' -- '+(v.nome_cliente||'CONSUMIDOR FINAL')+'</div>'
+        +'<div class="conf-sub">Impresso em '+fmtD(v.impresso_em)+'</div></div>'
+        +'<div class="conf-val">'+fmtV(v.total)+'</div>';
+      body.appendChild(row);
+    });
   }
-  if(!lista.length)html='<div style="padding:2rem;text-align:center;color:var(--sub)"><i class="ti ti-circle-check" style="font-size:24px;color:var(--green)"></i><br><br>Tudo impresso!</div>';
-  body.innerHTML=html;
   confAtualizaCnt();
 }
+
 function confToggle(id){
   const row=document.getElementById('crow-'+id);
   if(CONF_SEL.has(id)){CONF_SEL.delete(id);row?.classList.remove('sel');}
