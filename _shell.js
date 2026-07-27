@@ -200,10 +200,13 @@ html{scroll-behavior:smooth}
   }
 
   async function loadShMods(){
-    let db=window._dottecDb;
+    // reutiliza o cliente da página se já existir (evita múltiplas instâncias)
+    let db=window._dottecDb||window.db||null;
     if(!db&&typeof supabase!=='undefined'){
       window._dottecDb=supabase.createClient(SB_URL,SB_KEY);
       db=window._dottecDb;
+    } else if(db&&!window._dottecDb){
+      window._dottecDb=db;
     }
     if(db&&USR.id){
       try{
