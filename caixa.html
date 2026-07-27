@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Caixa — Dottec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
+<style>
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;text-transform:uppercase}
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;background:var(--dark);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok i{color:#4ade80}.toast.err i{color:#f87171}
+/* FILTER BAR */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
+.fb-top{display:flex;align-items:center;gap:10px;padding:8px 16px;flex-wrap:wrap}
+.btn-abrir{height:34px;padding:0 14px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-abrir:hover{opacity:.88}
+.btn-fechar{height:34px;padding:0 14px;border-radius:8px;border:none;background:var(--red);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-fechar:hover{opacity:.88}
+.btn-reforco{height:34px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-reforco:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
+.btn-resumo{height:34px;padding:0 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-resumo:hover{border-color:var(--amber);color:var(--amber);background:var(--abg)}
+.caixa-status{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:12px;font-weight:600}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-dot.aberto{background:var(--green);box-shadow:0 0 0 3px rgba(59,109,17,.2)}
+.status-dot.fechado{background:var(--sub)}
+/* SESSÕES */
+.body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.sess-card{margin:12px 16px;background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.sess-head{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.sess-head:hover{background:var(--bg)}
+.sess-head-info{flex:1}
+.sess-num{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
+.sess-periodo{font-size:12.5px;font-weight:700;color:var(--dark)}
+.sess-sub{font-size:11px;color:var(--sub)}
+.sess-saldo{font-size:16px;font-weight:800;color:var(--dark);text-align:right;flex-shrink:0}
+.sess-saldo-lbl{font-size:9px;color:var(--sub);text-align:right}
+.sess-badge{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:5px;flex-shrink:0}
+.sess-badge.aberto{background:var(--gbg);color:var(--green)}
+.sess-badge.fechado{background:var(--bg);color:var(--sub)}
+.sess-toggle{font-size:13px;color:var(--sub);flex-shrink:0;transition:transform .2s}
+.sess-toggle.open{transform:rotate(180deg)}
+/* MOVIMENTOS */
+.movs-wrap{display:none;border-top:1px solid var(--border)}
+.movs-wrap.open{display:block}
+.mov-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.mov-row:last-child{border-bottom:none}
+.mov-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.mov-ico.ent{background:var(--gbg);color:var(--green)}
+.mov-ico.sai{background:var(--rbg);color:var(--red)}
+.mov-ico.ref{background:var(--abg);color:var(--amber)}
+.mov-info{flex:1;min-width:0}
+.mov-desc{font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mov-sub{font-size:10.5px;color:var(--sub)}
+.mov-val{font-size:13px;font-weight:800;flex-shrink:0}
+.mov-val.pos{color:var(--green)}
+.mov-val.neg{color:var(--red)}
+.mov-hora{font-size:10px;color:var(--sub);flex-shrink:0;white-space:nowrap}
+.movs-empty{padding:1.5rem;text-align:center;color:var(--sub);font-size:12px}
+/* TF */
+.tf{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;font-size:11px;color:var(--sub);border-top:1px solid var(--border);background:var(--white)}
+/* OVERLAY/MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);overflow:hidden}
+.mh{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mh-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.mh-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+.mx{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.mb{padding:16px 20px;display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto}
+.mf{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{height:36px;border:1.5px solid var(--border);border-radius:7px;padding:0 10px;font-family:inherit;font-size:13px;color:var(--dark);background:#FAFAF7;outline:none;transition:border-color .2s;text-transform:uppercase;width:100%}
+.field textarea{height:72px;resize:none;padding:8px 10px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan)}
+.field input[type=number]{text-transform:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-pri{height:36px;padding:0 18px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+/* RESUMO */
+.res-section{margin-bottom:14px}
+.res-title{font-size:10px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;padding:6px 0 4px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.res-table{width:100%;border-collapse:collapse;font-size:12px}
+.res-table th{text-align:left;padding:4px 6px;font-size:10px;font-weight:700;color:var(--sub);border-bottom:1px solid var(--border)}
+.res-table td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.res-table tr:last-child td{border-bottom:none}
+.res-table .tot{font-weight:800;background:var(--bg)}
+.res-saldo{background:var(--dark);color:#fff;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.res-saldo-lbl{font-size:11px;color:rgba(255,255,255,.5);font-weight:700}
+.res-saldo-val{font-size:22px;font-weight:800;color:#fff}
+.res-info{background:var(--bg);border-radius:8px;padding:10px 14px;font-size:11.5px;color:var(--sub);margin-bottom:10px}
+.res-info strong{color:var(--dark)}
+@page{size:A4 portrait;margin:10mm}
+@media print{.filter-bar,.tf,#_dottec_shell,.overlay{display:none!important}.body{overflow:visible;height:auto}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<!-- MODAL ABRIR CAIXA -->
+<div class="overlay" id="ov-abrir">
+  <div class="modal" style="max-width:400px">
+    <div class="mh">
+      <div class="mh-ico" style="background:var(--gbg);color:var(--green)"><i class="ti ti-cash"></i></div>
+      <div class="mh-title">Abrir caixa</div>
+      <button class="mx" onclick="fecha('abrir')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <div class="field">
+        <label>Saldo inicial (R$)</label>
+        <input type="number" id="ab-saldo" min="0" step="0.01" placeholder="0,00" value="0"/>
+      </div>
+      <div class="field">
+        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <textarea id="ab-obs" placeholder="Observações..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecha('abrir')">Cancelar</button>
+      <button class="btn-pri" style="background:var(--green)" onclick="abrirCaixa()"><i class="ti ti-lock-open"></i> Abrir caixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FECHAR CAIXA -->
+<div class="overlay" id="ov-fechar">
+  <div class="modal" style="max-width:420px">
+    <div class="mh">
+      <div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-lock"></i></div>
+      <div class="mh-title">Fechar caixa</div>
+      <button class="mx" onclick="fecha('fechar')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <div id="fch-resumo" style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;color:var(--sub)">Carregando...</div>
+      <div class="field">
+        <label>Saldo final contado (R$)</label>
+        <input type="number" id="fch-saldo" min="0" step="0.01" placeholder="0,00"/>
+      </div>
+      <div class="field">
+        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <textarea id="fch-obs" placeholder="Observações sobre o fechamento..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecha('fechar')">Cancelar</button>
+      <button class="btn-pri" style="background:var(--red)" onclick="fecharCaixa()"><i class="ti ti-lock"></i> Fechar caixa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REFORÇO -->
+<div class="overlay" id="ov-reforco">
+  <div class="modal" style="max-width:400px">
+    <div class="mh">
+      <div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-plus"></i></div>
+      <div class="mh-title">Adicionar reforço</div>
+      <button class="mx" onclick="fecha('reforco')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input type="number" id="ref-valor" min="0.01" step="0.01" placeholder="0,00"/>
+      </div>
+      <div class="field">
+        <label>Descrição</label>
+        <input type="text" id="ref-desc" placeholder="Ex: MOEDAS TROCO, NOTA R$50..."/>
+      </div>
+      <div class="field">
+        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <textarea id="ref-obs" placeholder="Detalhes do reforço..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecha('reforco')">Cancelar</button>
+      <button class="btn-pri" style="background:var(--amber)" onclick="salvarReforco()"><i class="ti ti-plus"></i> Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESUMO -->
+<div class="overlay" id="ov-resumo">
+  <div class="modal" style="max-width:620px">
+    <div class="mh">
+      <div class="mh-ico" style="background:var(--abg);color:var(--amber)"><i class="ti ti-chart-bar"></i></div>
+      <div class="mh-title" id="res-title">Resumo do caixa</div>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button onclick="imprimirResumo()" style="height:28px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--sub);display:flex;align-items:center;gap:4px"><i class="ti ti-printer"></i> Imprimir</button>
+        <button class="mx" onclick="fecha('resumo')"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+    <div class="mb" id="res-body" style="max-height:75vh">Carregando...</div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="fb-top">
+    <button class="btn-abrir" id="btn-abrir" onclick="document.getElementById('ov-abrir').classList.add('open');document.getElementById('ab-saldo').focus()">
+      <i class="ti ti-lock-open"></i> Abrir caixa
+    </button>
+    <button class="btn-fechar" id="btn-fechar" style="display:none" onclick="prepFechar()">
+      <i class="ti ti-lock"></i> Fechar caixa
+    </button>
+    <button class="btn-reforco" id="btn-reforco" style="display:none" onclick="document.getElementById('ov-reforco').classList.add('open');document.getElementById('ref-valor').focus()">
+      <i class="ti ti-plus"></i> Reforço
+    </button>
+    <button class="btn-resumo" id="btn-resumo-atual" style="display:none" onclick="abrirResumoSessao(_SESSAO_ATUAL?.id)">
+      <i class="ti ti-chart-bar"></i> Ver resumo
+    </button>
+    <div class="caixa-status" id="caixa-status-bar">
+      <div class="status-dot fechado" id="status-dot"></div>
+      <span id="status-txt">Carregando...</span>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body" id="body-main">
+  <div style="padding:2rem;text-align:center;color:var(--sub)"><i class="ti ti-loader-2"></i> Carregando...</div>
+</div>
+<div class="tf">
+  <span id="tf-cnt"></span>
+  <span>Dottec · Caixa</span>
+</div>
+
+<script>
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=supabase.createClient(SB_URL,SB_KEY);
+let USR={nome:'Gaza',perfil:'ADMIN',id:null};
+try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
+
+const fmtV=v=>'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const fmtDt=d=>d?new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const fmtDtCurto=d=>d?new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+const fmtHora=d=>d?new Date(d).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+
+let _SESSAO_ATUAL=null;
+let _SESSOES=[];
+
+// ── LOAD
+async function load(){
+  const{data:sessoes}=await db.from('caixa_sessoes')
+    .select('*').order('data_abertura',{ascending:false}).limit(50);
+  _SESSOES=sessoes||[];
+  _SESSAO_ATUAL=_SESSOES.find(s=>!s.data_fechamento)||null;
+  atualizarStatus();
+  renderSessoes();
+}
+
+function atualizarStatus(){
+  const dot=document.getElementById('status-dot');
+  const txt=document.getElementById('status-txt');
+  const btnAbrir=document.getElementById('btn-abrir');
+  const btnFechar=document.getElementById('btn-fechar');
+  const btnReforco=document.getElementById('btn-reforco');
+  const btnResumo=document.getElementById('btn-resumo-atual');
+  if(_SESSAO_ATUAL){
+    dot.className='status-dot aberto';
+    txt.textContent='Caixa aberto desde '+fmtHora(_SESSAO_ATUAL.data_abertura);
+    btnAbrir.style.display='none';
+    btnFechar.style.display='flex';
+    btnReforco.style.display='flex';
+    btnResumo.style.display='flex';
+  } else {
+    dot.className='status-dot fechado';
+    txt.textContent='Caixa fechado';
+    btnAbrir.style.display='flex';
+    btnFechar.style.display='none';
+    btnReforco.style.display='none';
+    btnResumo.style.display='none';
+  }
+  document.getElementById('tf-cnt').textContent=_SESSOES.length+' sessão'+ (_SESSOES.length!==1?'ões':'');
+}
+
+// ── RENDER SESSÕES
+function renderSessoes(){
+  const body=document.getElementById('body-main');
+  if(!_SESSOES.length){
+    body.innerHTML='<div style="padding:3rem;text-align:center;color:var(--sub);font-size:13px"><i class="ti ti-cash" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4"></i>Nenhuma sessão de caixa ainda</div>';
+    return;
+  }
+  body.innerHTML=_SESSOES.map((s,i)=>{
+    const aberto=!s.data_fechamento;
+    const saldo=s.saldo_final!=null?s.saldo_final:s.saldo_inicial;
+    return '<div class="sess-card" id="sc-'+s.id+'">'
+      +'<div class="sess-head" onclick="toggleSessao(\''+s.id+'\')">'
+        +'<div class="sess-badge '+(aberto?'aberto':'fechado')+'">'+(aberto?'ABERTO':'FECHADO')+'</div>'
+        +'<div class="sess-head-info">'
+          +'<div class="sess-periodo">'+fmtDtCurto(s.data_abertura)+(s.data_fechamento?' → '+fmtDtCurto(s.data_fechamento):'')+'</div>'
+          +'<div class="sess-sub">Abertura: '+fmtV(s.saldo_inicial)+(s.observacoes?' · '+s.observacoes:'')+'</div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0">'
+          +'<div class="sess-saldo-lbl">'+(s.saldo_final!=null?'Saldo final':'Em aberto')+'</div>'
+          +'<div class="sess-saldo">'+fmtV(saldo)+'</div>'
+        +'</div>'
+        +'<button onclick="event.stopPropagation();abrirResumoSessao(\''+s.id+'\')" style="height:28px;padding:0 8px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;cursor:pointer;font-family:inherit;color:var(--sub);display:flex;align-items:center;gap:3px;flex-shrink:0"><i class="ti ti-chart-bar"></i></button>'
+        +'<i class="ti ti-chevron-down sess-toggle" id="st-'+s.id+'"></i>'
+      +'</div>'
+      +'<div class="movs-wrap" id="mw-'+s.id+'"><div class="movs-empty"><i class="ti ti-loader-2"></i> Carregando...</div></div>'
+    +'</div>';
+  }).join('');
+  // abre a sessão atual automaticamente
+  if(_SESSAO_ATUAL)toggleSessao(_SESSAO_ATUAL.id,true);
+}
+
+// ── TOGGLE SESSÃO
+const _MOVS_CACHE={};
+async function toggleSessao(id,forceOpen=false){
+  const wrap=document.getElementById('mw-'+id);
+  const tog=document.getElementById('st-'+id);
+  const isOpen=wrap.classList.contains('open');
+  if(isOpen&&!forceOpen){wrap.classList.remove('open');tog.classList.remove('open');return;}
+  wrap.classList.add('open');
+  tog.classList.add('open');
+  if(_MOVS_CACHE[id]){renderMovs(id,_MOVS_CACHE[id]);return;}
+  const{data:movs}=await db.from('caixa_movimentos')
+    .select('*').eq('sessao_id',id).order('criado_em',{ascending:true});
+  _MOVS_CACHE[id]=movs||[];
+  renderMovs(id,_MOVS_CACHE[id]);
+}
+
+function renderMovs(sessaoId,movs){
+  const wrap=document.getElementById('mw-'+sessaoId);
+  if(!movs.length){wrap.innerHTML='<div class="movs-empty">Nenhum movimento nesta sessão</div>';return;}
+  wrap.innerHTML=movs.map(m=>{
+    const isEnt=m.tipo==='ENTRADA'||m.tipo==='REFORCO';
+    const isRef=m.tipo==='REFORCO';
+    const ico=isRef?'ref':isEnt?'ent':'sai';
+    const valCls=m.valor>=0?'pos':'neg';
+    return '<div class="mov-row">'
+      +'<div class="mov-ico '+ico+'"><i class="ti ti-'+(isRef?'plus':isEnt?'arrow-down-right':'arrow-up-right')+'"></i></div>'
+      +'<div class="mov-info">'
+        +'<div class="mov-desc">'+m.descricao+'</div>'
+        +'<div class="mov-sub">'+(m.forma_pagamento||m.categoria||m.tipo)+(m.referencia?' · '+m.referencia:'')+'</div>'
+      +'</div>'
+      +'<div class="mov-val '+valCls+'">'+fmtV(m.valor)+'</div>'
+      +'<div class="mov-hora">'+fmtHora(m.criado_em)+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ── ABRIR CAIXA
+async function abrirCaixa(){
+  const saldo=parseFloat(document.getElementById('ab-saldo').value)||0;
+  const obs=document.getElementById('ab-obs').value.trim().toUpperCase()||null;
+  const{data,error}=await db.from('caixa_sessoes').insert({
+    saldo_inicial:saldo,status:'ABERTO',observacoes:obs
+  }).select().single();
+  if(error){toast('Erro: '+error.message,'err');return;}
+  fecha('abrir');
+  toast('Caixa aberto!');
+  _SESSAO_ATUAL=data;
+  _SESSOES.unshift(data);
+  atualizarStatus();
+  renderSessoes();
+}
+
+// ── FECHAR CAIXA
+async function prepFechar(){
+  if(!_SESSAO_ATUAL){toast('Nenhum caixa aberto.','err');return;}
+  document.getElementById('ov-fechar').classList.add('open');
+  // calcula saldo esperado
+  const{data:movs}=await db.from('caixa_movimentos').select('valor,tipo').eq('sessao_id',_SESSAO_ATUAL.id);
+  const totalMov=(movs||[]).reduce((s,m)=>s+Number(m.valor),0);
+  const saldoEsp=Number(_SESSAO_ATUAL.saldo_inicial)+totalMov;
+  document.getElementById('fch-resumo').innerHTML=
+    '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Saldo inicial</span><strong>'+fmtV(_SESSAO_ATUAL.saldo_inicial)+'</strong></div>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Movimentos</span><strong style="color:'+(totalMov>=0?'var(--green)':'var(--red)')+'">'+fmtV(totalMov)+'</strong></div>'
+    +'<div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;margin-top:2px"><span style="font-weight:700">Saldo esperado</span><strong>'+fmtV(saldoEsp)+'</strong></div>';
+  document.getElementById('fch-saldo').value=saldoEsp.toFixed(2);
+  document.getElementById('fch-obs').value='';
+}
+
+async function fecharCaixa(){
+  if(!_SESSAO_ATUAL)return;
+  const saldoFinal=parseFloat(document.getElementById('fch-saldo').value)||0;
+  const obs=document.getElementById('fch-obs').value.trim().toUpperCase()||null;
+  const{error}=await db.from('caixa_sessoes').update({
+    data_fechamento:new Date().toISOString(),
+    saldo_final:saldoFinal,status:'FECHADO',observacoes:obs
+  }).eq('id',_SESSAO_ATUAL.id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  fecha('fechar');
+  toast('Caixa fechado!');
+  const idx=_SESSOES.findIndex(s=>s.id===_SESSAO_ATUAL.id);
+  if(idx>=0){_SESSOES[idx].data_fechamento=new Date().toISOString();_SESSOES[idx].saldo_final=saldoFinal;_SESSOES[idx].status='FECHADO';}
+  _SESSAO_ATUAL=null;
+  atualizarStatus();
+  renderSessoes();
+}
+
+// ── REFORÇO
+async function salvarReforco(){
+  if(!_SESSAO_ATUAL){toast('Abra o caixa primeiro.','err');return;}
+  const valor=parseFloat(document.getElementById('ref-valor').value)||0;
+  const desc=document.getElementById('ref-desc').value.trim().toUpperCase();
+  const obs=document.getElementById('ref-obs').value.trim().toUpperCase()||null;
+  if(valor<=0){toast('Informe o valor.','err');return;}
+  if(!desc){toast('Informe a descrição.','err');return;}
+  const{data,error}=await db.from('caixa_movimentos').insert({
+    sessao_id:_SESSAO_ATUAL.id,
+    tipo:'REFORCO',
+    descricao:desc+(obs?' — '+obs:''),
+    valor:valor,
+    categoria:'REFORCO',
+    forma_pagamento:'DINHEIRO',
+  }).select().single();
+  if(error){toast('Erro: '+error.message,'err');return;}
+  fecha('reforco');
+  toast('Reforço adicionado!');
+  // invalida cache da sessão atual
+  delete _MOVS_CACHE[_SESSAO_ATUAL.id];
+  // reabre os movimentos
+  const wrap=document.getElementById('mw-'+_SESSAO_ATUAL.id);
+  if(wrap&&wrap.classList.contains('open')){
+    wrap.innerHTML='<div class="movs-empty"><i class="ti ti-loader-2"></i></div>';
+    const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',_SESSAO_ATUAL.id).order('criado_em',{ascending:true});
+    _MOVS_CACHE[_SESSAO_ATUAL.id]=movs||[];
+    renderMovs(_SESSAO_ATUAL.id,movs||[]);
+  }
+  // imprime comprovante do reforço automaticamente
+  imprimirReforco(data);
+}
+
+function imprimirReforco(mov){
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'
+    +'<style>@page{size:A5 portrait;margin:10mm}body{font-family:Arial,sans-serif;font-size:11px;color:#111}'
+    +'.hdr{text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}'
+    +'.logo{font-size:16px;font-weight:bold}.row{display:flex;justify-content:space-between;margin-bottom:5px}'
+    +'.lbl{color:#555}.val{font-weight:bold}'
+    +'.total{font-size:15px;font-weight:bold;text-align:center;margin-top:12px;padding-top:8px;border-top:2px solid #111}'
+    +'@media print{body{-webkit-print-color-adjust:exact}}</style></head><body>'
+    +'<div class="hdr"><div class="logo">DOTTEC</div><div style="font-size:9px;color:#555">Comprovante de Reforço de Caixa</div></div>'
+    +'<div class="row"><span class="lbl">Data/Hora</span><span class="val">'+fmtDt(mov.criado_em)+'</span></div>'
+    +'<div class="row"><span class="lbl">Tipo</span><span class="val">REFORÇO</span></div>'
+    +'<div class="row"><span class="lbl">Descrição</span><span class="val">'+mov.descricao+'</span></div>'
+    +'<div class="total">VALOR: '+fmtV(mov.valor)+'</div>'
+    +'</body></html>';
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win)setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
+// ── RESUMO
+async function abrirResumoSessao(sessaoId){
+  if(!sessaoId)return;
+  document.getElementById('ov-resumo').classList.add('open');
+  document.getElementById('res-body').innerHTML='<div style="text-align:center;padding:1rem;color:var(--sub)"><i class="ti ti-loader-2"></i> Carregando...</div>';
+  const sessao=_SESSOES.find(s=>s.id===sessaoId);
+  document.getElementById('res-title').textContent='Resumo — '+fmtDtCurto(sessao?.data_abertura||'');
+  const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
+  const lista=movs||[];
+  _MOVS_CACHE[sessaoId]=lista;
+
+  // agrupa por forma de pagamento
+  const porForma={};
+  lista.forEach(m=>{
+    const f=m.forma_pagamento||m.categoria||m.tipo;
+    if(!porForma[f])porForma[f]={recebido:0,pago:0};
+    if(m.valor>=0)porForma[f].recebido+=Number(m.valor);
+    else porForma[f].pago+=Number(m.valor);
+  });
+
+  // por tipo (ENTRADA/SAIDA/REFORCO)
+  const entradas=lista.filter(m=>m.tipo==='ENTRADA'||m.tipo==='REFORCO');
+  const saidas=lista.filter(m=>m.tipo==='SAIDA');
+  const totalEnt=entradas.reduce((s,m)=>s+Number(m.valor),0);
+  const totalSai=saidas.reduce((s,m)=>s+Number(m.valor),0);
+  const saldoReal=Number(sessao?.saldo_inicial||0)+totalEnt+totalSai;
+
+  // agrupa entradas por forma
+  const formasEnt={};
+  entradas.forEach(m=>{const f=m.forma_pagamento||'OUTROS';if(!formasEnt[f])formasEnt[f]=0;formasEnt[f]+=Number(m.valor);});
+  const formasSai={};
+  saidas.forEach(m=>{const f=m.forma_pagamento||'OUTROS';if(!formasSai[f])formasSai[f]=0;formasSai[f]+=Number(m.valor);});
+  const todasFormas=new Set([...Object.keys(formasEnt),...Object.keys(formasSai)]);
+
+  let html='';
+  // Info da sessão
+  html+='<div class="res-info">'
+    +'<div><strong>Abertura:</strong> '+fmtDt(sessao?.data_abertura)+'</div>'
+    +(sessao?.data_fechamento?'<div><strong>Fechamento:</strong> '+fmtDt(sessao.data_fechamento)+'</div>':'')
+    +'<div><strong>Saldo inicial:</strong> '+fmtV(sessao?.saldo_inicial)+'</div>'
+    +(sessao?.observacoes?'<div><strong>Obs:</strong> '+sessao.observacoes+'</div>':'')
+  +'</div>';
+
+  // Entradas
+  if(entradas.length){
+    html+='<div class="res-section"><div class="res-title">Entradas</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Valor</th></tr>';
+    Object.entries(formasEnt).forEach(([f,v])=>{
+      html+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--green);font-weight:700">'+fmtV(v)+'</td></tr>';
+    });
+    html+='<tr class="tot"><td>TOTAL ENTRADAS</td><td style="text-align:right;color:var(--green)">'+fmtV(totalEnt)+'</td></tr>';
+    html+='</table></div>';
+  }
+
+  // Saídas
+  if(saidas.length){
+    html+='<div class="res-section"><div class="res-title">Saídas</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Valor</th></tr>';
+    Object.entries(formasSai).forEach(([f,v])=>{
+      html+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--red);font-weight:700">'+fmtV(v)+'</td></tr>';
+    });
+    html+='<tr class="tot"><td>TOTAL SAÍDAS</td><td style="text-align:right;color:var(--red)">'+fmtV(totalSai)+'</td></tr>';
+    html+='</table></div>';
+  }
+
+  // Formas de pagamento (consolidado)
+  if(todasFormas.size){
+    html+='<div class="res-section"><div class="res-title">Formas de pagamento</div>'
+      +'<table class="res-table"><tr><th>Forma</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
+    let totRec=0,totPag=0;
+    todasFormas.forEach(f=>{
+      const rec=formasEnt[f]||0;
+      const pag=formasSai[f]||0;
+      totRec+=rec;totPag+=pag;
+      html+='<tr><td>'+f+'</td>'
+        +'<td style="text-align:right;color:var(--green)">'+fmtV(rec)+'</td>'
+        +'<td style="text-align:right;color:var(--red)">'+fmtV(pag)+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fmtV(rec+pag)+'</td></tr>';
+    });
+    html+='<tr class="tot"><td>TOTAL</td>'
+      +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
+      +'<td style="text-align:right;color:var(--red)">'+fmtV(totPag)+'</td>'
+      +'<td style="text-align:right">'+fmtV(totRec+totPag)+'</td></tr>';
+    html+='</table></div>';
+  }
+
+  // Saldo real
+  html+='<div class="res-saldo"><div><div class="res-saldo-lbl">Saldo real no caixa (dinheiro)</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Inicial: '+fmtV(sessao?.saldo_inicial)+' + Entradas dinheiro</div></div>'
+    +'<div class="res-saldo-val">'+fmtV(saldoReal)+'</div></div>';
+
+  document.getElementById('res-body').innerHTML=html;
+}
+
+// ── IMPRIMIR RESUMO
+function imprimirResumo(){
+  const conteudo=document.getElementById('res-body').innerHTML;
+  const sessId=_SESSOES.find(s=>s.id);
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'
+    +'<style>@page{size:A4 portrait;margin:12mm}body{font-family:Arial,sans-serif;font-size:10px;color:#111}'
+    +'.hdr{text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}'
+    +'.logo{font-size:16px;font-weight:bold}'
+    +'.res-section{margin-bottom:12px}'
+    +'.res-title{font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;color:#555;border-bottom:1px solid #ddd;padding-bottom:2px;margin-bottom:4px}'
+    +'.res-table{width:100%;border-collapse:collapse;margin-bottom:6px}'
+    +'.res-table th{font-size:8px;text-align:left;padding:3px 5px;border-bottom:1px solid #ccc;color:#555}'
+    +'.res-table td{padding:3px 5px;border-bottom:1px solid #eee;font-size:9px}'
+    +'.res-table .tot td{font-weight:bold;border-top:2px solid #111;border-bottom:none}'
+    +'.res-info{background:#f5f5f0;border-radius:6px;padding:8px 10px;font-size:10px;margin-bottom:10px}'
+    +'.res-saldo{background:#1C1C1A;color:#fff;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}'
+    +'.res-saldo-lbl{font-size:9px;color:rgba(255,255,255,.5)}'
+    +'.res-saldo-val{font-size:18px;font-weight:bold;color:#fff}'
+    +'@media print{body{-webkit-print-color-adjust:exact}}</style></head><body>'
+    +'<div class="hdr"><div class="logo">DOTTEC</div><div style="font-size:9px;color:#555">Assistência Inteligente · Resumo de Caixa</div></div>'
+    +conteudo+'</body></html>';
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win)setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
+// ── UTILS
+function toast(msg,t){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='err'?'ti-alert-circle':'ti-check');document.getElementById('tm').textContent=msg;el.className='toast '+(t||'ok')+' show';setTimeout(()=>el.classList.remove('show'),3500);}
+function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
+['abrir','fechar','reforco','resumo'].forEach(id=>{
+  document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fecha(id);});
+});
+
+// INIT
+load();
+</script>
+</body>
+</html>
