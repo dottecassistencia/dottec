@@ -351,10 +351,16 @@ function renderMovs(sessaoId,movs){
 async function abrirCaixa(){
   const saldo=parseFloat(document.getElementById('ab-saldo').value)||0;
   const obs=document.getElementById('ab-obs').value.trim().toUpperCase()||null;
-  const{data,error}=await db.from('caixa_sessoes').insert({
+  const{error:eAb}=await db.from('caixa_sessoes').insert({
     saldo_inicial:saldo,status:'ABERTO',observacoes:obs
-  }).select().single();
-  if(error){toast('Erro: '+error.message,'err');return;}
+  });
+  if(eAb){toast('Erro: '+eAb.message,'err');return;}
+  // busca a sessão recém criada
+  const{data:sessData}=await db.from('caixa_sessoes')
+    .select('*').is('data_fechamento',null)
+    .order('data_abertura',{ascending:false}).limit(1);
+  const data=sessData?.[0]||null;
+  if(!data){toast('Erro ao buscar sessão.','err');return;}
   fecha('abrir');
   toast('Caixa aberto!');
   _SESSAO_ATUAL=data;
@@ -405,15 +411,20 @@ async function salvarReforco(){
   const obs=document.getElementById('ref-obs').value.trim().toUpperCase()||null;
   if(valor<=0){toast('Informe o valor.','err');return;}
   if(!desc){toast('Informe a descrição.','err');return;}
-  const{data,error}=await db.from('caixa_movimentos').insert({
+  const{error}=await db.from('caixa_movimentos').insert({
     sessao_id:_SESSAO_ATUAL.id,
     tipo:'REFORCO',
     descricao:desc+(obs?' — '+obs:''),
     valor:valor,
     categoria:'REFORCO',
     forma_pagamento:'DINHEIRO',
-  }).select().single();
+  });
   if(error){toast('Erro: '+error.message,'err');return;}
+  // busca o registro recem inserido para imprimir
+  const{data:movData}=await db.from('caixa_movimentos')
+    .select('*').eq('sessao_id',_SESSAO_ATUAL.id).eq('tipo','REFORCO')
+    .order('criado_em',{ascending:false}).limit(1);
+  const data=movData?.[0]||null;
   fecha('reforco');
   toast('Reforço adicionado!');
   // invalida cache da sessão atual
