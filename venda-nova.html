@@ -244,9 +244,10 @@ textarea.obs:focus{border-color:var(--cyan)}
 <script>
 const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-const db=supabase.createClient(SB_URL,SB_KEY);
+const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
 let USR={nome:'Gaza',perfil:'ADMIN',id:null};
 try{const s=sessionStorage.getItem('dottec_sessao');if(s)USR=JSON.parse(s);}catch{}
+const _VID=new URLSearchParams(location.search).get('id');
 const fmtV=v=>'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
 const proxDia=dia=>{const h=new Date();let d=new Date(h.getFullYear(),h.getMonth(),dia);if(d<=h)d=new Date(h.getFullYear(),h.getMonth()+1,dia);return d.toISOString().slice(0,10);};
 
@@ -259,6 +260,72 @@ let _SALVANDO=false;
 let _SALVANDO_VENDA_ID=null;
 
 // ── FORMAS
+async function loadVenda(){
+  if(!_VID)return;
+  document.getElementById('btn-txt').textContent='Salvar alterações';
+  try{
+    // busca venda — sem .single() para evitar erro 406
+    const{data:vendas}=await db.from('vendas').select('*').eq('id',_VID).limit(1);
+    const v=vendas?.[0];
+    if(!v){toast('Venda não encontrada.','err');return;}
+
+    // busca itens e pagamentos em paralelo
+    const[{data:its},{data:pags}]=await Promise.all([
+      db.from('venda_itens').select('*').eq('venda_id',_VID).order('criado_em',{ascending:true}),
+      db.from('pagamentos_venda').select('*').eq('venda_id',_VID),
+    ]);
+
+    // cliente
+    if(v.pessoa_id){
+      const{data:pessoas}=await db.from('pessoas')
+        .select('id,nome,celular,documento').eq('id',v.pessoa_id).limit(1);
+      const p=pessoas?.[0];
+      if(p){
+        CLIENTE={id:p.id,nome:(p.nome||'').toUpperCase(),celular:p.celular||'',documento:p.documento||''};
+        document.getElementById('cl-search-wrap').style.display='none';
+        document.getElementById('cl-chip-nome').textContent=CLIENTE.nome;
+        document.getElementById('cl-chip-sub').textContent=[p.celular,p.documento].filter(Boolean).join(' · ')||'Sem contato';
+        document.getElementById('cl-chip').style.display='flex';
+      }
+    }
+
+    // itens
+    ITENS=(its||[]).map(i=>({
+      id:i.produto_id||null,
+      nome:i.nome||'',
+      preco:Number(i.valor_unit||0),
+      tipo:i.produto_id?'produto':'servico',
+      estoque:null,
+      qty:Number(i.quantidade||1),
+      desconto:Number(i.desconto||0),
+    }));
+    renderItens();
+
+    // pagamentos — limpa o que pagAdd() criou e carrega os reais
+    PAGS=(pags||[]).map(p=>{
+      const isDup=(p.forma_pagamento_nome||'').toUpperCase().includes('DUPLICATA');
+      return{
+        forma_id:p.forma_pagamento_id||null,
+        forma_nome:p.forma_pagamento_nome||'',
+        valor:Number(p.valor||0),
+        movimenta_caixa:!!p.movimenta_caixa,
+        isDuplicata:isDup,
+        vencimento:'',
+      };
+    });
+    renderPags();
+
+    // obs
+    const obsEl=document.getElementById('obs');
+    if(obsEl&&v.observacoes)obsEl.value=v.observacoes;
+
+    calcTotal();
+  }catch(e){
+    toast('Erro ao carregar venda: '+e.message,'err');
+    console.error('loadVenda:',e);
+  }
+}
+
 async function loadFormas(){
   const{data}=await db.from('formas_pagamento').select('id,nome,movimenta_caixa').eq('ativo',true).order('nome');
   FORMAS=data||[];
@@ -529,15 +596,35 @@ async function salvar(){
   if(PAGS.length&&totalPago<totalItens-0.01){toast('Pagamento incompleto. Falta '+fmtV(totalItens-totalPago),'err');resetBtn();return;}
   try{
     const sessaoId=await getSessaoAtiva();
-    const{data:venda,error:eV}=await db.from('vendas').insert({
-      tipo:'RAPIDA',pessoa_id:CLIENTE.id||null,
-      nome_cliente:CLIENTE.id?CLIENTE.nome:'CONSUMIDOR FINAL',
-      subtotal:totalItens,desconto:0,total:totalItens,
-      status:PAGS.length?'CONCLUIDA':'ABERTA',
-      observacoes:document.getElementById('obs').value.trim().toUpperCase()||null,
-      caixa_sessao_id:sessaoId||null,
-    }).select().single();
-    if(eV)throw eV;
+    let venda;
+    if(_VID){
+      // edição — atualiza
+      const{data:vUpd,error:eV}=await db.from('vendas').update({
+        pessoa_id:CLIENTE.id||null,
+        nome_cliente:CLIENTE.id?CLIENTE.nome:'CONSUMIDOR FINAL',
+        subtotal:totalItens,desconto:0,total:totalItens,
+        status:PAGS.length?'CONCLUIDA':'ABERTA',
+        observacoes:document.getElementById('obs').value.trim().toUpperCase()||null,
+      }).eq('id',_VID).select().single();
+      if(eV)throw eV;
+      venda=vUpd;
+      // remove itens e pagamentos antigos
+      await db.from('venda_itens').delete().eq('venda_id',_VID).catch(()=>{});
+      await db.from('pagamentos_venda').delete().eq('venda_id',_VID).catch(()=>{});
+    } else {
+      // nova venda
+      const{data:vNew,error:eV}=await db.from('vendas').insert({
+        tipo:'RAPIDA',pessoa_id:CLIENTE.id||null,
+        nome_cliente:CLIENTE.id?CLIENTE.nome:'CONSUMIDOR FINAL',
+        subtotal:totalItens,desconto:0,total:totalItens,
+        status:PAGS.length?'CONCLUIDA':'ABERTA',
+        observacoes:document.getElementById('obs').value.trim().toUpperCase()||null,
+        caixa_sessao_id:sessaoId||null,
+      }).select().single();
+      if(eV)throw eV;
+      venda=vNew;
+    }
+    if(!venda)throw new Error('Erro ao salvar venda');
     _SALVANDO_VENDA_ID=venda.id; // marca que venda foi criada — bloqueia re-envio
 
     const{error:eIt}=await db.from('venda_itens').insert(ITENS.map(it=>({
@@ -592,7 +679,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.item-search'))document.getElementById('item-drop').classList.remove('open');
 });
 
-loadFormas();
+loadFormas().then(()=>loadVenda());
 </script>
 </body>
 </html>
