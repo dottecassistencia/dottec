@@ -287,6 +287,12 @@ async function loadVenda(){
         document.getElementById('cl-chip-sub').textContent=[p.celular,p.documento].filter(Boolean).join(' · ')||'Sem contato';
         document.getElementById('cl-chip').style.display='flex';
       }
+    } else {
+      // consumidor final — mostra o chip com nome padrão
+      document.getElementById('cl-search-wrap').style.display='none';
+      document.getElementById('cl-chip-nome').textContent='CONSUMIDOR FINAL';
+      document.getElementById('cl-chip-sub').textContent='Venda de balcão';
+      document.getElementById('cl-chip').style.display='flex';
     }
 
     // itens
@@ -485,10 +491,13 @@ function itmDesc(i,v){ITENS[i].desconto=Math.max(0,parseFloat(v)||0);renderItens
 
 // ── PAGAMENTOS
 function pagAdd(){
-  // descobre forma "DUPLICATA" para saber se é prazo
   const f=FORMAS[0]||{id:null,nome:'DINHEIRO',movimenta_caixa:true};
   const isDuplicata=f.nome.toUpperCase().includes('DUPLICATA');
-  PAGS.push({forma_id:f.id,forma_nome:f.nome,valor:0,movimenta_caixa:f.movimenta_caixa,
+  // calcula saldo restante para preencher automaticamente
+  const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty)-it.desconto,0);
+  const totalPago=PAGS.reduce((s,p)=>s+p.valor,0);
+  const saldo=Math.max(0,Math.round((totalItens-totalPago)*100)/100);
+  PAGS.push({forma_id:f.id,forma_nome:f.nome,valor:saldo,movimenta_caixa:f.movimenta_caixa,
     isDuplicata,vencimento:isDuplicata?proxDia(5):''});
   renderPags();calcTotal();
 }
@@ -499,6 +508,12 @@ function pagForma(i,formaId){
   const isDup=f.nome.toUpperCase().includes('DUPLICATA');
   PAGS[i]={...PAGS[i],forma_id:f.id,forma_nome:f.nome,movimenta_caixa:f.movimenta_caixa,
     isDuplicata:isDup,vencimento:isDup?proxDia(5):''};
+  // preenche automaticamente com o saldo restante se o valor estava zerado
+  if(!PAGS[i].valor||PAGS[i].valor===0){
+    const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty)-it.desconto,0);
+    const totalPago=PAGS.filter(function(_,idx){return idx!==i;}).reduce(function(s,p){return s+p.valor;},0);
+    PAGS[i].valor=Math.max(0,Math.round((totalItens-totalPago)*100)/100);
+  }
   renderPags();calcTotal();
 }
 function pagVal(i,v){
@@ -599,18 +614,20 @@ async function salvar(){
     let venda;
     if(_VID){
       // edição — atualiza
-      const{data:vUpd,error:eV}=await db.from('vendas').update({
+      const{error:eV}=await db.from('vendas').update({
         pessoa_id:CLIENTE.id||null,
         nome_cliente:CLIENTE.id?CLIENTE.nome:'CONSUMIDOR FINAL',
         subtotal:totalItens,desconto:0,total:totalItens,
         status:PAGS.length?'CONCLUIDA':'ABERTA',
         observacoes:document.getElementById('obs').value.trim().toUpperCase()||null,
-      }).eq('id',_VID).select().single();
+      }).eq('id',_VID);
       if(eV)throw eV;
-      venda=vUpd;
-      // remove itens e pagamentos antigos
+      const{data:vUpdArr}=await db.from('vendas').select('*').eq('id',_VID).limit(1);
+      venda=vUpdArr?.[0];
+      // remove itens, pagamentos e lançamentos antigos do caixa
       await db.from('venda_itens').delete().eq('venda_id',_VID).catch(()=>{});
       await db.from('pagamentos_venda').delete().eq('venda_id',_VID).catch(()=>{});
+      await db.from('caixa_movimentos').delete().eq('referencia','venda:'+_VID).catch(()=>{});
     } else {
       // nova venda
       const{data:vNew,error:eV}=await db.from('vendas').insert({
@@ -640,10 +657,11 @@ async function salvar(){
       }
     }
     if(PAGS.length){
-      await db.from('pagamentos_venda').insert(PAGS.map(p=>({
+      const{error:ePag}=await db.from('pagamentos_venda').insert(PAGS.map(p=>({
         venda_id:venda.id,forma_pagamento_id:p.forma_id||null,
         forma_pagamento_nome:p.forma_nome,valor:p.valor,movimenta_caixa:p.movimenta_caixa,
-      }))).catch(()=>{});
+      })));
+      if(ePag)console.error('pagamentos_venda:',ePag);
       if(sessaoId){
         const rows=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>({
           sessao_id:sessaoId,tipo:'ENTRADA',

@@ -184,6 +184,38 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
 </div>
 
+<!-- MODAL SANGRIA -->
+<div class="overlay" id="ov-sangria">
+  <div class="modal" style="max-width:400px">
+    <div class="mh">
+      <div class="mh-ico" style="background:var(--rbg);color:var(--red)"><i class="ti ti-minus"></i></div>
+      <div class="mh-title">Sangria de caixa</div>
+      <button class="mx" onclick="fecha('sangria')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <div style="background:var(--rbg);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--red);font-weight:600">
+        <i class="ti ti-info-circle"></i> Retirada de dinheiro do caixa para transferência ou depósito.
+      </div>
+      <div class="field">
+        <label>Valor a retirar (R$)</label>
+        <input type="number" id="san-valor" min="0.01" step="0.01" placeholder="0,00"/>
+      </div>
+      <div class="field">
+        <label>Destino</label>
+        <input type="text" id="san-dest" placeholder="Ex: CAIXA PRINCIPAL, DEPOSITO BANCO..."/>
+      </div>
+      <div class="field">
+        <label>Observação <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <textarea id="san-obs" placeholder="Detalhes da sangria..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecha('sangria')">Cancelar</button>
+      <button class="btn-pri" style="background:var(--red)" onclick="salvarSangria()"><i class="ti ti-minus"></i> Confirmar sangria</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL RESUMO -->
 <div class="overlay" id="ov-resumo">
   <div class="modal" style="max-width:620px">
@@ -210,6 +242,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     </button>
     <button class="btn-reforco" id="btn-reforco" style="display:none" onclick="document.getElementById('ov-reforco').classList.add('open');document.getElementById('ref-valor').focus()">
       <i class="ti ti-plus"></i> Reforço
+    </button>
+    <button class="btn-reforco" id="btn-sangria" style="display:none;border-color:var(--red);color:var(--red)" onclick="document.getElementById('ov-sangria').classList.add('open');document.getElementById('san-valor').focus()">
+      <i class="ti ti-minus"></i> Sangria
     </button>
     <button class="btn-resumo" id="btn-resumo-atual" style="display:none" onclick="abrirResumoSessao(_SESSAO_ATUAL?.id)">
       <i class="ti ti-chart-bar"></i> Ver resumo
@@ -268,6 +303,7 @@ function atualizarStatus(){
     btnAbrir.style.display='none';
     btnFechar.style.display='flex';
     btnReforco.style.display='flex';
+    document.getElementById('btn-sangria').style.display='flex';
     btnResumo.style.display='flex';
   } else {
     dot.className='status-dot fechado';
@@ -275,6 +311,7 @@ function atualizarStatus(){
     btnAbrir.style.display='flex';
     btnFechar.style.display='none';
     btnReforco.style.display='none';
+    document.getElementById('btn-sangria').style.display='none';
     btnResumo.style.display='none';
   }
   document.getElementById('tf-cnt').textContent=_SESSOES.length+' sessão'+ (_SESSOES.length!==1?'ões':'');
@@ -472,31 +509,44 @@ async function abrirResumoSessao(sessaoId){
   const lista=movs||[];
   _MOVS_CACHE[sessaoId]=lista;
 
-  // agrupa por forma de pagamento
-  const porForma={};
-  lista.forEach(m=>{
-    const f=m.forma_pagamento||m.categoria||m.tipo;
-    if(!porForma[f])porForma[f]={recebido:0,pago:0};
-    if(m.valor>=0)porForma[f].recebido+=Number(m.valor);
-    else porForma[f].pago+=Number(m.valor);
-  });
-
-  // por tipo (ENTRADA/SAIDA/REFORCO)
-  const entradas=lista.filter(m=>m.tipo==='ENTRADA'||m.tipo==='REFORCO');
+  // separa por tipo
+  const entradas=lista.filter(m=>m.tipo==='ENTRADA');
   const saidas=lista.filter(m=>m.tipo==='SAIDA');
+  const reforcos=lista.filter(m=>m.tipo==='REFORCO');
+  const sangrias=lista.filter(m=>m.categoria==='SANGRIA');
   const totalEnt=entradas.reduce((s,m)=>s+Number(m.valor),0);
   const totalSai=saidas.reduce((s,m)=>s+Number(m.valor),0);
-  const saldoReal=Number(sessao?.saldo_inicial||0)+totalEnt+totalSai;
+  const totalRef=reforcos.reduce((s,m)=>s+Number(m.valor),0);
+  const totalSan=sangrias.reduce((s,m)=>s+Number(m.valor),0);
 
-  // agrupa entradas por forma
-  const formasEnt={};
-  entradas.forEach(m=>{const f=m.forma_pagamento||'OUTROS';if(!formasEnt[f])formasEnt[f]=0;formasEnt[f]+=Number(m.valor);});
-  const formasSai={};
-  saidas.forEach(m=>{const f=m.forma_pagamento||'OUTROS';if(!formasSai[f])formasSai[f]=0;formasSai[f]+=Number(m.valor);});
-  const todasFormas=new Set([...Object.keys(formasEnt),...Object.keys(formasSai)]);
+  // saldo real = dinheiro físico
+  const entDinheiro=lista.filter(m=>(m.forma_pagamento||'').toUpperCase()==='DINHEIRO'&&m.valor>0);
+  const saiDinheiro=lista.filter(m=>(m.forma_pagamento||'').toUpperCase()==='DINHEIRO'&&m.valor<0);
+  const totalDinhEnt=entDinheiro.reduce((s,m)=>s+Number(m.valor),0);
+  const totalDinhSai=saiDinheiro.reduce((s,m)=>s+Number(m.valor),0);
+  const saldoReal=Number(sessao?.saldo_inicial||0)+totalDinhEnt+totalDinhSai;
+
+  // por categoria e forma
+  const porCat={};
+  lista.forEach(m=>{
+    const cat=m.categoria||m.tipo;
+    const forma=m.forma_pagamento||'—';
+    if(!porCat[cat])porCat[cat]={};
+    if(!porCat[cat][forma])porCat[cat][forma]={recebido:0,pago:0};
+    if(m.valor>=0)porCat[cat][forma].recebido+=Number(m.valor);
+    else porCat[cat][forma].pago+=Number(m.valor);
+  });
+
+  // formas consolidadas
+  const formasConj={};
+  lista.forEach(m=>{
+    const f=m.forma_pagamento||'—';
+    if(!formasConj[f])formasConj[f]={rec:0,pag:0};
+    if(m.valor>=0)formasConj[f].rec+=Number(m.valor);
+    else formasConj[f].pag+=Number(m.valor);
+  });
 
   let html='';
-  // Info da sessão
   html+='<div class="res-info">'
     +'<div><strong>Abertura:</strong> '+fmtDt(sessao?.data_abertura)+'</div>'
     +(sessao?.data_fechamento?'<div><strong>Fechamento:</strong> '+fmtDt(sessao.data_fechamento)+'</div>':'')
@@ -504,53 +554,46 @@ async function abrirResumoSessao(sessaoId){
     +(sessao?.observacoes?'<div><strong>Obs:</strong> '+sessao.observacoes+'</div>':'')
   +'</div>';
 
-  // Entradas
-  if(entradas.length){
-    html+='<div class="res-section"><div class="res-title">Entradas</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Valor</th></tr>';
-    Object.entries(formasEnt).forEach(([f,v])=>{
-      html+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--green);font-weight:700">'+fmtV(v)+'</td></tr>';
-    });
-    html+='<tr class="tot"><td>TOTAL ENTRADAS</td><td style="text-align:right;color:var(--green)">'+fmtV(totalEnt)+'</td></tr>';
-    html+='</table></div>';
-  }
-
-  // Saídas
-  if(saidas.length){
-    html+='<div class="res-section"><div class="res-title">Saídas</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Valor</th></tr>';
-    Object.entries(formasSai).forEach(([f,v])=>{
-      html+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--red);font-weight:700">'+fmtV(v)+'</td></tr>';
-    });
-    html+='<tr class="tot"><td>TOTAL SAÍDAS</td><td style="text-align:right;color:var(--red)">'+fmtV(totalSai)+'</td></tr>';
-    html+='</table></div>';
-  }
-
-  // Formas de pagamento (consolidado)
-  if(todasFormas.size){
-    html+='<div class="res-section"><div class="res-title">Formas de pagamento</div>'
-      +'<table class="res-table"><tr><th>Forma</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
-    let totRec=0,totPag=0;
-    todasFormas.forEach(f=>{
-      const rec=formasEnt[f]||0;
-      const pag=formasSai[f]||0;
-      totRec+=rec;totPag+=pag;
+  // Por categoria
+  Object.entries(porCat).forEach(function(entry){
+    const cat=entry[0], formas=entry[1];
+    const totCat=Object.values(formas).reduce(function(s,v){return s+v.recebido+v.pago;},0);
+    const corTitle=cat==='SANGRIA'?'var(--red)':cat==='REFORCO'?'var(--amber)':'var(--sub)';
+    html+='<div class="res-section"><div class="res-title" style="color:'+corTitle+'">'+cat+'</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
+    Object.entries(formas).forEach(function(fe){
+      const f=fe[0], v=fe[1];
       html+='<tr><td>'+f+'</td>'
-        +'<td style="text-align:right;color:var(--green)">'+fmtV(rec)+'</td>'
-        +'<td style="text-align:right;color:var(--red)">'+fmtV(pag)+'</td>'
-        +'<td style="text-align:right;font-weight:700">'+fmtV(rec+pag)+'</td></tr>';
+        +'<td style="text-align:right;color:var(--green)">'+fmtV(v.recebido)+'</td>'
+        +'<td style="text-align:right;color:var(--red)">'+fmtV(v.pago)+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.pago)+'</td></tr>';
     });
-    html+='<tr class="tot"><td>TOTAL</td>'
-      +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
-      +'<td style="text-align:right;color:var(--red)">'+fmtV(totPag)+'</td>'
-      +'<td style="text-align:right">'+fmtV(totRec+totPag)+'</td></tr>';
+    html+='<tr class="tot"><td>SUBTOTAL</td><td colspan="2"></td><td style="text-align:right">'+fmtV(totCat)+'</td></tr>';
     html+='</table></div>';
-  }
+  });
 
-  // Saldo real
-  html+='<div class="res-saldo"><div><div class="res-saldo-lbl">Saldo real no caixa (dinheiro)</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Inicial: '+fmtV(sessao?.saldo_inicial)+' + Entradas dinheiro</div></div>'
-    +'<div class="res-saldo-val">'+fmtV(saldoReal)+'</div></div>';
+  // Consolidado por forma
+  html+='<div class="res-section"><div class="res-title">Formas de pagamento (consolidado)</div>'
+    +'<table class="res-table"><tr><th>Forma</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
+  let totRec=0,totPag=0;
+  Object.entries(formasConj).forEach(function(fe){
+    const f=fe[0], v=fe[1];
+    totRec+=v.rec;totPag+=v.pag;
+    html+='<tr><td>'+f+'</td>'
+      +'<td style="text-align:right;color:var(--green)">'+fmtV(v.rec)+'</td>'
+      +'<td style="text-align:right;color:var(--red)">'+fmtV(v.pag)+'</td>'
+      +'<td style="text-align:right;font-weight:700">'+fmtV(v.rec+v.pag)+'</td></tr>';
+  });
+  html+='<tr class="tot"><td>TOTAL</td>'
+    +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
+    +'<td style="text-align:right;color:var(--red)">'+fmtV(totPag)+'</td>'
+    +'<td style="text-align:right">'+fmtV(totRec+totPag)+'</td></tr>';
+  html+='</table></div>';
+
+  html+='<div class="res-saldo"><div>'
+    +'<div class="res-saldo-lbl">Saldo real no caixa (dinheiro físico)</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Inicial '+fmtV(sessao?.saldo_inicial)+' + Entradas dinheiro '+fmtV(totalDinhEnt)+'</div>'
+  +'</div><div class="res-saldo-val">'+fmtV(saldoReal)+'</div></div>';
 
   document.getElementById('res-body').innerHTML=html;
 }
@@ -582,11 +625,50 @@ function imprimirResumo(){
   if(win)setTimeout(()=>URL.revokeObjectURL(url),60000);
 }
 
+// ── SANGRIA
+async function salvarSangria(){
+  if(!_SESSAO_ATUAL){toast('Abra o caixa primeiro.','err');return;}
+  const valor=parseFloat(document.getElementById('san-valor').value)||0;
+  const dest=document.getElementById('san-dest').value.trim().toUpperCase();
+  const obs=document.getElementById('san-obs').value.trim().toUpperCase()||null;
+  if(valor<=0){toast('Informe o valor.','err');return;}
+  if(!dest){toast('Informe o destino.','err');return;}
+  const desc='SANGRIA — '+dest+(obs?' — '+obs:'');
+  const{error}=await db.from('caixa_movimentos').insert({
+    sessao_id:_SESSAO_ATUAL.id,
+    tipo:'SAIDA',
+    descricao:desc,
+    valor:-Math.abs(valor),
+    categoria:'SANGRIA',
+    forma_pagamento:'DINHEIRO',
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  fecha('sangria');
+  toast('Sangria registrada!');
+  document.getElementById('san-valor').value='';
+  document.getElementById('san-dest').value='';
+  document.getElementById('san-obs').value='';
+  delete _MOVS_CACHE[_SESSAO_ATUAL.id];
+  const wrap=document.getElementById('mw-'+_SESSAO_ATUAL.id);
+  if(wrap&&wrap.classList.contains('open')){
+    wrap.innerHTML='<div class="movs-empty"><i class="ti ti-loader-2"></i></div>';
+    const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',_SESSAO_ATUAL.id).order('criado_em',{ascending:true});
+    _MOVS_CACHE[_SESSAO_ATUAL.id]=movs||[];
+    renderMovs(_SESSAO_ATUAL.id,movs||[]);
+  }
+}
+
 // ── UTILS
 function toast(msg,t){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='err'?'ti-alert-circle':'ti-check');document.getElementById('tm').textContent=msg;el.className='toast '+(t||'ok')+' show';setTimeout(()=>el.classList.remove('show'),3500);}
 function fecha(id){document.getElementById('ov-'+id)?.classList.remove('open');}
-['abrir','fechar','reforco','resumo'].forEach(id=>{
+['abrir','fechar','reforco','sangria','resumo'].forEach(id=>{
   document.getElementById('ov-'+id).addEventListener('click',function(e){if(e.target===this)fecha(id);});
+});
+// fecha menus de sessão ao clicar fora
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.sess-head')&&!e.target.closest('.movs-wrap')){
+    // não fecha automaticamente — usuário precisa clicar no cabeçalho
+  }
 });
 
 // INIT
