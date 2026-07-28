@@ -609,6 +609,11 @@ async function salvar(){
   const totalItens=ITENS.reduce((s,it)=>s+(it.preco*it.qty)-it.desconto,0);
   const totalPago=PAGS.reduce((s,p)=>s+p.valor,0);
   if(PAGS.length&&totalPago<totalItens-0.01){toast('Pagamento incompleto. Falta '+fmtV(totalItens-totalPago),'err');resetBtn();return;}
+  // valida que todas as formas têm nome
+  for(const p of PAGS){
+    if(!p.forma_nome||p.forma_nome.trim()===''){toast('Selecione a forma de pagamento.','err');resetBtn();return;}
+    if(!p.valor||p.valor<=0){toast('Informe o valor da forma de pagamento.','err');resetBtn();return;}
+  }
   try{
     const sessaoId=await getSessaoAtiva();
     let venda;
@@ -658,10 +663,13 @@ async function salvar(){
     }
     if(PAGS.length){
       const{error:ePag}=await db.from('pagamentos_venda').insert(PAGS.map(p=>({
-        venda_id:venda.id,forma_pagamento_id:p.forma_id||null,
-        forma_pagamento_nome:p.forma_nome,valor:p.valor,movimenta_caixa:p.movimenta_caixa,
+        venda_id:venda.id,
+        forma_pagamento_id:p.forma_id||null,
+        forma_pagamento_nome:(p.forma_nome||'').toUpperCase(),
+        valor:Number(p.valor)||0,
+        movimenta_caixa:p.movimenta_caixa===true,
       })));
-      if(ePag)console.error('pagamentos_venda:',ePag);
+      if(ePag)throw new Error('Pagamentos: '+ePag.message);
       if(sessaoId){
         const rows=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>({
           sessao_id:sessaoId,tipo:'ENTRADA',
