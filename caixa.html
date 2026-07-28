@@ -39,8 +39,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .sess-num{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
 .sess-periodo{font-size:12.5px;font-weight:700;color:var(--dark)}
 .sess-sub{font-size:11px;color:var(--sub)}
-.sess-saldo{font-size:16px;font-weight:800;color:var(--dark);text-align:right;flex-shrink:0}
-.sess-saldo-lbl{font-size:9px;color:var(--sub);text-align:right}
+.sess-saldo{font-size:20px;font-weight:800;color:var(--dark);text-align:right;flex-shrink:0;line-height:1.1}
+.sess-saldo-lbl{font-size:9px;color:var(--sub);text-align:right;text-transform:uppercase;letter-spacing:.04em}
 .sess-badge{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:5px;flex-shrink:0}
 .sess-badge.aberto{background:var(--gbg);color:var(--green)}
 .sess-badge.fechado{background:var(--bg);color:var(--sub)}
@@ -58,7 +58,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .mov-info{flex:1;min-width:0}
 .mov-desc{font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mov-sub{font-size:10.5px;color:var(--sub)}
-.mov-val{font-size:13px;font-weight:800;flex-shrink:0}
+.mov-val{font-size:14px;font-weight:800;flex-shrink:0;min-width:80px;text-align:right}
 .mov-val.pos{color:var(--green)}
 .mov-val.neg{color:var(--red)}
 .mov-hora{font-size:10px;color:var(--sub);flex-shrink:0;white-space:nowrap}
@@ -649,13 +649,31 @@ async function salvarSangria(){
   document.getElementById('san-dest').value='';
   document.getElementById('san-obs').value='';
   delete _MOVS_CACHE[_SESSAO_ATUAL.id];
-  const wrap=document.getElementById('mw-'+_SESSAO_ATUAL.id);
+  await recarregarMovsSessao(_SESSAO_ATUAL.id);
+}
+
+// ── RECARGA
+async function recarregarMovsSessao(sessaoId){
+  const{data:movs}=await db.from('caixa_movimentos')
+    .select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
+  _MOVS_CACHE[sessaoId]=movs||[];
+  const wrap=document.getElementById('mw-'+sessaoId);
   if(wrap&&wrap.classList.contains('open')){
-    wrap.innerHTML='<div class="movs-empty"><i class="ti ti-loader-2"></i></div>';
-    const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',_SESSAO_ATUAL.id).order('criado_em',{ascending:true});
-    _MOVS_CACHE[_SESSAO_ATUAL.id]=movs||[];
-    renderMovs(_SESSAO_ATUAL.id,movs||[]);
+    renderMovs(sessaoId,movs||[]);
   }
+  // atualiza saldo exibido no card
+  const total=(movs||[]).reduce((s,m)=>s+Number(m.valor),0);
+  const sessao=_SESSOES.find(s=>s.id===sessaoId);
+  const saldoAtual=Number(sessao?.saldo_inicial||0)+total;
+  const card=document.getElementById('sc-'+sessaoId);
+  if(card){
+    const saldoEl=card.querySelector('.sess-saldo');
+    const lblEl=card.querySelector('.sess-saldo-lbl');
+    if(saldoEl)saldoEl.textContent=fmtV(saldoAtual);
+    if(lblEl)lblEl.textContent='Saldo atual';
+  }
+  // atualiza barra de status
+  atualizarStatus();
 }
 
 // ── UTILS
