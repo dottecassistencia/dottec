@@ -87,6 +87,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .pag-tag{font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;text-align:center;white-space:nowrap}
 .pag-tag.cx{background:var(--gbg);color:var(--green)}
 .pag-tag.pr{background:var(--abg);color:var(--amber)}
+.pag-tag.dg{background:var(--cbg);color:var(--cd)}
 .pag-del{width:24px;height:24px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--sub);font-size:12px;display:flex;align-items:center;justify-content:center}
 .pag-del:hover{background:var(--rbg);color:var(--red)}
 .pag-venc-row{display:flex;align-items:center;gap:8px;padding:4px 10px 6px;grid-column:1/-1}
@@ -310,11 +311,14 @@ async function loadVenda(){
     // pagamentos — limpa o que pagAdd() criou e carrega os reais
     PAGS=(pags||[]).map(p=>{
       const isDup=(p.forma_pagamento_nome||'').toUpperCase().includes('DUPLICATA');
+      // busca movimenta_caixa atualizado da tabela de formas
+      const formaAtual=FORMAS.find(f=>f.id===p.forma_pagamento_id||f.nome===p.forma_pagamento_nome);
+      const movCaixa=formaAtual?formaAtual.movimenta_caixa:!!p.movimenta_caixa;
       return{
         forma_id:p.forma_pagamento_id||null,
         forma_nome:p.forma_pagamento_nome||'',
         valor:Number(p.valor||0),
-        movimenta_caixa:!!p.movimenta_caixa,
+        movimenta_caixa:movCaixa,
         isDuplicata:isDup,
         vencimento:'',
       };
@@ -553,7 +557,7 @@ function renderPags(){
       <input type="number" class="pag-val" value="${p.valor>0?p.valor.toFixed(2):''}"
         placeholder="${saldo>0?saldo.toFixed(2):''}"
         min="0" step="0.01" onchange="pagVal(${i},this.value)"/>
-      <span class="pag-tag ${p.movimenta_caixa?'cx':'pr'}">${p.movimenta_caixa?'CAIXA':'A PRAZO'}</span>
+      <span class="pag-tag ${p.movimenta_caixa?'cx':p.isDuplicata?'pr':'dg'}">${p.movimenta_caixa?'FÍSICO':p.isDuplicata?'A PRAZO':'DIGITAL'}</span>
       <button class="pag-del" onclick="pagRemove(${i})"><i class="ti ti-x"></i></button>
       ${p.isDuplicata?`<div class="pag-venc-row" style="grid-column:1/-1">
         <label>Vencimento:</label>
@@ -630,9 +634,9 @@ async function salvar(){
       const{data:vUpdArr}=await db.from('vendas').select('*').eq('id',_VID).limit(1);
       venda=vUpdArr?.[0];
       // remove itens, pagamentos e lançamentos antigos do caixa
-      await db.from('venda_itens').delete().eq('venda_id',_VID).catch(()=>{});
-      await db.from('pagamentos_venda').delete().eq('venda_id',_VID).catch(()=>{});
-      await db.from('caixa_movimentos').delete().eq('referencia','venda:'+_VID).catch(()=>{});
+      try{await db.from('venda_itens').delete().eq('venda_id',_VID);}catch{}
+      try{await db.from('pagamentos_venda').delete().eq('venda_id',_VID);}catch{}
+      try{await db.from('caixa_movimentos').delete().eq('referencia','venda:'+_VID);}catch{}
     } else {
       // nova venda
       const{data:vNew,error:eV}=await db.from('vendas').insert({
@@ -658,7 +662,7 @@ async function salvar(){
 
     for(const it of ITENS){
       if(it.tipo==='produto'&&it.id){
-        await db.from('produtos').update({estoque_atual:Math.max(0,(it.estoque||0)-it.qty)}).eq('id',it.id).catch(()=>{});
+        try{await db.from('produtos').update({estoque_atual:Math.max(0,(it.estoque||0)-it.qty)}).eq('id',it.id);}catch{}
       }
     }
     if(PAGS.length){
