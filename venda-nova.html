@@ -126,6 +126,16 @@ textarea.obs:focus{border-color:var(--cyan)}
 .btn-pri{height:32px;padding:0 14px;border-radius:7px;border:none;background:var(--cyan);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
 .btn-sec{height:32px;padding:0 12px;border-radius:7px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 @page{size:A4 portrait;margin:10mm}
+/* MODAL AVISO FINANCEIRO */
+.aviso-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.4);z-index:9998;align-items:center;justify-content:center}
+.aviso-overlay.open{display:flex}
+.aviso-modal{background:var(--white);border-radius:14px;padding:24px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:aviso-in .25s ease}
+@keyframes aviso-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.aviso-ico{width:48px;height:48px;border-radius:50%;background:var(--abg);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px}
+.aviso-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:6px}
+.aviso-msg{font-size:12px;color:var(--sub);line-height:1.6;margin-bottom:16px}
+.aviso-progress{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.aviso-bar{height:100%;background:var(--cyan);border-radius:2px;width:100%;transition:width linear}
 </style>
 </head>
 <body>
@@ -622,6 +632,16 @@ async function salvar(){
     const sessaoId=await getSessaoAtiva();
     let venda;
     if(_VID){
+      // avisa que vai movimentar o financeiro
+      const temPag=PAGS.some(p=>p.valor>0);
+      if(temPag&&sessaoId){
+        const formasFisico=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>p.forma_nome).join(', ');
+        const formasDigital=PAGS.filter(p=>!p.movimenta_caixa&&p.valor>0).map(p=>p.forma_nome).join(', ');
+        let avisoMsg='Lançando no caixa de hoje:';
+        if(formasFisico)avisoMsg+=' Físico ('+formasFisico+')';
+        if(formasDigital)avisoMsg+=(formasFisico?' · ':' ')+'Digital ('+formasDigital+')';
+        mostrarAviso(avisoMsg,2500);
+      }
       // edição — atualiza
       const{error:eV}=await db.from('vendas').update({
         pessoa_id:CLIENTE.id||null,
@@ -675,13 +695,21 @@ async function salvar(){
       })));
       if(ePag)throw new Error('Pagamentos: '+ePag.message);
       if(sessaoId){
-        const rows=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>({
-          sessao_id:sessaoId,tipo:'ENTRADA',
+        // lança TODOS os pagamentos no caixa — físico como ENTRADA, digital como DIGITAL
+        const rows=PAGS.filter(p=>p.valor>0).map(p=>({
+          sessao_id:sessaoId,
+          tipo:p.movimenta_caixa?'ENTRADA':'DIGITAL',
           descricao:'VENDA #'+String(venda.numero||'').padStart(4,'0'),
-          valor:p.valor,forma_pagamento:p.forma_nome,
-          referencia:'venda:'+venda.id,pessoa_id:CLIENTE.id||null,
+          valor:p.valor,
+          forma_pagamento:p.forma_nome,
+          categoria:p.movimenta_caixa?'VENDA':'VENDA DIGITAL',
+          referencia:'venda:'+venda.id,
+          pessoa_id:CLIENTE.id||null,
         }));
-        if(rows.length)await db.from('caixa_movimentos').insert(rows).catch(e=>console.warn('caixa:',e));
+        if(rows.length){
+          const{error:eCx}=await db.from('caixa_movimentos').insert(rows);
+          if(eCx)console.warn('caixa:',eCx);
+        }
       }
     }
     toast('Venda salva!');
@@ -699,6 +727,22 @@ async function salvar(){
       setTimeout(()=>location.href='vendas.html',2000);
     }
   }
+}
+
+function mostrarAviso(msg,duracao=3000){
+  document.getElementById('aviso-msg').textContent=msg;
+  document.getElementById('ov-aviso').classList.add('open');
+  const bar=document.getElementById('aviso-bar');
+  bar.style.transition='none';
+  bar.style.width='100%';
+  setTimeout(()=>{
+    bar.style.transition='width '+duracao+'ms linear';
+    bar.style.width='0%';
+  },50);
+  setTimeout(()=>fechaAviso(),duracao);
+}
+function fechaAviso(){
+  document.getElementById('ov-aviso').classList.remove('open');
 }
 
 function toast(msg,t='ok'){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='ok'?'ti-check':'ti-alert-circle');document.getElementById('tm').textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3500);}
