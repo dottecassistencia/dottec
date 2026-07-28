@@ -286,6 +286,24 @@ async function load(){
     .select('*').order('data_abertura',{ascending:false}).limit(50);
   _SESSOES=sessoes||[];
   _SESSAO_ATUAL=_SESSOES.find(s=>!s.data_fechamento)||null;
+
+  // busca movimentos de todas as sessões para calcular saldo real
+  if(_SESSOES.length){
+    const ids=_SESSOES.map(s=>s.id);
+    const{data:movs}=await db.from('caixa_movimentos')
+      .select('sessao_id,valor').in('sessao_id',ids);
+    // agrupa por sessão
+    const totais={};
+    (movs||[]).forEach(m=>{
+      if(!totais[m.sessao_id])totais[m.sessao_id]=0;
+      totais[m.sessao_id]+=Number(m.valor);
+    });
+    // injeta saldo calculado em cada sessão
+    _SESSOES.forEach(s=>{
+      s._saldo_calculado=Number(s.saldo_inicial)+(totais[s.id]||0);
+    });
+  }
+
   atualizarStatus();
   renderSessoes();
 }
@@ -326,7 +344,8 @@ function renderSessoes(){
   }
   body.innerHTML=_SESSOES.map((s,i)=>{
     const aberto=!s.data_fechamento;
-    const saldo=s.saldo_final!=null?s.saldo_final:s.saldo_inicial;
+    // usa saldo calculado pelos movimentos; se fechado usa saldo_final
+    const saldo=!aberto&&s.saldo_final!=null ? s.saldo_final : (s._saldo_calculado??s.saldo_inicial);
     return '<div class="sess-card" id="sc-'+s.id+'">'
       +'<div class="sess-head" onclick="toggleSessao(\''+s.id+'\')">'
         +'<div class="sess-badge '+(aberto?'aberto':'fechado')+'">'+(aberto?'ABERTO':'FECHADO')+'</div>'
@@ -335,7 +354,7 @@ function renderSessoes(){
           +'<div class="sess-sub">Abertura: '+fmtV(s.saldo_inicial)+(s.observacoes?' · '+s.observacoes:'')+'</div>'
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0">'
-          +'<div class="sess-saldo-lbl">'+(s.saldo_final!=null?'Saldo final':'Em aberto')+'</div>'
+          +'<div class="sess-saldo-lbl">'+(aberto?'Saldo atual':'Saldo final')+'</div>'
           +'<div class="sess-saldo">'+fmtV(saldo)+'</div>'
         +'</div>'
         +'<button onclick="event.stopPropagation();abrirResumoSessao(\''+s.id+'\')" style="height:28px;padding:0 8px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;cursor:pointer;font-family:inherit;color:var(--sub);display:flex;align-items:center;gap:3px;flex-shrink:0"><i class="ti ti-chart-bar"></i></button>'
@@ -661,9 +680,10 @@ async function recarregarMovsSessao(sessaoId){
   if(wrap&&wrap.classList.contains('open')){
     renderMovs(sessaoId,movs||[]);
   }
-  // atualiza saldo exibido no card
+  // atualiza saldo calculado e exibe no card
   const total=(movs||[]).reduce((s,m)=>s+Number(m.valor),0);
   const sessao=_SESSOES.find(s=>s.id===sessaoId);
+  if(sessao){sessao._saldo_calculado=Number(sessao.saldo_inicial)+total;}
   const saldoAtual=Number(sessao?.saldo_inicial||0)+total;
   const card=document.getElementById('sc-'+sessaoId);
   if(card){
