@@ -483,16 +483,12 @@ async function salvarReforco(){
   const data=movData?.[0]||null;
   fecha('reforco');
   toast('Reforço adicionado!');
-  // invalida cache da sessão atual
+  document.getElementById('ref-valor').value='';
+  document.getElementById('ref-desc').value='';
+  document.getElementById('ref-obs').value='';
+  // invalida cache e atualiza saldo do card + movimentos abertos (mesmo padrão da sangria)
   delete _MOVS_CACHE[_SESSAO_ATUAL.id];
-  // reabre os movimentos
-  const wrap=document.getElementById('mw-'+_SESSAO_ATUAL.id);
-  if(wrap&&wrap.classList.contains('open')){
-    wrap.innerHTML='<div class="movs-empty"><i class="ti ti-loader-2"></i></div>';
-    const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',_SESSAO_ATUAL.id).order('criado_em',{ascending:true});
-    _MOVS_CACHE[_SESSAO_ATUAL.id]=movs||[];
-    renderMovs(_SESSAO_ATUAL.id,movs||[]);
-  }
+  await recarregarMovsSessao(_SESSAO_ATUAL.id);
   // imprime comprovante do reforço automaticamente
   imprimirReforco(data);
 }
@@ -564,13 +560,15 @@ async function abrirResumoSessao(sessaoId){
 
   // ── AGRUPA ──────────────────────────────────────────────────────────
 
-  // Vendas por forma de pagamento
+  // Vendas por forma de pagamento — 3 baldes: FÍSICO (dinheiro), DIGITAL (pix/cartão, já recebido) e A PRAZO (duplicata, ainda não recebido)
+  const isAPrazo=f=>{const u=(f||'').toUpperCase();return u.includes('PRAZO')||u.includes('DUPLICATA');};
   const vendasPorForma={};
   pagVendas.forEach(p=>{
     const f=p.forma_pagamento_nome||'OUTROS';
-    if(!vendasPorForma[f])vendasPorForma[f]={recebido:0,aprazo:0};
+    if(!vendasPorForma[f])vendasPorForma[f]={recebido:0,digital:0,aprazo:0};
     if(p.movimenta_caixa)vendasPorForma[f].recebido+=Number(p.valor||0);
-    else vendasPorForma[f].aprazo+=Number(p.valor||0);
+    else if(isAPrazo(f))vendasPorForma[f].aprazo+=Number(p.valor||0);
+    else vendasPorForma[f].digital+=Number(p.valor||0);
   });
 
   // Contas a receber (OS) por forma
@@ -625,20 +623,24 @@ async function abrirResumoSessao(sessaoId){
   // VENDAS DE PRODUTOS/SERVIÇOS
   if(Object.keys(vendasPorForma).length){
     h+='<div class="res-section"><div class="res-title">Vendas ('+( vendas||[]).length+')</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido (físico)</th><th style="text-align:right">A prazo / Digital</th><th style="text-align:right">Total</th></tr>';
-    let totRec=0,totDig=0;
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Físico</th><th style="text-align:right">Digital<br><span style="font-weight:400;font-size:9px">(já recebido)</span></th><th style="text-align:right">A prazo<br><span style="font-weight:400;font-size:9px">(a receber)</span></th><th style="text-align:right">Total</th></tr>';
+    let totRec=0,totDig=0,totPrz=0;
     Object.entries(vendasPorForma).forEach(function([f,v]){
-      totRec+=v.recebido;totDig+=v.aprazo;
+      totRec+=v.recebido;totDig+=v.digital;totPrz+=v.aprazo;
       h+='<tr><td>'+f+'</td>'
-        +'<td style="text-align:right;color:var(--green)">'+fmtV(v.recebido)+'</td>'
-        +'<td style="text-align:right;color:var(--cd)">'+fmtV(v.aprazo)+'</td>'
-        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.aprazo)+'</td></tr>';
+        +'<td style="text-align:right;color:var(--green)">'+(v.recebido?fmtV(v.recebido):'—')+'</td>'
+        +'<td style="text-align:right;color:var(--cd)">'+(v.digital?fmtV(v.digital):'—')+'</td>'
+        +'<td style="text-align:right;color:var(--amber)">'+(v.aprazo?fmtV(v.aprazo):'—')+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.digital+v.aprazo)+'</td></tr>';
     });
     h+='<tr class="tot"><td>TOTAL VENDAS</td>'
       +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
       +'<td style="text-align:right;color:var(--cd)">'+fmtV(totDig)+'</td>'
-      +'<td style="text-align:right">'+fmtV(totRec+totDig)+'</td></tr>';
-    h+='</table></div>';
+      +'<td style="text-align:right;color:var(--amber)">'+fmtV(totPrz)+'</td>'
+      +'<td style="text-align:right">'+fmtV(totRec+totDig+totPrz)+'</td></tr>';
+    h+='</table>'
+      +'<div style="font-size:10.5px;color:var(--sub);margin-top:4px"><strong>Recebido hoje (físico + digital):</strong> '+fmtV(totRec+totDig)+' &nbsp;·&nbsp; <strong>Ainda a receber:</strong> '+fmtV(totPrz)+'</div>'
+      +'</div>';
   }
 
   // CONTAS A RECEBER (OS)
