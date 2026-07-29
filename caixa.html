@@ -527,32 +527,18 @@ async function abrirResumoSessao(sessaoId){
   const diaAb=dtAb.toISOString().slice(0,10);
   const diaFch=dtFch.toISOString().slice(0,10);
 
-  // 1. Movimentos diretos do caixa (reforço, sangria, entradas lançadas)
+  // 1. Movimentos do caixa desta sessão — fonte ÚNICA de tudo que entrou/saiu (vendas, reforço, sangria)
   const{data:movs}=await db.from('caixa_movimentos')
     .select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
   _MOVS_CACHE[sessaoId]=movs||[];
 
-  // 2. Pagamentos de vendas do período (PIX, cartão, dinheiro...)
-  const{data:vendas}=await db.from('vendas')
-    .select('id,numero,nome_cliente,total,status')
-    .in('status',['CONCLUIDA','AGUARDANDO RETIRADA'])
-    .gte('criado_em',dtAb.toISOString())
-    .lte('criado_em',dtFch.toISOString());
-  const vendaIds=(vendas||[]).map(v=>v.id);
-  let pagVendas=[];
-  if(vendaIds.length){
-    const{data:pags}=await db.from('pagamentos_venda')
-      .select('*').in('venda_id',vendaIds);
-    pagVendas=pags||[];
-  }
-
-  // 3. Contas a receber pagas no período (OS, etc)
+  // 2. Contas a receber pagas no período (OS, etc — não passam pelo caixa_movimentos)
   const{data:contasRec}=await db.from('contas_receber')
     .select('*').eq('status','PAGO')
     .gte('criado_em',dtAb.toISOString())
     .lte('criado_em',dtFch.toISOString());
 
-  // 4. Contas a pagar pagas no período
+  // 3. Contas a pagar pagas no período
   const{data:contasPag}=await db.from('contas')
     .select('*').eq('tipo','PAGAR').eq('status','PAGO')
     .gte('data_pagamento',diaAb)
@@ -560,16 +546,16 @@ async function abrirResumoSessao(sessaoId){
 
   // ── AGRUPA ──────────────────────────────────────────────────────────
 
-  // Vendas por forma de pagamento — 3 baldes: FÍSICO (dinheiro), DIGITAL (pix/cartão, já recebido) e A PRAZO (duplicata, ainda não recebido)
-  const isAPrazo=f=>{const u=(f||'').toUpperCase();return u.includes('PRAZO')||u.includes('DUPLICATA');};
+  // Vendas por forma de pagamento — direto do caixa_movimentos (categoria VENDA = físico, VENDA DIGITAL = pix/cartão/duplicata)
+  const vendaMovs=(movs||[]).filter(m=>m.categoria==='VENDA'||m.categoria==='VENDA DIGITAL');
   const vendasPorForma={};
-  pagVendas.forEach(p=>{
-    const f=p.forma_pagamento_nome||'OUTROS';
-    if(!vendasPorForma[f])vendasPorForma[f]={recebido:0,digital:0,aprazo:0};
-    if(p.movimenta_caixa)vendasPorForma[f].recebido+=Number(p.valor||0);
-    else if(isAPrazo(f))vendasPorForma[f].aprazo+=Number(p.valor||0);
-    else vendasPorForma[f].digital+=Number(p.valor||0);
+  vendaMovs.forEach(m=>{
+    const f=m.forma_pagamento||'OUTROS';
+    if(!vendasPorForma[f])vendasPorForma[f]={fisico:0,digital:0};
+    if(m.categoria==='VENDA')vendasPorForma[f].fisico+=Number(m.valor||0);
+    else vendasPorForma[f].digital+=Number(m.valor||0);
   });
+  const qtdVendas=new Set(vendaMovs.map(m=>m.referencia)).size;
 
   // Contas a receber (OS) por forma
   const recPorForma={};
@@ -593,17 +579,9 @@ async function abrirResumoSessao(sessaoId){
   const totalReforco=(movs||[]).filter(m=>m.categoria==='REFORCO').reduce((s,m)=>s+Number(m.valor||0),0);
   const totalSangria=(movs||[]).filter(m=>m.tipo==='SAIDA').reduce((s,m)=>s+Number(m.valor||0),0);
 
-  // Saldo físico real = MESMA conta do card (saldo_inicial + soma de todos os caixa_movimentos da sessão)
-  // Nunca recalcular a partir de pagamentos_venda aqui — isso é o que causava o card e o resumo mostrarem valores diferentes.
+  // Saldo físico = saldo_inicial + soma de TODOS os movimentos da sessão — idêntico ao card, sempre
   const totalMovsSessao=(movs||[]).reduce((s,m)=>s+Number(m.valor||0),0);
   const saldoFisico=Number(sessao?.saldo_inicial||0)+totalMovsSessao;
-
-  // Checagem de integridade: dinheiro de vendas (pagamentos_venda) deve bater com ENTRADA de venda no caixa_movimentos
-  const dinheiroRecebido=Object.entries(vendasPorForma)
-    .filter(([f])=>f.toUpperCase()==='DINHEIRO')
-    .reduce((s,[,v])=>s+v.recebido,0);
-  const entradaVendasNoCaixa=(movs||[]).filter(m=>m.tipo==='ENTRADA'&&m.categoria!=='REFORCO').reduce((s,m)=>s+Number(m.valor||0),0);
-  const divergencia=Math.round((dinheiroRecebido-entradaVendasNoCaixa)*100)/100;
 
   // ── MONTA HTML ───────────────────────────────────────────────────────
   let h='';
@@ -616,36 +594,23 @@ async function abrirResumoSessao(sessaoId){
     +(sessao?.observacoes?'<div><strong>Obs:</strong> '+sessao.observacoes+'</div>':'')
   +'</div>';
 
-  // AVISO DE DIVERGÊNCIA (venda em dinheiro sem lançamento correspondente no caixa)
-  if(Math.abs(divergencia)>=0.01){
-    h+='<div style="background:var(--rbg);border:1px solid #F5B5B5;border-radius:8px;padding:10px 14px;font-size:11.5px;color:var(--red);margin-bottom:12px;display:flex;gap:8px;align-items:flex-start">'
-      +'<i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i>'
-      +'<div><strong>Divergência encontrada:</strong> vendas em dinheiro somam '+fmtV(dinheiroRecebido)+', mas o caixa só tem '+fmtV(entradaVendasNoCaixa)+' lançado como entrada de venda. '
-      +'Diferença de '+fmtV(Math.abs(divergencia))+' — provavelmente uma venda não gravou o movimento de caixa corretamente. O saldo abaixo reflete o que está <em>realmente</em> no caixa (mesmo valor do card).</div>'
-    +'</div>';
-  }
-
   // VENDAS DE PRODUTOS/SERVIÇOS
   if(Object.keys(vendasPorForma).length){
-    h+='<div class="res-section"><div class="res-title">Vendas ('+( vendas||[]).length+')</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Físico</th><th style="text-align:right">Digital</th><th style="text-align:right">A prazo</th><th style="text-align:right">Total</th></tr>';
-    let totRec=0,totDig=0,totPrz=0;
+    h+='<div class="res-section"><div class="res-title">Vendas ('+qtdVendas+')</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Físico</th><th style="text-align:right">Digital</th><th style="text-align:right">Total</th></tr>';
+    let totFis=0,totDig=0;
     Object.entries(vendasPorForma).forEach(function([f,v]){
-      totRec+=v.recebido;totDig+=v.digital;totPrz+=v.aprazo;
+      totFis+=v.fisico;totDig+=v.digital;
       h+='<tr><td>'+f+'</td>'
-        +'<td style="text-align:right;color:var(--green)">'+(v.recebido?fmtV(v.recebido):'—')+'</td>'
+        +'<td style="text-align:right;color:var(--green)">'+(v.fisico?fmtV(v.fisico):'—')+'</td>'
         +'<td style="text-align:right;color:var(--cd)">'+(v.digital?fmtV(v.digital):'—')+'</td>'
-        +'<td style="text-align:right;color:var(--amber)">'+(v.aprazo?fmtV(v.aprazo):'—')+'</td>'
-        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.digital+v.aprazo)+'</td></tr>';
+        +'<td style="text-align:right;font-weight:700">'+fmtV(v.fisico+v.digital)+'</td></tr>';
     });
     h+='<tr class="tot"><td>TOTAL VENDAS</td>'
-      +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
+      +'<td style="text-align:right;color:var(--green)">'+fmtV(totFis)+'</td>'
       +'<td style="text-align:right;color:var(--cd)">'+fmtV(totDig)+'</td>'
-      +'<td style="text-align:right;color:var(--amber)">'+fmtV(totPrz)+'</td>'
-      +'<td style="text-align:right">'+fmtV(totRec+totDig+totPrz)+'</td></tr>';
-    h+='</table>'
-      +'<div style="font-size:10.5px;color:var(--sub);margin-top:4px"><strong>Recebido hoje (físico + digital):</strong> '+fmtV(totRec+totDig)+' &nbsp;·&nbsp; <strong>Ainda a receber:</strong> '+fmtV(totPrz)+'</div>'
-      +'</div>';
+      +'<td style="text-align:right">'+fmtV(totFis+totDig)+'</td></tr>';
+    h+='</table></div>';
   }
 
   // CONTAS A RECEBER (OS)
@@ -683,7 +648,7 @@ async function abrirResumoSessao(sessaoId){
   h+='<div class="res-saldo"><div>'
     +'<div class="res-saldo-lbl">Saldo real no caixa (dinheiro físico)</div>'
     +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">'
-      +'Inicial '+fmtV(sessao?.saldo_inicial)+' + movimentos da sessão '+fmtV(totalMovsSessao)+' = mesmo valor do card acima'
+      +'Inicial '+fmtV(sessao?.saldo_inicial)+' + movimentos da sessão '+fmtV(totalMovsSessao)
     +'</div>'
   +'</div><div class="res-saldo-val">'+fmtV(saldoFisico)+'</div></div>';
 
