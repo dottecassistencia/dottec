@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Novo Produto — Dottec Assistência</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<title>Novo Produto — Dottec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
 <style>
   :root{
     --cyan:#29B8C2; --cyan-dark:#1E9099; --cyan-bg:#E3F4F5;
@@ -17,37 +16,42 @@
     --green:#3B6D11; --green-bg:#EAF3DE;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+  body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
   /* texto sempre em caixa alta visualmente E no valor real */
   input, textarea { text-transform: uppercase; }
   input[type="number"], input.no-upper { text-transform: none; }
 
-  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:1.1rem 2rem;position:sticky;top:0;z-index:50}
-  .crumb{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:14px}
-  .back-btn{
-    width:36px;height:36px;border-radius:10px;background:var(--bg);border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;
-    cursor:pointer;text-decoration:none;flex-shrink:0;transition:background .15s;
-  }
-  .back-btn:hover{background:#E2DFD6}
-  .crumb-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--dark)}
-  .crumb-sub{font-size:12px;color:var(--sub);margin-top:1px}
+  /* FILTER BAR */
+  .filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
+  .fb-top{display:flex;align-items:center;gap:14px;padding:10px 16px;flex-wrap:wrap}
+  .crumb-title{font-size:15px;font-weight:800;color:var(--dark)}
+  .crumb-sub{font-size:11px;color:var(--sub);margin-top:1px;text-transform:none}
 
-  .crumb-right{margin-left:auto;display:flex;gap:10px}
   .btn{
-    height:40px;padding:0 18px;border-radius:10px;border:none;cursor:pointer;
-    font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:700;text-transform:none;
-    display:flex;align-items:center;gap:7px;transition:background .15s,transform .1s;
+    height:36px;padding:0 16px;border-radius:9px;border:none;cursor:pointer;
+    font-family:inherit;font-size:12.5px;font-weight:700;text-transform:none;
+    display:flex;align-items:center;gap:6px;transition:background .15s;text-decoration:none;
   }
-  .btn:active{transform:scale(.97)}
   .btn-primary{background:var(--coral);color:#fff}
   .btn-primary:hover{background:var(--coral-dark)}
   .btn-secondary{background:var(--white);color:var(--text);border:1px solid var(--border);text-transform:none}
   .btn-secondary:hover{background:var(--bg)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
 
-  .content{max-width:980px;margin:0 auto;padding:2rem 2rem 4rem}
+  /* BODY */
+  .body{flex:1;overflow-y:auto}
+  .content{max-width:980px;margin:0 auto;padding:1.25rem 1.5rem 5.5rem}
+
+  /* BARRA FLUTUANTE (padrão vendas) */
+  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--dark);color:#fff;
+    padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+  .bb-info{font-size:12px;color:rgba(255,255,255,.55);font-weight:600;text-transform:none}
+  .bb-btns{display:flex;gap:8px;margin-left:auto}
+  .bottom-bar .btn-secondary{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18)}
+  .bottom-bar .btn-secondary:hover{background:rgba(255,255,255,.18)}
+  @media(max-width:600px){.bb-info{display:none}}
 
   .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:hidden}
   .panel-head{
@@ -59,7 +63,7 @@
   .panel-icon.green{background:var(--green-bg);color:var(--green)}
   .panel-icon.amber{background:#FBEEDB;color:#9A6000}
   .panel-icon.slate{background:#EEF0F5;color:#3A4A6B}
-  .panel-title{font-family:'Lora',serif;font-size:15.5px;font-weight:600;color:var(--dark)}
+  .panel-title{font-size:14.5px;font-weight:800;color:var(--dark)}
   .panel-sub{font-size:11.5px;color:var(--sub);margin-top:1px;text-transform:none}
 
   .panel-body{padding:1.5rem}
@@ -78,7 +82,7 @@
 
   input,select{
     width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;
-    background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;
+    background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:inherit;outline:none;
     transition:border-color .15s,box-shadow .15s,background .15s;
   }
   input::placeholder{color:#B5B2A8;text-transform:none}
@@ -144,7 +148,7 @@
     display:flex;align-items:center;justify-content:space-between;margin-top:4px;
   }
   .calc-label{font-size:11px;font-weight:700;color:var(--cyan-dark);text-transform:uppercase;letter-spacing:.05em}
-  .calc-value{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--dark)}
+  .calc-value{font-size:21px;font-weight:800;color:var(--dark)}
 
   .help-text{font-size:11px;color:var(--sub);margin-top:5px;text-transform:none;line-height:1.5}
 
@@ -174,22 +178,16 @@
 
 <div class="toast" id="toast"><i id="toast-icon" class="ti ti-check"></i><span id="toast-msg"></span></div>
 
-<header class="topbar">
-  <div class="crumb">
-    <a class="back-btn" href="produtos.html"><i class="ti ti-arrow-left"></i></a>
+<div class="filter-bar">
+  <div class="fb-top">
     <div>
       <div class="crumb-title" id="page-title">Novo produto</div>
       <div class="crumb-sub">Preencha os dados do produto</div>
     </div>
-    <div class="crumb-right">
-      <a class="btn btn-secondary" href="produtos.html">Cancelar</a>
-      <button class="btn btn-primary" id="btn-save" onclick="salvarProduto()">
-        <i class="ti ti-device-floppy"></i> Salvar produto
-      </button>
-    </div>
   </div>
-</header>
+</div>
 
+<div class="body" id="body-main">
 <main class="content">
 
   <!-- IDENTIFICAÇÃO -->
@@ -388,11 +386,23 @@
   </div>
 
 </main>
+</div>
+
+<!-- BARRA FLUTUANTE (padrão vendas) -->
+<div class="bottom-bar">
+  <div class="bb-info" id="bb-info">Preencha os dados e salve</div>
+  <div class="bb-btns">
+    <a class="btn btn-secondary" href="produtos.html"><i class="ti ti-arrow-left"></i> Cancelar</a>
+    <button class="btn btn-primary" id="btn-save" onclick="salvarProduto()">
+      <i class="ti ti-device-floppy"></i> Salvar produto
+    </button>
+  </div>
+</div>
 
 <script>
-  const SUPA_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-  const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+  const SB_URL = 'https://clctxzynpfjilxmyblpg.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+  const db = window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
 
   const params = new URLSearchParams(window.location.search);
   const EDIT_ID = params.get('id');
