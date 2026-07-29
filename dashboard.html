@@ -738,13 +738,38 @@ async function loadCompras(){
     .select('id,numero,cliente_nome,aparelho,status,atualizado_em')
     .ilike('status','AGUARDANDO PE%')
     .order('atualizado_em',{ascending:true}).limit(20);
+  // sugestão automática: produtos abaixo do estoque mínimo, agrupados por fornecedor fixo
+  const{data:produtosBaixos}=await db.from('produtos')
+    .select('id,nome,estoque_atual,estoque_minimo,fornecedor_id,pessoas(nome)')
+    .eq('ativo',true).gt('estoque_minimo',0);
   const isAdmin=USR.perfil==='ADMIN';
   const body=document.getElementById('lc-body');
-  const totalCnt=(lc||[]).length+(osAg||[]).length;
+
+  const baixos=(produtosBaixos||[]).filter(p=>Number(p.estoque_atual||0)<=Number(p.estoque_minimo||0));
+  const porForn={};
+  baixos.forEach(p=>{
+    const chave=p.fornecedor_id||'__sem__';
+    const nomeForn=p.pessoas?.nome||null;
+    if(!porForn[chave])porForn[chave]={nome:nomeForn,itens:[]};
+    porForn[chave].itens.push(p.nome);
+  });
+  const gruposForn=Object.values(porForn);
+
+  const totalCnt=(lc||[]).length+(osAg||[]).length+baixos.length;
   document.getElementById('lc-cnt').textContent=totalCnt||'';
   document.getElementById('lc-cnt').style.display=totalCnt?'inline':'none';
   if(!totalCnt){body.innerHTML='<div class="p-empty"><i class="ti ti-shopping-bag"></i>Lista vazia</div>';return;}
   const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
+  // sugestão de estoque — fornecedor em destaque (produtos com fornecedor fixo primeiro, sem fornecedor por último)
+  const sugRows=gruposForn.sort((a,b)=>(a.nome?0:1)-(b.nome?0:1)).map(g=>`
+    <a class="lc-row" href="produtos.html" style="border-left:3px solid var(--cyan);text-decoration:none;color:inherit">
+      <div class="lc-info" style="flex:1">
+        <div class="lc-prod"><i class="ti ti-truck-delivery" style="color:var(--cd);margin-right:3px"></i>${g.nome?'Fornecedor: '+g.nome:'Sem fornecedor definido'}
+          <span class="lc-urg" style="background:var(--cbg);color:var(--cd)">${g.itens.length} ${g.itens.length===1?'ITEM':'ITENS'}</span>
+        </div>
+        <div class="lc-forn">${g.itens.join(', ')} · estoque baixo</div>
+      </div>
+    </a>`).join('');
   // OS aguardando peça
   const osRows=(osAg||[]).map(o=>`
     <div class="lc-row" style="border-left:3px solid var(--amber);cursor:pointer" onclick="irOS('${o.id}')">
@@ -765,7 +790,7 @@ async function loadCompras(){
       </div>
       ${isAdmin?`<button class="lc-del" onclick="delC('${c.id}')" title="Remover"><i class="ti ti-x"></i></button>`:''}
     </div>`).join('');
-  body.innerHTML=osRows+lcRows;
+  body.innerHTML=sugRows+osRows+lcRows;
 }
 function irOS(id){location.href='os-nova.html?id='+id;}
 async function salvarCompra(){

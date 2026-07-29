@@ -75,17 +75,14 @@
 
   /* BODY */
   .body{flex:1;overflow-y:auto}
-  .content{max-width:980px;margin:0 auto;padding:1.25rem 1.5rem 5.5rem}
+  .content{max-width:980px;margin:0 auto;padding:1.25rem 1.5rem 4.5rem}
 
   /* BARRA FLUTUANTE (padrão vendas) */
-  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--dark);color:#fff;
-    padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
-    box-shadow:0 -6px 24px rgba(0,0,0,.18)}
-  .bb-info{font-size:12px;color:rgba(255,255,255,.55);font-weight:600}
-  .bb-btns{display:flex;gap:8px;margin-left:auto}
-  .bottom-bar .btn-secondary{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18)}
-  .bottom-bar .btn-secondary:hover{background:rgba(255,255,255,.18)}
-  @media(max-width:600px){.bb-info{display:none}}
+  /* FAB — mesmo padrão de venda-nova.html */
+  .fab-wrap{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:700;display:flex;gap:8px}
+  .fab-back{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.07);font-family:inherit}
+  .fab-save{height:36px;padding:0 18px;border-radius:18px;border:none;background:var(--coral);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;box-shadow:0 4px 14px rgba(232,96,74,.35)}
+  .fab-save:disabled{opacity:.6;cursor:not-allowed}
 
   /* PAPÉIS */
   .papeis-section{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:16px}
@@ -422,15 +419,12 @@
 </main>
 </div>
 
-<!-- BARRA FLUTUANTE (padrão vendas) -->
-<div class="bottom-bar">
-  <div class="bb-info" id="bb-info">Preencha os dados e salve</div>
-  <div class="bb-btns">
-    <a class="btn btn-secondary" href="pessoas.html"><i class="ti ti-arrow-left"></i> Cancelar</a>
-    <button class="btn btn-primary" id="btn-save" onclick="salvar()">
-      <i class="ti ti-device-floppy"></i> Salvar
-    </button>
-  </div>
+<!-- FAB — mesmo padrão de venda-nova.html -->
+<div class="fab-wrap">
+  <a href="pessoas.html" class="fab-back"><i class="ti ti-arrow-left"></i> Voltar</a>
+  <button onclick="salvar()" id="btn-save" class="fab-save">
+    <i class="ti ti-device-floppy"></i> Salvar
+  </button>
 </div>
 
 <script>

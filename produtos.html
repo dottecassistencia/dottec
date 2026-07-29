@@ -109,25 +109,61 @@
     table{font-size:12px}
     thead th, tbody td{padding:9px 10px}
   }
+
+  /* MODAL (padrão do app) */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+  .overlay.open{display:flex}
+  .modal{background:var(--white);border-radius:16px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .mh{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .mh-ico{width:32px;height:32px;border-radius:8px;background:var(--cbg);color:var(--cd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .mh-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+  .mx{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+  .mb{padding:10px 14px;overflow-y:auto}
+  .hist-empty{text-align:center;padding:2.5rem 1rem;color:var(--sub);font-size:12.5px}
+  .hist-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.35}
+
+  /* SUGESTÃO DE COMPRAS */
+  .sug-forn{margin-bottom:14px}
+  .sug-forn:last-child{margin-bottom:0}
+  .sug-forn-head{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px 8px 0 0;font-size:12px;font-weight:800;color:var(--dark)}
+  .sug-forn-head i{color:var(--cd)}
+  .sug-forn-count{margin-left:auto;font-size:10px;font-weight:700;color:var(--sub);background:var(--white);padding:2px 7px;border-radius:5px}
+  .sug-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-top:none;font-size:12.5px}
+  .sug-forn .sug-item:last-child{border-radius:0 0 8px 8px}
+  .sug-item-nome{flex:1;font-weight:600;color:var(--dark)}
+  .sug-item-qtd{font-size:11px;color:var(--coral-dark);font-weight:700;white-space:nowrap}
 </style>
 </head>
 <body>
 
+<!-- MODAL SUGESTÃO DE COMPRAS -->
+<div class="overlay" id="ov-sugestao" onclick="if(event.target===this)fecharSugestao()">
+  <div class="modal">
+    <div class="mh">
+      <div class="mh-ico"><i class="ti ti-truck-delivery"></i></div>
+      <div class="mh-title">Sugestão de compras</div>
+      <button class="mx" onclick="fecharSugestao()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb" id="sugestao-body"><div class="hist-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i></div></div>
+  </div>
+</div>
+
 <div class="filter-bar">
   <div class="fb-top">
-    <div class="dropdown-wrap" id="add-dropdown">
-      <button class="btn btn-primary" onclick="toggleDropdown('add-dropdown')">
-        <i class="ti ti-plus"></i> Adicionar
+    <a class="btn btn-primary" href="produto-novo.html"><i class="ti ti-plus"></i> Adicionar</a>
+
+    <div class="dropdown-wrap" id="mais-dropdown">
+      <button class="btn btn-secondary" onclick="toggleDropdown('mais-dropdown')">
+        <i class="ti ti-settings-2"></i> Mais opções
         <i class="ti ti-chevron-down" style="font-size:13px"></i>
       </button>
       <div class="dropdown-menu">
-        <a class="ddm-item" href="produto-novo.html"><i class="ti ti-package"></i> Novo produto</a>
-        <a class="ddm-item" href="#" onclick="alert('Em breve: gerador de etiqueta'); return false;"><i class="ti ti-barcode"></i> Gerar etiqueta</a>
+        <a class="ddm-item" href="etiquetas.html"><i class="ti ti-barcode"></i> Tirar etiquetas</a>
         <a class="ddm-item" href="#" onclick="alert('Em breve: gestão de grupos'); return false;"><i class="ti ti-category"></i> Grupo de produtos</a>
+        <div style="height:1px;background:var(--border);margin:5px 4px"></div>
+        <a class="ddm-item" href="#" onclick="abrirSugestaoCompras(); return false;"><i class="ti ti-truck-delivery"></i> Sugestão de compras</a>
       </div>
     </div>
-
-    <button class="btn btn-secondary"><i class="ti ti-settings-2"></i> Mais ações</button>
 
     <div class="search-wrap">
       <i class="ti ti-search"></i>
@@ -180,6 +216,52 @@
   });
 
   let TODOS_PRODUTOS = [];
+
+  // ── SUGESTÃO DE COMPRAS ─────────────────────────────────────
+  // Regra: produtos ativos com estoque_atual <= estoque_minimo (e minimo definido > 0)
+  // Agrupados por fornecedor (fornecedor_id do produto). Sem fornecedor cadastrado = "Sem fornecedor definido".
+  async function abrirSugestaoCompras() {
+    document.querySelectorAll('.dropdown-wrap.open').forEach(d => d.classList.remove('open'));
+    document.getElementById('ov-sugestao').classList.add('open');
+    document.getElementById('sugestao-body').innerHTML = '<div class="hist-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i></div>';
+
+    const { data, error } = await db.from('produtos')
+      .select('id,nome,estoque_atual,estoque_minimo,fornecedor_id,pessoas(nome)')
+      .eq('ativo', true)
+      .gt('estoque_minimo', 0);
+
+    if (error) {
+      document.getElementById('sugestao-body').innerHTML = `<div class="hist-empty"><i class="ti ti-alert-circle"></i>Erro: ${error.message}</div>`;
+      return;
+    }
+
+    const baixos = (data || []).filter(p => Number(p.estoque_atual || 0) <= Number(p.estoque_minimo || 0));
+    if (!baixos.length) {
+      document.getElementById('sugestao-body').innerHTML = '<div class="hist-empty"><i class="ti ti-check"></i>Nenhum produto abaixo do estoque mínimo agora.</div>';
+      return;
+    }
+
+    // agrupa por fornecedor
+    const porForn = {};
+    baixos.forEach(p => {
+      const chave = p.fornecedor_id || '__sem__';
+      const nomeForn = p.pessoas?.nome || 'Sem fornecedor definido';
+      if (!porForn[chave]) porForn[chave] = { nome: nomeForn, itens: [] };
+      const sugerido = Math.max(1, Number(p.estoque_minimo || 0) - Number(p.estoque_atual || 0));
+      porForn[chave].itens.push({ nome: p.nome, sugerido });
+    });
+
+    document.getElementById('sugestao-body').innerHTML = Object.values(porForn).map(f => `
+      <div class="sug-forn">
+        <div class="sug-forn-head"><i class="ti ti-truck-delivery"></i> ${f.nome}<span class="sug-forn-count">${f.itens.length} ${f.itens.length===1?'item':'itens'}</span></div>
+        ${f.itens.map(it => `
+          <div class="sug-item">
+            <span class="sug-item-nome">${it.nome}</span>
+            <span class="sug-item-qtd">sugerido: ${it.sugerido} un.</span>
+          </div>`).join('')}
+      </div>`).join('');
+  }
+  function fecharSugestao() { document.getElementById('ov-sugestao').classList.remove('open'); }
 
   function toggleDropdown(id) {
     document.querySelectorAll('.dropdown-wrap.open').forEach(d => { if (d.id !== id) d.classList.remove('open'); });

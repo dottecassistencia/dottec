@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Etiquetas — Dottec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="_shell.js"></script>
+<style>
+:root{--cyan:#29B8C2;--cd:#1E9099;--cbg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--green:#3B6D11;--gbg:#EAF3DE}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;background:var(--dark);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok i{color:#4ade80}.toast.err i{color:#f87171}
+
+/* FILTER BAR */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
+.fb-top{display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap}
+.fb-search{flex:1;min-width:180px;max-width:320px;position:relative}
+.fb-search input{width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px 0 32px;font-family:inherit;font-size:12.5px;color:var(--dark);background:#FAFAF7;outline:none}
+.fb-search input:focus{border-color:var(--cyan);background:var(--white)}
+.fb-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px}
+.btn{height:34px;padding:0 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none}
+.btn-sec{background:var(--white);color:var(--text);border:1px solid var(--border)}
+.btn-sec:hover{background:var(--bg)}
+.btn-pri{background:var(--coral);color:#fff}
+.btn-pri:hover{background:var(--coral-dark)}
+.sel-preset{height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:inherit;font-size:12px;font-weight:600;color:var(--dark);background:#FAFAF7;outline:none}
+.fb-count{margin-left:auto;font-size:11.5px;color:var(--sub);font-weight:600;white-space:nowrap}
+
+/* BODY: LISTA (esquerda) + PREVIEW (direita) */
+.body{flex:1;overflow:hidden;display:flex}
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;overflow:hidden}
+.list-panel{overflow-y:auto;padding:12px 16px;border-right:1px solid var(--border);background:var(--white)}
+.prod-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;border:1px solid var(--border);margin-bottom:6px;background:var(--white)}
+.prod-row.checked{border-color:var(--cyan);background:var(--cbg)}
+.prod-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;background:#fff}
+.prod-row.checked .prod-check{background:var(--cyan);border-color:var(--cyan);color:#fff}
+.prod-info{flex:1;min-width:0;cursor:pointer}
+.prod-nome{font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-meta{font-size:10.5px;color:var(--sub);margin-top:1px}
+.prod-qtd{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.prod-qtd button{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
+.prod-qtd button:hover{border-color:var(--cyan);color:var(--cd)}
+.prod-qtd input{width:34px;height:22px;border:1px solid var(--border);border-radius:6px;text-align:center;font-size:11.5px;font-family:inherit;outline:none}
+.list-empty{text-align:center;padding:3rem 1rem;color:var(--sub);font-size:12.5px}
+.list-empty i{font-size:30px;display:block;margin-bottom:8px;opacity:.35}
+
+.preview-panel{overflow-y:auto;background:#DEDBD2;padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.preview-info{font-size:11.5px;color:var(--sub);text-align:center;line-height:1.5}
+.preview-info b{color:var(--dark)}
+
+/* CONFIG PANEL (personalizado) */
+.cfg-panel{display:none;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px;width:100%;max-width:320px;font-size:11.5px}
+.cfg-panel.open{display:block}
+.cfg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.cfg-row label{display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:3px}
+.cfg-row input{width:100%;height:28px;border:1px solid var(--border);border-radius:6px;padding:0 8px;font-family:inherit;font-size:11.5px}
+
+/* FOLHA / ETIQUETAS — dimensões em mm, usadas tanto na tela quanto na impressão */
+.sheet{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);display:grid}
+.label{border:1px dashed #ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:1mm}
+.label-nome{font-size:2.3mm;font-weight:700;text-align:center;line-height:1.15;max-height:6mm;overflow:hidden;width:100%;text-transform:uppercase}
+.label-preco{font-size:3mm;font-weight:800;margin-top:.3mm}
+.label-barcode{width:100%;display:flex;justify-content:center;margin-top:.3mm}
+.label-barcode svg{width:100%;height:auto;max-height:9mm}
+.label-codigo{font-size:2mm;color:#555;font-variant-numeric:tabular-nums;margin-top:.2mm}
+.label-empty{border-style:dashed;border-color:#ddd}
+
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* IMPRESSÃO — some com tudo, só a folha aparece */
+@media print{
+  @page{size:A4;margin:0}
+  body *{visibility:hidden}
+  #print-area, #print-area *{visibility:visible}
+  #print-area{position:absolute;left:0;top:0}
+  .sheet{box-shadow:none}
+}
+@media(max-width:900px){
+  .main{display:block;overflow:visible}
+  .body{overflow-y:auto}
+  .list-panel{border-right:none;overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
+
+<div class="filter-bar">
+  <div class="fb-top">
+    <div class="fb-search"><i class="ti ti-search"></i><input id="busca" placeholder="Buscar produto..." oninput="renderLista()"/></div>
+    <select class="sel-preset" id="preset" onchange="onPresetChange()">
+      <option value="pimaco6180">Pimaco 6180 — 2×10 (99,1×25,4mm)</option>
+      <option value="pimaco6183">Pimaco 6183 — 3×8 (63,5×25,4mm)</option>
+      <option value="custom">Personalizado...</option>
+    </select>
+    <button class="btn btn-sec" onclick="marcarTodos(true)"><i class="ti ti-checkbox"></i> Marcar todos</button>
+    <button class="btn btn-sec" onclick="marcarTodos(false)"><i class="ti ti-square"></i> Limpar</button>
+    <span class="fb-count" id="fb-count">0 selecionados</span>
+    <button class="btn btn-pri" onclick="imprimir()"><i class="ti ti-printer"></i> Imprimir</button>
+  </div>
+</div>
+
+<div class="body" id="body-main">
+  <div class="main">
+    <div class="list-panel" id="list-panel">
+      <div class="list-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i> Carregando produtos...</div>
+    </div>
+    <div class="preview-panel">
+      <div class="preview-info">
+        Impressora: <b>HP LaserJet P1102w</b> — folha adesiva A4.<br/>
+        Selecione a pré-visualização abaixo antes de imprimir e confira o alinhamento com a folha física.
+      </div>
+      <div class="cfg-panel" id="cfg-panel">
+        <div class="cfg-row">
+          <div><label>Largura etiqueta (mm)</label><input type="number" id="cfg-w" value="99.1" step="0.1" oninput="onCfgChange()"/></div>
+          <div><label>Altura etiqueta (mm)</label><input type="number" id="cfg-h" value="25.4" step="0.1" oninput="onCfgChange()"/></div>
+        </div>
+        <div class="cfg-row">
+          <div><label>Colunas</label><input type="number" id="cfg-cols" value="2" min="1" oninput="onCfgChange()"/></div>
+          <div><label>Linhas</label><input type="number" id="cfg-rows" value="10" min="1" oninput="onCfgChange()"/></div>
+        </div>
+        <div class="cfg-row">
+          <div><label>Margem topo (mm)</label><input type="number" id="cfg-mt" value="0" step="0.1" oninput="onCfgChange()"/></div>
+          <div><label>Margem esquerda (mm)</label><input type="number" id="cfg-ml" value="0" step="0.1" oninput="onCfgChange()"/></div>
+        </div>
+      </div>
+      <div id="print-area"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
+
+const fmtV=v=>'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+let PRODUTOS=[];
+let SELECIONADOS={}; // id -> qtd
+
+const PRESETS={
+  pimaco6180:{w:99.1,h:25.4,cols:2,rows:10,mt:0,ml:0},
+  pimaco6183:{w:63.5,h:25.4,cols:3,rows:8,mt:0,ml:0},
+};
+
+async function load(){
+  const{data,error}=await db.from('produtos')
+    .select('id,codigo,codigo_barras,nome,valor_venda')
+    .eq('ativo',true).order('nome');
+  if(error){
+    document.getElementById('list-panel').innerHTML=`<div class="list-empty"><i class="ti ti-alert-circle"></i>Erro: ${error.message}</div>`;
+    return;
+  }
+  PRODUTOS=data||[];
+  renderLista();
+  atualizarContador();
+  renderPreview();
+}
+
+function renderLista(){
+  const q=(document.getElementById('busca').value||'').trim().toUpperCase();
+  let lista=PRODUTOS;
+  if(q) lista=lista.filter(p=>(p.nome||'').toUpperCase().includes(q)||String(p.codigo).includes(q)||(p.codigo_barras||'').toUpperCase().includes(q));
+
+  if(!lista.length){
+    document.getElementById('list-panel').innerHTML='<div class="list-empty"><i class="ti ti-package-off"></i>Nenhum produto encontrado</div>';
+    return;
+  }
+
+  document.getElementById('list-panel').innerHTML=lista.map(p=>{
+    const marcado=SELECIONADOS[p.id]!==undefined;
+    const qtd=SELECIONADOS[p.id]||1;
+    return `<div class="prod-row${marcado?' checked':''}" id="row-${p.id}">
+      <div class="prod-check" onclick="toggleProduto('${p.id}')"><i class="ti ti-check" style="${marcado?'':'display:none'}"></i></div>
+      <div class="prod-info" onclick="toggleProduto('${p.id}')">
+        <div class="prod-nome">${p.nome}</div>
+        <div class="prod-meta">Cód. ${String(p.codigo).padStart(3,'0')}${p.codigo_barras?' · '+p.codigo_barras:' · sem cód. de barras'} · ${fmtV(p.valor_venda)}</div>
+      </div>
+      <div class="prod-qtd">
+        <button onclick="alterarQtd('${p.id}',-1)"><i class="ti ti-minus"></i></button>
+        <input type="number" min="1" value="${qtd}" onchange="setQtd('${p.id}',this.value)"/>
+        <button onclick="alterarQtd('${p.id}',1)"><i class="ti ti-plus"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProduto(id){
+  if(SELECIONADOS[id]!==undefined) delete SELECIONADOS[id];
+  else SELECIONADOS[id]=1;
+  renderLista();
+  atualizarContador();
+  renderPreview();
+}
+function alterarQtd(id,delta){
+  const atual=SELECIONADOS[id]||1;
+  SELECIONADOS[id]=Math.max(1,atual+delta);
+  if(SELECIONADOS[id]===undefined) return;
+  renderLista();
+  atualizarContador();
+  renderPreview();
+}
+function setQtd(id,v){
+  const n=Math.max(1,parseInt(v)||1);
+  if(SELECIONADOS[id]!==undefined){ SELECIONADOS[id]=n; atualizarContador(); renderPreview(); }
+}
+function marcarTodos(v){
+  const q=(document.getElementById('busca').value||'').trim().toUpperCase();
+  let lista=PRODUTOS;
+  if(q) lista=lista.filter(p=>(p.nome||'').toUpperCase().includes(q)||String(p.codigo).includes(q)||(p.codigo_barras||'').toUpperCase().includes(q));
+  lista.forEach(p=>{ if(v) SELECIONADOS[p.id]=SELECIONADOS[p.id]||1; else delete SELECIONADOS[p.id]; });
+  renderLista();
+  atualizarContador();
+  renderPreview();
+}
+function atualizarContador(){
+  const totalItens=Object.keys(SELECIONADOS).length;
+  const totalEtiquetas=Object.values(SELECIONADOS).reduce((s,q)=>s+q,0);
+  document.getElementById('fb-count').textContent=totalItens+' produto'+(totalItens!==1?'s':'')+' · '+totalEtiquetas+' etiqueta'+(totalEtiquetas!==1?'s':'');
+}
+
+// ── PRESET / CONFIG DE FOLHA ─────────────────────────────────
+function getCfg(){
+  const p=document.getElementById('preset').value;
+  if(p==='custom'){
+    return{
+      w:parseFloat(document.getElementById('cfg-w').value)||99.1,
+      h:parseFloat(document.getElementById('cfg-h').value)||25.4,
+      cols:parseInt(document.getElementById('cfg-cols').value)||2,
+      rows:parseInt(document.getElementById('cfg-rows').value)||10,
+      mt:parseFloat(document.getElementById('cfg-mt').value)||0,
+      ml:parseFloat(document.getElementById('cfg-ml').value)||0,
+    };
+  }
+  return PRESETS[p];
+}
+function onPresetChange(){
+  const p=document.getElementById('preset').value;
+  document.getElementById('cfg-panel').classList.toggle('open',p==='custom');
+  if(p!=='custom'){
+    const c=PRESETS[p];
+    document.getElementById('cfg-w').value=c.w;
+    document.getElementById('cfg-h').value=c.h;
+    document.getElementById('cfg-cols').value=c.cols;
+    document.getElementById('cfg-rows').value=c.rows;
+    document.getElementById('cfg-mt').value=c.mt;
+    document.getElementById('cfg-ml').value=c.ml;
+  }
+  renderPreview();
+}
+function onCfgChange(){ renderPreview(); }
+
+// ── MONTA A LISTA DE ETIQUETAS (respeitando quantidade) ──────
+function listaEtiquetas(){
+  const out=[];
+  Object.entries(SELECIONADOS).forEach(([id,qtd])=>{
+    const p=PRODUTOS.find(x=>String(x.id)===String(id));
+    if(!p) return;
+    for(let i=0;i<qtd;i++) out.push(p);
+  });
+  return out;
+}
+
+// ── RENDERIZA A(S) FOLHA(S) ───────────────────────────────────
+function renderPreview(){
+  const cfg=getCfg();
+  const itens=listaEtiquetas();
+  const area=document.getElementById('print-area');
+
+  if(!itens.length){
+    area.innerHTML='<div class="preview-info" style="padding:2rem 0"><i class="ti ti-barcode" style="font-size:26px;display:block;margin-bottom:6px;opacity:.4"></i>Selecione produtos na lista à esquerda pra ver a pré-visualização.</div>';
+    return;
+  }
+
+  const porFolha=cfg.cols*cfg.rows;
+  const folhas=Math.ceil(itens.length/porFolha);
+  let html='';
+
+  for(let f=0; f<folhas; f++){
+    const cellsFolha=itens.slice(f*porFolha,(f+1)*porFolha);
+    html+=`<div class="sheet" style="width:210mm;height:297mm;padding:${cfg.mt}mm 0 0 ${cfg.ml}mm;grid-template-columns:repeat(${cfg.cols},${cfg.w}mm);grid-auto-rows:${cfg.h}mm;margin-bottom:14px" id="sheet-${f}">`;
+    for(let i=0;i<porFolha;i++){
+      const p=cellsFolha[i];
+      if(!p){ html+=`<div class="label label-empty"></div>`; continue; }
+      const barId='bc-'+f+'-'+i;
+      const codigoParaBarras=p.codigo_barras||String(p.codigo).padStart(6,'0');
+      html+=`<div class="label">
+        <div class="label-nome">${p.nome}</div>
+        <div class="label-barcode"><svg id="${barId}"></svg></div>
+        <div class="label-codigo">${codigoParaBarras}</div>
+        <div class="label-preco">${fmtV(p.valor_venda)}</div>
+      </div>`;
+    }
+    html+='</div>';
+  }
+  area.innerHTML=html;
+
+  // gera os códigos de barra de verdade (Code128 — lê qualquer leitor comum)
+  itens.forEach((p,idx)=>{
+    const f=Math.floor(idx/porFolha), i=idx%porFolha;
+    const barId='bc-'+f+'-'+i;
+    const el=document.getElementById(barId);
+    if(!el) return;
+    const codigoParaBarras=p.codigo_barras||String(p.codigo).padStart(6,'0');
+    try{
+      JsBarcode('#'+barId, codigoParaBarras, {format:'CODE128',displayValue:false,margin:0,height:34,width:1.4});
+    }catch(e){ /* código inválido pro formato — ignora silenciosamente na etiqueta */ }
+  });
+}
+
+function imprimir(){
+  if(!Object.keys(SELECIONADOS).length){ toast('Selecione ao menos um produto.','err'); return; }
+  window.print();
+}
+function toast(msg,t){const el=document.getElementById('toast');document.getElementById('ti').className='ti '+(t==='err'?'ti-alert-circle':'ti-check');document.getElementById('tm').textContent=msg;el.className='toast '+(t||'ok')+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+
+load();
+</script>
+</body>
+</html>
