@@ -1,195 +1,192 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Orçamentos — Dottec Assistência</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orçamentos — Dottec</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="_shell.js"></script>
 <style>
-  :root{--cyan:#29B8C2;--cyan-dark:#1E9099;--cyan-bg:#E3F4F5;--coral:#E8604A;--coral-dark:#C94835;--coral-bg:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#FFFFFF;--amber:#9A6000;--amber-bg:#FBEEDB;--green:#3B6D11;--green-bg:#EAF3DE;--teal:#0E7490;--teal-bg:#CFFAFE}
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Figtree',sans-serif;color:var(--text);min-height:100vh;background:var(--bg)}
+/* Cores da página seguem a bolinha "Orçamentos" do _shell.js (#0E7490) como destaque, dentro do padrão visual do app */
+:root{--cyan:#0E7490;--cd:#0A5A72;--cbg:#CFFAFE;--coral:#E8604A;--cbg2:#FBE9E5;--dark:#1C1C1A;--text:#2C2C2A;--sub:#8A887F;--border:#EAE7DF;--bg:#EDEAE3;--white:#fff;--amber:#9A6000;--abg:#FBEEDB;--green:#3B6D11;--gbg:#EAF3DE;--red:#DC2626;--rbg:#FEF2F2}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;background:var(--dark);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success i{color:#4ade80}.toast.error i{color:#f87171}
 
-  /* TOPBAR */
-  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
-  .back-btn{width:34px;height:34px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:15px;cursor:pointer;text-decoration:none;flex-shrink:0}
-  .back-btn:hover{background:#E2DFD6}
-  .topbar-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark);flex:1}
-  .tb-tabs{display:flex;gap:3px;background:var(--bg);border-radius:10px;padding:3px}
-  .tb-tab{height:32px;padding:0 14px;border-radius:8px;border:none;cursor:pointer;font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--sub);transition:all .15s;display:flex;align-items:center;gap:6px}
-  .tb-tab.active{background:var(--white);color:var(--dark);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+/* FILTER BAR (fixa, padrão do app) */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
+.fb-top{display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap}
+.seg{display:flex;background:var(--bg);border-radius:8px;padding:2px;flex-shrink:0}
+.seg-btn{height:32px;padding:0 14px;border:none;background:transparent;border-radius:6px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.seg-btn.active{background:var(--white);color:var(--cyan);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.fb-search{flex:1;min-width:150px;position:relative}
+.fb-search input{width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px 0 32px;font-family:inherit;font-size:12.5px;color:var(--dark);background:#FAFAF7;outline:none;text-transform:uppercase}
+.fb-search input::placeholder{text-transform:none}
+.fb-search input:focus{border-color:var(--cyan);background:var(--white)}
+.fb-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px}
+.chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--sub);font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.active{background:var(--cbg);color:var(--cyan);border-color:var(--cyan)}
+.chip:hover{border-color:var(--cyan);color:var(--cyan)}
+.margem-wrap{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--sub);background:var(--white);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:32px;white-space:nowrap}
+.margem-wrap input{width:40px;height:22px;border:none;background:transparent;font-size:13px;font-family:inherit;font-weight:800;color:var(--dark);outline:none;text-align:right}
 
-  /* LAYOUT PRINCIPAL */
-  .main-layout{display:grid;grid-template-columns:1fr 400px;min-height:calc(100vh - 57px)}
+/* BODY / LAYOUT */
+.body{flex:1;overflow:hidden;display:flex}
+.main-layout{flex:1;display:grid;grid-template-columns:1fr 380px;overflow:hidden}
 
-  /* ESQUERDO — LISTA DO FORNECEDOR */
-  .left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--white)}
+/* ESQUERDO — LISTA DO FORNECEDOR */
+.left-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--white);overflow:hidden}
+.tab-panel{display:none;flex:1;flex-direction:column;overflow:hidden}
+.tab-panel.active{display:flex}
 
-  /* ABA LISTA */
-  .tab-panel{display:none;flex:1;flex-direction:column}
-  .tab-panel.active{display:flex}
+/* COLAR LISTA — colapsável */
+.paste-header{border-bottom:1px solid var(--border);background:#FAFAF7;flex-shrink:0}
+.paste-toggle{display:flex;align-items:center;gap:8px;padding:10px 16px;cursor:pointer;user-select:none}
+.paste-toggle i.chev{margin-left:auto;transition:transform .2s;color:var(--sub);font-size:14px}
+.paste-toggle.open i.chev{transform:rotate(180deg)}
+.paste-label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:7px}
+.paste-label .badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--cbg);color:var(--cyan)}
+.paste-body{display:none;padding:0 16px 12px}
+.paste-body.open{display:block}
+.paste-box{width:100%;min-height:100px;max-height:150px;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;background:#fff;font-size:12.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.6;transition:border-color .15s;text-transform:none}
+.paste-box:focus{border-color:var(--cyan)}
+.paste-box::placeholder{color:#B5B2A8;font-style:italic}
+.parse-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.btn-parse{height:34px;padding:0 14px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-parse:hover{background:var(--cd)}
+.btn-limpar{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--sub);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.btn-limpar:hover{background:var(--bg)}
+.parse-info{font-size:11.5px;color:var(--sub);margin-left:auto}
 
-  /* PASTE AREA */
-  .paste-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:#FAFAF7}
-  .paste-label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;gap:7px}
-  .paste-label .badge{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:6px;background:var(--teal-bg);color:var(--teal)}
-  .paste-box{width:100%;min-height:110px;max-height:160px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:#fff;font-size:12.5px;font-family:'Figtree',sans-serif;outline:none;resize:vertical;line-height:1.6;transition:border-color .15s}
-  .paste-box:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.12)}
-  .paste-box::placeholder{color:#B5B2A8;font-style:italic}
-  .parse-row{display:flex;align-items:center;gap:8px;margin-top:8px}
-  .btn-parse{height:36px;padding:0 16px;border-radius:9px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
-  .btn-parse:hover{background:#0A5A72}
-  .btn-limpar{height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--sub);font-family:'Figtree',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
-  .btn-limpar:hover{background:var(--bg)}
-  .parse-info{font-size:12px;color:var(--sub);margin-left:auto}
+/* LISTA ITENS */
+.items-area{flex:1;overflow-y:auto}
+.item-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s;position:relative}
+.item-row:hover{background:#FAFAF8}
+.item-row.selected{background:var(--gbg)}
+.item-row.selected::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
+.item-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff}
+.item-row.selected .item-check{background:var(--green);border-color:var(--green);color:#fff}
+.item-info{flex:1;min-width:0}
+.item-modelo{font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-detalhe{font-size:10.5px;color:var(--sub);margin-top:2px;display:flex;gap:8px;align-items:center}
+.item-detalhe span{display:flex;align-items:center;gap:3px}
+.cond-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px}
+.cond-badge.novo{background:var(--gbg);color:var(--green)}
+.cond-badge.usado{background:var(--abg);color:var(--amber)}
+.cond-badge.seminovo{background:var(--cbg);color:var(--cyan)}
+.preco-forn{font-size:12.5px;font-weight:700;color:var(--sub);flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
+.preco-venda{font-size:10.5px;color:var(--cyan);margin-top:2px;font-weight:700;text-align:right}
 
-  /* FILTROS E BUSCA */
-  .filter-bar{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:#FAFAF7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .search-mini{position:relative;flex:1;min-width:160px}
-  .search-mini i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px}
-  .search-mini input{width:100%;height:34px;padding:0 12px 0 34px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-family:inherit;outline:none;text-transform:uppercase}
-  .search-mini input::placeholder{text-transform:none}
-  .search-mini input:focus{border-color:var(--teal)}
-  .chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px}
-  .chip.active{background:var(--teal-bg);color:var(--teal);border-color:rgba(14,116,144,.4)}
-  .chip:hover{border-color:var(--teal);color:var(--teal)}
-  .margem-wrap{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--sub);background:#fff;border:1px solid var(--border);border-radius:8px;padding:0 10px;height:32px}
-  .margem-wrap input{width:44px;height:22px;border:none;background:transparent;font-size:13px;font-family:inherit;font-weight:700;color:var(--dark);outline:none;text-align:right}
+.items-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--sub);gap:10px;padding:2rem}
+.items-empty i{font-size:36px;opacity:.25}
+.items-empty p{font-size:13px}
 
-  /* LISTA ITENS */
-  .items-area{flex:1;overflow-y:auto}
-  .item-row{
-    display:flex;align-items:center;gap:10px;padding:10px 1.25rem;
-    border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s;
-    position:relative;
-  }
-  .item-row:hover{background:#F8FAF5}
-  .item-row.selected{background:#EFF7EE}
-  .item-row.selected::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:0 3px 3px 0}
-  .item-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:#fff}
-  .item-row.selected .item-check{background:var(--green);border-color:var(--green);color:#fff}
-  .item-info{flex:1;min-width:0}
-  .item-modelo{font-size:13.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .item-detalhe{font-size:11px;color:var(--sub);margin-top:2px;display:flex;gap:8px}
-  .item-detalhe span{display:flex;align-items:center;gap:3px}
-  .cond-badge{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px}
-  .cond-badge.novo{background:#EAF3DE;color:var(--green)}
-  .cond-badge.usado{background:var(--amber-bg);color:var(--amber)}
-  .cond-badge.seminovo{background:var(--cyan-bg);color:var(--cyan-dark)}
-  .preco-forn{font-size:13px;font-weight:700;color:var(--sub);flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums}
-  .preco-venda{font-size:11px;color:var(--teal);margin-top:2px;font-weight:700;text-align:right}
+/* ABA HISTÓRICO */
+.historico-list{flex:1;overflow-y:auto}
+.hist-item{padding:12px 16px;border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s}
+.hist-item:hover{background:#FAFAF7}
+.hist-cliente{font-size:13px;font-weight:700;color:var(--dark)}
+.hist-meta{font-size:11px;color:var(--sub);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.hist-status{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:5px;flex-shrink:0}
+.hist-status.ABERTO{background:var(--cbg);color:var(--cyan)}
+.hist-status.APROVADO{background:var(--gbg);color:var(--green)}
+.hist-status.RECUSADO{background:var(--rbg);color:var(--red)}
+.hist-status.EXPIRADO{background:var(--bg);color:var(--sub)}
 
-  .items-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--sub);gap:10px}
-  .items-empty i{font-size:40px;opacity:.2}
-  .items-empty p{font-size:13.5px}
+/* DIREITO — ORÇAMENTO ATIVO */
+.right-panel{background:var(--white);display:flex;flex-direction:column;overflow:hidden}
+.orcamento-header{padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.orcamento-title{font-size:14px;font-weight:800;color:var(--dark);margin-bottom:3px}
+.orcamento-meta{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:8px}
 
-  /* ABA HISTÓRICO */
-  .historico-list{flex:1;overflow-y:auto}
+.cliente-area{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.campo-label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.campo-input{width:100%;height:36px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:#FAFAF7;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:uppercase}
+.campo-input:focus{border-color:var(--cyan);background:var(--white)}
 
-  /* DIREITO — ORÇAMENTO */
-  .right-panel{background:var(--white);display:flex;flex-direction:column}
-  .orcamento-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0}
-  .orcamento-title{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--dark);margin-bottom:4px}
-  .orcamento-meta{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:8px}
+.selecionados-area{flex:1;overflow-y:auto;padding:10px 16px}
+.sel-empty{text-align:center;padding:2rem;color:var(--sub);font-size:12.5px}
+.sel-empty i{font-size:30px;display:block;margin-bottom:8px;opacity:.25}
 
-  /* CLIENTE */
-  .cliente-area{padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0}
-  .campo-label{font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-  .campo-input{width:100%;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#FAFAF7;font-size:13.5px;font-family:inherit;outline:none;transition:border-color .15s}
-  .campo-input:focus{border-color:var(--teal)}
+.sel-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:7px}
+.sel-info{flex:1;min-width:0}
+.sel-modelo{font-size:12.5px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sel-badges{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+.sel-preco-wrap{text-align:right;flex-shrink:0}
+.sel-preco-forn{font-size:10.5px;color:var(--sub);text-decoration:line-through}
+.sel-preco-venda{font-size:14px;font-weight:800;color:var(--cyan)}
+.sel-remove{width:26px;height:26px;border-radius:7px;border:none;background:var(--rbg);color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sel-remove:hover{background:var(--red);color:#fff}
 
-  /* SELECIONADOS */
-  .selecionados-area{flex:1;overflow-y:auto;padding:.75rem 1.25rem}
-  .sel-empty{text-align:center;padding:2rem;color:var(--sub);font-size:13px}
-  .sel-empty i{font-size:32px;display:block;margin-bottom:8px;opacity:.25}
+/* AÇÕES */
+.acoes-area{padding:14px 16px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.preview-box{background:var(--bg);border-radius:10px;padding:12px;font-size:12px;line-height:1.7;color:var(--dark);max-height:140px;overflow-y:auto;font-family:inherit;white-space:pre-wrap;border:1px solid var(--border);margin-bottom:2px;text-transform:none}
+.acoes-btns{display:flex;gap:8px}
+.btn-copiar{flex:1;height:38px;border-radius:9px;border:none;background:var(--cyan);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-copiar:hover{background:var(--cd)}
+.btn-copiar.copied{background:var(--green)}
+.btn-salvar-orc{height:38px;padding:0 14px;border-radius:9px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-salvar-orc:hover{background:var(--bg)}
+.btn-pdf{height:38px;padding:0 12px;border-radius:9px;border:1.5px solid var(--coral);color:var(--coral);background:#fff;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-pdf:hover{background:var(--coral);color:#fff}
 
-  .sel-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:10px;margin-bottom:7px;transition:background .12s}
-  .sel-info{flex:1;min-width:0}
-  .sel-modelo{font-size:13px;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sel-badges{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
-  .sel-preco-wrap{text-align:right;flex-shrink:0}
-  .sel-preco-forn{font-size:11px;color:var(--sub);text-decoration:line-through}
-  .sel-preco-venda{font-family:'Lora',serif;font-size:15px;font-weight:700;color:var(--teal)}
-  .sel-remove{width:26px;height:26px;border-radius:7px;border:none;background:var(--coral-bg);color:var(--coral);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:background .12s}
-  .sel-remove:hover{background:var(--coral);color:#fff}
+.margem-alerta{font-size:11px;color:var(--coral);font-weight:700;display:none;align-items:center;gap:5px}
+.margem-alerta.show{display:flex}
 
-  /* AREA AÇOES */
-  .acoes-area{padding:1rem 1.25rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:8px}
-  .preview-box{background:var(--bg);border-radius:12px;padding:12px;font-size:12.5px;line-height:1.7;color:var(--dark);max-height:150px;overflow-y:auto;font-family:'Figtree',sans-serif;white-space:pre-wrap;border:1px solid var(--border);margin-bottom:2px}
-  .acoes-btns{display:flex;gap:8px}
-  .btn-copiar{flex:1;height:40px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
-  .btn-copiar:hover{background:#0A5A72}
-  .btn-copiar.copied{background:var(--green)}
-  .btn-salvar-orc{height:40px;padding:0 16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;color:var(--text);font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .15s}
-  .btn-salvar-orc:hover{background:var(--bg)}
-  .btn-pdf{height:40px;padding:0 14px;border-radius:10px;border:1.5px solid var(--coral);color:var(--coral);background:#fff;font-family:'Figtree',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
-  .btn-pdf:hover{background:var(--coral);color:#fff}
+/* MODAL (padrão do app) */
+.overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(0,0,0,.18);overflow:hidden}
+.mh{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mh-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--cbg);color:var(--cyan)}
+.mh-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+.mx{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+.mb{padding:16px 20px;display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto}
+.mf{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.field label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+.field .label-opt{font-weight:400;text-transform:none;font-size:9.5px}
+.field input,.field select,.field textarea{width:100%;height:38px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;text-transform:uppercase}
+.field input[type=date]{text-transform:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);background:var(--white)}
+.field textarea{height:70px;resize:none;padding:8px 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-pri{height:36px;padding:0 18px;border-radius:8px;border:none;background:var(--cyan);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-pri:hover{background:var(--cd)}
+.btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
 
-  /* ALERTA MARGEM */
-  .margem-alerta{font-size:11.5px;color:var(--coral);font-weight:700;display:flex;align-items:center;gap:5px;display:none}
-  .margem-alerta.show{display:flex}
-
-  /* MODAL SALVAR ORC */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
-  .modal-overlay.open{display:flex}
-  .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 64px rgba(0,0,0,.18)}
-  .modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-  .modal-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--dark)}
-  .modal-close{width:30px;height:30px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub)}
-  .modal-body{padding:1.5rem}
-  .field{margin-bottom:14px}.field.no-mb{margin-bottom:0}
-  label{display:block;font-size:10.5px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-  .label-opt{font-weight:400;text-transform:none;font-size:10px}
-  input[type=text],input[type=date],select,textarea{width:100%;height:42px;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#FAFAF7;color:var(--dark);font-size:13.5px;font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
-  input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,116,144,.12);background:#fff}
-  input::placeholder{color:#B5B2A8}
-  textarea{height:80px;resize:vertical;padding:10px 13px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .modal-foot{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-  .btn-modal-save{height:40px;padding:0 20px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-family:'Figtree',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px}
-  .btn-modal-save:hover{background:#0A5A72}
-  .btn-modal-cancel{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Figtree',sans-serif}
-  .btn-modal-cancel:hover{background:var(--bg)}
-
-  /* ABA HISTÓRICO */
-  .hist-item{padding:12px 1.25rem;border-bottom:1px solid #F2F0EA;cursor:pointer;transition:background .12s}
-  .hist-item:hover{background:#FAFAF7}
-  .hist-cliente{font-size:13.5px;font-weight:700;color:var(--dark)}
-  .hist-meta{font-size:11.5px;color:var(--sub);margin-top:2px;display:flex;gap:10px}
-  .hist-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px}
-  .hist-status.ABERTO{background:var(--cyan-bg);color:var(--cyan-dark)}
-  .hist-status.APROVADO{background:var(--green-bg);color:var(--green)}
-  .hist-status.RECUSADO{background:var(--coral-bg);color:var(--coral)}
-  .hist-status.EXPIRADO{background:#F0EFEA;color:var(--sub)}
-
-  .toast{position:fixed;top:1.5rem;right:1.5rem;z-index:999;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;box-shadow:0 4px 20px rgba(0,0,0,.12);transform:translateX(140%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);max-width:320px}
-  .toast.show{transform:translateX(0)}
-  .toast.success{background:#E6FAF8;color:#0F6E56;border:1px solid rgba(15,110,86,.2)}
-  .toast.error{background:var(--coral-bg);color:var(--coral-dark);border:1px solid rgba(232,96,74,.2)}
-
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  .spin{animation:spin .7s linear infinite;display:inline-block}
-  @media(max-width:900px){.main-layout{grid-template-columns:1fr}.right-panel{border-top:2px solid var(--border)}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spin{animation:spin .7s linear infinite;display:inline-block}
+@media(max-width:900px){
+  .body{overflow-y:auto}
+  .main-layout{display:block;overflow:visible}
+  .left-panel{border-right:none;border-bottom:2px solid var(--border);overflow:visible}
+  .tab-panel.active{overflow:visible}
+  .items-area{overflow:visible}
+  .right-panel{overflow:visible}
+  .selecionados-area{overflow:visible}
+}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"><i id="ti" class="ti ti-check"></i><span id="tm"></span></div>
 
 <!-- MODAL SALVAR ORÇAMENTO -->
-<div class="modal-overlay" id="modal-orc" onclick="if(event.target===this)fecharModal()">
+<div class="overlay" id="modal-orc" onclick="if(event.target===this)fecharModal()">
   <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">Salvar orçamento</div>
-      <button class="modal-close" onclick="fecharModal()"><i class="ti ti-x"></i></button>
+    <div class="mh">
+      <div class="mh-ico"><i class="ti ti-device-floppy"></i></div>
+      <div class="mh-title">Salvar orçamento</div>
+      <button class="mx" onclick="fecharModal()"><i class="ti ti-x"></i></button>
     </div>
-    <div class="modal-body">
+    <div class="mb">
       <div class="grid2">
         <div class="field">
           <label>Cliente</label>
-          <input type="text" id="m-cliente" placeholder="NOME DO CLIENTE" style="text-transform:uppercase"/>
+          <input type="text" id="m-cliente" placeholder="NOME DO CLIENTE"/>
         </div>
         <div class="field">
           <label>Contato (WhatsApp)</label>
@@ -210,121 +207,124 @@
           </select>
         </div>
       </div>
-      <div class="field no-mb">
-        <label>Observações <span class="label-opt">opcional</span></label>
-        <textarea id="m-obs" placeholder="APARELHO QUE INTERESSA, CONDIÇÃO ESPECIAL..."></textarea>
+      <div class="field">
+        <label>Observações <span class="label-opt">(opcional)</span></label>
+        <textarea id="m-obs" placeholder="Aparelho que interessa, condição especial..."></textarea>
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-modal-save" onclick="salvarOrcamento()"><i class="ti ti-device-floppy"></i> Salvar</button>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-pri" onclick="salvarOrcamento()"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
   </div>
 </div>
 
-<header class="topbar">
-  <a class="back-btn" href="dashboard.html"><i class="ti ti-arrow-left"></i></a>
-  <div class="topbar-title">Orçamentos</div>
-  <div class="tb-tabs">
-    <button class="tb-tab active" id="tab-lista" onclick="setTab('lista')"><i class="ti ti-list"></i> Lista do fornecedor</button>
-    <button class="tb-tab" id="tab-historico" onclick="setTab('historico')"><i class="ti ti-history"></i> Histórico</button>
-  </div>
-</header>
-
-<div class="main-layout">
-
-  <!-- ESQUERDO -->
-  <div class="left-panel">
-
-    <!-- ABA LISTA -->
-    <div class="tab-panel active" id="panel-lista">
-      <!-- PASTE -->
-      <div class="paste-header">
-        <div class="paste-label">Lista do fornecedor <span class="badge">COLAR AQUI</span></div>
-        <textarea class="paste-box" id="lista-raw" placeholder="Cole aqui a lista de preços do seu fornecedor (iPhones, Samsung, etc.)&#10;&#10;Exemplos de formatos aceitos:&#10;iPhone 15 Pro Max 256GB - R$ 4.500 (novo)&#10;Samsung S24 256gb usado - 2800&#10;IP15 128 black seminovo 3.200"></textarea>
-        <div class="parse-row">
-          <button class="btn-parse" onclick="parseLista()"><i class="ti ti-wand"></i> Interpretar lista</button>
-          <button class="btn-limpar" onclick="limparLista()">Limpar</button>
-          <span class="parse-info" id="parse-info"></span>
-        </div>
-      </div>
-      <!-- FILTROS -->
-      <div class="filter-bar">
-        <div class="search-mini">
-          <i class="ti ti-search"></i>
-          <input type="text" id="busca-lista" placeholder="Filtrar modelo, GB, cor..." oninput="renderLista()"/>
-        </div>
-        <button class="chip" id="chip-novo" onclick="toggleChip('novo')"><i class="ti ti-circle-check"></i> Novo</button>
-        <button class="chip" id="chip-usado" onclick="toggleChip('usado')">Usado</button>
-        <button class="chip" id="chip-seminovo" onclick="toggleChip('seminovo')">Seminovo</button>
-        <div class="margem-wrap">
-          <i class="ti ti-trending-up" style="font-size:14px"></i>
-          Margem <input type="number" id="margem-perc" value="30" min="0" max="200" step="1" oninput="renderLista()"/> %
-        </div>
-      </div>
-      <!-- ITEMS -->
-      <div class="items-area" id="items-area">
-        <div class="items-empty">
-          <i class="ti ti-clipboard-text"></i>
-          <p>Cole a lista do fornecedor acima</p>
-        </div>
-      </div>
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="fb-top">
+    <div class="seg">
+      <button class="seg-btn active" id="tab-lista" onclick="setTab('lista')"><i class="ti ti-list"></i> Lista</button>
+      <button class="seg-btn" id="tab-historico" onclick="setTab('historico')"><i class="ti ti-history"></i> Histórico</button>
     </div>
-
-    <!-- ABA HISTÓRICO -->
-    <div class="tab-panel" id="panel-historico">
-      <div class="historico-list" id="historico-list">
-        <div class="items-empty"><i class="ti ti-history"></i><p>Nenhum orçamento salvo</p></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- DIREITO — ORÇAMENTO ATIVO -->
-  <div class="right-panel">
-    <div class="orcamento-header">
-      <div class="orcamento-title">Orçamento</div>
-      <div class="orcamento-meta">
-        <span id="orc-count">0 item(s) selecionado(s)</span>
-        <span>·</span>
-        <span id="orc-date">—</span>
-      </div>
-    </div>
-
-    <div class="cliente-area">
-      <div class="campo-label">Para quem</div>
-      <input type="text" class="campo-input" id="cliente-nome" placeholder="Nome do cliente (opcional)" oninput="gerarPreview()"/>
-    </div>
-
-    <div class="selecionados-area" id="selecionados-area">
-      <div class="sel-empty"><i class="ti ti-shopping-cart"></i>Selecione itens da lista</div>
-    </div>
-
-    <div class="acoes-area">
-      <div class="margem-alerta" id="margem-alerta">
-        <i class="ti ti-alert-triangle"></i> Atenção: preço de venda abaixo do custo em algum item!
-      </div>
-      <div class="preview-box" id="preview-box" style="display:none"></div>
-      <div class="acoes-btns">
-        <button class="btn-copiar" id="btn-copiar" onclick="copiarTexto()">
-          <i class="ti ti-copy"></i> Copiar para WhatsApp
-        </button>
-        <button class="btn-salvar-orc" onclick="abrirModal()">
-          <i class="ti ti-device-floppy"></i> Salvar
-        </button>
-        <button class="btn-pdf" onclick="gerarPDF()">
-          <i class="ti ti-file-type-pdf"></i> PDF
-        </button>
-      </div>
+    <div class="fb-search"><i class="ti ti-search"></i><input type="text" id="busca-lista" placeholder="Filtrar modelo, GB, cor..." oninput="renderLista()"/></div>
+    <button class="chip" id="chip-novo" onclick="toggleChip('novo')">Novo</button>
+    <button class="chip" id="chip-usado" onclick="toggleChip('usado')">Usado</button>
+    <button class="chip" id="chip-seminovo" onclick="toggleChip('seminovo')">Seminovo</button>
+    <div class="margem-wrap">
+      <i class="ti ti-trending-up" style="font-size:13px"></i>
+      Margem <input type="number" id="margem-perc" value="30" min="0" max="200" step="1" oninput="renderLista()"/> %
     </div>
   </div>
+</div>
 
+<!-- BODY -->
+<div class="body" id="body-main">
+  <div class="main-layout">
+
+    <!-- ESQUERDO -->
+    <div class="left-panel">
+
+      <!-- ABA LISTA -->
+      <div class="tab-panel active" id="panel-lista">
+        <!-- PASTE (colapsável) -->
+        <div class="paste-header">
+          <div class="paste-toggle open" id="paste-toggle" onclick="togglePaste()">
+            <div class="paste-label"><i class="ti ti-clipboard-text"></i> Colar lista do fornecedor <span class="badge" id="paste-badge">COLE AQUI</span></div>
+            <i class="ti ti-chevron-down chev"></i>
+          </div>
+          <div class="paste-body open" id="paste-body">
+            <textarea class="paste-box" id="lista-raw" placeholder="Cole aqui a lista de preços do seu fornecedor (iPhones, Samsung, etc.)&#10;&#10;Exemplos de formatos aceitos:&#10;iPhone 15 Pro Max 256GB - R$ 4.500 (novo)&#10;Samsung S24 256gb usado - 2800&#10;IP15 128 black seminovo 3.200"></textarea>
+            <div class="parse-row">
+              <button class="btn-parse" onclick="parseLista()"><i class="ti ti-wand"></i> Interpretar lista</button>
+              <button class="btn-limpar" onclick="limparLista()">Limpar</button>
+              <span class="parse-info" id="parse-info"></span>
+            </div>
+          </div>
+        </div>
+        <!-- ITEMS -->
+        <div class="items-area" id="items-area">
+          <div class="items-empty">
+            <i class="ti ti-clipboard-text"></i>
+            <p>Cole a lista do fornecedor acima</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA HISTÓRICO -->
+      <div class="tab-panel" id="panel-historico">
+        <div class="historico-list" id="historico-list">
+          <div class="items-empty"><i class="ti ti-history"></i><p>Nenhum orçamento salvo</p></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DIREITO — ORÇAMENTO ATIVO -->
+    <div class="right-panel">
+      <div class="orcamento-header">
+        <div class="orcamento-title">Orçamento</div>
+        <div class="orcamento-meta">
+          <span id="orc-count">0 item(s) selecionado(s)</span>
+          <span>·</span>
+          <span id="orc-date">—</span>
+        </div>
+      </div>
+
+      <div class="cliente-area">
+        <div class="campo-label">Para quem</div>
+        <input type="text" class="campo-input" id="cliente-nome" placeholder="Nome do cliente (opcional)" oninput="gerarPreview()"/>
+      </div>
+
+      <div class="selecionados-area" id="selecionados-area">
+        <div class="sel-empty"><i class="ti ti-shopping-cart"></i>Selecione itens da lista</div>
+      </div>
+
+      <div class="acoes-area">
+        <div class="margem-alerta" id="margem-alerta">
+          <i class="ti ti-alert-triangle"></i> Atenção: preço de venda abaixo do custo em algum item!
+        </div>
+        <div class="preview-box" id="preview-box" style="display:none"></div>
+        <div class="acoes-btns">
+          <button class="btn-copiar" id="btn-copiar" onclick="copiarTexto()">
+            <i class="ti ti-copy"></i> Copiar para WhatsApp
+          </button>
+          <button class="btn-salvar-orc" onclick="abrirModal()">
+            <i class="ti ti-device-floppy"></i> Salvar
+          </button>
+          <button class="btn-pdf" onclick="gerarPDF()">
+            <i class="ti ti-file-type-pdf"></i> PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const SUPA_URL='https://clctxzynpfjilxmyblpg.supabase.co';
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
-const db=supabase.createClient(SUPA_URL,SUPA_KEY);
+const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
+const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
 const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
 const fmtCompact=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
 const hoje=new Date().toLocaleDateString('pt-BR');
@@ -350,6 +350,13 @@ function setTab(tab){
     document.getElementById('panel-'+t).classList.toggle('active',t===tab);
   });
   if(tab==='historico') carregarHistorico();
+}
+
+// ── COLAR LISTA (colapsável) ────────────────────────────────────
+function togglePaste(force){
+  const open=force!==undefined?force:!document.getElementById('paste-body').classList.contains('open');
+  document.getElementById('paste-body').classList.toggle('open',open);
+  document.getElementById('paste-toggle').classList.toggle('open',open);
 }
 
 // ── PARSER ────────────────────────────────────────────────────
@@ -437,8 +444,9 @@ function parseLista(){
   });
 
   document.getElementById('parse-info').textContent=ITENS_PARSED.length+' item(ns) identificados';
+  document.getElementById('paste-badge').textContent=ITENS_PARSED.length+' ITENS';
   if(ITENS_PARSED.length===0) toast('Nenhum item reconhecido. Verifique o formato da lista.','error');
-  else toast(ITENS_PARSED.length+' itens interpretados!','success');
+  else{toast(ITENS_PARSED.length+' itens interpretados!','success');togglePaste(false);}
   renderLista();
 }
 
@@ -446,6 +454,8 @@ function limparLista(){
   document.getElementById('lista-raw').value='';
   ITENS_PARSED=[];SELECIONADOS.clear();
   document.getElementById('parse-info').textContent='';
+  document.getElementById('paste-badge').textContent='COLE AQUI';
+  togglePaste(true);
   renderLista();renderSelecionados();
 }
 
