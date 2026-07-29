@@ -34,20 +34,19 @@
   .filter-btn:hover{border-color:var(--cyan);color:var(--cd)}
   .filter-btn.active{background:var(--cbg);color:var(--cd);border-color:var(--cyan)}
 
-  .search-wrap{margin-left:auto;position:relative;min-width:200px;flex:1;max-width:280px}
+  .search-wrap{position:relative;min-width:200px;max-width:280px}
   .search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px}
   .search-wrap input{
     width:100%;height:34px;padding:0 12px 0 34px;border-radius:8px;
     border:1.5px solid var(--border);background:#FAFAF7;font-size:12.5px;font-family:inherit;outline:none;
-    transition:border-color .15s;text-transform:uppercase
+    transition:border-color .15s;
   }
-  .search-wrap input::placeholder{text-transform:none}
   .search-wrap input:focus{border-color:var(--cyan);background:var(--white)}
 
   /* BODY */
   .body{flex:1;overflow-y:auto}
 
-  .table-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:1rem}
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
   table{width:100%;border-collapse:collapse}
   thead th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
     color:var(--sub);padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAF7}
@@ -73,11 +72,28 @@
 
   .actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
   .act-btn{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .15s}
+    display:flex;align-items:center;justify-content:center;font-size:13px;transition:background .15s;flex-shrink:0}
   .act-edit{background:var(--cbg);color:var(--cd)}
   .act-edit:hover{background:var(--cyan);color:#fff}
+  .act-wpp{background:var(--gbg);color:var(--green)}
+  .act-wpp:hover{background:var(--green);color:#fff}
+  .act-wpp:disabled{opacity:.35;cursor:not-allowed}
+  .act-wpp:disabled:hover{background:var(--gbg);color:var(--green)}
+  .act-more{background:var(--bg);color:var(--sub)}
+  .act-more:hover{background:#E2DFD6;color:var(--dark)}
   .act-del{background:var(--cbg2);color:var(--coral)}
   .act-del:hover{background:var(--coral);color:#fff}
+
+  /* DROPDOWN "MAIS AÇÕES" (compartilhado, reposicionado por linha) */
+  .more-drop{display:none;position:fixed;background:var(--white);border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 12px 36px rgba(0,0,0,.14);padding:6px;z-index:9999;min-width:200px}
+  .more-drop.open{display:block}
+  .more-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:12.5px;font-weight:600;
+    color:var(--text);cursor:pointer;text-decoration:none}
+  .more-item:hover{background:var(--bg)}
+  .more-item i{font-size:14px;width:16px;text-align:center;color:var(--sub)}
+  .more-item.danger{color:var(--coral)}
+  .more-item.danger i{color:var(--coral)}
 
   .empty-row td{padding:3.5rem 1rem;text-align:center;color:var(--sub)}
   .empty-row i{font-size:32px;display:block;margin-bottom:10px;opacity:.4}
@@ -86,11 +102,44 @@
   .table-footer{display:flex;align-items:center;justify-content:space-between;
     padding:10px 16px;border-top:1px solid var(--border);font-size:11.5px;color:var(--sub)}
 
+  /* MODAL HISTÓRICO */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(28,28,26,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem}
+  .overlay.open{display:flex}
+  .modal{background:var(--white);border-radius:16px;width:100%;max-width:440px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.18)}
+  .mh{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .mh-ico{width:32px;height:32px;border-radius:8px;background:var(--cbg);color:var(--cd);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .mh-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
+  .mx{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
+  .mb{padding:10px 12px;overflow-y:auto}
+  .hist-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px}
+  .hist-row:hover{background:#FAFAF7}
+  .hist-info{flex:1;min-width:0}
+  .hist-num{font-size:12.5px;font-weight:700;color:var(--dark)}
+  .hist-meta{font-size:10.5px;color:var(--sub);margin-top:1px}
+  .hist-val{font-size:13px;font-weight:800;color:var(--cd);flex-shrink:0}
+  .hist-empty{text-align:center;padding:2.5rem 1rem;color:var(--sub);font-size:12.5px}
+  .hist-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.35}
+
   @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  @media(max-width:760px){.search-wrap{max-width:none;width:100%;order:10}}
+  @media(max-width:760px){.search-wrap{max-width:none;width:100%}}
 </style>
 </head>
 <body>
+
+<!-- MODAL HISTÓRICO -->
+<div class="overlay" id="ov-hist" onclick="if(event.target===this)fecharHist()">
+  <div class="modal">
+    <div class="mh">
+      <div class="mh-ico" id="hist-ico"><i class="ti ti-history"></i></div>
+      <div class="mh-title" id="hist-title">Histórico</div>
+      <button class="mx" onclick="fecharHist()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb" id="hist-body"><div class="hist-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i></div></div>
+  </div>
+</div>
+
+<!-- DROPDOWN "MAIS AÇÕES" (compartilhado entre linhas) -->
+<div class="more-drop" id="more-drop"></div>
 
 <div class="filter-bar">
   <div class="fb-top">
@@ -105,13 +154,13 @@
 
     <div class="search-wrap">
       <i class="ti ti-search"></i>
-      <input type="text" id="search-input" placeholder="Buscar por nome, CPF ou CNPJ" oninput="filterTable()"/>
+      <input type="text" id="search-input" class="upper" placeholder="Buscar por nome, CPF ou CNPJ" oninput="filterTable()"/>
     </div>
   </div>
 </div>
 
 <div class="body" id="body-main">
-  <main class="content">
+  <main class="content" style="padding-top:.75rem">
     <div class="table-card">
       <table>
         <thead>
@@ -120,7 +169,7 @@
             <th>Telefone</th>
             <th>Cidade / UF</th>
             <th class="center">Papéis</th>
-            <th style="width:90px;text-align:right">Ações</th>
+            <th style="width:130px;text-align:right">Ações</th>
           </tr>
         </thead>
         <tbody id="pessoas-tbody">
@@ -173,7 +222,10 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
       document.getElementById('table-count').textContent='0 registros';
       return;
     }
-    tb.innerHTML=lista.map(p=>`
+    tb.innerHTML=lista.map(p=>{
+      const fone=(p.celular||p.telefone||'').replace(/\D/g,'');
+      const wppHref=fone?`https://wa.me/55${fone}`:null;
+      return `
       <tr>
         <td>
           <div class="td-nome">${p.nome}${p.nome_fantasia?` <span style="font-weight:400;color:var(--sub);font-size:12px">(${p.nome_fantasia})</span>`:''}</div>
@@ -185,10 +237,12 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
         <td>
           <div class="actions">
             <button class="act-btn act-edit" onclick="window.location.href='pessoa-novo.html?id=${p.id}'" title="Editar"><i class="ti ti-pencil"></i></button>
-            <button class="act-btn act-del" onclick="excluir('${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
+            <button class="act-btn act-wpp" ${wppHref?'':'disabled'} onclick="${wppHref?`window.open('${wppHref}','_blank')`:''}" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i></button>
+            <button class="act-btn act-more" onclick="abrirMais(event,'${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Mais ações"><i class="ti ti-dots"></i></button>
           </div>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
     document.getElementById('table-count').textContent=lista.length+(lista.length===1?' registro':' registros');
   }
 
@@ -202,7 +256,81 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     renderTable(lista);
   }
 
+  // ── DROPDOWN "MAIS AÇÕES" ──────────────────────────────────
+  let _MAIS_ATUAL=null;
+  function abrirMais(ev,id,nome){
+    ev.stopPropagation();
+    _MAIS_ATUAL={id,nome};
+    const drop=document.getElementById('more-drop');
+    const jaAberto=drop.classList.contains('open')&&drop.dataset.id===id;
+    if(jaAberto){drop.classList.remove('open');return;}
+    drop.dataset.id=id;
+    drop.innerHTML=`
+      <div class="more-item" onclick="verHistorico('os','${id}','${nome.replace(/'/g,"\\'")}')"><i class="ti ti-tool"></i> Ver histórico de OS</div>
+      <div class="more-item" onclick="verHistorico('vendas','${id}','${nome.replace(/'/g,"\\'")}')"><i class="ti ti-shopping-cart"></i> Ver histórico de compras</div>
+      <div style="height:1px;background:var(--border);margin:4px 2px"></div>
+      <div class="more-item danger" onclick="excluir('${id}','${nome.replace(/'/g,"\\'")}')"><i class="ti ti-trash"></i> Excluir pessoa</div>
+    `;
+    const r=ev.currentTarget.getBoundingClientRect();
+    drop.style.top=(r.bottom+6)+'px';
+    drop.style.right=(window.innerWidth-r.right)+'px';
+    drop.classList.add('open');
+  }
+  document.addEventListener('click',()=>document.getElementById('more-drop').classList.remove('open'));
+
+  // ── HISTÓRICO (OS / COMPRAS) ───────────────────────────────
+  // OBS: assume que 'ordens_servico' tem coluna pessoa_id — se o erro aparecer, me avisa que ajusto.
+  async function verHistorico(tipo,pessoaId,nome){
+    document.getElementById('more-drop').classList.remove('open');
+    const isOS=tipo==='os';
+    document.getElementById('hist-title').textContent=(isOS?'Histórico de OS — ':'Histórico de compras — ')+nome;
+    document.getElementById('hist-ico').innerHTML=`<i class="ti ${isOS?'ti-tool':'ti-shopping-cart'}"></i>`;
+    document.getElementById('hist-body').innerHTML='<div class="hist-empty"><i class="ti ti-loader-2" style="animation:spin .8s linear infinite"></i></div>';
+    document.getElementById('ov-hist').classList.add('open');
+
+    try{
+      if(isOS){
+        const{data,error}=await db.from('ordens_servico').select('id,numero,status,criado_em').eq('pessoa_id',pessoaId).order('criado_em',{ascending:false}).limit(30);
+        if(error)throw error;
+        renderHist(data,'os');
+      }else{
+        const{data,error}=await db.from('vendas').select('id,numero,status,total,criado_em').eq('pessoa_id',pessoaId).order('criado_em',{ascending:false}).limit(30);
+        if(error)throw error;
+        renderHist(data,'vendas');
+      }
+    }catch(e){
+      document.getElementById('hist-body').innerHTML=`<div class="hist-empty"><i class="ti ti-alert-circle"></i>Erro ao carregar: ${e.message}</div>`;
+    }
+  }
+  function renderHist(lista,tipo){
+    if(!lista||!lista.length){
+      document.getElementById('hist-body').innerHTML=`<div class="hist-empty"><i class="ti ti-inbox"></i>Nenhum registro encontrado</div>`;
+      return;
+    }
+    const href=tipo==='os'?'os-nova.html?id=':'venda-nova.html?id=';
+    document.getElementById('hist-body').innerHTML=lista.map(r=>`
+      <a class="hist-row" href="${href}${r.id}" style="text-decoration:none;color:inherit">
+        <div class="hist-info">
+          <div class="hist-num">#${String(r.numero||'').padStart(4,'0')}</div>
+          <div class="hist-meta">${new Date(r.criado_em).toLocaleDateString('pt-BR')} · ${r.status||''}</div>
+        </div>
+        ${tipo==='vendas'?`<div class="hist-val">${fmtV(r.total)}</div>`:''}
+      </a>`).join('');
+  }
+  function fecharHist(){document.getElementById('ov-hist').classList.remove('open');}
+  const fmtV=v=>'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+  // ── MAIÚSCULO REAL (não só visual) ─────────────────────────
+  document.addEventListener('input',e=>{
+    if(e.target.classList&&e.target.classList.contains('upper')){
+      const pos=e.target.selectionStart,posEnd=e.target.selectionEnd;
+      e.target.value=e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos,posEnd);
+    }
+  });
+
   async function excluir(id,nome){
+    document.getElementById('more-drop').classList.remove('open');
     if(!confirm('Excluir "'+nome+'"? Essa ação não pode ser desfeita.')) return;
     const{error}=await db.from('pessoas').delete().eq('id',id);
     if(error){alert('Erro: '+error.message);return;}

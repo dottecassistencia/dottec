@@ -57,7 +57,8 @@
     transition:background .12s;border-bottom:1px solid #F2F0EA;
   }
   .sr-item:last-child{border-bottom:none}
-  .sr-item:hover{background:var(--bg)}
+  .sr-item:hover,.sr-item.active{background:var(--bg)}
+  .sr-item.active{box-shadow:inset 3px 0 0 var(--cyan)}
   .sr-avatar{width:34px;height:34px;border-radius:50%;background:var(--cbg);
     display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
     color:var(--cd);flex-shrink:0}
@@ -74,7 +75,17 @@
 
   /* BODY */
   .body{flex:1;overflow-y:auto}
-  .content{max-width:980px;margin:0 auto;padding:1.5rem 1.5rem 3rem}
+  .content{max-width:980px;margin:0 auto;padding:1.25rem 1.5rem 5.5rem}
+
+  /* BARRA FLUTUANTE (padrão vendas) */
+  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:500;background:var(--dark);color:#fff;
+    padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+  .bb-info{font-size:12px;color:rgba(255,255,255,.55);font-weight:600}
+  .bb-btns{display:flex;gap:8px;margin-left:auto}
+  .bottom-bar .btn-secondary{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18)}
+  .bottom-bar .btn-secondary:hover{background:rgba(255,255,255,.18)}
+  @media(max-width:600px){.bb-info{display:none}}
 
   /* PAPÉIS */
   .papeis-section{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:16px}
@@ -125,6 +136,8 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .grid-cep{display:grid;grid-template-columns:140px 1fr 110px;gap:14px}
+  .grid-end2{display:grid;grid-template-columns:1fr 1fr 1fr 90px;gap:14px}
   .field{margin-bottom:14px}
   .field.no-mb{margin-bottom:0}
 
@@ -151,14 +164,18 @@
   .cnpj-only{display:none}
   .cnpj-only.show{display:block}
 
-  /* CEP */
-  .cep-wrap{display:flex;gap:8px}
-  .cep-wrap input{flex:1}
-  .cep-btn{height:38px;padding:0 13px;border-radius:8px;border:1px solid var(--border);
-    background:var(--white);color:var(--sub);font-size:12.5px;font-weight:600;cursor:pointer;
-    display:flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap;
-    transition:background .15s,border-color .15s,color .15s}
-  .cep-btn:hover{background:var(--cbg);border-color:var(--cyan);color:var(--cd)}
+  /* CEP com busca embutida */
+  .cep-field{position:relative}
+  .cep-field input{padding-right:38px}
+  .cep-icon-btn{position:absolute;right:4px;top:4px;bottom:4px;width:30px;border-radius:6px;border:none;
+    background:var(--cbg);color:var(--cd);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:13px;transition:background .15s}
+  .cep-icon-btn:hover{background:var(--cyan);color:#fff}
+
+  @media(max-width:760px){
+    .grid-cep{grid-template-columns:1fr}
+    .grid-end2{grid-template-columns:1fr 1fr}
+  }
 
   /* TOAST */
   .toast{position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;padding:10px 16px;border-radius:10px;
@@ -190,12 +207,6 @@
     <div>
       <div class="crumb-title" id="page-title">Nova pessoa</div>
       <div class="crumb-sub">Preencha os dados e selecione os papéis</div>
-    </div>
-    <div class="crumb-right">
-      <a class="btn btn-secondary" href="pessoas.html">Cancelar</a>
-      <button class="btn btn-primary" id="btn-save" onclick="salvar()">
-        <i class="ti ti-device-floppy"></i> Salvar
-      </button>
     </div>
   </div>
 </div>
@@ -259,7 +270,7 @@
     </div>
     <div class="panel-body">
 
-      <div class="grid2" style="margin-bottom:14px">
+      <div class="grid3" style="margin-bottom:14px">
         <div class="field no-mb">
           <label id="doc-label">CPF / CNPJ</label>
           <input type="text" id="documento" placeholder="Digite o CPF ou CNPJ" oninput="onDocInput(this)" maxlength="18"/>
@@ -267,31 +278,34 @@
             <i class="ti ti-check-circle"></i><span id="doc-tipo-label">—</span>
           </div>
         </div>
-        <div class="field no-mb cnpj-only" id="nome-fantasia-wrap">
-          <label>Nome fantasia <span class="label-opt">opcional</span></label>
-          <input type="text" id="nome_fantasia" class="upper" placeholder="NOME FANTASIA"/>
+        <div class="field no-mb">
+          <label id="nome-label">Nome completo</label>
+          <input type="text" id="nome" class="upper" placeholder="NOME COMPLETO"/>
+        </div>
+        <div class="field no-mb">
+          <label>Data de nascimento <span class="label-opt">opcional</span></label>
+          <input type="date" id="data_nascimento"/>
         </div>
       </div>
 
-      <div class="field">
-        <label id="nome-label">Nome completo</label>
-        <input type="text" id="nome" class="upper" placeholder="NOME COMPLETO"/>
+      <div class="field cnpj-only" id="nome-fantasia-wrap">
+        <label>Nome fantasia <span class="label-opt">opcional</span></label>
+        <input type="text" id="nome_fantasia" class="upper" placeholder="NOME FANTASIA"/>
       </div>
 
-      <div class="grid2" style="margin-bottom:14px">
+      <div class="grid3">
+        <div class="field no-mb">
+          <label>Celular / WhatsApp</label>
+          <input type="text" id="celular" placeholder="(47) 99999-0000" oninput="maskTelCel(this)"/>
+        </div>
         <div class="field no-mb">
           <label>Telefone <span class="label-opt">fixo</span></label>
           <input type="text" id="telefone" placeholder="(47) 3333-0000" oninput="maskTelFixo(this)"/>
         </div>
         <div class="field no-mb">
-          <label>Celular / WhatsApp</label>
-          <input type="text" id="celular" placeholder="(47) 99999-0000" oninput="maskTelCel(this)"/>
+          <label>E-mail <span class="label-opt">recibos e OS</span></label>
+          <input type="email" id="email" placeholder="exemplo@email.com" style="text-transform:none"/>
         </div>
-      </div>
-
-      <div class="field no-mb">
-        <label>E-mail <span class="label-opt">para envio de recibos e OS</span></label>
-        <input type="email" id="email" placeholder="exemplo@email.com" style="text-transform:none"/>
       </div>
 
     </div>
@@ -344,15 +358,15 @@
       </div>
     </div>
     <div class="panel-body">
-      <div class="field">
-        <label>CEP</label>
-        <div class="cep-wrap">
-          <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)"/>
-          <button type="button" class="cep-btn" onclick="buscarCep()"><i class="ti ti-search"></i> Buscar CEP</button>
+      <div class="grid-cep" style="margin-bottom:14px">
+        <div class="field no-mb">
+          <label>CEP</label>
+          <div class="cep-field">
+            <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)"/>
+            <button type="button" class="cep-icon-btn" onclick="buscarCep()" title="Buscar CEP"><i class="ti ti-search"></i></button>
+          </div>
         </div>
-      </div>
-      <div class="grid3" style="margin-bottom:14px">
-        <div class="field no-mb" style="grid-column:span 2">
+        <div class="field no-mb">
           <label>Logradouro</label>
           <input type="text" id="logradouro" class="upper" placeholder="RUA, AVENIDA, ETC"/>
         </div>
@@ -361,7 +375,7 @@
           <input type="text" id="numero" class="upper" placeholder="123"/>
         </div>
       </div>
-      <div class="grid3" style="margin-bottom:14px">
+      <div class="grid-end2">
         <div class="field no-mb">
           <label>Complemento <span class="label-opt">opcional</span></label>
           <input type="text" id="complemento" class="upper" placeholder="APTO, SALA..."/>
@@ -374,8 +388,6 @@
           <label>Cidade</label>
           <input type="text" id="cidade" class="upper" placeholder="CIDADE"/>
         </div>
-      </div>
-      <div style="max-width:120px">
         <div class="field no-mb">
           <label>UF</label>
           <select id="estado">
@@ -410,6 +422,17 @@
 </main>
 </div>
 
+<!-- BARRA FLUTUANTE (padrão vendas) -->
+<div class="bottom-bar">
+  <div class="bb-info" id="bb-info">Preencha os dados e salve</div>
+  <div class="bb-btns">
+    <a class="btn btn-secondary" href="pessoas.html"><i class="ti ti-arrow-left"></i> Cancelar</a>
+    <button class="btn btn-primary" id="btn-save" onclick="salvar()">
+      <i class="ti ti-device-floppy"></i> Salvar
+    </button>
+  </div>
+</div>
+
 <script>
   const SB_URL='https://clctxzynpfjilxmyblpg.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsY3R4enlucGZqaWx4bXlibHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNDMsImV4cCI6MjA5NTM0NzI0M30.YBGIwVFpE52KZKpOjMMMh1WCZbzDLM_adwGxxXhkIL0';
@@ -419,6 +442,15 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
   const EDIT_ID=params.get('id');
   let TIPO_DOC='CPF';
   let PAPEIS={cliente:false,fornecedor:false,transportadora:false};
+
+  // ── MAIÚSCULO REAL (não só visual) ─────────────────────────
+  document.addEventListener('input',e=>{
+    if(e.target.classList&&e.target.classList.contains('upper')){
+      const pos=e.target.selectionStart,posEnd=e.target.selectionEnd;
+      e.target.value=e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos,posEnd);
+    }
+  });
 
   // ── TOAST ─────────────────────────────────────────────────
   function toast(msg,type='success'){
@@ -525,10 +557,11 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
   }
 
   // ── BUSCA RÁPIDA ──────────────────────────────────────────
-  let buscaTimer;
+  let buscaTimer,_srIdx=-1,_srItems=[];
   async function buscaRapida(){
     const q=document.getElementById('busca-rapida').value.trim();
     const res=document.getElementById('search-results');
+    _srIdx=-1;
     if(q.length<2){res.classList.remove('open');return;}
 
     clearTimeout(buscaTimer);
@@ -542,6 +575,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
       if(!data||data.length===0){
         res.innerHTML='<div class="sr-empty">Nenhuma pessoa encontrada para "'+q+'"</div>';
         res.classList.add('open');
+        _srItems=[];
         return;
       }
 
@@ -566,8 +600,31 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
           <i class="ti ti-chevron-right sr-arrow"></i>
         </div>`).join('');
       res.classList.add('open');
+      _srItems=Array.from(res.querySelectorAll('.sr-item'));
     },350);
   }
+
+  // ── NAVEGAÇÃO POR TECLADO (↑ ↓ Enter Esc) ──────────────────
+  document.getElementById('busca-rapida').addEventListener('keydown',e=>{
+    const res=document.getElementById('search-results');
+    if(!res.classList.contains('open')||!_srItems.length)return;
+    if(e.key==='ArrowDown'){
+      e.preventDefault();
+      _srIdx=Math.min(_srIdx+1,_srItems.length-1);
+      _srItems.forEach((it,i)=>it.classList.toggle('active',i===_srIdx));
+      _srItems[_srIdx].scrollIntoView({block:'nearest'});
+    }else if(e.key==='ArrowUp'){
+      e.preventDefault();
+      _srIdx=Math.max(_srIdx-1,0);
+      _srItems.forEach((it,i)=>it.classList.toggle('active',i===_srIdx));
+      _srItems[_srIdx].scrollIntoView({block:'nearest'});
+    }else if(e.key==='Enter'){
+      e.preventDefault();
+      if(_srIdx>=0&&_srItems[_srIdx])_srItems[_srIdx].click();
+    }else if(e.key==='Escape'){
+      res.classList.remove('open');
+    }
+  });
 
   document.addEventListener('click',e=>{
     if(!e.target.closest('.search-bar-inner'))
@@ -590,6 +647,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
 
     document.getElementById('nome').value=p.nome||'';
     document.getElementById('nome_fantasia').value=p.nome_fantasia||'';
+    document.getElementById('data_nascimento').value=p.data_nascimento||'';
     document.getElementById('telefone').value=p.telefone||'';
     document.getElementById('celular').value=p.celular||'';
     document.getElementById('email').value=p.email||'';
@@ -635,6 +693,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
         documento:doc,
         nome,
         nome_fantasia:document.getElementById('nome_fantasia').value.trim()||null,
+        data_nascimento:document.getElementById('data_nascimento').value||null,
         telefone:document.getElementById('telefone').value.replace(/\D/g,'')||null,
         celular:document.getElementById('celular').value.replace(/\D/g,'')||null,
         email:document.getElementById('email').value.trim().toLowerCase()||null,
