@@ -521,100 +521,185 @@ function imprimirReforco(mov){
 async function abrirResumoSessao(sessaoId){
   if(!sessaoId)return;
   document.getElementById('ov-resumo').classList.add('open');
-  document.getElementById('res-body').innerHTML='<div style="text-align:center;padding:1rem;color:var(--sub)"><i class="ti ti-loader-2"></i> Carregando...</div>';
+  document.getElementById('res-body').innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--sub)"><i class="ti ti-loader-2"></i> Carregando...</div>';
   const sessao=_SESSOES.find(s=>s.id===sessaoId);
   document.getElementById('res-title').textContent='Resumo — '+fmtDtCurto(sessao?.data_abertura||'');
-  const{data:movs}=await db.from('caixa_movimentos').select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
-  const lista=movs||[];
-  _MOVS_CACHE[sessaoId]=lista;
 
-  // separa por tipo
-  const entradas=lista.filter(m=>m.tipo==='ENTRADA');
-  const saidas=lista.filter(m=>m.tipo==='SAIDA');
-  const reforcos=lista.filter(m=>m.tipo==='REFORCO');
-  const sangrias=lista.filter(m=>m.categoria==='SANGRIA');
-  const totalEnt=entradas.reduce((s,m)=>s+Number(m.valor),0);
-  const totalSai=saidas.reduce((s,m)=>s+Number(m.valor),0);
-  const totalRef=reforcos.reduce((s,m)=>s+Number(m.valor),0);
-  const totalSan=sangrias.reduce((s,m)=>s+Number(m.valor),0);
+  // datas da sessão para filtrar
+  const dtAb=sessao?.data_abertura?new Date(sessao.data_abertura):new Date();
+  const dtFch=sessao?.data_fechamento?new Date(sessao.data_fechamento):new Date();
+  const diaAb=dtAb.toISOString().slice(0,10);
+  const diaFch=dtFch.toISOString().slice(0,10);
 
-  // saldo real = dinheiro físico
-  const entDinheiro=lista.filter(m=>(m.forma_pagamento||'').toUpperCase()==='DINHEIRO'&&m.valor>0);
-  const saiDinheiro=lista.filter(m=>(m.forma_pagamento||'').toUpperCase()==='DINHEIRO'&&m.valor<0);
-  const totalDinhEnt=entDinheiro.reduce((s,m)=>s+Number(m.valor),0);
-  const totalDinhSai=saiDinheiro.reduce((s,m)=>s+Number(m.valor),0);
-  const saldoReal=Number(sessao?.saldo_inicial||0)+totalDinhEnt+totalDinhSai;
+  // 1. Movimentos diretos do caixa (reforço, sangria, entradas lançadas)
+  const{data:movs}=await db.from('caixa_movimentos')
+    .select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
+  _MOVS_CACHE[sessaoId]=movs||[];
 
-  // por categoria e forma
-  const porCat={};
-  lista.forEach(m=>{
-    const cat=m.categoria||m.tipo;
-    const forma=m.forma_pagamento||'—';
-    if(!porCat[cat])porCat[cat]={};
-    if(!porCat[cat][forma])porCat[cat][forma]={recebido:0,pago:0};
-    if(m.valor>=0)porCat[cat][forma].recebido+=Number(m.valor);
-    else porCat[cat][forma].pago+=Number(m.valor);
+  // 2. Pagamentos de vendas do período (PIX, cartão, dinheiro...)
+  const{data:vendas}=await db.from('vendas')
+    .select('id,numero,nome_cliente,total,status')
+    .in('status',['CONCLUIDA','AGUARDANDO RETIRADA'])
+    .gte('criado_em',dtAb.toISOString())
+    .lte('criado_em',dtFch.toISOString());
+  const vendaIds=(vendas||[]).map(v=>v.id);
+  let pagVendas=[];
+  if(vendaIds.length){
+    const{data:pags}=await db.from('pagamentos_venda')
+      .select('*').in('venda_id',vendaIds);
+    pagVendas=pags||[];
+  }
+
+  // 3. Contas a receber pagas no período (OS, etc)
+  const{data:contasRec}=await db.from('contas_receber')
+    .select('*').eq('status','PAGO')
+    .gte('criado_em',dtAb.toISOString())
+    .lte('criado_em',dtFch.toISOString());
+
+  // 4. Contas a pagar pagas no período
+  const{data:contasPag}=await db.from('contas')
+    .select('*').eq('tipo','PAGAR').eq('status','PAGO')
+    .gte('data_pagamento',diaAb)
+    .lte('data_pagamento',diaFch);
+
+  // ── AGRUPA ──────────────────────────────────────────────────────────
+
+  // Vendas por forma de pagamento
+  const vendasPorForma={};
+  pagVendas.forEach(p=>{
+    const f=p.forma_pagamento_nome||'OUTROS';
+    if(!vendasPorForma[f])vendasPorForma[f]={recebido:0,aprazo:0};
+    if(p.movimenta_caixa)vendasPorForma[f].recebido+=Number(p.valor||0);
+    else vendasPorForma[f].aprazo+=Number(p.valor||0);
   });
 
-  // formas consolidadas
-  const formasConj={};
-  lista.forEach(m=>{
-    const f=m.forma_pagamento||'—';
-    if(!formasConj[f])formasConj[f]={rec:0,pag:0};
-    if(m.valor>=0)formasConj[f].rec+=Number(m.valor);
-    else formasConj[f].pag+=Number(m.valor);
+  // Contas a receber (OS) por forma
+  const recPorForma={};
+  (contasRec||[]).forEach(c=>{
+    const f=c.forma_pagamento||'OUTROS';
+    if(!recPorForma[f])recPorForma[f]=0;
+    recPorForma[f]+=Number(c.valor||0);
   });
 
-  let html='';
-  html+='<div class="res-info">'
-    +'<div><strong>Abertura:</strong> '+fmtDt(sessao?.data_abertura)+'</div>'
-    +(sessao?.data_fechamento?'<div><strong>Fechamento:</strong> '+fmtDt(sessao.data_fechamento)+'</div>':'')
+  // Contas a pagar por forma
+  const pagPorForma={};
+  (contasPag||[]).forEach(c=>{
+    const f=c.forma_pagamento||'OUTROS';
+    if(!pagPorForma[f])pagPorForma[f]=0;
+    pagPorForma[f]+=Number(c.valor_pago||c.valor||0);
+  });
+
+  // Movimentos diretos por forma (reforço, sangria)
+  const movsPorForma={};
+  (movs||[]).filter(m=>m.tipo==='REFORCO'||m.tipo==='SAIDA').forEach(m=>{
+    const f=m.forma_pagamento||'DINHEIRO';
+    if(!movsPorForma[f])movsPorForma[f]=0;
+    movsPorForma[f]+=Number(m.valor||0);
+  });
+
+  // Totais gerais
+  const totalVendasRec=pagVendas.filter(p=>p.movimenta_caixa).reduce((s,p)=>s+Number(p.valor||0),0);
+  const totalVendasDig=pagVendas.filter(p=>!p.movimenta_caixa).reduce((s,p)=>s+Number(p.valor||0),0);
+  const totalContasRec=(contasRec||[]).reduce((s,c)=>s+Number(c.valor||0),0);
+  const totalContasPag=(contasPag||[]).reduce((s,c)=>s+Number(c.valor_pago||c.valor||0),0);
+  const totalReforco=(movs||[]).filter(m=>m.tipo==='REFORCO').reduce((s,m)=>s+Number(m.valor||0),0);
+  const totalSangria=(movs||[]).filter(m=>m.tipo==='SAIDA').reduce((s,m)=>s+Number(m.valor||0),0);
+
+  // Saldo físico real = saldo_inicial + dinheiro recebido - sangrias + reforços
+  const dinheiroRecebido=Object.entries(vendasPorForma)
+    .filter(([f])=>f.toUpperCase()==='DINHEIRO')
+    .reduce((s,[,v])=>s+v.recebido,0);
+  const saldoFisico=Number(sessao?.saldo_inicial||0)+dinheiroRecebido+totalReforco+totalSangria;
+
+  // ── MONTA HTML ───────────────────────────────────────────────────────
+  let h='';
+
+  // Info da sessão
+  h+='<div class="res-info">'
+    +'<div style="display:flex;justify-content:space-between"><span><strong>Abertura:</strong> '+fmtDt(sessao?.data_abertura)+'</span>'
+    +(sessao?.data_fechamento?'<span><strong>Fechamento:</strong> '+fmtDt(sessao.data_fechamento)+'</span>':'<span style="color:var(--green);font-weight:700">EM ABERTO</span>')+'</div>'
     +'<div><strong>Saldo inicial:</strong> '+fmtV(sessao?.saldo_inicial)+'</div>'
     +(sessao?.observacoes?'<div><strong>Obs:</strong> '+sessao.observacoes+'</div>':'')
   +'</div>';
 
-  // Por categoria
-  Object.entries(porCat).forEach(function(entry){
-    const cat=entry[0], formas=entry[1];
-    const totCat=Object.values(formas).reduce(function(s,v){return s+v.recebido+v.pago;},0);
-    const corTitle=cat==='SANGRIA'?'var(--red)':cat==='REFORCO'?'var(--amber)':'var(--sub)';
-    html+='<div class="res-section"><div class="res-title" style="color:'+corTitle+'">'+cat+'</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
-    Object.entries(formas).forEach(function(fe){
-      const f=fe[0], v=fe[1];
-      html+='<tr><td>'+f+'</td>'
+  // VENDAS DE PRODUTOS/SERVIÇOS
+  if(Object.keys(vendasPorForma).length){
+    h+='<div class="res-section"><div class="res-title">Vendas ('+( vendas||[]).length+')</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido (físico)</th><th style="text-align:right">A prazo / Digital</th><th style="text-align:right">Total</th></tr>';
+    let totRec=0,totDig=0;
+    Object.entries(vendasPorForma).forEach(function([f,v]){
+      totRec+=v.recebido;totDig+=v.aprazo;
+      h+='<tr><td>'+f+'</td>'
         +'<td style="text-align:right;color:var(--green)">'+fmtV(v.recebido)+'</td>'
-        +'<td style="text-align:right;color:var(--red)">'+fmtV(v.pago)+'</td>'
-        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.pago)+'</td></tr>';
+        +'<td style="text-align:right;color:var(--cd)">'+fmtV(v.aprazo)+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fmtV(v.recebido+v.aprazo)+'</td></tr>';
     });
-    html+='<tr class="tot"><td>SUBTOTAL</td><td colspan="2"></td><td style="text-align:right">'+fmtV(totCat)+'</td></tr>';
-    html+='</table></div>';
-  });
+    h+='<tr class="tot"><td>TOTAL VENDAS</td>'
+      +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
+      +'<td style="text-align:right;color:var(--cd)">'+fmtV(totDig)+'</td>'
+      +'<td style="text-align:right">'+fmtV(totRec+totDig)+'</td></tr>';
+    h+='</table></div>';
+  }
 
-  // Consolidado por forma
-  html+='<div class="res-section"><div class="res-title">Formas de pagamento (consolidado)</div>'
-    +'<table class="res-table"><tr><th>Forma</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pago</th><th style="text-align:right">Total</th></tr>';
-  let totRec=0,totPag=0;
-  Object.entries(formasConj).forEach(function(fe){
-    const f=fe[0], v=fe[1];
-    totRec+=v.rec;totPag+=v.pag;
-    html+='<tr><td>'+f+'</td>'
-      +'<td style="text-align:right;color:var(--green)">'+fmtV(v.rec)+'</td>'
-      +'<td style="text-align:right;color:var(--red)">'+fmtV(v.pag)+'</td>'
-      +'<td style="text-align:right;font-weight:700">'+fmtV(v.rec+v.pag)+'</td></tr>';
-  });
-  html+='<tr class="tot"><td>TOTAL</td>'
-    +'<td style="text-align:right;color:var(--green)">'+fmtV(totRec)+'</td>'
-    +'<td style="text-align:right;color:var(--red)">'+fmtV(totPag)+'</td>'
-    +'<td style="text-align:right">'+fmtV(totRec+totPag)+'</td></tr>';
-  html+='</table></div>';
+  // CONTAS A RECEBER (OS)
+  if((contasRec||[]).length){
+    h+='<div class="res-section"><div class="res-title">Contas recebidas (OS e outros)</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido</th></tr>';
+    Object.entries(recPorForma).forEach(function([f,v]){
+      h+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--green);font-weight:700">'+fmtV(v)+'</td></tr>';
+    });
+    h+='<tr class="tot"><td>TOTAL RECEBIDO</td><td style="text-align:right;color:var(--green)">'+fmtV(totalContasRec)+'</td></tr>';
+    h+='</table></div>';
+  }
 
-  html+='<div class="res-saldo"><div>'
+  // CONTAS A PAGAR
+  if((contasPag||[]).length){
+    h+='<div class="res-section"><div class="res-title">Contas pagas (despesas)</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Pago</th></tr>';
+    Object.entries(pagPorForma).forEach(function([f,v]){
+      h+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--red);font-weight:700">'+fmtV(-v)+'</td></tr>';
+    });
+    h+='<tr class="tot"><td>TOTAL DESPESAS</td><td style="text-align:right;color:var(--red)">'+fmtV(-totalContasPag)+'</td></tr>';
+    h+='</table></div>';
+  }
+
+  // REFORÇO / SANGRIA
+  if(totalReforco||totalSangria){
+    h+='<div class="res-section"><div class="res-title">Reforços e sangrias</div>'
+      +'<table class="res-table"><tr><th>Tipo</th><th style="text-align:right">Valor</th></tr>';
+    if(totalReforco)h+='<tr><td>REFORÇO (DINHEIRO)</td><td style="text-align:right;color:var(--amber);font-weight:700">'+fmtV(totalReforco)+'</td></tr>';
+    if(totalSangria)h+='<tr><td>SANGRIA (DINHEIRO)</td><td style="text-align:right;color:var(--red);font-weight:700">'+fmtV(totalSangria)+'</td></tr>';
+    h+='</table></div>';
+  }
+
+  // CONSOLIDADO POR FORMA
+  const todasFormas={};
+  pagVendas.forEach(p=>{const f=p.forma_pagamento_nome||'OUTROS';if(!todasFormas[f])todasFormas[f]=0;todasFormas[f]+=Number(p.valor||0);});
+  (contasRec||[]).forEach(c=>{const f=c.forma_pagamento||'OUTROS';if(!todasFormas[f])todasFormas[f]=0;todasFormas[f]+=Number(c.valor||0);});
+  (contasPag||[]).forEach(c=>{const f=c.forma_pagamento||'OUTROS';if(!todasFormas[f])todasFormas[f]=0;todasFormas[f]-=Number(c.valor_pago||c.valor||0);});
+  (movs||[]).filter(m=>m.tipo==='REFORCO'||m.tipo==='SAIDA').forEach(m=>{const f=m.forma_pagamento||'DINHEIRO';if(!todasFormas[f])todasFormas[f]=0;todasFormas[f]+=Number(m.valor||0);});
+
+  if(Object.keys(todasFormas).length){
+    h+='<div class="res-section"><div class="res-title">Formas de pagamento (consolidado)</div>'
+      +'<table class="res-table"><tr><th>Forma</th><th style="text-align:right">Total</th></tr>';
+    let grandTotal=0;
+    Object.entries(todasFormas).forEach(function([f,v]){
+      grandTotal+=v;
+      h+='<tr><td>'+f+'</td><td style="text-align:right;font-weight:700;color:'+(v>=0?'var(--green)':'var(--red)')+'">'+fmtV(v)+'</td></tr>';
+    });
+    h+='<tr class="tot"><td>TOTAL GERAL</td><td style="text-align:right">'+fmtV(grandTotal)+'</td></tr>';
+    h+='</table></div>';
+  }
+
+  // SALDO FÍSICO
+  h+='<div class="res-saldo"><div>'
     +'<div class="res-saldo-lbl">Saldo real no caixa (dinheiro físico)</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Inicial '+fmtV(sessao?.saldo_inicial)+' + Entradas dinheiro '+fmtV(totalDinhEnt)+'</div>'
-  +'</div><div class="res-saldo-val">'+fmtV(saldoReal)+'</div></div>';
+    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">'
+      +'Inicial '+fmtV(sessao?.saldo_inicial)+' + Dinheiro '+fmtV(dinheiroRecebido)+' + Reforço '+fmtV(totalReforco)+' + Sangria '+fmtV(totalSangria)
+    +'</div>'
+  +'</div><div class="res-saldo-val">'+fmtV(saldoFisico)+'</div></div>';
 
-  document.getElementById('res-body').innerHTML=html;
+  document.getElementById('res-body').innerHTML=h;
 }
 
 // ── IMPRIMIR RESUMO
