@@ -652,11 +652,14 @@ async function salvar(){
       const temPag=PAGS.some(p=>p.valor>0);
       if(temPag&&sessaoId){
         const formasFisico=PAGS.filter(p=>p.movimenta_caixa&&p.valor>0).map(p=>p.forma_nome).join(', ');
-        const formasDigital=PAGS.filter(p=>!p.movimenta_caixa&&p.valor>0).map(p=>p.forma_nome).join(', ');
-        let avisoMsg='Lançando no caixa de hoje:';
+        const formasDigital=PAGS.filter(p=>!p.movimenta_caixa&&!p.isDuplicata&&p.valor>0).map(p=>p.forma_nome).join(', ');
+        const formasPrazo=PAGS.filter(p=>p.isDuplicata&&p.valor>0).map(p=>p.forma_nome).join(', ');
+        let avisoMsg='';
+        if(formasFisico||formasDigital)avisoMsg+='Lançando no caixa de hoje:';
         if(formasFisico)avisoMsg+=' Físico ('+formasFisico+')';
         if(formasDigital)avisoMsg+=(formasFisico?' · ':' ')+'Digital ('+formasDigital+')';
-        mostrarAviso(avisoMsg,2500);
+        if(formasPrazo)avisoMsg+=(avisoMsg?' — ':'')+'A prazo indo para contas a receber ('+formasPrazo+')';
+        if(avisoMsg)mostrarAviso(avisoMsg,2500);
       }
       // edição — atualiza
       const{error:eV}=await db.from('vendas').update({
@@ -669,10 +672,11 @@ async function salvar(){
       if(eV)throw eV;
       const{data:vUpdArr}=await db.from('vendas').select('*').eq('id',_VID).limit(1);
       venda=vUpdArr?.[0];
-      // remove itens, pagamentos e lançamentos antigos do caixa
+      // remove itens, pagamentos e lançamentos antigos do caixa (e contas a receber de duplicata desta venda)
       try{await db.from('venda_itens').delete().eq('venda_id',_VID);}catch{}
       try{await db.from('pagamentos_venda').delete().eq('venda_id',_VID);}catch{}
       try{await db.from('caixa_movimentos').delete().eq('referencia','venda:'+_VID);}catch{}
+      try{await db.from('contas_receber').delete().ilike('descricao','VENDA #'+String(venda?.numero||'').padStart(4,'0')+' —%');}catch{}
     } else {
       // nova venda
       const{data:vNew,error:eV}=await db.from('vendas').insert({
@@ -710,9 +714,24 @@ async function salvar(){
         movimenta_caixa:p.movimenta_caixa===true,
       })));
       if(ePag)throw new Error('Pagamentos: '+ePag.message);
+
+      // A PRAZO (duplicata) NÃO é dinheiro recebido — vira conta a receber, com o vencimento escolhido
+      const pagsPrazo=PAGS.filter(p=>p.isDuplicata&&p.valor>0);
+      if(pagsPrazo.length){
+        const{error:eRec}=await db.from('contas_receber').insert(pagsPrazo.map(p=>({
+          tipo:'RECEBER',
+          descricao:'VENDA #'+String(venda.numero||'').padStart(4,'0')+' — '+(p.forma_nome||'DUPLICATA')+(CLIENTE.nome?' — '+CLIENTE.nome:''),
+          valor:Number(p.valor)||0,
+          data_compensacao:p.vencimento||null,
+          forma_pagamento:p.forma_nome,
+          status:'ABERTO',
+        })));
+        if(eRec)console.warn('contas_receber:',eRec);
+      }
+
+      // Só físico e digital JÁ RECEBIDO entram no caixa — duplicata fica de fora
       if(sessaoId){
-        // lança TODOS os pagamentos no caixa — físico como ENTRADA, digital como DIGITAL
-        const rows=PAGS.filter(p=>p.valor>0).map(p=>({
+        const rows=PAGS.filter(p=>p.valor>0&&!p.isDuplicata).map(p=>({
           sessao_id:sessaoId,
           tipo:p.movimenta_caixa?'ENTRADA':'DIGITAL',
           descricao:'VENDA #'+String(venda.numero||'').padStart(4,'0'),

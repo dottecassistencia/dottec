@@ -532,11 +532,13 @@ async function abrirResumoSessao(sessaoId){
     .select('*').eq('sessao_id',sessaoId).order('criado_em',{ascending:true});
   _MOVS_CACHE[sessaoId]=movs||[];
 
-  // 2. Contas a receber pagas no período (OS, etc — não passam pelo caixa_movimentos)
-  const{data:contasRec}=await db.from('contas_receber')
-    .select('*').eq('status','PAGO')
+  // 2. Contas a receber do período — TODAS (pago + pendente), separadas por origem: venda (os_id vazio) x OS (os_id preenchido)
+  const{data:contasRecTodas}=await db.from('contas_receber')
+    .select('*')
     .gte('criado_em',dtAb.toISOString())
     .lte('criado_em',dtFch.toISOString());
+  const contasRecVenda=(contasRecTodas||[]).filter(c=>!c.os_id);
+  const contasRecOS=(contasRecTodas||[]).filter(c=>c.os_id);
 
   // 3. Contas a pagar pagas no período
   const{data:contasPag}=await db.from('contas')
@@ -557,14 +559,6 @@ async function abrirResumoSessao(sessaoId){
   });
   const qtdVendas=new Set(vendaMovs.map(m=>m.referencia)).size;
 
-  // Contas a receber (OS) por forma
-  const recPorForma={};
-  (contasRec||[]).forEach(c=>{
-    const f=c.forma_pagamento||'OUTROS';
-    if(!recPorForma[f])recPorForma[f]=0;
-    recPorForma[f]+=Number(c.valor||0);
-  });
-
   // Contas a pagar por forma
   const pagPorForma={};
   (contasPag||[]).forEach(c=>{
@@ -574,7 +568,6 @@ async function abrirResumoSessao(sessaoId){
   });
 
   // Totais gerais
-  const totalContasRec=(contasRec||[]).reduce((s,c)=>s+Number(c.valor||0),0);
   const totalContasPag=(contasPag||[]).reduce((s,c)=>s+Number(c.valor_pago||c.valor||0),0);
   const totalReforco=(movs||[]).filter(m=>m.categoria==='REFORCO').reduce((s,m)=>s+Number(m.valor||0),0);
   const totalSangria=(movs||[]).filter(m=>m.tipo==='SAIDA').reduce((s,m)=>s+Number(m.valor||0),0);
@@ -582,6 +575,34 @@ async function abrirResumoSessao(sessaoId){
   // Saldo físico = saldo_inicial + soma de TODOS os movimentos da sessão — idêntico ao card, sempre
   const totalMovsSessao=(movs||[]).reduce((s,m)=>s+Number(m.valor||0),0);
   const saldoFisico=Number(sessao?.saldo_inicial||0)+totalMovsSessao;
+
+  // Helper: agrupa uma lista de contas_receber por forma de pagamento, separando recebido x pendente
+  function tabelaRecebiveis(titulo,lista){
+    if(!lista.length)return '';
+    const porForma={};
+    lista.forEach(c=>{
+      const f=c.forma_pagamento||'OUTROS';
+      if(!porForma[f])porForma[f]={pago:0,pendente:0};
+      if(c.status==='PAGO')porForma[f].pago+=Number(c.valor||0);
+      else porForma[f].pendente+=Number(c.valor||0);
+    });
+    let totPago=0,totPend=0;
+    let t='<div class="res-section"><div class="res-title">'+titulo+' ('+lista.length+')</div>'
+      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido</th><th style="text-align:right">Pendente</th><th style="text-align:right">Total</th></tr>';
+    Object.entries(porForma).forEach(function([f,v]){
+      totPago+=v.pago;totPend+=v.pendente;
+      t+='<tr><td>'+f+'</td>'
+        +'<td style="text-align:right;color:var(--green)">'+(v.pago?fmtV(v.pago):'—')+'</td>'
+        +'<td style="text-align:right;color:var(--amber)">'+(v.pendente?fmtV(v.pendente):'—')+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fmtV(v.pago+v.pendente)+'</td></tr>';
+    });
+    t+='<tr class="tot"><td>TOTAL</td>'
+      +'<td style="text-align:right;color:var(--green)">'+fmtV(totPago)+'</td>'
+      +'<td style="text-align:right;color:var(--amber)">'+fmtV(totPend)+'</td>'
+      +'<td style="text-align:right">'+fmtV(totPago+totPend)+'</td></tr>';
+    t+='</table></div>';
+    return t;
+  }
 
   // ── MONTA HTML ───────────────────────────────────────────────────────
   let h='';
@@ -594,7 +615,7 @@ async function abrirResumoSessao(sessaoId){
     +(sessao?.observacoes?'<div><strong>Obs:</strong> '+sessao.observacoes+'</div>':'')
   +'</div>';
 
-  // VENDAS DE PRODUTOS/SERVIÇOS
+  // VENDAS DE PRODUTOS/SERVIÇOS (físico + digital, já recebidos — direto do caixa)
   if(Object.keys(vendasPorForma).length){
     h+='<div class="res-section"><div class="res-title">Vendas ('+qtdVendas+')</div>'
       +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Físico</th><th style="text-align:right">Digital</th><th style="text-align:right">Total</th></tr>';
@@ -613,16 +634,11 @@ async function abrirResumoSessao(sessaoId){
     h+='</table></div>';
   }
 
-  // CONTAS A RECEBER (OS)
-  if((contasRec||[]).length){
-    h+='<div class="res-section"><div class="res-title">Contas recebidas (OS e outros)</div>'
-      +'<table class="res-table"><tr><th>Forma de pagamento</th><th style="text-align:right">Recebido</th></tr>';
-    Object.entries(recPorForma).forEach(function([f,v]){
-      h+='<tr><td>'+f+'</td><td style="text-align:right;color:var(--green);font-weight:700">'+fmtV(v)+'</td></tr>';
-    });
-    h+='<tr class="tot"><td>TOTAL RECEBIDO</td><td style="text-align:right;color:var(--green)">'+fmtV(totalContasRec)+'</td></tr>';
-    h+='</table></div>';
-  }
+  // VENDAS A PRAZO (contas a receber geradas pela página de vendas)
+  h+=tabelaRecebiveis('Vendas a prazo (contas a receber)',contasRecVenda);
+
+  // OS — CONTAS A RECEBER
+  h+=tabelaRecebiveis('OS — contas a receber',contasRecOS);
 
   // CONTAS A PAGAR
   if((contasPag||[]).length){
