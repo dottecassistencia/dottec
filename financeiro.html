@@ -70,6 +70,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .fin-status{font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:5px;flex-shrink:0;white-space:nowrap;min-width:64px;text-align:center}
 .fin-status.aberto{background:var(--abg);color:var(--amber)}
 .fin-status.pago{background:var(--gbg);color:var(--green)}
+.fin-status.vencida{background:var(--rbg);color:var(--red)}
+.fin-status.parcial{background:var(--cbg);color:var(--cd)}
+.fin-status.cancelada{background:var(--border);color:var(--sub);text-decoration:line-through}
 .fin-acoes{display:flex;gap:4px;flex-shrink:0}
 .fin-ac-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
 .fin-ac-btn:hover{border-color:var(--cyan);color:var(--cd);background:var(--cbg)}
@@ -203,7 +206,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="fb-bottom">
     <button class="st-btn active" data-v="ABERTO" onclick="setStatus('ABERTO')">Em aberto</button>
     <button class="st-btn" data-v="PAGO" onclick="setStatus('PAGO')">Pago/Recebido</button>
-    <button class="st-btn" data-v="TODOS" onclick="setStatus('TODOS')">Todos</button>
+    <button class="st-btn" data-v="TODOS" onclick="setStatus('TODOS')">Todos (inclui cancelado)</button>
   </div>
 </div>
 
@@ -250,14 +253,16 @@ async function load(){
     descricao:c.descricao,valor:Number(c.valor||0),valor_pago:Number(c.valor_pago||0),
     vencimento:c.vencimento,data_pagamento:c.data_pagamento,
     forma_pagamento:c.forma_pagamento,categoria:c.categoria,observacoes:c.observacoes,
-    status:c.status,recorrente:c.recorrente,criado_em:c.criado_em,
+    status:c.status,status_norm:c.status==='PAGA'?'PAGO':(c.status==='CANCELADA'?'CANCELADA':'ABERTO'),
+    recorrente:c.recorrente,criado_em:c.criado_em,
   }));
   const b=(contasRec||[]).map(c=>({
     origem:'contas_receber',id:c.id,tipo:'RECEBER',subtipo:c.os_id?'OS':'VENDA',
     descricao:c.descricao,valor:Number(c.valor||0),valor_pago:c.status==='PAGO'?Number(c.valor||0):0,
     vencimento:c.data_compensacao,data_pagamento:c.status==='PAGO'?c.data_compensacao:null,
     forma_pagamento:c.forma_pagamento,categoria:c.os_id?'OS':'VENDA A PRAZO',observacoes:c.observacao,
-    status:c.status,recorrente:false,criado_em:c.criado_em,
+    status:c.status,status_norm:c.status==='PAGO'?'PAGO':'ABERTO',
+    recorrente:false,criado_em:c.criado_em,
   }));
   ITENS=[...a,...b];
   preencheFormasSelects();
@@ -283,11 +288,19 @@ function setStatus(v){
 }
 
 // ── RENDER
+function classeStatus(s){
+  if(s==='PAGA'||s==='PAGO')return 'pago';
+  if(s==='VENCIDA')return 'vencida';
+  if(s==='PARCIAL')return 'parcial';
+  if(s==='CANCELADA')return 'cancelada';
+  return 'aberto';
+}
+
 function render(){
   const busca=(document.getElementById('busca').value||'').trim().toUpperCase();
   let lista=ITENS.filter(it=>{
     if(FILTRO_TIPO!=='TODOS'&&it.tipo!==FILTRO_TIPO)return false;
-    if(FILTRO_STATUS!=='TODOS'&&it.status!==FILTRO_STATUS)return false;
+    if(FILTRO_STATUS!=='TODOS'&&it.status_norm!==FILTRO_STATUS)return false;
     if(busca){
       const alvo=[it.descricao,it.categoria,it.forma_pagamento,it.observacoes].filter(Boolean).join(' ').toUpperCase();
       if(!alvo.includes(busca))return false;
@@ -296,9 +309,9 @@ function render(){
   });
   // ordena: em aberto primeiro por vencimento mais próximo, pagos por data desc
   lista.sort((a,b)=>{
-    if(a.status!==b.status)return a.status==='ABERTO'?-1:1;
+    if(a.status_norm!==b.status_norm)return a.status_norm==='ABERTO'?-1:1;
     const da=a.vencimento||a.criado_em||'',db_=b.vencimento||b.criado_em||'';
-    return a.status==='ABERTO'?da.localeCompare(db_):db_.localeCompare(da);
+    return a.status_norm==='ABERTO'?da.localeCompare(db_):db_.localeCompare(da);
   });
 
   renderStats();
@@ -311,7 +324,7 @@ function render(){
   }
   const hoje=hojeISO();
   body.innerHTML='<div class="fin-list">'+lista.map(it=>{
-    const atrasado=it.status==='ABERTO'&&it.vencimento&&it.vencimento<hoje;
+    const atrasado=it.status_norm==='ABERTO'&&it.vencimento&&it.vencimento<hoje;
     const origLbl=it.subtipo==='OS'?'OS':it.subtipo==='VENDA'?'VENDA':'MANUAL';
     const podeEditar=it.origem==='contas';
     return '<div class="fin-row">'
@@ -323,9 +336,9 @@ function render(){
       +'</div>'
       +'<div class="fin-venc'+(atrasado?' atrasado':'')+'">'+(it.vencimento?fmtDt(it.vencimento):'—')+(atrasado?' <i class="ti ti-alert-triangle"></i>':'')+'</div>'
       +'<div class="fin-val '+(it.tipo==='PAGAR'?'pagar':'receber')+'">'+fmtV(it.valor)+'</div>'
-      +'<div class="fin-status '+(it.status==='PAGO'?'pago':'aberto')+'">'+(it.status==='PAGO'?'PAGO':'ABERTO')+'</div>'
+      +'<div class="fin-status '+classeStatus(it.status)+'">'+it.status+'</div>'
       +'<div class="fin-acoes">'
-        +(it.status==='ABERTO'?'<button class="fin-ac-btn baixa" onclick="abrirBaixa(\''+it.origem+'\',\''+it.id+'\')" title="Dar baixa"><i class="ti ti-check"></i></button>':'')
+        +(it.status_norm==='ABERTO'?'<button class="fin-ac-btn baixa" onclick="abrirBaixa(\''+it.origem+'\',\''+it.id+'\')" title="Dar baixa"><i class="ti ti-check"></i></button>':'')
         +(podeEditar?'<button class="fin-ac-btn del" onclick="abrirExcluir(\''+it.origem+'\',\''+it.id+'\')" title="Excluir"><i class="ti ti-trash"></i></button>':'')
       +'</div>'
     +'</div>';
@@ -334,7 +347,7 @@ function render(){
 }
 
 function renderStats(){
-  const abertos=ITENS.filter(it=>it.status==='ABERTO');
+  const abertos=ITENS.filter(it=>it.status_norm==='ABERTO');
   const totPagar=abertos.filter(it=>it.tipo==='PAGAR').reduce((s,it)=>s+it.valor,0);
   const totReceber=abertos.filter(it=>it.tipo==='RECEBER').reduce((s,it)=>s+it.valor,0);
   const hoje=hojeISO();
@@ -379,7 +392,7 @@ async function salvarNovo(){
   if(valor<=0){toast('Informe o valor.','err');return;}
   const{error}=await db.from('contas').insert({
     tipo:_NOVO_TIPO,descricao,valor,valor_pago:0,vencimento,
-    forma_pagamento,categoria,observacoes,recorrente,status:'ABERTO',
+    forma_pagamento,categoria,observacoes,recorrente,status:'ABERTA',
   });
   if(error){toast('Erro: '+error.message,'err');return;}
   fecha('novo');
@@ -399,8 +412,8 @@ function abrirBaixa(origem,id){
   document.getElementById('bx-ico-i').className='ti '+(isPag?'ti-cash-off':'ti-cash');
   document.getElementById('bx-btn-salvar').style.background=isPag?'var(--red)':'var(--green)';
   document.getElementById('bx-val-lbl').textContent=isPag?'pago':'recebido';
-  document.getElementById('bx-resumo').innerHTML='<strong>'+it.descricao+'</strong><br>Valor total: '+fmtV(it.valor)+(it.vencimento?' · Vencimento: '+fmtDt(it.vencimento):'');
-  document.getElementById('bx-valor').value=it.valor.toFixed(2);
+  document.getElementById('bx-resumo').innerHTML='<strong>'+it.descricao+'</strong><br>Valor total: '+fmtV(it.valor)+(it.valor_pago>0?' · Já pago: '+fmtV(it.valor_pago):'')+(it.vencimento?' · Vencimento: '+fmtDt(it.vencimento):'');
+  document.getElementById('bx-valor').value=Math.max(0,it.valor-(it.valor_pago||0)).toFixed(2);
   document.getElementById('bx-data').value=hojeISO();
   document.getElementById('bx-forma').value=it.forma_pagamento||'';
   document.getElementById('ov-baixa').classList.add('open');
@@ -412,8 +425,10 @@ async function salvarBaixa(){
   const forma=document.getElementById('bx-forma').value||null;
   if(valor<=0){toast('Informe o valor.','err');return;}
   if(_ITEM_ATUAL.origem==='contas'){
+    const totalPago=(_ITEM_ATUAL.valor_pago||0)+valor;
+    const statusNovo=totalPago>=_ITEM_ATUAL.valor-0.01?'PAGA':'PARCIAL';
     const{error}=await db.from('contas').update({
-      status:'PAGO',valor_pago:valor,data_pagamento:data,forma_pagamento:forma,
+      status:statusNovo,valor_pago:totalPago,data_pagamento:data,forma_pagamento:forma,
     }).eq('id',_ITEM_ATUAL.id);
     if(error){toast('Erro: '+error.message,'err');return;}
   } else {
