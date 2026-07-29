@@ -365,7 +365,7 @@ async function loadVenda(){
 async function loadFormas(){
   const{data}=await db.from('formas_pagamento').select('id,nome,movimenta_caixa').eq('ativo',true).order('nome');
   FORMAS=data||[];
-  pagAdd();
+  // não adiciona forma de pagamento automaticamente — usuário escolhe com "+ Adicionar forma"
 }
 
 // ── CLIENTE autocomplete
@@ -705,6 +705,7 @@ async function salvar(){
         try{await db.from('produtos').update({estoque_atual:Math.max(0,(it.estoque||0)-it.qty)}).eq('id',it.id);}catch{}
       }
     }
+    let avisoCaixaFalhou=false,erroCaixaMsg='';
     if(PAGS.length){
       const{error:ePag}=await db.from('pagamentos_venda').insert(PAGS.map(p=>({
         venda_id:venda.id,
@@ -733,7 +734,7 @@ async function salvar(){
       if(sessaoId){
         const rows=PAGS.filter(p=>p.valor>0&&!p.isDuplicata).map(p=>({
           sessao_id:sessaoId,
-          tipo:p.movimenta_caixa?'ENTRADA':'DIGITAL',
+          tipo:'ENTRADA',
           descricao:'VENDA #'+String(venda.numero||'').padStart(4,'0'),
           valor:p.valor,
           forma_pagamento:p.forma_nome,
@@ -743,9 +744,14 @@ async function salvar(){
         }));
         if(rows.length){
           const{error:eCx}=await db.from('caixa_movimentos').insert(rows);
-          if(eCx)console.warn('caixa:',eCx);
+          if(eCx){console.warn('caixa:',eCx);avisoCaixaFalhou=true;erroCaixaMsg=eCx.message;}
         }
       }
+    }
+    if(avisoCaixaFalhou){
+      toast('Venda salva, mas NÃO lançou no caixa: '+erroCaixaMsg,'err');
+      setTimeout(()=>location.href='vendas.html',3500);
+      return;
     }
     toast('Venda salva!');
     setTimeout(()=>location.href='vendas.html',700);
@@ -788,7 +794,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.item-search'))document.getElementById('item-drop').classList.remove('open');
 });
 
-loadFormas().then(()=>loadVenda());
+loadFormas().then(()=>loadVenda()).then(()=>{renderPags();calcTotal();});
 </script>
 </body>
 </html>
