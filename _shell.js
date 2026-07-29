@@ -157,11 +157,9 @@ html{scroll-behavior:smooth}
           fb.style.left='0';
           fb.style.right='0';
           fb.style.zIndex='8999';
-          // Empurra o conteúdo abaixo do filter-bar também
+          // Empurra o conteúdo abaixo do filter-bar também (só o spacer resolve — sem paddingTop extra no .body, senão soma a altura 2x)
           const fbH=fb.offsetHeight;
           spacer.style.height=(h+fbH)+'px';
-          const body=document.querySelector('.body');
-          if(body) body.style.paddingTop=fbH+'px';
         }
       } else {
         setTimeout(applySpacerHeight,50);
