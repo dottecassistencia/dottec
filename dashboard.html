@@ -740,16 +740,23 @@ async function loadCompras(){
     .order('atualizado_em',{ascending:true}).limit(20);
   // sugestão automática: produtos abaixo do estoque mínimo, agrupados por fornecedor fixo
   const{data:produtosBaixos}=await db.from('produtos')
-    .select('id,nome,estoque_atual,estoque_minimo,fornecedor_id,pessoas(nome)')
+    .select('id,nome,estoque_atual,estoque_minimo,fornecedor_id')
     .eq('ativo',true).gt('estoque_minimo',0);
   const isAdmin=USR.perfil==='ADMIN';
   const body=document.getElementById('lc-body');
 
   const baixos=(produtosBaixos||[]).filter(p=>Number(p.estoque_atual||0)<=Number(p.estoque_minimo||0));
+  // busca nomes dos fornecedores separadamente (evita depender de FK configurada pro embedded join)
+  const fornIds=[...new Set(baixos.map(p=>p.fornecedor_id).filter(Boolean))];
+  let fornMap={};
+  if(fornIds.length){
+    const{data:forns}=await db.from('pessoas').select('id,nome').in('id',fornIds);
+    (forns||[]).forEach(f=>{fornMap[f.id]=f.nome;});
+  }
   const porForn={};
   baixos.forEach(p=>{
     const chave=p.fornecedor_id||'__sem__';
-    const nomeForn=p.pessoas?.nome||null;
+    const nomeForn=fornMap[p.fornecedor_id]||null;
     if(!porForn[chave])porForn[chave]={nome:nomeForn,itens:[]};
     porForn[chave].itens.push(p.nome);
   });
