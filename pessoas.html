@@ -145,16 +145,16 @@
   <div class="fb-top">
     <a class="btn btn-primary" href="pessoa-novo.html"><i class="ti ti-plus"></i> Adicionar</a>
 
+    <div class="search-wrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="search-input" class="upper" placeholder="Buscar por nome, CPF ou CNPJ" oninput="filterTable()"/>
+    </div>
+
     <div class="filters">
       <button class="filter-btn active" id="f-todos" onclick="setFiltro('todos')"><i class="ti ti-list"></i> Todos</button>
       <button class="filter-btn" id="f-cliente" onclick="setFiltro('cliente')"><i class="ti ti-user"></i> Clientes</button>
       <button class="filter-btn" id="f-fornecedor" onclick="setFiltro('fornecedor')"><i class="ti ti-truck"></i> Fornecedores</button>
       <button class="filter-btn" id="f-transportadora" onclick="setFiltro('transportadora')"><i class="ti ti-ship"></i> Transportadoras</button>
-    </div>
-
-    <div class="search-wrap">
-      <i class="ti ti-search"></i>
-      <input type="text" id="search-input" class="upper" placeholder="Buscar por nome, CPF ou CNPJ" oninput="filterTable()"/>
     </div>
   </div>
 </div>

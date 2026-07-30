@@ -35,43 +35,12 @@
   .btn-secondary:hover{background:var(--bg)}
   .btn:disabled{opacity:.6;cursor:not-allowed}
 
-  /* BUSCA RÁPIDA */
-  .search-bar{background:#FAFAF7;border-bottom:1px solid var(--border);padding:.65rem 16px;flex-shrink:0}
-  .search-bar-inner{max-width:980px;margin:0 auto;position:relative}
-  .search-bar-inner i.icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:15px;pointer-events:none}
-  .search-bar-inner input{
-    width:100%;height:38px;padding:0 13px 0 38px;border-radius:9px;
-    border:1.5px solid var(--border);background:#fff;font-size:13px;font-family:inherit;outline:none;
-    transition:border-color .15s;
-  }
-  .search-bar-inner input:focus{border-color:var(--cyan)}
-
-  .search-results{
-    display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
-    background:#fff;border:1px solid var(--border);border-radius:12px;
-    box-shadow:0 12px 36px rgba(0,0,0,.12);max-height:300px;overflow-y:auto;z-index:200;
-  }
-  .search-results.open{display:block}
-  .sr-item{
-    display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;
-    transition:background .12s;border-bottom:1px solid #F2F0EA;
-  }
-  .sr-item:last-child{border-bottom:none}
-  .sr-item:hover,.sr-item.active{background:var(--bg)}
-  .sr-item.active{box-shadow:inset 3px 0 0 var(--cyan)}
-  .sr-avatar{width:34px;height:34px;border-radius:50%;background:var(--cbg);
-    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;
-    color:var(--cd);flex-shrink:0}
-  .sr-info{flex:1}
-  .sr-nome{font-size:13px;font-weight:700;color:var(--dark)}
-  .sr-doc{font-size:11px;color:var(--sub)}
-  .sr-papeis{display:flex;gap:4px;margin-top:3px}
-  .sr-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px}
-  .sr-badge.c{background:var(--cbg);color:var(--cd)}
-  .sr-badge.f{background:var(--abg);color:var(--amber)}
-  .sr-badge.t{background:var(--slate-bg);color:var(--slate)}
-  .sr-arrow{font-size:13px;color:var(--sub)}
-  .sr-empty{padding:1.1rem;text-align:center;font-size:12.5px;color:var(--sub)}
+  /* INDICADOR DE CPF/CNPJ JÁ CADASTRADO (enquanto digita) */
+  .doc-existing-hint{font-size:10.5px;margin-top:5px;display:none;align-items:center;gap:5px;font-weight:600}
+  .doc-existing-hint.show{display:flex}
+  .doc-existing-hint.checking{color:var(--sub)}
+  .doc-existing-hint.found{color:var(--amber)}
+  .doc-existing-hint.loaded{color:var(--green)}
 
   /* BODY */
   .body{flex:1;overflow-y:auto}
@@ -212,15 +181,6 @@
   </div>
 </div>
 
-<!-- BUSCA RÁPIDA -->
-<div class="search-bar">
-  <div class="search-bar-inner">
-    <i class="ti ti-search icon"></i>
-    <input type="text" id="busca-rapida" placeholder="Buscar pessoa cadastrada por nome, CPF ou CNPJ..." oninput="buscaRapida()" />
-    <div class="search-results" id="search-results"></div>
-  </div>
-</div>
-
 <div class="body" id="body-main">
 
 <main class="content">
@@ -277,6 +237,9 @@
           <input type="text" id="documento" placeholder="Digite o CPF ou CNPJ" oninput="onDocInput(this)" maxlength="18"/>
           <div class="doc-detected" id="doc-detected">
             <i class="ti ti-check-circle"></i><span id="doc-tipo-label">—</span>
+          </div>
+          <div class="doc-existing-hint" id="doc-existing-hint">
+            <i class="ti ti-loader-2 spin" id="doc-existing-icon"></i><span id="doc-existing-text"></span>
           </div>
         </div>
         <div class="field no-mb">
@@ -440,7 +403,9 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
 
   const params=new URLSearchParams(window.location.search);
-  const EDIT_ID=params.get('id');
+  let EDIT_ID=params.get('id');
+  const EDIT_ID_FROM_URL=!!EDIT_ID; // se veio da URL, nunca reseta / nunca faz auto-match
+  let _matchedDocRaw=null; // guarda o documento que gerou o último auto-carregamento
   let TIPO_DOC='CPF';
   let PAPEIS={cliente:false,fornecedor:false,transportadora:false};
 
@@ -496,6 +461,63 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     if(raw.length===11) setTipoDoc('CPF');
     else if(raw.length===14) setTipoDoc('CNPJ');
     else setTipoDoc('DETECT');
+
+    checarDocumentoExistente(raw);
+  }
+
+  // ── DETECÇÃO DE CPF/CNPJ JÁ CADASTRADO (ao vivo, enquanto digita) ──
+  let _docCheckTimer=null;
+  async function checarDocumentoExistente(raw){
+    const hint=document.getElementById('doc-existing-hint');
+    const icon=document.getElementById('doc-existing-icon');
+    const txt=document.getElementById('doc-existing-text');
+    clearTimeout(_docCheckTimer);
+
+    // se veio da URL (edição direta), nunca roda a detecção ao vivo
+    if(EDIT_ID_FROM_URL){ hint.classList.remove('show'); return; }
+
+    // se já tinha carregado um cadastro por auto-match mas o CPF mudou, desfaz e volta ao modo "novo"
+    if(EDIT_ID&&raw!==_matchedDocRaw){
+      EDIT_ID=null;
+      _matchedDocRaw=null;
+      document.getElementById('page-title').textContent='Nova pessoa';
+    }
+
+    if(raw.length<3){ hint.classList.remove('show'); return; }
+
+    const completo = raw.length===11 || raw.length===14;
+
+    _docCheckTimer=setTimeout(async()=>{
+      if(completo){
+        // documento completo -> busca exata e, se achar, carrega o cadastro inteiro
+        icon.className='ti ti-loader-2 spin';
+        txt.textContent='Verificando...';
+        hint.className='doc-existing-hint show checking';
+        const{data}=await db.from('pessoas').select('*').eq('documento',raw).maybeSingle();
+        if(data){
+          EDIT_ID=data.id;
+          _matchedDocRaw=raw;
+          preencherFormulario(data);
+          document.getElementById('page-title').textContent='Editar pessoa';
+          icon.className='ti ti-circle-check';
+          txt.textContent='Cadastro encontrado — dados carregados abaixo';
+          hint.className='doc-existing-hint show loaded';
+          toast('Esse CPF/CNPJ já tem cadastro — dados carregados.','success');
+        }else{
+          hint.classList.remove('show');
+        }
+      }else{
+        // ainda digitando -> só avisa que existe, sem carregar nada ainda
+        const{data}=await db.from('pessoas').select('id').ilike('documento',raw+'%').limit(1);
+        if(data&&data.length){
+          icon.className='ti ti-alert-triangle';
+          txt.textContent='Já existe cadastro com esse início de documento...';
+          hint.className='doc-existing-hint show found';
+        }else{
+          hint.classList.remove('show');
+        }
+      }
+    },300);
   }
 
   function setTipoDoc(tipo){
@@ -561,89 +583,18 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     }catch(e){toast('Erro ao buscar CEP.','error');}
   }
 
-  // ── BUSCA RÁPIDA ──────────────────────────────────────────
-  let buscaTimer,_srIdx=-1,_srItems=[];
-  async function buscaRapida(){
-    const q=document.getElementById('busca-rapida').value.trim();
-    const res=document.getElementById('search-results');
-    _srIdx=-1;
-    if(q.length<2){res.classList.remove('open');return;}
-
-    clearTimeout(buscaTimer);
-    buscaTimer=setTimeout(async()=>{
-      const term=q.toUpperCase();
-      const{data}=await db.from('pessoas')
-        .select('id,nome,documento,tipo_doc,celular,is_cliente,is_fornecedor,is_transportadora')
-        .or(`nome.ilike.%${term}%,documento.ilike.%${q.replace(/\D/g,'')}%`)
-        .eq('ativo',true).limit(8);
-
-      if(!data||data.length===0){
-        res.innerHTML='<div class="sr-empty">Nenhuma pessoa encontrada para "'+q+'"</div>';
-        res.classList.add('open');
-        _srItems=[];
-        return;
-      }
-
-      function fmtDoc(doc,tipo){
-        if(!doc) return '';
-        if(tipo==='CPF') return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
-        return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
-      }
-
-      res.innerHTML=data.map(p=>`
-        <div class="sr-item" onclick="window.location.href='pessoa-novo.html?id=${p.id}'">
-          <div class="sr-avatar">${p.nome[0]}</div>
-          <div class="sr-info">
-            <div class="sr-nome">${p.nome}</div>
-            <div class="sr-doc">${p.tipo_doc}: ${fmtDoc(p.documento,p.tipo_doc)}${p.celular?' · '+p.celular:''}</div>
-            <div class="sr-papeis">
-              ${p.is_cliente?'<span class="sr-badge c">Cliente</span>':''}
-              ${p.is_fornecedor?'<span class="sr-badge f">Fornecedor</span>':''}
-              ${p.is_transportadora?'<span class="sr-badge t">Transportadora</span>':''}
-            </div>
-          </div>
-          <i class="ti ti-chevron-right sr-arrow"></i>
-        </div>`).join('');
-      res.classList.add('open');
-      _srItems=Array.from(res.querySelectorAll('.sr-item'));
-    },350);
-  }
-
-  // ── NAVEGAÇÃO POR TECLADO (↑ ↓ Enter Esc) ──────────────────
-  document.getElementById('busca-rapida').addEventListener('keydown',e=>{
-    const res=document.getElementById('search-results');
-    if(!res.classList.contains('open')||!_srItems.length)return;
-    if(e.key==='ArrowDown'){
-      e.preventDefault();
-      _srIdx=Math.min(_srIdx+1,_srItems.length-1);
-      _srItems.forEach((it,i)=>it.classList.toggle('active',i===_srIdx));
-      _srItems[_srIdx].scrollIntoView({block:'nearest'});
-    }else if(e.key==='ArrowUp'){
-      e.preventDefault();
-      _srIdx=Math.max(_srIdx-1,0);
-      _srItems.forEach((it,i)=>it.classList.toggle('active',i===_srIdx));
-      _srItems[_srIdx].scrollIntoView({block:'nearest'});
-    }else if(e.key==='Enter'){
-      e.preventDefault();
-      if(_srIdx>=0&&_srItems[_srIdx])_srItems[_srIdx].click();
-    }else if(e.key==='Escape'){
-      res.classList.remove('open');
-    }
-  });
-
-  document.addEventListener('click',e=>{
-    if(!e.target.closest('.search-bar-inner'))
-      document.getElementById('search-results').classList.remove('open');
-  });
-
   // ── CARREGAR EDIÇÃO ───────────────────────────────────────
   async function loadEdicao(){
     if(!EDIT_ID) return;
     document.getElementById('page-title').textContent='Editar pessoa';
     const{data:p,error}=await db.from('pessoas').select('*').eq('id',EDIT_ID).single();
     if(error||!p){toast('Pessoa não encontrada.','error');return;}
+    preencherFormulario(p);
+  }
 
-    // doc e tipo
+  // preenche todos os campos do formulário a partir de um registro de pessoa
+  // (usado tanto ao editar via ?id= quanto ao detectar um CPF/CNPJ já cadastrado enquanto digita)
+  function preencherFormulario(p){
     document.getElementById('documento').value=
       p.tipo_doc==='CPF'
         ? p.documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4')
