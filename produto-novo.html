@@ -623,14 +623,29 @@
         ipi_percentual: parseFloat(document.getElementById('ipi_percentual').value) || null,
       };
 
-      let error;
+      let error, novoId = null;
       if (EDIT_ID) {
         ({ error } = await db.from('produtos').update(payload).eq('id', EDIT_ID));
       } else {
-        ({ error } = await db.from('produtos').insert(payload));
+        const ins = await db.from('produtos').insert(payload).select('id').single();
+        error = ins.error;
+        novoId = ins.data?.id || null;
       }
 
       if (error) throw new Error(error.message);
+
+      // notifica o administrador sobre o novo produto cadastrado
+      if (!EDIT_ID && novoId) {
+        try {
+          let usr = { nome: 'Usuário' };
+          try { const s = sessionStorage.getItem('dottec_sessao'); if (s) usr = JSON.parse(s); } catch {}
+          await db.from('produtos_notificacoes').insert({
+            produto_id: novoId, tipo: 'NOVO_PRODUTO',
+            descricao: 'Produto cadastrado: ' + payload.nome + ' — por ' + usr.nome,
+            usuario_nome: usr.nome, lida: false,
+          });
+        } catch (e) { console.warn('notificacao:', e); }
+      }
 
       toast('Produto salvo com sucesso!', 'success');
       setTimeout(() => window.location.href = 'produtos.html', 1200);

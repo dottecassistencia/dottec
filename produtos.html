@@ -91,6 +91,8 @@
   }
   .act-edit{background:var(--cbg);color:var(--cd)}
   .act-edit:hover{background:var(--cyan);color:#fff}
+  .act-mov{background:var(--gbg);color:var(--green)}
+  .act-mov:hover{background:var(--green);color:#fff}
   .act-del{background:var(--cbg2);color:var(--coral)}
   .act-del:hover{background:var(--coral);color:#fff}
 
@@ -120,6 +122,7 @@
   .mh-title{font-size:14px;font-weight:700;color:var(--dark);flex:1}
   .mx{width:28px;height:28px;border-radius:7px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub)}
   .mb{padding:10px 14px;overflow-y:auto}
+  .mf{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
   .hist-empty{text-align:center;padding:2.5rem 1rem;color:var(--sub);font-size:12.5px}
   .hist-empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.35}
 
@@ -133,6 +136,22 @@
   .sug-forn .sug-item:last-child{border-radius:0 0 8px 8px}
   .sug-item-nome{flex:1;font-weight:600;color:var(--dark)}
   .sug-item-qtd{font-size:11px;color:var(--coral-dark);font-weight:700;white-space:nowrap}
+
+  /* MOVIMENTAR ESTOQUE */
+  .mov-resumo{background:var(--bg);border-radius:9px;padding:10px 12px;margin-bottom:14px}
+  .mov-resumo-nome{font-size:12.5px;font-weight:700;color:var(--dark)}
+  .mov-resumo-estoque{font-size:11px;color:var(--sub);margin-top:2px}
+  .seg{display:flex;background:var(--bg);border-radius:8px;padding:2px;margin-bottom:14px}
+  .seg-btn{flex:1;height:34px;border:none;background:transparent;border-radius:6px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+  .seg-btn.active.entrada{background:var(--white);color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .seg-btn.active.saida{background:var(--white);color:var(--coral);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .field{margin-bottom:12px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .field input{width:100%;height:38px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:#FAFAF7;color:var(--dark);font-size:13px;font-family:inherit;outline:none}
+  .field input:focus{border-color:var(--cyan);background:#fff}
+  .btn-sec{height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-pri{height:36px;padding:0 18px;border-radius:8px;border:none;background:var(--green);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
 
   /* MODAL ETIQUETAS — grandão */
   .modal-etq{background:var(--white);border-radius:16px;width:100%;max-width:1200px;height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.25);overflow:hidden}
@@ -239,6 +258,39 @@
   </div>
 </div>
 
+<!-- MODAL MOVIMENTAR ESTOQUE -->
+<div class="overlay" id="ov-mov" onclick="if(event.target===this)fecharMov()">
+  <div class="modal" style="max-width:400px">
+    <div class="mh">
+      <div class="mh-ico"><i class="ti ti-arrows-exchange"></i></div>
+      <div class="mh-title">Movimentar estoque</div>
+      <button class="mx" onclick="fecharMov()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <div class="mov-resumo">
+        <div class="mov-resumo-nome" id="mov-nome"></div>
+        <div class="mov-resumo-estoque">Estoque atual: <strong id="mov-estoque-atual"></strong> un.</div>
+      </div>
+      <div class="seg">
+        <button class="seg-btn active entrada" id="mov-btn-entrada" onclick="setMovTipo('ENTRADA')"><i class="ti ti-plus"></i> Entrada</button>
+        <button class="seg-btn saida" id="mov-btn-saida" onclick="setMovTipo('SAIDA')"><i class="ti ti-minus"></i> Saída</button>
+      </div>
+      <div class="field">
+        <label>Quantidade</label>
+        <input type="number" id="mov-qtd" min="1" value="1"/>
+      </div>
+      <div class="field">
+        <label>Motivo <span style="font-weight:400;text-transform:none;font-size:9px">(opcional)</span></label>
+        <input type="text" id="mov-motivo" class="upper" placeholder="EX: AJUSTE, PERDA, DEVOLUÇÃO..."/>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-sec" onclick="fecharMov()">Cancelar</button>
+      <button class="btn-pri" id="mov-btn-confirmar" onclick="salvarMovimentacao()"><i class="ti ti-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SUGESTÃO DE COMPRAS -->
 <div class="overlay" id="ov-sugestao" onclick="if(event.target===this)fecharSugestao()">
   <div class="modal">
@@ -285,7 +337,7 @@
             <th>Nome</th>
             <th style="width:120px" class="right">Valor</th>
             <th style="width:100px" class="center">Estoque</th>
-            <th style="width:110px" class="right">Ações</th>
+            <th style="width:140px" class="right">Ações</th>
           </tr>
         </thead>
         <tbody id="produtos-tbody">
@@ -319,6 +371,63 @@
   });
 
   let TODOS_PRODUTOS = [];
+
+  // sessão do usuário (mesma chave que o _shell.js usa)
+  let USR = { nome: 'Usuário', perfil: 'ADMIN', id: null };
+  try { const s = sessionStorage.getItem('dottec_sessao'); if (s) USR = JSON.parse(s); } catch {}
+
+  // ── MOVIMENTAR ESTOQUE ───────────────────────────────────────
+  let MOV_PRODUTO = null, MOV_TIPO = 'ENTRADA';
+  function abrirMovimentar(id) {
+    const p = TODOS_PRODUTOS.find(x => String(x.id) === String(id));
+    if (!p) return;
+    MOV_PRODUTO = p;
+    MOV_TIPO = 'ENTRADA';
+    document.getElementById('mov-nome').textContent = p.nome;
+    document.getElementById('mov-estoque-atual').textContent = p.estoque_atual ?? 0;
+    document.getElementById('mov-qtd').value = 1;
+    document.getElementById('mov-motivo').value = '';
+    setMovTipo('ENTRADA');
+    document.getElementById('ov-mov').classList.add('open');
+    setTimeout(() => document.getElementById('mov-qtd').focus(), 50);
+  }
+  function fecharMov() { document.getElementById('ov-mov').classList.remove('open'); }
+  function setMovTipo(t) {
+    MOV_TIPO = t;
+    document.getElementById('mov-btn-entrada').classList.toggle('active', t === 'ENTRADA');
+    document.getElementById('mov-btn-saida').classList.toggle('active', t === 'SAIDA');
+    const btn = document.getElementById('mov-btn-confirmar');
+    btn.style.background = t === 'ENTRADA' ? 'var(--green)' : 'var(--coral)';
+  }
+  async function salvarMovimentacao() {
+    if (!MOV_PRODUTO) return;
+    const qtd = parseInt(document.getElementById('mov-qtd').value) || 0;
+    const motivo = document.getElementById('mov-motivo').value.trim().toUpperCase();
+    if (qtd <= 0) { alert('Informe uma quantidade válida.'); return; }
+    const estoqueAtual = Number(MOV_PRODUTO.estoque_atual || 0);
+    if (MOV_TIPO === 'SAIDA' && qtd > estoqueAtual) {
+      if (!confirm('A quantidade de saída (' + qtd + ') é maior que o estoque atual (' + estoqueAtual + '). Isso vai deixar o estoque negativo. Continuar mesmo assim?')) return;
+    }
+    const novoEstoque = MOV_TIPO === 'ENTRADA' ? estoqueAtual + qtd : estoqueAtual - qtd;
+
+    const btn = document.getElementById('mov-btn-confirmar');
+    btn.disabled = true;
+    const { error } = await db.from('produtos').update({ estoque_atual: novoEstoque }).eq('id', MOV_PRODUTO.id);
+    if (error) { alert('Erro ao movimentar: ' + error.message); btn.disabled = false; return; }
+
+    // notifica o administrador (tabela usada pelo painel "Notificações Produtos" no dashboard)
+    try {
+      const descricao = (MOV_TIPO === 'ENTRADA' ? 'ENTRADA de ' : 'SAÍDA de ') + qtd + ' un. — ' + MOV_PRODUTO.nome + (motivo ? ' (' + motivo + ')' : '') + ' — por ' + USR.nome;
+      await db.from('produtos_notificacoes').insert({
+        produto_id: MOV_PRODUTO.id, tipo: 'MOVIMENTACAO', descricao,
+        usuario_nome: USR.nome, lida: false,
+      });
+    } catch (e) { console.warn('notificacao:', e); }
+
+    btn.disabled = false;
+    fecharMov();
+    await loadProdutos();
+  }
 
   // ── SUGESTÃO DE COMPRAS ─────────────────────────────────────
   // Regra: produtos ativos com estoque_atual <= estoque_minimo (e minimo definido > 0)
@@ -599,6 +708,7 @@
         <td class="td-estoque ${estoqueClass(p.estoque_atual, p.estoque_minimo)}">${fmtMoney(p.estoque_atual).replace('.00','')}</td>
         <td>
           <div class="actions">
+            <button class="act-btn act-mov" onclick="abrirMovimentar('${p.id}')" title="Movimentar estoque"><i class="ti ti-arrows-exchange"></i></button>
             <button class="act-btn act-edit" onclick="editarProduto('${p.id}')" title="Editar"><i class="ti ti-pencil"></i></button>
             <button class="act-btn act-del" onclick="excluirProduto('${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Excluir"><i class="ti ti-trash"></i></button>
           </div>

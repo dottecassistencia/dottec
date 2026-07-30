@@ -436,6 +436,18 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
       <div class="panel-body" id="al-body"><div class="p-empty"><i class="ti ti-loader-2 spin"></i></div></div>
     </div>
 
+    <!-- NOTIFICAÇÕES PRODUTOS (só admin) -->
+    <div class="panel" id="not-prod-panel" style="display:none">
+      <div class="ph">
+        <div class="ph-l">
+          <div class="ph-ico phi-red"><i class="ti ti-package"></i></div>
+          <span class="ph-title">Notificações Produtos</span>
+          <span class="ph-cnt r" id="np-cnt" style="display:none">0</span>
+        </div>
+      </div>
+      <div class="panel-body" id="np-body"><div class="p-empty"><i class="ti ti-loader-2 spin"></i></div></div>
+    </div>
+
     <!-- CONTAS + AGENDA -->
     <div class="panel">
       <!-- contas no topo -->
@@ -661,6 +673,38 @@ async function loadAlertas(){
   }).join('');
 }
 
+// ── NOTIFICAÇÕES PRODUTOS (só admin) ────────────────
+async function loadNotificacoesProdutos(){
+  if(USR.perfil!=='ADMIN')return; // painel fica oculto pra quem não é admin
+  document.getElementById('not-prod-panel').style.display='flex';
+  const body=document.getElementById('np-body');
+  const{data,error}=await db.from('produtos_notificacoes').select('id,produto_id,tipo,descricao,usuario_nome,criado_em,lida').order('criado_em',{ascending:false}).limit(20);
+  if(error){body.innerHTML='<div class="p-empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';return;}
+  const lista=data||[];
+  const badge=document.getElementById('np-cnt');
+  const naoLidas=lista.filter(n=>!n.lida).length;
+  if(naoLidas){badge.style.display='inline';badge.textContent=naoLidas;}else{badge.style.display='none';}
+  if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Nenhuma novidade</div>';return;}
+  const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
+  body.innerHTML=lista.map(n=>{
+    const isNovo=n.tipo==='NOVO_PRODUTO';
+    const cls=isNovo?'alta':'norm';
+    const tag=isNovo?'NOVO':'ESTOQUE';
+    return`<div class="al-row" style="cursor:pointer" onclick="window.location.href='produto-novo.html?id=${n.produto_id}'">
+      <div class="al-pip ${cls}"></div>
+      <div class="al-info">
+        <div class="al-t">${n.descricao}</div>
+        <div class="al-s">${n.usuario_nome||''}</div>
+      </div>
+      <span class="al-tag ${cls}">${tag}</span>
+      <span class="al-time">${tempo(n.criado_em)}</span>
+    </div>`;
+  }).join('');
+  // marca como lidas depois de exibir
+  const idsNaoLidas=lista.filter(n=>!n.lida).map(n=>n.id);
+  if(idsNaoLidas.length){try{await db.from('produtos_notificacoes').update({lida:true}).in('id',idsNaoLidas);}catch{}}
+}
+
 // ── CONTAS ─────────────────────────────────────────
 async function loadContas(){
   if(USR.perfil==='TECNICO'){document.getElementById('ct-body').innerHTML='<div style="padding:.6rem 1rem;font-size:12px;color:var(--sub)">Restrito ao comercial</div>';return;}
@@ -870,7 +914,7 @@ async function salvarOsSt(){
 }
 
 // ── INIT ───────────────────────────────────────────
-Promise.all([loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas()]).catch(console.error);
+Promise.all([loadUsuarios(),loadAlertas(),loadContas(),loadAgenda(),loadCompras(),loadMetricas(),loadNotificacoesProdutos()]).catch(console.error);
 setInterval(loadAlertas,60000);
 </script>
 </body>
