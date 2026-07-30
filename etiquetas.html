@@ -91,6 +91,8 @@ input:focus,select:focus{border-color:var(--cyan);background:#fff}
             <select id="preset" onchange="onPresetChange()">
               <option value="pimaco6180">Pimaco 6180 — 2×10 (99,1×25,4mm)</option>
               <option value="pimaco6183">Pimaco 6183 — 3×8 (63,5×25,4mm)</option>
+              <option value="pimaco6187">Pimaco 6187 — 5×13 (38,1×21,2mm) — pequena, 65/folha</option>
+              <option value="pimaco6082">Pimaco 6082 — 3×9 (66,6×25,4mm) — etiqueta de preço</option>
               <option value="custom">Personalizado...</option>
             </select>
           </div>
@@ -165,6 +167,8 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
 const PRESETS={
   pimaco6180:{w:99.1,h:25.4,cols:2,rows:10,mt:0},
   pimaco6183:{w:63.5,h:25.4,cols:3,rows:8,mt:0},
+  pimaco6187:{w:38.1,h:21.2,cols:5,rows:13,mt:0},
+  pimaco6082:{w:66.6,h:25.4,cols:3,rows:9,mt:0},
 };
 
 function onPresetChange(){

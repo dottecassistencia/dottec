@@ -14,12 +14,6 @@
 
   .content{max-width:1200px;margin:0 auto;padding:1rem 1.5rem 1.5rem}
 
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-  .metric{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:.85rem 1.1rem}
-  .metric-label{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-  .metric-value{font-size:19px;font-weight:800;color:var(--dark)}
-  .metric-value.coral{color:var(--coral)}.metric-value.amber{color:var(--amber)}.metric-value.green{color:var(--green)}
-
   /* FILTER BAR */
   .filter-bar{background:var(--white);border-bottom:1px solid var(--border)}
   .fb-top{display:flex;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap}
@@ -32,7 +26,7 @@
   .filter-btn.active{background:var(--cbg);color:var(--cd);border-color:var(--cyan)}
   .filter-btn:hover{border-color:var(--cyan);color:var(--cd)}
 
-  .search-wrap{position:relative;min-width:200px;max-width:260px;margin-left:auto}
+  .search-wrap{position:relative;min-width:200px;max-width:260px}
   .search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px}
   .search-wrap input{width:100%;height:34px;padding:0 12px 0 34px;border-radius:8px;border:1.5px solid var(--border);background:#FAFAF7;font-size:12.5px;font-family:inherit;outline:none;transition:border-color .15s}
   .search-wrap input:focus{border-color:var(--cyan);background:var(--white)}
@@ -102,7 +96,7 @@
   .toast.show{opacity:1;transform:translateY(0)}
   .toast.success i{color:#4ade80}.toast.error i{color:#f87171}
   @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  @media(max-width:900px){.metrics{grid-template-columns:1fr 1fr}.search-wrap{max-width:none;width:100%}}
+  @media(max-width:900px){.search-wrap{max-width:none;width:100%}}
 </style>
 </head>
 <body>
@@ -126,7 +120,6 @@
     <div class="filters">
       <button class="filter-btn active" id="fs-todos" onclick="setFiltro('TODOS')">Todas</button>
       <button class="filter-btn" id="fs-pendente" onclick="setFiltro('PENDENTE')">Pendentes</button>
-      <button class="filter-btn" id="fs-pago" onclick="setFiltro('PAGO')">Pagas</button>
       <button class="filter-btn" id="fs-cancelado" onclick="setFiltro('CANCELADO')">Canceladas</button>
     </div>
 
@@ -139,13 +132,6 @@
 
 <div class="body" id="body-main">
   <main class="content">
-    <div class="metrics">
-      <div class="metric"><div class="metric-label">Compras este mês</div><div class="metric-value" id="m-qtd">—</div></div>
-      <div class="metric"><div class="metric-label">Total este mês</div><div class="metric-value coral" id="m-total">R$ —</div></div>
-      <div class="metric"><div class="metric-label">A pagar (parcelas)</div><div class="metric-value amber" id="m-pagar">R$ —</div></div>
-      <div class="metric"><div class="metric-label">Com NF-e</div><div class="metric-value green" id="m-nfe">—</div></div>
-    </div>
-
     <div class="table-card">
       <table>
         <thead>
@@ -174,7 +160,6 @@
   const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);window._dottecDb=c;return c;})();
   const fmt=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
   const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
-  const mesInicio=new Date().toISOString().slice(0,8)+'01';
 
   document.addEventListener('input',e=>{
     if(e.target.classList&&e.target.classList.contains('upper')){
@@ -196,7 +181,7 @@
 
   function setFiltro(f){
     FILTRO=f;
-    ['todos','pendente','pago','cancelado'].forEach(x=>{
+    ['todos','pendente','cancelado'].forEach(x=>{
       document.getElementById('fs-'+x).classList.toggle('active',f===x.toUpperCase()||f==='TODOS'&&x==='todos');
     });
     filtrar();
@@ -248,11 +233,8 @@
   }
 
   async function load(){
-    const[rC,rP]=await Promise.all([
-      db.from('compras').select('*').order('criado_em',{ascending:false}),
-      db.from('compra_parcelas').select('valor').eq('status','ABERTA'),
-    ]);
-    TODOS=rC.data||[];
+    const{data:rC}=await db.from('compras').select('*').order('criado_em',{ascending:false});
+    TODOS=rC||[];
     // join manual com pessoas (evita depender de FK configurada pro embedded join)
     const fornIds=[...new Set(TODOS.map(c=>c.fornecedor_id).filter(Boolean))];
     if(fornIds.length){
@@ -261,14 +243,6 @@
       (forns||[]).forEach(f=>{fornMap[f.id]=f.nome;});
       TODOS.forEach(c=>{ if(c.fornecedor_id&&fornMap[c.fornecedor_id]) c.pessoas={nome:fornMap[c.fornecedor_id]}; });
     }
-    const mes=TODOS.filter(c=>c.data_entrada>=mesInicio&&c.status!=='CANCELADO');
-    const totalMes=mes.reduce((s,c)=>s+Number(c.valor_total),0);
-    const totalPagar=(rP.data||[]).reduce((s,p)=>s+Number(p.valor),0);
-    const comNfe=TODOS.filter(c=>c.tem_nota).length;
-    document.getElementById('m-qtd').textContent=mes.length;
-    document.getElementById('m-total').textContent=fmt(totalMes);
-    document.getElementById('m-pagar').textContent=fmt(totalPagar);
-    document.getElementById('m-nfe').textContent=comNfe;
     filtrar();
   }
 

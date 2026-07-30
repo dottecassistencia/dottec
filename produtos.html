@@ -44,7 +44,7 @@
   .ddm-item i{font-size:15px;color:var(--sub);width:16px}
   .ddm-item:hover{background:var(--bg)}
 
-  .search-wrap{position:relative;min-width:200px;max-width:280px;margin-left:auto}
+  .search-wrap{position:relative;min-width:200px;max-width:280px}
   .search-wrap input{
     width:100%;height:34px;padding:0 12px 0 34px;border-radius:8px;
     border:1.5px solid var(--border);background:#FAFAF7;font-size:12.5px;font-family:inherit;outline:none;
@@ -166,7 +166,7 @@
   .cfg-row label{display:block;font-size:9.5px;font-weight:700;color:var(--sub);text-transform:uppercase;margin-bottom:3px}
   .cfg-row input{width:100%;height:28px;border:1px solid var(--border);border-radius:6px;padding:0 8px;font-family:inherit;font-size:11.5px}
 
-  .sheet{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);display:grid}
+  .sheet{background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15);display:grid;zoom:.42}
   .label{border:1px dashed #ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:1mm}
   .label-nome{font-size:2.3mm;font-weight:700;text-align:center;line-height:1.15;max-height:6mm;overflow:hidden;width:100%;text-transform:uppercase}
   .label-preco{font-size:3mm;font-weight:800;margin-top:.3mm}
@@ -180,7 +180,7 @@
     body *{visibility:hidden}
     #etq-print-area, #etq-print-area *{visibility:visible}
     #etq-print-area{position:absolute;left:0;top:0}
-    .sheet{box-shadow:none}
+    .sheet{box-shadow:none;zoom:1}
   }
   @media(max-width:900px){
     .etq-body{grid-template-columns:1fr;overflow-y:auto}
@@ -206,20 +206,19 @@
       <select class="sel-preset" id="etq-preset" onchange="etqOnPresetChange()">
         <option value="pimaco6180">Pimaco 6180 — 2×10 (99,1×25,4mm)</option>
         <option value="pimaco6183">Pimaco 6183 — 3×8 (63,5×25,4mm)</option>
+        <option value="pimaco6187">Pimaco 6187 — 5×13 (38,1×21,2mm)</option>
+        <option value="pimaco6082">Pimaco 6082 — 3×9 (66,6×25,4mm)</option>
         <option value="custom">Personalizado...</option>
       </select>
       <button class="btn btn-secondary" onclick="etqMarcarTodos(true)"><i class="ti ti-checkbox"></i> Marcar todos</button>
       <button class="btn btn-secondary" onclick="etqMarcarTodos(false)"><i class="ti ti-square"></i> Limpar</button>
+      <a href="etiquetas.html" class="btn btn-secondary" style="color:var(--cd)"><i class="ti ti-settings"></i> Configurar padrão</a>
       <span class="fb-count" id="etq-count">0 selecionados</span>
       <button class="btn btn-primary" onclick="etqImprimir()"><i class="ti ti-printer"></i> Imprimir</button>
     </div>
     <div class="etq-body">
       <div class="etq-list-panel" id="etq-list-panel"></div>
       <div class="etq-preview-panel">
-        <div class="etq-preview-info">
-          Impressora: <b>HP LaserJet P1102w</b> — folha adesiva A4. Confira o alinhamento com a folha física antes de imprimir.
-          <a href="etiquetas.html" style="color:var(--cd);font-weight:700;text-decoration:none;margin-left:4px">Configurar padrão ↗</a>
-        </div>
         <div class="etq-cfg-panel" id="etq-cfg-panel">
           <div class="cfg-row">
             <div><label>Largura (mm)</label><input type="number" id="etq-cfg-w" value="99.1" step="0.1" oninput="etqRenderPreview()"/></div>
@@ -381,6 +380,8 @@
   const ETQ_PRESETS = {
     pimaco6180: { w: 99.1, h: 25.4, cols: 2, rows: 10, mt: 0, ml: 0 },
     pimaco6183: { w: 63.5, h: 25.4, cols: 3, rows: 8, mt: 0, ml: 0 },
+    pimaco6187: { w: 38.1, h: 21.2, cols: 5, rows: 13, mt: 0, ml: 0 },
+    pimaco6082: { w: 66.6, h: 25.4, cols: 3, rows: 9, mt: 0, ml: 0 },
   };
 
   async function abrirEtiquetas() {
@@ -462,7 +463,10 @@
   function etqAtualizarContador() {
     const totalItens = Object.keys(ETQ_SELECIONADOS).length;
     const totalEtiquetas = Object.values(ETQ_SELECIONADOS).reduce((s, q) => s + q, 0);
-    document.getElementById('etq-count').textContent = totalItens + ' produto' + (totalItens !== 1 ? 's' : '') + ' · ' + totalEtiquetas + ' etiqueta' + (totalEtiquetas !== 1 ? 's' : '');
+    const cfg = etqGetCfg();
+    const porFolha = Math.max(1, cfg.cols * cfg.rows);
+    const folhas = totalEtiquetas ? Math.ceil(totalEtiquetas / porFolha) : 0;
+    document.getElementById('etq-count').textContent = totalItens + ' produto' + (totalItens !== 1 ? 's' : '') + ' · ' + totalEtiquetas + ' etiqueta' + (totalEtiquetas !== 1 ? 's' : '') + (folhas ? ' · ' + folhas + ' folha' + (folhas !== 1 ? 's' : '') : '');
   }
 
   function etqGetCfg() {
@@ -505,6 +509,7 @@
   }
 
   function etqRenderPreview() {
+    etqAtualizarContador();
     const cfg = etqGetCfg();
     const itens = etqListaEtiquetas();
     const area = document.getElementById('etq-print-area');

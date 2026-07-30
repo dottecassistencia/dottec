@@ -194,14 +194,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <!-- FILTER BAR -->
 <div class="filter-bar">
   <div class="fb-top">
+    <button class="btn-add-pag" onclick="abrirNovo('PAGAR')"><i class="ti ti-plus"></i> Pagar</button>
+    <button class="btn-add-rec" onclick="abrirNovo('RECEBER')"><i class="ti ti-plus"></i> Receber</button>
     <div class="seg" id="seg-tipo">
       <button class="seg-btn active" data-v="TODOS" onclick="setTipo('TODOS')">Todos</button>
       <button class="seg-btn pagar" data-v="PAGAR" onclick="setTipo('PAGAR')">A Pagar</button>
       <button class="seg-btn receber" data-v="RECEBER" onclick="setTipo('RECEBER')">A Receber</button>
     </div>
     <div class="fb-search"><i class="ti ti-search"></i><input id="busca" placeholder="Buscar descrição, categoria, forma..." oninput="render()"/></div>
-    <button class="btn-add-pag" onclick="abrirNovo('PAGAR')"><i class="ti ti-plus"></i> Pagar</button>
-    <button class="btn-add-rec" onclick="abrirNovo('RECEBER')"><i class="ti ti-plus"></i> Receber</button>
   </div>
   <div class="fb-bottom">
     <button class="st-btn active" data-v="ABERTO" onclick="setStatus('ABERTO')">Em aberto</button>
