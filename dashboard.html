@@ -142,6 +142,12 @@ body{font-family:'Figtree',sans-serif;color:var(--text);background:var(--bg);dis
 .al-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:12px;flex-shrink:0}
 .al-tag.crit{background:var(--rbg);color:var(--red)}.al-tag.alta{background:var(--abg);color:var(--amber)}.al-tag.norm{background:var(--bg);color:var(--sub)}
 .al-time{font-size:10px;color:#B5B2A8;flex-shrink:0;margin-left:3px}
+.np-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff}
+.np-check:hover{border-color:var(--cyan)}
+.np-check.checked{background:var(--cyan);border-color:var(--cyan)}
+.np-check i{font-size:11px;color:#fff;display:none}
+.np-check.checked i{display:block}
+.np-row-removing{opacity:0;transform:translateX(8px);transition:opacity .25s,transform .25s}
 
 /* contas + agenda no painel do meio */
 .sec-head{display:flex;align-items:center;gap:7px;padding:9px 14px 7px;border-bottom:2px solid var(--border)}
@@ -678,21 +684,21 @@ async function loadNotificacoesProdutos(){
   if(USR.perfil!=='ADMIN')return; // painel fica oculto pra quem não é admin
   document.getElementById('not-prod-panel').style.display='flex';
   const body=document.getElementById('np-body');
-  const{data,error}=await db.from('produtos_notificacoes').select('id,produto_id,tipo,descricao,usuario_nome,criado_em,lida').order('criado_em',{ascending:false}).limit(20);
+  const{data,error}=await db.from('produtos_notificacoes').select('id,produto_id,tipo,descricao,usuario_nome,criado_em').order('criado_em',{ascending:false}).limit(30);
   if(error){body.innerHTML='<div class="p-empty"><i class="ti ti-alert-circle"></i>Erro ao carregar</div>';return;}
   const lista=data||[];
   const badge=document.getElementById('np-cnt');
-  const naoLidas=lista.filter(n=>!n.lida).length;
-  if(naoLidas){badge.style.display='inline';badge.textContent=naoLidas;}else{badge.style.display='none';}
+  if(lista.length){badge.style.display='inline';badge.textContent=lista.length;}else{badge.style.display='none';}
   if(!lista.length){body.innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Nenhuma novidade</div>';return;}
   const tempo=dt=>{const m=Math.floor((new Date()-new Date(dt))/60000);if(m<60)return m+'min';const h=Math.floor(m/60);if(h<24)return h+'h';return Math.floor(h/24)+'d';};
   body.innerHTML=lista.map(n=>{
     const isNovo=n.tipo==='NOVO_PRODUTO';
     const cls=isNovo?'alta':'norm';
     const tag=isNovo?'NOVO':'ESTOQUE';
-    return`<div class="al-row" style="cursor:pointer" onclick="window.location.href='produto-novo.html?id=${n.produto_id}'">
+    return`<div class="al-row" id="np-row-${n.id}" style="cursor:default">
+      <div class="np-check" onclick="removerNotificacao('${n.id}')"><i class="ti ti-check"></i></div>
       <div class="al-pip ${cls}"></div>
-      <div class="al-info">
+      <div class="al-info" style="cursor:pointer" onclick="window.location.href='produto-novo.html?id=${n.produto_id}'">
         <div class="al-t">${n.descricao}</div>
         <div class="al-s">${n.usuario_nome||''}</div>
       </div>
@@ -700,9 +706,21 @@ async function loadNotificacoesProdutos(){
       <span class="al-time">${tempo(n.criado_em)}</span>
     </div>`;
   }).join('');
-  // marca como lidas depois de exibir
-  const idsNaoLidas=lista.filter(n=>!n.lida).map(n=>n.id);
-  if(idsNaoLidas.length){try{await db.from('produtos_notificacoes').update({lida:true}).in('id',idsNaoLidas);}catch{}}
+}
+
+async function removerNotificacao(id){
+  const row=document.getElementById('np-row-'+id);
+  const chk=row?.querySelector('.np-check');
+  if(chk)chk.classList.add('checked');
+  if(row)row.classList.add('np-row-removing');
+  try{await db.from('produtos_notificacoes').delete().eq('id',id);}catch(e){console.warn('remover notificacao:',e);}
+  setTimeout(()=>{
+    row?.remove();
+    const restantes=document.querySelectorAll('#np-body .al-row').length;
+    const badge=document.getElementById('np-cnt');
+    if(restantes){badge.textContent=restantes;}else{badge.style.display='none';}
+    if(!restantes)document.getElementById('np-body').innerHTML='<div class="p-empty"><i class="ti ti-circle-check"></i>Nenhuma novidade</div>';
+  },260);
 }
 
 // ── CONTAS ─────────────────────────────────────────
