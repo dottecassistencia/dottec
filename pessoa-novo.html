@@ -132,6 +132,9 @@
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .grid-doc-nome{display:grid;grid-template-columns:150px 1.6fr 135px 140px;gap:14px}
+  @media(max-width:900px){.grid-doc-nome{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.grid-doc-nome{grid-template-columns:1fr}}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
   .grid-cep{display:grid;grid-template-columns:140px 1fr 110px;gap:14px}
   .grid-end2{display:grid;grid-template-columns:1fr 1fr 1fr 90px;gap:14px}
@@ -160,6 +163,7 @@
   /* CNPJ extras */
   .cnpj-only{display:none}
   .cnpj-only.show{display:block}
+  .field.cpf-only.hide{display:none}
 
   /* CEP com busca embutida */
   .cep-field{position:relative}
@@ -267,7 +271,7 @@
     </div>
     <div class="panel-body">
 
-      <div class="grid3" style="margin-bottom:14px">
+      <div class="grid-doc-nome" style="margin-bottom:14px">
         <div class="field no-mb">
           <label id="doc-label">CPF / CNPJ</label>
           <input type="text" id="documento" placeholder="Digite o CPF ou CNPJ" oninput="onDocInput(this)" maxlength="18"/>
@@ -280,8 +284,12 @@
           <input type="text" id="nome" class="upper" placeholder="NOME COMPLETO"/>
         </div>
         <div class="field no-mb">
-          <label>Data de nascimento <span class="label-opt">opcional</span></label>
+          <label>Nascimento <span class="label-opt">opcional</span></label>
           <input type="date" id="data_nascimento"/>
+        </div>
+        <div class="field no-mb cpf-only" id="rg-wrap">
+          <label>RG <span class="label-opt">opcional</span></label>
+          <input type="text" id="rg" class="upper" placeholder="00.000.000-0"/>
         </div>
       </div>
 
@@ -495,6 +503,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     const dd=document.getElementById('doc-detected');
     const lbl=document.getElementById('doc-tipo-label');
     const cnpjEls=document.querySelectorAll('.cnpj-only');
+    const rgWrap=document.getElementById('rg-wrap');
 
     if(tipo==='CPF'){
       TIPO_DOC='CPF';
@@ -502,16 +511,19 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
       lbl.textContent='CPF detectado';
       document.getElementById('nome-label').textContent='Nome completo';
       cnpjEls.forEach(el=>el.classList.remove('show'));
+      rgWrap.classList.remove('hide');
     } else if(tipo==='CNPJ'){
       TIPO_DOC='CNPJ';
       dd.className='doc-detected cnpj show';
       lbl.textContent='CNPJ detectado — campos de empresa habilitados';
       document.getElementById('nome-label').textContent='Razão social';
       cnpjEls.forEach(el=>el.classList.add('show'));
+      rgWrap.classList.add('hide');
     } else {
       TIPO_DOC='CPF';
       dd.className='doc-detected';
       cnpjEls.forEach(el=>el.classList.remove('show'));
+      rgWrap.classList.remove('hide');
     }
   }
 
@@ -642,6 +654,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     document.getElementById('nome').value=p.nome||'';
     document.getElementById('nome_fantasia').value=p.nome_fantasia||'';
     document.getElementById('data_nascimento').value=p.data_nascimento||'';
+    document.getElementById('rg').value=p.rg||'';
     document.getElementById('telefone').value=p.telefone||'';
     document.getElementById('celular').value=p.celular||'';
     document.getElementById('email').value=p.email||'';
@@ -688,6 +701,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
         nome,
         nome_fantasia:document.getElementById('nome_fantasia').value.trim()||null,
         data_nascimento:document.getElementById('data_nascimento').value||null,
+        rg:document.getElementById('rg').value.trim()||null,
         telefone:document.getElementById('telefone').value.replace(/\D/g,'')||null,
         celular:document.getElementById('celular').value.replace(/\D/g,'')||null,
         email:document.getElementById('email').value.trim().toLowerCase()||null,
