@@ -133,7 +133,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
   .grid-doc-nome{display:grid;grid-template-columns:150px 1.6fr 135px 140px;gap:14px}
-  @media(max-width:900px){.grid-doc-nome{grid-template-columns:1fr 1fr}}
+  @media(max-width:900px){.grid-doc-nome{grid-template-columns:1fr 1fr}.grid-doc-nome>div{grid-column:auto!important}}
   @media(max-width:520px){.grid-doc-nome{grid-template-columns:1fr}}
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
   .grid-cep{display:grid;grid-template-columns:140px 1fr 110px;gap:14px}
@@ -283,19 +283,18 @@
           <label id="nome-label">Nome completo</label>
           <input type="text" id="nome" class="upper" placeholder="NOME COMPLETO"/>
         </div>
-        <div class="field no-mb">
+        <div class="field no-mb cpf-only" id="nascimento-wrap" style="grid-column:3">
           <label>Nascimento <span class="label-opt">opcional</span></label>
           <input type="date" id="data_nascimento"/>
         </div>
-        <div class="field no-mb cpf-only" id="rg-wrap">
+        <div class="field no-mb cnpj-only" id="nome-fantasia-wrap" style="grid-column:3">
+          <label>Nome fantasia <span class="label-opt">opcional</span></label>
+          <input type="text" id="nome_fantasia" class="upper" placeholder="NOME FANTASIA"/>
+        </div>
+        <div class="field no-mb cpf-only" id="rg-wrap" style="grid-column:4">
           <label>RG <span class="label-opt">opcional</span></label>
           <input type="text" id="rg" class="upper" placeholder="00.000.000-0"/>
         </div>
-      </div>
-
-      <div class="field cnpj-only" id="nome-fantasia-wrap">
-        <label>Nome fantasia <span class="label-opt">opcional</span></label>
-        <input type="text" id="nome_fantasia" class="upper" placeholder="NOME FANTASIA"/>
       </div>
 
       <div class="grid3">
@@ -503,7 +502,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     const dd=document.getElementById('doc-detected');
     const lbl=document.getElementById('doc-tipo-label');
     const cnpjEls=document.querySelectorAll('.cnpj-only');
-    const rgWrap=document.getElementById('rg-wrap');
+    const cpfEls=document.querySelectorAll('.cpf-only');
 
     if(tipo==='CPF'){
       TIPO_DOC='CPF';
@@ -511,19 +510,19 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
       lbl.textContent='CPF detectado';
       document.getElementById('nome-label').textContent='Nome completo';
       cnpjEls.forEach(el=>el.classList.remove('show'));
-      rgWrap.classList.remove('hide');
+      cpfEls.forEach(el=>el.classList.remove('hide'));
     } else if(tipo==='CNPJ'){
       TIPO_DOC='CNPJ';
       dd.className='doc-detected cnpj show';
       lbl.textContent='CNPJ detectado — campos de empresa habilitados';
       document.getElementById('nome-label').textContent='Razão social';
       cnpjEls.forEach(el=>el.classList.add('show'));
-      rgWrap.classList.add('hide');
+      cpfEls.forEach(el=>el.classList.add('hide'));
     } else {
       TIPO_DOC='CPF';
       dd.className='doc-detected';
       cnpjEls.forEach(el=>el.classList.remove('show'));
-      rgWrap.classList.remove('hide');
+      cpfEls.forEach(el=>el.classList.remove('hide'));
     }
   }
 
