@@ -621,6 +621,10 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
     document.getElementById('regime_tributario').value=p.regime_tributario||'';
     document.getElementById('observacoes').value=p.observacoes||'';
 
+    ['cliente','fornecedor','transportadora'].forEach(papel=>{
+      PAPEIS[papel]=false;
+      document.getElementById('toggle-'+papel).classList.remove('selected');
+    });
     if(p.is_cliente)        togglePapel('cliente');
     if(p.is_fornecedor)     togglePapel('fornecedor');
     if(p.is_transportadora) togglePapel('transportadora');
@@ -690,6 +694,7 @@ const db=window._dottecDb||(()=>{const c=supabase.createClient(SB_URL,SB_KEY);wi
   }
 
   // ── INIT ──────────────────────────────────────────────────
+  if(!EDIT_ID) togglePapel('cliente');
   loadEdicao();
 </script>
 </body>
